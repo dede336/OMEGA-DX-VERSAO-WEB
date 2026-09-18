@@ -1,9 +1,12 @@
-FROM node:22-bookworm-slim
+# Compilação Java
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@10.14.0 --activate
 COPY . .
-RUN pnpm install --frozen-lockfile && pnpm --filter @workspace/api-server build
-ENV NODE_ENV=production
-ENV PORT=3000
-EXPOSE 3000
-CMD ["pnpm","--filter","@workspace/api-server","start"]
+RUN mvn clean package -DskipTests
+
+# Execução do Servidor
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
