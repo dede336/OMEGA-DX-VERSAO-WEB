@@ -43,9 +43,9 @@ export function useAuth() {
 }
 
 function buildApiUrl(): string {
-  const env = process.env['EXPO_PUBLIC_API_URL'];
+  const env = process.env.EXPO_PUBLIC_API_URL;
   if (env) return env;
-  const domain = process.env['EXPO_PUBLIC_DOMAIN'];
+  const domain = process.env.EXPO_PUBLIC_DOMAIN;
   if (domain) return `https://${domain}/api`;
   if (__DEV__) {
     const hostUri = (Constants.expoConfig?.hostUri ?? '') as string;
