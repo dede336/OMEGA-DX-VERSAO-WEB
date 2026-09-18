@@ -804,28 +804,3 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
 });
-    borderRadius: 12,
-    backgroundColor: '#1e293b',
-    alignItems: 'center',
-  },
-
-  confirmCancelText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#94a3b8',
-  },
-
-  confirmOk: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#ef4444',
-    alignItems: 'center',
-  },
-
-  confirmOkText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-});
