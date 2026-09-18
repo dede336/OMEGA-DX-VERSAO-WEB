@@ -566,56 +566,31 @@ function FullTreeNodeView({
 // ─── 2D Pan Canvas (drag anywhere, no scrollbars) ────────────────────────────
 
 function PanCanvas({ contentWidth, children }: { contentWidth: number; children: React.ReactNode }) {
-  const panX = useRef(new Animated.Value(0)).current;
-  const panY = useRef(new Animated.Value(0)).current;
-  const lastOffset = useRef({ x: 0, y: 0 });
-  const containerSize = useRef({ w: 1, h: 1 });
-  const contentH = useRef(1);
-
-  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-
-  const responder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: (_, { dx, dy }) => Math.abs(dx) > 2 || Math.abs(dy) > 2,
-      onPanResponderGrant: () => {
-        panX.setOffset(lastOffset.current.x);
-        panY.setOffset(lastOffset.current.y);
-        panX.setValue(0);
-        panY.setValue(0);
-      },
-      onPanResponderMove: Animated.event([null, { dx: panX, dy: panY }], { useNativeDriver: false }),
-      onPanResponderRelease: () => {
-        panX.flattenOffset();
-        panY.flattenOffset();
-        const cx = (panX as any)._value as number;
-        const cy = (panY as any)._value as number;
-        const minX = Math.min(0, containerSize.current.w - contentWidth);
-        const minY = Math.min(0, containerSize.current.h - contentH.current);
-        const nx = clamp(cx, minX, 0);
-        const ny = clamp(cy, minY, 0);
-        panX.setValue(nx);
-        panY.setValue(ny);
-        lastOffset.current = { x: nx, y: ny };
-      },
-    })
-  ).current;
-
   return (
-    <View
-      style={{ flex: 1, overflow: 'hidden' }}
-      onLayout={(e) => {
-        containerSize.current = { w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height };
-      }}
-      {...responder.panHandlers}
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
     >
-      <Animated.View
-        style={{ width: contentWidth, transform: [{ translateX: panX }, { translateY: panY }] }}
-        onLayout={(e) => { contentH.current = e.nativeEvent.layout.height; }}
+      <ScrollView
+        horizontal
+        contentContainerStyle={{
+          width: contentWidth,
+          minHeight: '100%',
+          alignItems: 'flex-start',
+        }}
+        showsHorizontalScrollIndicator={false}
       >
-        {children}
-      </Animated.View>
-    </View>
+        <View
+          style={{
+            width: contentWidth,
+            alignItems: 'center',
+          }}
+        >
+          {children}
+        </View>
+      </ScrollView>
+    </ScrollView>
   );
 }
 
