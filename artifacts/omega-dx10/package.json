@@ -5,8 +5,8 @@
   "main": "expo-router/entry",
   "scripts": {
     "dev": "bash -c 'EXPO_PACKAGER_PROXY_URL=https://$REPLIT_EXPO_DEV_DOMAIN EXPO_PUBLIC_DOMAIN=$REPLIT_DEV_DOMAIN EXPO_PUBLIC_REPL_ID=$REPL_ID REACT_NATIVE_PACKAGER_HOSTNAME=$REPLIT_DEV_DOMAIN pnpm exec expo start --localhost --port $PORT'",
-    "build": "node scripts/build.js && EXPO_PUBLIC_DOMAIN=$REPLIT_INTERNAL_APP_DOMAIN pnpm exec expo export --platform web",
-    "serve": "EXPO_PUBLIC_DOMAIN=$REPLIT_INTERNAL_APP_DOMAIN npx expo export --platform web --output-dir dist 2>&1 && node server/serve.js",
+    "build": "EXPO_PUBLIC_DOMAIN=${EXPO_PUBLIC_DOMAIN:-$RENDER_EXTERNAL_URL} node scripts/build.js && EXPO_PUBLIC_DOMAIN=${EXPO_PUBLIC_DOMAIN:-$RENDER_EXTERNAL_URL} pnpm exec expo export --platform web",
+    "serve": "EXPO_PUBLIC_DOMAIN=${EXPO_PUBLIC_DOMAIN:-$RENDER_EXTERNAL_URL} pnpm exec expo export --platform web --output-dir dist 2>&1 && node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
