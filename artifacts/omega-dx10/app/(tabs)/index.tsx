@@ -209,7 +209,7 @@ export default function HomeScreen() {
       </View>
 
       {/* ── Stats strip ── */}
-      <View style={[styles.statsStrip, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+      <View style={[styles.statsStrip, { backgroundColor: 'rgba(28, 28, 28, 0.70)', borderColor: colors.border }, pixelStyle]}>
         <View style={styles.statItem}>
           <Image source={require('../../assets/images/digimon-icon.webp')} style={styles.statIcon} resizeMode="contain" />
           <Text style={[styles.statNum, { color: colors.foreground }]}>{collection.length}</Text>
