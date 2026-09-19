@@ -1843,4 +1843,4 @@ const styles = StyleSheet.create({
   resultBtnText: { fontSize: 13, fontWeight: '700' as const },
   autoRestartBanner: { width: '100%', borderRadius: 12, borderWidth: 1, padding: 12, alignItems: 'center', gap: 4 },
   autoRestartText: { fontSize: 13, fontWeight: '700' as const },
-}); 
+});
