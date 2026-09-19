@@ -24,12 +24,12 @@ const LANG_CYCLE: Language[] = ['pt', 'en', 'es'];
 const GACHA_ANIME_IMG  = require('../../assets/images/gacha-anime.webp');
 const GEM_ICON_IMG     = require('../../assets/images/gem-icon.webp');
 
-const TK_BG_GIF        = require('../../assets/images/tk_bg.webp');
-const TAI_BG           = require('../../assets/images/tai_bg.webp');
-const SORA_BG          = require('../../assets/images/sora_bg.webp');
-const MIMI_BG          = require('../../assets/images/mimi_bg.webp');
-const KARI_BG          = require('../../assets/images/kari_bg.webp');
-const MATT_BG          = require('../../assets/images/matt_bg.webp');
+const TK_BG_GIF        = require('../../assets/images/tk.png');
+const TAI_BG           = require('../../assets/images/tai.png');
+const SORA_BG          = require('../../assets/images/sora.png');
+const MIMI_BG          = require('../../assets/images/mimi.png');
+const KARI_BG          = require('../../assets/images/kari.png');
+const MATT_BG          = require('../../assets/images/mat.png');
 
 const ELEMENT_GIFS: Record<string, any> = {
   FIRE:      require('../../assets/images/fire_status.webp'),
@@ -97,7 +97,7 @@ export default function HomeScreen() {
           <Image
             source={TK_BG_GIF}
             style={[StyleSheet.absoluteFillObject, { opacity: 0.35 }]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
         )}
         {isTai && (
@@ -111,7 +111,7 @@ export default function HomeScreen() {
           <Image
             source={SORA_BG}
             style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
         )}
         {isMimi && (
@@ -119,7 +119,7 @@ export default function HomeScreen() {
             <Image
               source={MIMI_BG}
               style={{ width: '100%', height: '100%', opacity: 0.30 }}
-              resizeMode="cover"
+              resizeMode="stretch"
             />
           </View>
         )}
@@ -127,14 +127,14 @@ export default function HomeScreen() {
           <Image
             source={KARI_BG}
             style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
         )}
         {isMatt && (
           <Image
             source={MATT_BG}
             style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
         )}
 
