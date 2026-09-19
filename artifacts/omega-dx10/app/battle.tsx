@@ -50,7 +50,8 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
-const ATTACK_EFFECT_TIME = 1500;
+const ATTACK_EFFECT_TIME = 1000;
+const DAMAGE_START_TIME = 800;
 const HP_STEP_TIME = 100;
 const HP_STEP_COUNT = 10;
 
@@ -133,7 +134,7 @@ function ElementAttackEffect({ element, large = false }: { element: ElementId; l
       Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }),
       Animated.sequence([
         Animated.timing(opacity, { toValue: 1, duration: 80, useNativeDriver: true }),
-        Animated.delay(1220),
+        Animated.delay(720),
         Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]),
     ]).start();
@@ -326,13 +327,13 @@ export default function BattleScreen() {
   const [hitFlash, setHitFlash] = useState<{ element: ElementId; idx: number; key: number } | null>(null);
   const flashElementHit = useCallback((element: ElementId, idx: number) => {
     setHitFlash({ element, idx, key: Date.now() });
-    setTimeout(() => setHitFlash(null), 900);
+    setTimeout(() => setHitFlash(null), ATTACK_EFFECT_TIME);
   }, []);
 
   const [playerHitFlash, setPlayerHitFlash] = useState<{ element: ElementId; key: number } | null>(null);
   const flashPlayerHit = useCallback((element: ElementId) => {
     setPlayerHitFlash({ element, key: Date.now() });
-    setTimeout(() => setPlayerHitFlash(null), 900);
+    setTimeout(() => setPlayerHitFlash(null), ATTACK_EFFECT_TIME);
   }, []);
 
   // ── Background pan animation ───────────────────────────────────────────────
@@ -784,9 +785,6 @@ export default function BattleScreen() {
       }
 
       addLog(`🎮 Vez de ${pf.name}!`, colors.primary);
-      targetIdxRef.current = -1;
-      setTargetIdx(-1);
-      setTargetSelected(false);
       setAttackMenuOpen(false);
       awaitingPlayerActionRef.current = true;
       setAwaitingPlayerAction(true);
@@ -941,7 +939,6 @@ export default function BattleScreen() {
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setTargetSelected(false);
 
     const attackElement: ElementId = action === 'SPIRIT'
       ? (currentPF.spiritElement ?? currentPF.element)
@@ -1016,7 +1013,7 @@ export default function BattleScreen() {
             }, 250);
           }, HP_STEP_TIME * step);
         }
-      }, ATTACK_EFFECT_TIME);
+      }, DAMAGE_START_TIME);
       return;
     }
 
@@ -1084,7 +1081,7 @@ export default function BattleScreen() {
           ), 350);
         }, HP_STEP_TIME * step);
       }
-    }, ATTACK_EFFECT_TIME);
+    }, DAMAGE_START_TIME);
   }
 
   // ── Alphamon Dádiva Divina: heal an ally before attacking ─────────────────
@@ -1103,9 +1100,6 @@ export default function BattleScreen() {
     addLog(`🎮 Vez de ${alphamon.name}!`, colors.primary);
     awaitingPlayerActionRef.current = true;
     setAwaitingPlayerAction(true);
-    targetIdxRef.current = -1;
-    setTargetIdx(-1);
-    setTargetSelected(false);
   }
 
   function continueAfterAlphaHeal() {
@@ -1116,9 +1110,6 @@ export default function BattleScreen() {
     addLog(`🎮 Vez de ${alphamon.name}!`, colors.primary);
     awaitingPlayerActionRef.current = true;
     setAwaitingPlayerAction(true);
-    targetIdxRef.current = -1;
-    setTargetIdx(-1);
-    setTargetSelected(false);
   }
 
   // ── Guard ──────────────────────────────────────────────────────────────────
@@ -1362,7 +1353,7 @@ export default function BattleScreen() {
           {/* Background */}
           <View style={[StyleSheet.absoluteFillObject, { backgroundColor: '#0a0a0a' }]} />
           {map.backgroundImage && (
-            <View style={StyleSheet.absoluteFillObject}>
+            <View style={[StyleSheet.absoluteFillObject, styles.arenaBackgroundClip]}>
               <Animated.Image
                 source={map.backgroundImage}
                 style={{ width: '100%', height: '100%', transform: [{ scale: 1.3 }, { translateX: bgPan }] }}
@@ -1883,13 +1874,14 @@ const styles = StyleSheet.create({
 
   // ── Arena with simultaneous enemies ──
   arena: { width: '100%', height: 220, overflow: 'hidden' as const },
+  arenaBackgroundClip: { overflow: 'hidden' as const },
   arenaBgImg: { position: 'absolute' as const, top: 0, bottom: 0, left: 0, right: 0 },
   arenaOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'center', alignItems: 'center' },
   arenaFallback: { width: '100%', height: 180, borderBottomWidth: 1, justifyContent: 'center', alignItems: 'center' },
   arenaEnemyRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 8, flexWrap: 'wrap' },
   arenaEnemySlot: { alignItems: 'center', gap: 4, position: 'relative' as const, minWidth: 80 },
   arenaEnemyDead: { opacity: 0.4 },
-  targetReticle: { position: 'absolute', alignSelf: 'center', top: 4, zIndex: 20 },
+  targetReticle: { position: 'absolute', alignSelf: 'center', top: 12, zIndex: 20 },
   elementAttackEffect: { position: 'absolute', width: 100, height: 116, zIndex: 30, alignSelf: 'center', top: -20 },
   elementAttackEffectLarge: { width: 145, height: 165, top: -30 },
   arenaEnemySprite: { width: 72, height: 72 },
