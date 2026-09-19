@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, TextInput, Image,
+  Platform, TextInput, Image, Modal, Pressable,
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +17,15 @@ import {
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 import SaveManagerSection from '@/components/SaveManagerSection';
+import { getCharacter } from '@/constants/extendedCharacters';
+import { CharacterAvatar } from '@/components/GameComponents';
+
+const XP_BATTERIES = [
+  { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
+  { id: 'piece_battery_blue',   name: 'Bateria Azul',    xp: 200, color: '#3b82f6', img: require('../../assets/images/battery_blue.webp') },
+  { id: 'piece_battery_purple', name: 'Bateria Roxa',    xp: 400, color: '#a855f7', img: require('../../assets/images/battery_purple.webp') },
+  { id: 'piece_battery_gold',   name: 'Bateria Dourada', xp: 800, color: '#f59e0b', img: require('../../assets/images/battery_gold.webp') },
+] as const;
 
 export default function MochilaScreen() {
   const colors = useColors();
@@ -24,8 +33,8 @@ export default function MochilaScreen() {
   const game = useGame();
   const {
     playerName, gender, tamerId, inventory, equippedItems,
-    tamerExp, tamerLevel, pieces, bits,
-    equipItem, unequipItem, setPlayerName, craftItem,
+    tamerExp, tamerLevel, pieces, bits, collection,
+    equipItem, unequipItem, setPlayerName, craftItem, useXpItem,
   } = game;
 
   const { t } = useLanguage();
@@ -38,6 +47,10 @@ export default function MochilaScreen() {
   const [selectedSlot, setSelectedSlot] = useState<EquipSlot | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(playerName);
+  const [batteryModalVisible, setBatteryModalVisible] = useState(false);
+  const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
+  const [selectedDigimonId, setSelectedDigimonId] = useState<string | null>(null);
+  const [batteryQty, setBatteryQty] = useState(1);
 
   const topPad = 0;
   const botPad = insets.bottom + 20;
@@ -70,7 +83,18 @@ export default function MochilaScreen() {
     setEditingName(false);
   }
 
+  function openBattery(batteryId: string) {
+    setSelectedBatteryId(batteryId);
+    setSelectedDigimonId(collection[0]?.ownedId ?? null);
+    setBatteryQty(1);
+    setBatteryModalVisible(true);
+  }
+
+  const selectedBattery = XP_BATTERIES.find((battery) => battery.id === selectedBatteryId) ?? XP_BATTERIES[0];
+  const selectedBatteryStock = pieces[selectedBattery.id] ?? 0;
+
   return (
+    <>
     <ScrollView
       style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={[styles.content, { paddingTop: topPad + 20, paddingBottom: botPad }]}
@@ -340,6 +364,36 @@ export default function MochilaScreen() {
         </>
       )}
 
+      {/* ── Baterias de EXP ── */}
+      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Baterias de EXP</Text>
+      <View style={styles.batteryGrid}>
+        {XP_BATTERIES.map((battery) => {
+          const quantity = pieces[battery.id] ?? 0;
+          return (
+            <TouchableOpacity
+              key={battery.id}
+              style={[
+                styles.batteryCard,
+                { borderColor: battery.color + '88', backgroundColor: battery.color + '14', opacity: quantity > 0 ? 1 : 0.5 },
+                pixelStyle,
+              ]}
+              onPress={() => openBattery(battery.id)}
+              disabled={quantity <= 0}
+              activeOpacity={0.8}
+            >
+              <Image source={battery.img} style={styles.batteryImage} resizeMode="contain" />
+              <View style={styles.batteryCardInfo}>
+                <Text style={[styles.batteryName, { color: battery.color }]}>{battery.name}</Text>
+                <Text style={[styles.batteryXp, { color: colors.mutedForeground }]}>+{battery.xp} EXP</Text>
+              </View>
+              <View style={[styles.batteryQuantity, { backgroundColor: battery.color }]}> 
+                <Text style={styles.batteryQuantityText}>×{quantity}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
       {/* ── Itens Forjados ── */}
       {CRAFT_RECIPES.some((r) => inventory.includes(r.resultItemId)) && (
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('mochila.craftedItems')}</Text>
@@ -494,6 +548,94 @@ export default function MochilaScreen() {
         );
       })}
     </ScrollView>
+
+    <Modal
+      visible={batteryModalVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setBatteryModalVisible(false)}
+    >
+      <Pressable style={styles.batteryModalOverlay} onPress={() => setBatteryModalVisible(false)}>
+        <Pressable
+          style={[styles.batteryModalBox, { backgroundColor: colors.card, borderColor: selectedBattery.color }, pixelStyle]}
+          onPress={(event) => event.stopPropagation()}
+        >
+          <View style={styles.batteryModalHeader}>
+            <Image source={selectedBattery.img} style={styles.batteryModalImage} resizeMode="contain" />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.batteryModalTitle, { color: selectedBattery.color }]}>{selectedBattery.name}</Text>
+              <Text style={[styles.batteryModalSubtitle, { color: colors.mutedForeground }]}>+{selectedBattery.xp} EXP por bateria</Text>
+            </View>
+            <TouchableOpacity onPress={() => setBatteryModalVisible(false)} style={styles.batteryCloseButton}>
+              <Feather name="x" size={20} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.batteryTargetTitle, { color: colors.foreground }]}>Escolha o Digimon</Text>
+          <ScrollView style={styles.batteryDigimonList} showsVerticalScrollIndicator={false}>
+            {collection.map((owned) => {
+              const character = getCharacter(owned.characterId);
+              const selected = selectedDigimonId === owned.ownedId;
+              return (
+                <TouchableOpacity
+                  key={owned.ownedId}
+                  style={[
+                    styles.batteryDigimonCard,
+                    { borderColor: selected ? selectedBattery.color : colors.border, backgroundColor: selected ? selectedBattery.color + '18' : colors.background },
+                  ]}
+                  onPress={() => setSelectedDigimonId(owned.ownedId)}
+                >
+                  <CharacterAvatar characterId={owned.characterId} size={44} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.batteryDigimonName, { color: colors.foreground }]}>{character?.name ?? owned.characterId}</Text>
+                    <Text style={[styles.batteryDigimonLevel, { color: colors.mutedForeground }]}>Nível {owned.level}</Text>
+                  </View>
+                  {selected && <Feather name="check-circle" size={20} color={selectedBattery.color} />}
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <View style={styles.batteryQtyRow}>
+            <TouchableOpacity
+              style={[styles.batteryQtyButton, { borderColor: colors.border }]}
+              onPress={() => setBatteryQty((quantity) => Math.max(1, quantity - 1))}
+            >
+              <Feather name="minus" size={18} color={colors.foreground} />
+            </TouchableOpacity>
+            <View style={styles.batteryQtyCenter}>
+              <Text style={[styles.batteryQtyNumber, { color: colors.foreground }]}>{batteryQty}</Text>
+              <Text style={[styles.batteryQtyAvailable, { color: colors.mutedForeground }]}>Disponível: {selectedBatteryStock}</Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.batteryQtyButton, { borderColor: colors.border }]}
+              onPress={() => setBatteryQty((quantity) => Math.min(selectedBatteryStock, quantity + 1))}
+            >
+              <Feather name="plus" size={18} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={[styles.batteryTotalXp, { color: selectedBattery.color }]}>+{(selectedBattery.xp * batteryQty).toLocaleString()} EXP</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.batteryUseButton,
+              { backgroundColor: selectedBattery.color, opacity: selectedDigimonId && selectedBatteryStock > 0 ? 1 : 0.45 },
+            ]}
+            disabled={!selectedDigimonId || selectedBatteryStock <= 0}
+            onPress={() => {
+              if (!selectedDigimonId || selectedBatteryStock <= 0) return;
+              useXpItem(selectedDigimonId, selectedBattery.id, batteryQty);
+              setBatteryModalVisible(false);
+            }}
+          >
+            <Image source={selectedBattery.img} style={styles.batteryUseImage} resizeMode="contain" />
+            <Text style={styles.batteryUseText}>Usar no Digimon</Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+    </>
   );
 }
 
@@ -550,6 +692,36 @@ const styles = StyleSheet.create({
     fontSize: 12, fontWeight: '700' as const, letterSpacing: 0.5,
     marginBottom: 12, textTransform: 'uppercase',
   },
+
+  batteryGrid: { gap: 10, marginBottom: 24 },
+  batteryCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1.5, padding: 10, gap: 12 },
+  batteryImage: { width: 50, height: 50 },
+  batteryCardInfo: { flex: 1 },
+  batteryName: { fontSize: 13, fontWeight: '800' as const },
+  batteryXp: { fontSize: 11, marginTop: 3 },
+  batteryQuantity: { minWidth: 42, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 6, alignItems: 'center' },
+  batteryQuantityText: { color: '#fff', fontSize: 12, fontWeight: '900' as const },
+  batteryModalOverlay: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  batteryModalBox: { width: '100%', maxWidth: 390, maxHeight: '88%', borderRadius: 18, borderWidth: 2, padding: 16 },
+  batteryModalHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+  batteryModalImage: { width: 48, height: 48 },
+  batteryModalTitle: { fontSize: 15, fontWeight: '900' as const },
+  batteryModalSubtitle: { fontSize: 11, marginTop: 3 },
+  batteryCloseButton: { padding: 6 },
+  batteryTargetTitle: { fontSize: 12, fontWeight: '800' as const, marginBottom: 8 },
+  batteryDigimonList: { maxHeight: 260, marginBottom: 14 },
+  batteryDigimonCard: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 12, borderWidth: 1.5, padding: 9, marginBottom: 7 },
+  batteryDigimonName: { fontSize: 12, fontWeight: '800' as const },
+  batteryDigimonLevel: { fontSize: 10, marginTop: 2 },
+  batteryQtyRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 20 },
+  batteryQtyButton: { width: 42, height: 42, borderRadius: 12, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  batteryQtyCenter: { minWidth: 90, alignItems: 'center' },
+  batteryQtyNumber: { fontSize: 20, fontWeight: '900' as const },
+  batteryQtyAvailable: { fontSize: 10, marginTop: 2 },
+  batteryTotalXp: { fontSize: 15, fontWeight: '900' as const, textAlign: 'center' as const, marginVertical: 12 },
+  batteryUseButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, paddingVertical: 12 },
+  batteryUseImage: { width: 24, height: 24 },
+  batteryUseText: { color: '#fff', fontSize: 13, fontWeight: '900' as const },
 
   genderRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
   genderBtn: {
