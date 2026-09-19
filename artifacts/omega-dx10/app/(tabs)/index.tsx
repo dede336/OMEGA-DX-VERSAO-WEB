@@ -159,11 +159,7 @@ export default function HomeScreen() {
           {tamer ? (
             <Image
               source={tamer.image}
-              style={[
-                styles.tamerPortraitImg,
-                isMatt && { transform: [{ scale: 1.8 }] },
-                isTK   && { transform: [{ scale: 1.2 }] },
-              ]}
+              style={styles.tamerPortraitImg}
               resizeMode="contain"
             />
           ) : (
@@ -452,7 +448,7 @@ const styles = StyleSheet.create({
 
   // Hero
   heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 14, gap: 12 },
-  tamerPortrait: { width: 60, height: 86 },
+  tamerPortrait: { width: 50, height: 100 },
   tamerPortraitImg: { width: '100%' as unknown as number, height: '100%' as unknown as number },
   heroText: { flex: 1 },
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
