@@ -10,7 +10,7 @@ import { GAME_MAPS, MapStage, StageDrop } from '@/constants/gameData';
 import { useLanguage } from '@/context/LanguageContext';
 
 const STARS_3  = require('../../assets/images/ui/stars3.webp');
-const PADLOCK  = require('../../assets/images/ui/padlock.webp');
+const PADLOCK  = require('../../assets/images/ui/padlock.png');
 
 type TabId = 'digimundo' | 'dungeon' | 'eventos';
 
