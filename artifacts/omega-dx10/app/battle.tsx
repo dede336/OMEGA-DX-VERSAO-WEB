@@ -1357,7 +1357,7 @@ export default function BattleScreen() {
               <Animated.Image
                 source={map.backgroundImage}
                 style={{ width: '100%', height: '100%', transform: [{ scale: 1.3 }, { translateX: bgPan }] }}
-                resizeMode="contain"
+                resizeMode="cover"
               />
             </View>
           )}
