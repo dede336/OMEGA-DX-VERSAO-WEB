@@ -1889,7 +1889,7 @@ const styles = StyleSheet.create({
   arenaEnemyRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 8, flexWrap: 'wrap' },
   arenaEnemySlot: { alignItems: 'center', gap: 4, position: 'relative' as const, minWidth: 80 },
   arenaEnemyDead: { opacity: 0.4 },
-  targetReticle: { position: 'absolute', alignSelf: 'center', top: -8, zIndex: 20 },
+  targetReticle: { position: 'absolute', alignSelf: 'center', top: 4, zIndex: 20 },
   elementAttackEffect: { position: 'absolute', width: 100, height: 116, zIndex: 30, alignSelf: 'center', top: -20 },
   elementAttackEffectLarge: { width: 145, height: 165, top: -30 },
   arenaEnemySprite: { width: 72, height: 72 },
