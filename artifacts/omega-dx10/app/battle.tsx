@@ -23,7 +23,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import {
   CHARACTERS,
   ATTRIBUTES,
-  ELEMENTS,
   GAME_MAPS,
   EQUIPMENT_ITEMS,
   EQUIP_SLOTS_ORDER,
@@ -51,6 +50,20 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
+
+const ELEMENT_EFFECT_IMAGES: Record<ElementId, any> = {
+  WATER: require('../assets/images/effects/agua.gif'),
+  FIRE: require('../assets/images/effects/fogo.gif'),
+  ICE: require('../assets/images/effects/gelo.gif'),
+  LIGHT: require('../assets/images/effects/luz.gif'),
+  PLANT: require('../assets/images/effects/madeira.gif'),
+  METAL: require('../assets/images/effects/metal.gif'),
+  NULL: require('../assets/images/effects/nulo.gif'),
+  EARTH: require('../assets/images/effects/terra.gif'),
+  DARK: require('../assets/images/effects/trevas.gif'),
+  LIGHTNING: require('../assets/images/effects/trovão.gif'),
+  WIND: require('../assets/images/effects/vento.gif'),
+};
 
 function TargetReticle({ size }: { size: number }) {
   const rotation = useRef(new Animated.Value(0)).current;
@@ -94,7 +107,6 @@ function TargetReticle({ size }: { size: number }) {
 
   return (
     <Animated.Image
-      pointerEvents="none"
       source={TARGET_RETICLE_IMG}
       resizeMode="contain"
       style={[
@@ -110,23 +122,30 @@ function TargetReticle({ size }: { size: number }) {
   );
 }
 
-function HitEffect({ color }: { color: string }) {
-  const scale   = useRef(new Animated.Value(0.2)).current;
+function ElementAttackEffect({ element, large = false }: { element: ElementId; large?: boolean }) {
+  const scale = useRef(new Animated.Value(0.65)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(scale,   { toValue: 2.4, duration: 550, useNativeDriver: false }),
+      Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }),
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 1,   duration: 80,  useNativeDriver: false }),
-        Animated.timing(opacity, { toValue: 0,   duration: 470, useNativeDriver: false }),
+        Animated.timing(opacity, { toValue: 1, duration: 80, useNativeDriver: true }),
+        Animated.delay(620),
+        Animated.timing(opacity, { toValue: 0, duration: 180, useNativeDriver: true }),
       ]),
     ]).start();
-  }, []);
-  const inner = color + '55';
+  }, [opacity, scale]);
+
   return (
-    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { alignItems: 'center', justifyContent: 'center', zIndex: 30 }]}>
-      <Animated.View style={{ width: 68, height: 68, borderRadius: 34, borderWidth: 4, borderColor: color, backgroundColor: inner, opacity, transform: [{ scale }] }} />
-    </Animated.View>
+    <Animated.Image
+      source={ELEMENT_EFFECT_IMAGES[element]}
+      resizeMode="contain"
+      style={[
+        styles.elementAttackEffect,
+        large && styles.elementAttackEffectLarge,
+        { opacity, transform: [{ scale }] },
+      ]}
+    />
   );
 }
 
@@ -267,8 +286,7 @@ export default function BattleScreen() {
   const [turnQueueIdx, setTurnQueueIdx] = useState(0);
   const [awaitingPlayerAction, setAwaitingPlayerAction] = useState(false);
   const [attackMenuOpen, setAttackMenuOpen] = useState(false);
-  const [pendingTargetAction, setPendingTargetAction] = useState<ActionType | null>(null);
-  const [targetConfirmed, setTargetConfirmed] = useState(false);
+  const [targetSelected, setTargetSelected] = useState(false);
   const turnQueueRef = useRef<TurnEntry[]>([]);
   const turnQueueIdxRef = useRef(0);
   const awaitingPlayerActionRef = useRef(false);
@@ -289,58 +307,29 @@ export default function BattleScreen() {
     ]).start();
   }, []);
 
-  function requestEnemyTarget(action: ActionType) {
-    const actingEntry = turnQueueRef.current[turnQueueIdxRef.current];
-    const actingPlayerIdx = actingEntry?.side === 'player' ? actingEntry.idx : activeTeamIdxRef.current;
-    const currentPF = teamFightersRef.current[actingPlayerIdx];
-
-    if (!currentPF || currentPF.currentHP <= 0) return;
-    if (action === 'SPIRIT' && currentPF.currentMP < SPIRIT_MP_COST) {
-      addLog('MP insuficiente!', '#ef4444');
-      return;
-    }
-
-    if (action === 'SPIRIT' && currentPF.spiritHitsAll) {
-      handlePlayerAction(action);
-      return;
-    }
-
-    targetIdxRef.current = -1;
-    setTargetIdx(-1);
-    setTargetConfirmed(false);
-    setPendingTargetAction(action);
-    setAttackMenuOpen(false);
-    addLog('Escolha o inimigo que receberá o ataque.', '#f59e0b');
-  }
-
-  function confirmEnemyTarget(enemyIndex: number) {
-    if (!pendingTargetAction || targetConfirmed || busy) return;
+  function selectEnemyTarget(enemyIndex: number) {
+    if (!awaitingPlayerActionRef.current || busy || autoModeRef.current) return;
     if ((enemiesRef.current[enemyIndex]?.currentHP ?? 0) <= 0) return;
 
-    const action = pendingTargetAction;
     targetIdxRef.current = enemyIndex;
     setTargetIdx(enemyIndex);
-    setTargetConfirmed(true);
+    setTargetSelected(true);
+    setAttackMenuOpen(false);
     Haptics.selectionAsync();
-
-    setTimeout(() => {
-      setPendingTargetAction(null);
-      setTargetConfirmed(false);
-      handlePlayerAction(action);
-    }, 650);
+    addLog(`${enemiesRef.current[enemyIndex].name} selecionado. Agora escolha o ataque.`, '#f59e0b');
   }
 
   // ── Element hit flash ───────────────────────────────────────────────────────
   const [hitFlash, setHitFlash] = useState<{ element: ElementId; idx: number; key: number } | null>(null);
   const flashElementHit = useCallback((element: ElementId, idx: number) => {
     setHitFlash({ element, idx, key: Date.now() });
-    setTimeout(() => setHitFlash(null), 600);
+    setTimeout(() => setHitFlash(null), 900);
   }, []);
 
   const [playerHitFlash, setPlayerHitFlash] = useState<{ element: ElementId; key: number } | null>(null);
   const flashPlayerHit = useCallback((element: ElementId) => {
     setPlayerHitFlash({ element, key: Date.now() });
-    setTimeout(() => setPlayerHitFlash(null), 600);
+    setTimeout(() => setPlayerHitFlash(null), 900);
   }, []);
 
   // ── Background pan animation ───────────────────────────────────────────────
@@ -666,7 +655,9 @@ export default function BattleScreen() {
     setActiveTeamIdx(0);
     setEnemies(allEnemies);
     setBattleCharIds(charIds);
-    setTargetIdx(0);
+    setTargetIdx(-1);
+    targetIdxRef.current = -1;
+    setTargetSelected(false);
     setSelectedCharacter(fighters[0].ownedId);
     setTeam(teamIds);
     setLog([]);
@@ -790,6 +781,10 @@ export default function BattleScreen() {
       }
 
       addLog(`🎮 Vez de ${pf.name}!`, colors.primary);
+      targetIdxRef.current = -1;
+      setTargetIdx(-1);
+      setTargetSelected(false);
+      setAttackMenuOpen(false);
       awaitingPlayerActionRef.current = true;
       setAwaitingPlayerAction(true);
       setBusy(false);
@@ -925,6 +920,14 @@ export default function BattleScreen() {
       return;
     }
 
+    if (!autoModeRef.current && !targetSelected) {
+      addLog('Escolha primeiro o inimigo que receberá o ataque.', '#f59e0b');
+      awaitingPlayerActionRef.current = true;
+      setAwaitingPlayerAction(true);
+      setBusy(false);
+      return;
+    }
+
     // Ensure a living target is selected
     let tIdx = targetIdxRef.current;
     if ((enemiesRef.current[tIdx]?.currentHP ?? 0) <= 0) {
@@ -935,6 +938,11 @@ export default function BattleScreen() {
     }
 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setTargetSelected(false);
+
+    const attackElement: ElementId = action === 'SPIRIT'
+      ? (currentPF.spiritElement ?? currentPF.element)
+      : (currentPF.attackElement ?? currentPF.element);
 
     // ── Multi-target spirit ───────────────────────────────────────────────────
     if (action === 'SPIRIT' && currentPF.spiritHitsAll) {
@@ -948,7 +956,7 @@ export default function BattleScreen() {
         const lc = res.defenderResult.attrMult > 1 || res.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
         addLog(res.defenderResult.log, lc);
         shake(getEnemyShake(idx));
-        flashElementHit(currentPF.element, idx);
+        flashElementHit(attackElement, idx);
         if (res.defenderResult.newHP <= 0) { addLog(`${enemy.name} foi derrotado!`, '#22c55e'); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); }
       }
       const updatedTeamAll = teamFightersRef.current.map((f, i) => i === actingPlayerIdx ? { ...f, currentMP: spiritNewMP } : f);
@@ -978,7 +986,7 @@ export default function BattleScreen() {
     const lc = pResult.defenderResult.attrMult > 1 || pResult.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
     addLog(pResult.defenderResult.log, lc);
     shake(getEnemyShake(tIdx));
-    flashElementHit(currentPF.element, tIdx);
+    flashElementHit(attackElement, tIdx);
 
     const updatedEnemies = enemiesRef.current.map((e, i) => i === tIdx ? { ...e, currentHP: newTargetHP } : e);
     const updatedTeam = teamFightersRef.current.map((f, i) => i === actingPlayerIdx ? { ...f, currentMP: newPlayerMP } : f);
@@ -1023,6 +1031,9 @@ export default function BattleScreen() {
     addLog(`🎮 Vez de ${alphamon.name}!`, colors.primary);
     awaitingPlayerActionRef.current = true;
     setAwaitingPlayerAction(true);
+    targetIdxRef.current = -1;
+    setTargetIdx(-1);
+    setTargetSelected(false);
   }
 
   function continueAfterAlphaHeal() {
@@ -1033,6 +1044,9 @@ export default function BattleScreen() {
     addLog(`🎮 Vez de ${alphamon.name}!`, colors.primary);
     awaitingPlayerActionRef.current = true;
     setAwaitingPlayerAction(true);
+    targetIdxRef.current = -1;
+    setTargetIdx(-1);
+    setTargetSelected(false);
   }
 
   // ── Guard ──────────────────────────────────────────────────────────────────
@@ -1298,10 +1312,10 @@ export default function BattleScreen() {
                   <TouchableOpacity
                     key={i}
                     activeOpacity={isDead ? 1 : 0.85}
-                    onPress={() => confirmEnemyTarget(i)}
+                    onPress={() => selectEnemyTarget(i)}
                     style={[styles.arenaEnemySlot, isDead && styles.arenaEnemyDead]}
                   >
-                    {pendingTargetAction && targetConfirmed && isTarget && !isDead && (
+                    {targetSelected && awaitingPlayerAction && isTarget && !isDead && (
                       <TargetReticle size={enemies.length === 1 ? 118 : 82} />
                     )}
                     <Animated.View style={{ transform: [{ translateX: getEnemyShake(i) }] }}>
@@ -1315,7 +1329,11 @@ export default function BattleScreen() {
                         <CharacterAvatar characterId={charId} size={enemies.length === 1 ? 90 : 64} plain={hasBg} borderColor={hasBg ? 'transparent' : undefined} bgColor={hasBg ? 'transparent' : undefined} />
                       )}
                       {hitFlash?.idx === i && (
-                        <HitEffect key={hitFlash.key} color={ELEMENTS[hitFlash.element]?.color ?? '#ffffff'} />
+                        <ElementAttackEffect
+                          key={hitFlash.key}
+                          element={hitFlash.element}
+                          large={enemies.length === 1}
+                        />
                       )}
                     </Animated.View>
                     <View style={[styles.arenaEnemyInfo, { backgroundColor: hasBg ? 'rgba(0,0,0,0.6)' : colors.card }]}>
@@ -1339,9 +1357,9 @@ export default function BattleScreen() {
           </View>
         </View>
 
-        {pendingTargetAction && (
-          <Text style={[styles.targetHint, { color: targetConfirmed ? '#ef4444' : '#f59e0b' }]}> 
-            {targetConfirmed ? 'ALVO SELECIONADO' : 'ESCOLHA O INIMIGO QUE RECEBERÁ O ATAQUE'}
+        {awaitingPlayerAction && !autoMode && (
+          <Text style={[styles.targetHint, { color: targetSelected ? '#ef4444' : '#f59e0b' }]}> 
+            {targetSelected ? 'ALVO SELECIONADO — ESCOLHA O ATAQUE' : 'ESCOLHA PRIMEIRO O INIMIGO'}
           </Text>
         )}
 
@@ -1375,7 +1393,7 @@ export default function BattleScreen() {
               <View style={{ position: 'relative' }}>
                 <CharacterAvatar characterId={pOwned?.characterId ?? ''} size={64} />
                 {playerHitFlash && (
-                  <HitEffect key={playerHitFlash.key} color={ELEMENTS[playerHitFlash.element]?.color ?? '#ffffff'} />
+                  <ElementAttackEffect key={playerHitFlash.key} element={playerHitFlash.element} />
                 )}
               </View>
             </Animated.View>
@@ -1435,7 +1453,7 @@ export default function BattleScreen() {
             <View style={[styles.attackMenu, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => requestEnemyTarget('ATTACK')}
+                onPress={() => handlePlayerAction('ATTACK')}
                 style={[styles.attackOption, { borderColor: '#ef4444', backgroundColor: '#ef444418' }, pixelStyle]}
               >
                 <Text style={{ fontSize: 15 }}>{ELEMENT_EMOJI[playerFighter.attackElement ?? playerFighter.element] ?? '⚔️'}</Text>
@@ -1443,7 +1461,7 @@ export default function BattleScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={canSpirit ? 0.8 : 1}
-                onPress={() => canSpirit && requestEnemyTarget('SPIRIT')}
+                onPress={() => canSpirit && handlePlayerAction('SPIRIT')}
                 style={[styles.attackOption, {
                   borderColor: canSpirit ? '#a855f7' : colors.border,
                   backgroundColor: canSpirit ? '#a855f718' : colors.card,
@@ -1472,16 +1490,30 @@ export default function BattleScreen() {
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 22, height: 22 }} resizeMode="contain" />
                 <Text style={[styles.autoIndicatorText, { color: '#22c55e' }]}>{t('battle.auto')}…</Text>
               </View>
-            ) : awaitingPlayerAction && !attackMenuOpen && !pendingTargetAction ? (
+            ) : awaitingPlayerAction && !attackMenuOpen ? (
               <>
                 {/* ATAQUE */}
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  onPress={() => setAttackMenuOpen(true)}
-                  style={[styles.actionBtn, { backgroundColor: '#ef444422', borderColor: '#ef4444' }, pixelStyle]}
+                  onPress={() => {
+                    if (!targetSelected) {
+                      addLog('Escolha primeiro o inimigo.', '#f59e0b');
+                      return;
+                    }
+                    setAttackMenuOpen(true);
+                  }}
+                  style={[
+                    styles.actionBtn,
+                    {
+                      backgroundColor: targetSelected ? '#ef444422' : '#6b728018',
+                      borderColor: targetSelected ? '#ef4444' : colors.border,
+                      opacity: targetSelected ? 1 : 0.55,
+                    },
+                    pixelStyle,
+                  ]}
                 >
                   <Text style={{ fontSize: 14 }}>⚔️</Text>
-                  <Text style={[styles.actionBtnLabel, { color: '#ef4444' }]}>{t('battle.attack')}</Text>
+                  <Text style={[styles.actionBtnLabel, { color: targetSelected ? '#ef4444' : colors.mutedForeground }]}>{t('battle.attack')}</Text>
                 </TouchableOpacity>
                 {/* FUGIR */}
                 <TouchableOpacity
@@ -1786,7 +1818,8 @@ const styles = StyleSheet.create({
   arenaEnemySlot: { alignItems: 'center', gap: 4, position: 'relative' as const, minWidth: 80 },
   arenaEnemyDead: { opacity: 0.4 },
   targetReticle: { position: 'absolute', alignSelf: 'center', top: -8, zIndex: 20 },
-  elementFlashImg: { position: 'absolute', width: 72, height: 72, zIndex: 20, pointerEvents: 'none' as const },
+  elementAttackEffect: { position: 'absolute', width: 100, height: 116, zIndex: 30, alignSelf: 'center', top: -20 },
+  elementAttackEffectLarge: { width: 145, height: 165, top: -30 },
   arenaEnemySprite: { width: 72, height: 72 },
   arenaSingleSprite: { width: 110, height: 110 },
   arenaEnemyInfo: { borderRadius: 8, paddingHorizontal: 6, paddingVertical: 3, alignItems: 'center', gap: 2, minWidth: 72 },
