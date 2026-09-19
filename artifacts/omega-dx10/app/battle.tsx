@@ -50,6 +50,9 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
+const ATTACK_EFFECT_TIME = 1500;
+const HP_STEP_TIME = 100;
+const HP_STEP_COUNT = 10;
 
 const ELEMENT_EFFECT_IMAGES: Record<ElementId, any> = {
   WATER: require('../assets/images/effects/agua.gif'),
@@ -130,8 +133,8 @@ function ElementAttackEffect({ element, large = false }: { element: ElementId; l
       Animated.spring(scale, { toValue: 1, friction: 5, tension: 90, useNativeDriver: true }),
       Animated.sequence([
         Animated.timing(opacity, { toValue: 1, duration: 80, useNativeDriver: true }),
-        Animated.delay(620),
-        Animated.timing(opacity, { toValue: 0, duration: 180, useNativeDriver: true }),
+        Animated.delay(1220),
+        Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
       ]),
     ]).start();
   }, [opacity, scale]);
@@ -950,31 +953,70 @@ export default function BattleScreen() {
       const spiritAttacker = { ...currentPF, currentMP: SPIRIT_MP_COST };
       const liveIndices = enemiesRef.current.map((e, i) => ({ e, i })).filter(({ e }) => e.currentHP > 0);
       const updatedEnemiesAll = [...enemiesRef.current];
-      for (const { e: enemy, i: idx } of liveIndices) {
+      const attackResults = liveIndices.map(({ e: enemy, i: idx }) => {
         const res = executeTurn(spiritAttacker, enemy, 'SPIRIT');
         updatedEnemiesAll[idx] = { ...enemy, currentHP: res.defenderResult.newHP };
-        const lc = res.defenderResult.attrMult > 1 || res.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
-        addLog(res.defenderResult.log, lc);
-        shake(getEnemyShake(idx));
         flashElementHit(attackElement, idx);
-        if (res.defenderResult.newHP <= 0) { addLog(`${enemy.name} foi derrotado!`, '#22c55e'); Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); }
-      }
+        return { enemy, idx, res };
+      });
       const updatedTeamAll = teamFightersRef.current.map((f, i) => i === actingPlayerIdx ? { ...f, currentMP: spiritNewMP } : f);
-      setEnemies(updatedEnemiesAll); enemiesRef.current = updatedEnemiesAll;
       setTeamFighters(updatedTeamAll); teamFightersRef.current = updatedTeamAll;
-      const livingAfterAll = updatedEnemiesAll.filter((e) => e.currentHP > 0);
-      if (livingAfterAll.length === 0) {
-        setTimeout(() => {
-          addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
-          const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
-          if (activeId) grantRewards(activeId);
-          setWinner('player'); setPhase('result'); setBusy(false);
-        }, 400);
-        return;
-      }
-      const nextAlive = updatedEnemiesAll.findIndex((e) => e.currentHP > 0);
-      if (nextAlive >= 0) { targetIdxRef.current = nextAlive; setTargetIdx(nextAlive); }
-      setTimeout(() => processNextTurn(turnQueueRef.current, turnQueueIdxRef.current + 1, updatedTeamAll, updatedEnemiesAll), 400);
+
+      setTimeout(() => {
+        attackResults.forEach(({ idx, res }) => {
+          const lc = res.defenderResult.attrMult > 1 || res.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
+          addLog(res.defenderResult.log, lc);
+          shake(getEnemyShake(idx));
+        });
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+        const enemiesBefore = [...enemiesRef.current];
+        for (let step = 1; step <= HP_STEP_COUNT; step++) {
+          setTimeout(() => {
+            const enemiesAtStep = enemiesBefore.map((enemy, idx) => {
+              const finalEnemy = updatedEnemiesAll[idx];
+              if (!finalEnemy || enemy.currentHP <= 0) return enemy;
+              const hpAtStep = Math.round(enemy.currentHP + (finalEnemy.currentHP - enemy.currentHP) * (step / HP_STEP_COUNT));
+              return { ...enemy, currentHP: hpAtStep };
+            });
+            setEnemies(enemiesAtStep);
+            enemiesRef.current = enemiesAtStep;
+
+            if (step !== HP_STEP_COUNT) return;
+
+            setTimeout(() => {
+              attackResults.forEach(({ enemy, res }) => {
+                if (res.defenderResult.newHP <= 0) {
+                  addLog(`${enemy.name} foi derrotado!`, '#22c55e');
+                }
+              });
+              if (attackResults.some(({ res }) => res.defenderResult.newHP <= 0)) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              }
+
+              const livingAfterAll = enemiesAtStep.filter((e) => e.currentHP > 0);
+              if (livingAfterAll.length === 0) {
+                setTimeout(() => {
+                  addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
+                  const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
+                  if (activeId) grantRewards(activeId);
+                  setWinner('player'); setPhase('result'); setBusy(false);
+                }, 450);
+                return;
+              }
+
+              const nextAlive = enemiesAtStep.findIndex((e) => e.currentHP > 0);
+              if (nextAlive >= 0) { targetIdxRef.current = nextAlive; setTargetIdx(nextAlive); }
+              setTimeout(() => processNextTurn(
+                turnQueueRef.current,
+                turnQueueIdxRef.current + 1,
+                updatedTeamAll,
+                enemiesAtStep,
+              ), 400);
+            }, 250);
+          }, HP_STEP_TIME * step);
+        }
+      }, ATTACK_EFFECT_TIME);
       return;
     }
 
@@ -984,35 +1026,65 @@ export default function BattleScreen() {
     const newPlayerMP = pResult.attackerResult.newMP;
     const newTargetHP = pResult.defenderResult.newHP;
     const lc = pResult.defenderResult.attrMult > 1 || pResult.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
-    addLog(pResult.defenderResult.log, lc);
-    shake(getEnemyShake(tIdx));
     flashElementHit(attackElement, tIdx);
 
-    const updatedEnemies = enemiesRef.current.map((e, i) => i === tIdx ? { ...e, currentHP: newTargetHP } : e);
     const updatedTeam = teamFightersRef.current.map((f, i) => i === actingPlayerIdx ? { ...f, currentMP: newPlayerMP } : f);
-    setEnemies(updatedEnemies); enemiesRef.current = updatedEnemies;
     setTeamFighters(updatedTeam); teamFightersRef.current = updatedTeam;
 
-    if (newTargetHP <= 0) {
-      addLog(`${target.name} foi derrotado!`, '#22c55e');
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      const livingAfter = updatedEnemies.filter((e) => e.currentHP > 0);
-      if (livingAfter.length === 0) {
-        setTimeout(() => {
-          addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
-          const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
-          if (activeId) grantRewards(activeId);
-          setWinner('player'); setPhase('result'); setBusy(false);
-        }, 400);
-        return;
-      }
-      const nextTargetIdx = updatedEnemies.findIndex((e) => e.currentHP > 0);
-      targetIdxRef.current = nextTargetIdx;
-      setTargetIdx(nextTargetIdx);
-      addLog(`Alvo mudou para ${updatedEnemies[nextTargetIdx].name}!`, '#f59e0b');
-    }
+    // 1) Mostra o GIF inteiro. 2) Aplica o impacto. 3) Desce o HP em etapas.
+    setTimeout(() => {
+      addLog(pResult.defenderResult.log, lc);
+      shake(getEnemyShake(tIdx));
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    setTimeout(() => processNextTurn(turnQueueRef.current, turnQueueIdxRef.current + 1, updatedTeam, updatedEnemies), 400);
+      const hpBefore = target.currentHP;
+      for (let step = 1; step <= HP_STEP_COUNT; step++) {
+        setTimeout(() => {
+          const hpAtStep = Math.round(hpBefore + (newTargetHP - hpBefore) * (step / HP_STEP_COUNT));
+          const enemiesAtStep = enemiesRef.current.map((e, i) => i === tIdx ? { ...e, currentHP: hpAtStep } : e);
+          setEnemies(enemiesAtStep);
+          enemiesRef.current = enemiesAtStep;
+
+          if (step !== HP_STEP_COUNT) return;
+
+          if (newTargetHP <= 0) {
+            setTimeout(() => {
+              addLog(`${target.name} foi derrotado!`, '#22c55e');
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              const livingAfter = enemiesAtStep.filter((e) => e.currentHP > 0);
+              if (livingAfter.length === 0) {
+                setTimeout(() => {
+                  addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
+                  const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
+                  if (activeId) grantRewards(activeId);
+                  setWinner('player'); setPhase('result'); setBusy(false);
+                }, 450);
+                return;
+              }
+
+              const nextTargetIdx = enemiesAtStep.findIndex((e) => e.currentHP > 0);
+              targetIdxRef.current = nextTargetIdx;
+              setTargetIdx(nextTargetIdx);
+              addLog(`Alvo mudou para ${enemiesAtStep[nextTargetIdx].name}!`, '#f59e0b');
+              setTimeout(() => processNextTurn(
+                turnQueueRef.current,
+                turnQueueIdxRef.current + 1,
+                updatedTeam,
+                enemiesAtStep,
+              ), 400);
+            }, 250);
+            return;
+          }
+
+          setTimeout(() => processNextTurn(
+            turnQueueRef.current,
+            turnQueueIdxRef.current + 1,
+            updatedTeam,
+            enemiesAtStep,
+          ), 350);
+        }, HP_STEP_TIME * step);
+      }
+    }, ATTACK_EFFECT_TIME);
   }
 
   // ── Alphamon Dádiva Divina: heal an ally before attacking ─────────────────
@@ -1316,7 +1388,7 @@ export default function BattleScreen() {
                     style={[styles.arenaEnemySlot, isDead && styles.arenaEnemyDead]}
                   >
                     {targetSelected && awaitingPlayerAction && isTarget && !isDead && (
-                      <TargetReticle size={enemies.length === 1 ? 118 : 82} />
+                      <TargetReticle size={enemies.length === 1 ? 59 : 41} />
                     )}
                     <Animated.View style={{ transform: [{ translateX: getEnemyShake(i) }] }}>
                       {CHARACTER_IMAGES[charId] ? (
