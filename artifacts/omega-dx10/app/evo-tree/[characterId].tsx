@@ -35,18 +35,29 @@ type TreeNode = {
 
 function buildReverseMap(): Record<string, string[]> {
   const rev: Record<string, string[]> = {};
-  for (const [fromId, { evolvesTo }] of Object.entries(EVOLUTIONS)) {
-    if (!rev[evolvesTo]) rev[evolvesTo] = [];
-    rev[evolvesTo].push(fromId);
-  }
-  for (const [fromId, { evolvesTo }] of Object.entries(ALTERNATE_EVOLUTIONS)) {
+
+  const addConnection = (fromId: string, evolvesTo?: string) => {
+    if (!evolvesTo) return;
     if (!rev[evolvesTo]) rev[evolvesTo] = [];
     if (!rev[evolvesTo].includes(fromId)) rev[evolvesTo].push(fromId);
+  };
+
+  for (const [fromId, evolution] of Object.entries(EVOLUTIONS)) {
+    addConnection(fromId, evolution.evolvesTo);
   }
-  for (const [fromId, { evolvesTo }] of Object.entries(EXTRA_ALTERNATE_EVOLUTIONS)) {
-    if (!rev[evolvesTo]) rev[evolvesTo] = [];
-    if (!rev[evolvesTo].includes(fromId)) rev[evolvesTo].push(fromId);
+  for (const [fromId, evolution] of Object.entries(ALTERNATE_EVOLUTIONS)) {
+    addConnection(fromId, evolution.evolvesTo);
   }
+  for (const [fromId, evolution] of Object.entries(EXTRA_ALTERNATE_EVOLUTIONS)) {
+    addConnection(fromId, evolution.evolvesTo);
+  }
+  for (const [fromId, evolution] of Object.entries(HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS)) {
+    addConnection(fromId, evolution.evolvesTo);
+  }
+  for (const [fromId, fusion] of Object.entries(FUSIONS)) {
+    addConnection(fromId, fusion.resultId);
+  }
+
   return rev;
 }
 
@@ -75,6 +86,10 @@ function getConditionsForChild(parentId: string, childId: string): EvoConditions
   if (hc?.evolvesTo === childId) {
     return { fromId: parentId, requiredLevel: hc.requiredLevel, requiredItem: hc.requiredItem, requiredSacrificeCharacters: hc.requiredSacrificeCharacters };
   }
+  const fusion = FUSIONS[parentId];
+  if (fusion?.resultId === childId) {
+    return { fromId: parentId, requiredLevel: fusion.requiredLevel, requiredSacrificeCharacter: fusion.partner };
+  }
   return undefined;
 }
 
@@ -82,21 +97,32 @@ function buildTreeNode(charId: string, visited: Set<string>, parentId?: string):
   const mainNext  = EVOLUTIONS[charId]?.evolvesTo;
   const altNext   = ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
   const alt2Next  = EXTRA_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
+  const fixedNext = HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
+  const fusionNext = FUSIONS[charId]?.resultId;
 
   const targets: string[] = [];
-  if (mainNext && !visited.has(mainNext)) targets.push(mainNext);
-  if (altNext && altNext !== mainNext && !visited.has(altNext)) targets.push(altNext);
-  if (alt2Next && alt2Next !== mainNext && alt2Next !== altNext && !visited.has(alt2Next)) targets.push(alt2Next);
+  const addTarget = (target?: string) => {
+    if (target && !visited.has(target) && !targets.includes(target)) targets.push(target);
+  };
 
-  const nextVisited = new Set(visited);
-  for (const t of targets) nextVisited.add(t);
+  addTarget(mainNext);
+  addTarget(altNext);
+  addTarget(alt2Next);
+  addTarget(fixedNext);
+  addTarget(fusionNext);
 
   const conditions = parentId ? getConditionsForChild(parentId, charId) : undefined;
 
   return {
     id: charId,
     conditions,
-    children: targets.map(t => buildTreeNode(t, nextVisited, charId)),
+    // Cada ramo recebe seu próprio histórico. Assim um ramo irmão não bloqueia
+    // uma evolução válida que também faça parte de outra rota.
+    children: targets.map(target => {
+      const branchVisited = new Set(visited);
+      branchVisited.add(target);
+      return buildTreeNode(target, branchVisited, charId);
+    }),
   };
 }
 
