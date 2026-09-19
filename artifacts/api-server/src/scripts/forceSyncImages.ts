@@ -1,6 +1,6 @@
 /**
  * Force-sync: atualiza imageBase64 de TODOS os Digimons custom
- * cujo nome bater com um arquivo em seeds/images/ ou digimons/ do Expo.
+ * cujo nome bater com um arquivo em digimons/ do Expo ou no lote imported.
  * Diferente de syncImagesFromFolder, substitui mesmo quem já tem imagem.
  */
 import fs from "fs";
@@ -10,7 +10,7 @@ import { db, customDigimonsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const IMAGES_DIR   = path.join(__dirname, "..", "seeds", "images");
+const IMPORTED_DIR = path.join(__dirname, "..", "seeds", "images", "imported");
 const EXPO_DIR     = path.join(__dirname, "..", "..", "..", "omega-dx10", "assets", "images", "digimons");
 const VALID_EXTS   = new Set([".gif", ".webp", ".png", ".jpg", ".jpeg"]);
 
@@ -37,7 +37,7 @@ async function main() {
 
   // Monta índice de arquivos disponíveis: normName → fullPath
   const fileIndex = new Map<string, string>();
-  for (const dir of [IMAGES_DIR, EXPO_DIR]) {
+  for (const dir of [EXPO_DIR, IMPORTED_DIR]) {
     if (!fs.existsSync(dir)) continue;
     for (const f of fs.readdirSync(dir)) {
       if (!VALID_EXTS.has(path.extname(f).toLowerCase())) continue;
