@@ -8,7 +8,6 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { GAME_MAPS, MapStage, StageDrop } from '@/constants/gameData';
 import { useLanguage } from '@/context/LanguageContext';
-import WorldMapScreen from '@/components/WorldMap/WorldMapScreen';
 
 const STARS_3  = require('../../assets/images/ui/stars3.webp');
 const PADLOCK  = require('../../assets/images/ui/padlock.webp');
@@ -82,7 +81,6 @@ export default function MapScreen() {
   const [activeTab, setActiveTab] = useState<TabId>('digimundo');
   const [expandedMap, setExpandedMap] = useState<string>('map_forest');
   const [countdown, setCountdown] = useState(() => formatCountdown(getMsToMidnight()));
-  const [worldMapId, setWorldMapId] = useState<string | null>(null);
 
   useEffect(() => {
     const tick = setInterval(() => setCountdown(formatCountdown(getMsToMidnight())), 1000);
@@ -196,11 +194,7 @@ export default function MapScreen() {
           activeOpacity={0.85}
           onPress={() => {
             if (!unlocked || dayLocked) return;
-            if (!isDungeon && !isEvent) {
-              setWorldMapId(map.id);
-            } else {
-              setExpandedMap(expanded ? '' : map.id);
-            }
+            setExpandedMap(expanded ? '' : map.id);
           }}
         >
           {map.backgroundImage ? (
@@ -449,11 +443,6 @@ export default function MapScreen() {
         </ScrollView>
       )}
 
-      <WorldMapScreen
-        visible={!!worldMapId}
-        mapId={worldMapId ?? ''}
-        onClose={() => setWorldMapId(null)}
-      />
     </View>
   );
 }
