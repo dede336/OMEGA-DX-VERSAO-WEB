@@ -94,25 +94,31 @@ export default function HomeScreen() {
       {/* ── tamer top wrapper (hero + stats + actions) ── */}
       <View style={{ overflow: 'hidden', paddingTop: insets.top }}>
         {isTK && (
-          <Image
-            source={TK_BG_GIF}
-            style={[StyleSheet.absoluteFillObject, { opacity: 0.35 }]}
-            resizeMode="stretch"
-          />
+          <View style={StyleSheet.absoluteFillObject}>
+            <Image
+              source={TK_BG_GIF}
+              style={{ width: '100%', height: '100%', opacity: 0.35 }}
+              resizeMode="stretch"
+            />
+          </View>
         )}
         {isTai && (
-          <Image
-            source={TAI_BG}
-            style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="stretch"
-          />
+          <View style={StyleSheet.absoluteFillObject}>
+            <Image
+              source={TAI_BG}
+              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              resizeMode="stretch"
+            />
+          </View>
         )}
         {isSora && (
-          <Image
-            source={SORA_BG}
-            style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="stretch"
-          />
+          <View style={StyleSheet.absoluteFillObject}>
+            <Image
+              source={SORA_BG}
+              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              resizeMode="stretch"
+            />
+          </View>
         )}
         {isMimi && (
           <View style={StyleSheet.absoluteFillObject}>
@@ -124,18 +130,22 @@ export default function HomeScreen() {
           </View>
         )}
         {isKari && (
-          <Image
-            source={KARI_BG}
-            style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="stretch"
-          />
+          <View style={StyleSheet.absoluteFillObject}>
+            <Image
+              source={KARI_BG}
+              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              resizeMode="stretch"
+            />
+          </View>
         )}
         {isMatt && (
-          <Image
-            source={MATT_BG}
-            style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="stretch"
-          />
+          <View style={StyleSheet.absoluteFillObject}>
+            <Image
+              source={MATT_BG}
+              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              resizeMode="stretch"
+            />
+          </View>
         )}
 
         {/* ── Hero banner ── */}
