@@ -26,6 +26,13 @@ const SHINEGREYMON_BM_GIF   = require('../../assets/images/characters/shinegreym
 const ROSEMON_BM_GIF        = require('../../assets/images/characters/rosemonBurstMode_status.webp');
 const IMPERIALDRAMON_PM_GIF = require('../../assets/images/characters/imperialDramonPM_status.webp');
 
+const XP_BATTERIES = [
+  { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
+  { id: 'piece_battery_blue',   name: 'Bateria Azul',    xp: 200, color: '#3b82f6', img: require('../../assets/images/battery_blue.webp') },
+  { id: 'piece_battery_purple', name: 'Bateria Roxa',    xp: 400, color: '#a855f7', img: require('../../assets/images/battery_purple.webp') },
+  { id: 'piece_battery_gold',   name: 'Bateria Dourada', xp: 800, color: '#f59e0b', img: require('../../assets/images/battery_gold.webp') },
+] as const;
+
 
 type EvoPhase = 'playing' | 'reveal' | 'done';
 
@@ -190,7 +197,7 @@ export default function CollectionScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { collection, selectedCharacter, setSelectedCharacter, evolveDigimon, changeFormDigimon, pieces, sacrificeDigimon, isAdmin, tamerId } = useGame();
+  const { collection, selectedCharacter, setSelectedCharacter, evolveDigimon, changeFormDigimon, pieces, sacrificeDigimon, isAdmin, tamerId, useXpItem } = useGame();
   const tamerAccent = TAMERS.find(t => t.id === tamerId)?.accentColor;
 
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -214,6 +221,9 @@ export default function CollectionScreen() {
   const [modalOwned, setModalOwned] = useState<OwnedCharacter | null>(null);
   const [confirmSacrificeVisible, setConfirmSacrificeVisible] = useState(false);
   const [sacrificeResult, setSacrificeResult] = useState<SacrificeResult | null>(null);
+  const [xpPanelVisible, setXpPanelVisible] = useState(false);
+  const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
+  const [batteryQty, setBatteryQty] = useState(1);
 
   // Alt-evo sacrifice picker
   const [sacrificePickerVisible, setSacrificePickerVisible] = useState(false);
@@ -227,10 +237,13 @@ export default function CollectionScreen() {
   const titleScale = useRef(new Animated.Value(0.7)).current;
 
   function openModal(owned: OwnedCharacter) {
+    setXpPanelVisible(false);
+    setBatteryQty(1);
     setModalOwned(owned);
   }
 
   function closeModal() {
+    setXpPanelVisible(false);
     setModalOwned(null);
   }
 
@@ -379,6 +392,7 @@ export default function CollectionScreen() {
             style={[styles.modalSheet, { backgroundColor: colors.card }, pixelStyle]}
             onPress={(e) => e.stopPropagation()}
           >
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScrollContent}>
             {modalOwned && (() => {
               const char = getCharacter(modalOwned.characterId) ?? CHARACTERS[modalOwned.characterId];
               const rarityColor = char ? RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] : colors.primary;
@@ -592,6 +606,83 @@ export default function CollectionScreen() {
                     <Text style={[styles.setActiveBtnText, { color: colors.primaryForeground }]}>{t('collection.setActive')}</Text>
                   </TouchableOpacity>
 
+                  <TouchableOpacity
+                    style={[styles.xpBatteryButton, { borderColor: '#22c55e', backgroundColor: '#22c55e18' }, pixelStyle]}
+                    onPress={() => setXpPanelVisible((visible) => !visible)}
+                    activeOpacity={0.85}
+                  >
+                    <Image source={require('../../assets/images/battery_green.webp')} style={styles.xpBatteryButtonImage} resizeMode="contain" />
+                    <Text style={styles.xpBatteryButtonText}>USAR BATERIA EXP</Text>
+                    <Feather name={xpPanelVisible ? 'chevron-up' : 'chevron-down'} size={17} color="#22c55e" />
+                  </TouchableOpacity>
+
+                  {xpPanelVisible && (() => {
+                    const battery = XP_BATTERIES.find((item) => item.id === selectedBatteryId) ?? XP_BATTERIES[0];
+                    const available = pieces[battery.id] ?? 0;
+                    return (
+                      <View style={[styles.xpBatteryPanel, { borderColor: colors.border, backgroundColor: colors.background }]}> 
+                        <Text style={[styles.xpBatteryPanelTitle, { color: colors.foreground }]}>Escolha a bateria</Text>
+                        <View style={styles.xpBatteryOptions}>
+                          {XP_BATTERIES.map((item) => {
+                            const quantity = pieces[item.id] ?? 0;
+                            const selected = selectedBatteryId === item.id;
+                            return (
+                              <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                  styles.xpBatteryOption,
+                                  { borderColor: selected ? item.color : colors.border, backgroundColor: selected ? item.color + '1f' : colors.card, opacity: quantity > 0 ? 1 : 0.45 },
+                                ]}
+                                onPress={() => {
+                                  setSelectedBatteryId(item.id);
+                                  setBatteryQty(1);
+                                }}
+                                activeOpacity={0.8}
+                              >
+                                <Image source={item.img} style={styles.xpBatteryImage} resizeMode="contain" />
+                                <Text style={[styles.xpBatteryAmount, { color: item.color }]}>×{quantity}</Text>
+                                <Text style={[styles.xpBatteryValue, { color: colors.mutedForeground }]}>+{item.xp}</Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+
+                        <View style={styles.xpQuantityRow}>
+                          <TouchableOpacity
+                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
+                            onPress={() => setBatteryQty((quantity) => Math.max(1, quantity - 1))}
+                          >
+                            <Feather name="minus" size={17} color={colors.foreground} />
+                          </TouchableOpacity>
+                          <View style={styles.xpQuantityCenter}>
+                            <Text style={[styles.xpQuantityNumber, { color: colors.foreground }]}>{batteryQty}</Text>
+                            <Text style={[styles.xpQuantityAvailable, { color: colors.mutedForeground }]}>Disponível: {available}</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
+                            onPress={() => setBatteryQty((quantity) => Math.min(available, quantity + 1))}
+                          >
+                            <Feather name="plus" size={17} color={colors.foreground} />
+                          </TouchableOpacity>
+                        </View>
+
+                        <Text style={[styles.xpTotalText, { color: battery.color }]}>+{(battery.xp * batteryQty).toLocaleString()} EXP</Text>
+                        <TouchableOpacity
+                          style={[styles.xpConfirmButton, { backgroundColor: battery.color, opacity: available > 0 ? 1 : 0.45 }]}
+                          disabled={available <= 0}
+                          onPress={() => {
+                            if (available <= 0) return;
+                            useXpItem(modalOwned.ownedId, battery.id, batteryQty);
+                            closeModal();
+                          }}
+                        >
+                          <Image source={battery.img} style={styles.xpConfirmImage} resizeMode="contain" />
+                          <Text style={styles.xpConfirmText}>CONFIRMAR USO</Text>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })()}
+
                   <View style={styles.modalActions}>
                     <TouchableOpacity
                       style={[styles.detailBtn, { borderColor: colors.border }, pixelStyle]}
@@ -610,6 +701,7 @@ export default function CollectionScreen() {
                 </>
               );
             })()}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -913,7 +1005,9 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 36,
     gap: 14,
+    maxHeight: '94%',
   },
+  modalScrollContent: { gap: 14 },
   sheetHandle: {
     width: 40,
     height: 4,
@@ -935,6 +1029,26 @@ const styles = StyleSheet.create({
   sheetSub: { fontSize: 13, fontWeight: '600' as const },
   sheetBadgeRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap' as const },
   divider: { height: 1, borderRadius: 1 },
+
+  xpBatteryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 12, borderWidth: 1.5, paddingVertical: 10 },
+  xpBatteryButtonImage: { width: 24, height: 24 },
+  xpBatteryButtonText: { flex: 1, color: '#22c55e', fontSize: 12, fontWeight: '900' as const, textAlign: 'center' as const },
+  xpBatteryPanel: { borderRadius: 14, borderWidth: 1, padding: 12, gap: 10 },
+  xpBatteryPanelTitle: { fontSize: 12, fontWeight: '800' as const, textAlign: 'center' as const },
+  xpBatteryOptions: { flexDirection: 'row', gap: 7, justifyContent: 'center' },
+  xpBatteryOption: { flex: 1, maxWidth: 78, borderRadius: 10, borderWidth: 1.5, paddingVertical: 7, alignItems: 'center' },
+  xpBatteryImage: { width: 34, height: 34 },
+  xpBatteryAmount: { fontSize: 11, fontWeight: '900' as const, marginTop: 2 },
+  xpBatteryValue: { fontSize: 9, marginTop: 1 },
+  xpQuantityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 18 },
+  xpQuantityButton: { width: 38, height: 38, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  xpQuantityCenter: { minWidth: 90, alignItems: 'center' },
+  xpQuantityNumber: { fontSize: 18, fontWeight: '900' as const },
+  xpQuantityAvailable: { fontSize: 9, marginTop: 1 },
+  xpTotalText: { fontSize: 14, fontWeight: '900' as const, textAlign: 'center' as const },
+  xpConfirmButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderRadius: 10, paddingVertical: 10 },
+  xpConfirmImage: { width: 22, height: 22 },
+  xpConfirmText: { color: '#fff', fontSize: 12, fontWeight: '900' as const },
 
   // Compact evo rows
   evoRow: {
