@@ -104,7 +104,7 @@ export default function HomeScreen() {
           <Image
             source={TAI_BG}
             style={[StyleSheet.absoluteFillObject, { opacity: 0.30 }]}
-            resizeMode="cover"
+            resizeMode="stretch"
           />
         )}
         {isSora && (
