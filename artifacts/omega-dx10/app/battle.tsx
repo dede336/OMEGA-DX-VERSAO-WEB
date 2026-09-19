@@ -50,6 +50,65 @@ import { HPBar, AttributeBadge, CharacterAvatar, ELEMENT_EMOJI } from '@/compone
 import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
+const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
+
+function TargetReticle({ size }: { size: number }) {
+  const rotation = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const rotateAnimation = Animated.loop(
+      Animated.timing(rotation, {
+        toValue: 1,
+        duration: 1800,
+        useNativeDriver: true,
+      }),
+    );
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 450, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 450, useNativeDriver: true }),
+      ]),
+    );
+
+    rotateAnimation.start();
+    pulseAnimation.start();
+    return () => {
+      rotateAnimation.stop();
+      pulseAnimation.stop();
+    };
+  }, [pulse, rotation]);
+
+  const rotate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+  const scale = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.9, 1.08],
+  });
+  const opacity = pulse.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.72, 1],
+  });
+
+  return (
+    <Animated.Image
+      pointerEvents="none"
+      source={TARGET_RETICLE_IMG}
+      resizeMode="contain"
+      style={[
+        styles.targetReticle,
+        {
+          width: size,
+          height: size,
+          opacity,
+          transform: [{ rotate }, { scale }],
+        },
+      ]}
+    />
+  );
+}
 
 function HitEffect({ color }: { color: string }) {
   const scale   = useRef(new Animated.Value(0.2)).current;
@@ -208,6 +267,8 @@ export default function BattleScreen() {
   const [turnQueueIdx, setTurnQueueIdx] = useState(0);
   const [awaitingPlayerAction, setAwaitingPlayerAction] = useState(false);
   const [attackMenuOpen, setAttackMenuOpen] = useState(false);
+  const [pendingTargetAction, setPendingTargetAction] = useState<ActionType | null>(null);
+  const [targetConfirmed, setTargetConfirmed] = useState(false);
   const turnQueueRef = useRef<TurnEntry[]>([]);
   const turnQueueIdxRef = useRef(0);
   const awaitingPlayerActionRef = useRef(false);
@@ -227,6 +288,47 @@ export default function BattleScreen() {
       Animated.timing(anim, { toValue: 0, duration: 50, useNativeDriver: true }),
     ]).start();
   }, []);
+
+  function requestEnemyTarget(action: ActionType) {
+    const actingEntry = turnQueueRef.current[turnQueueIdxRef.current];
+    const actingPlayerIdx = actingEntry?.side === 'player' ? actingEntry.idx : activeTeamIdxRef.current;
+    const currentPF = teamFightersRef.current[actingPlayerIdx];
+
+    if (!currentPF || currentPF.currentHP <= 0) return;
+    if (action === 'SPIRIT' && currentPF.currentMP < SPIRIT_MP_COST) {
+      addLog('MP insuficiente!', '#ef4444');
+      return;
+    }
+
+    if (action === 'SPIRIT' && currentPF.spiritHitsAll) {
+      handlePlayerAction(action);
+      return;
+    }
+
+    targetIdxRef.current = -1;
+    setTargetIdx(-1);
+    setTargetConfirmed(false);
+    setPendingTargetAction(action);
+    setAttackMenuOpen(false);
+    addLog('Escolha o inimigo que receberá o ataque.', '#f59e0b');
+  }
+
+  function confirmEnemyTarget(enemyIndex: number) {
+    if (!pendingTargetAction || targetConfirmed || busy) return;
+    if ((enemiesRef.current[enemyIndex]?.currentHP ?? 0) <= 0) return;
+
+    const action = pendingTargetAction;
+    targetIdxRef.current = enemyIndex;
+    setTargetIdx(enemyIndex);
+    setTargetConfirmed(true);
+    Haptics.selectionAsync();
+
+    setTimeout(() => {
+      setPendingTargetAction(null);
+      setTargetConfirmed(false);
+      handlePlayerAction(action);
+    }, 650);
+  }
 
   // ── Element hit flash ───────────────────────────────────────────────────────
   const [hitFlash, setHitFlash] = useState<{ element: ElementId; idx: number; key: number } | null>(null);
@@ -1196,11 +1298,11 @@ export default function BattleScreen() {
                   <TouchableOpacity
                     key={i}
                     activeOpacity={isDead ? 1 : 0.85}
-                    onPress={() => { if (!isDead && !busy) { targetIdxRef.current = i; setTargetIdx(i); } }}
+                    onPress={() => confirmEnemyTarget(i)}
                     style={[styles.arenaEnemySlot, isDead && styles.arenaEnemyDead]}
                   >
-                    {isTarget && !isDead && (
-                      <View style={[styles.targetRing, { borderColor: hasBg ? '#ef4444' : colors.primary }]} />
+                    {pendingTargetAction && targetConfirmed && isTarget && !isDead && (
+                      <TargetReticle size={enemies.length === 1 ? 118 : 82} />
                     )}
                     <Animated.View style={{ transform: [{ translateX: getEnemyShake(i) }] }}>
                       {CHARACTER_IMAGES[charId] ? (
@@ -1237,9 +1339,9 @@ export default function BattleScreen() {
           </View>
         </View>
 
-        {enemies.length > 1 && (
-          <Text style={[styles.targetHint, { color: colors.mutedForeground }]}>
-            Toque num inimigo para selecionar o alvo
+        {pendingTargetAction && (
+          <Text style={[styles.targetHint, { color: targetConfirmed ? '#ef4444' : '#f59e0b' }]}> 
+            {targetConfirmed ? 'ALVO SELECIONADO' : 'ESCOLHA O INIMIGO QUE RECEBERÁ O ATAQUE'}
           </Text>
         )}
 
@@ -1333,7 +1435,7 @@ export default function BattleScreen() {
             <View style={[styles.attackMenu, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => handlePlayerAction('ATTACK')}
+                onPress={() => requestEnemyTarget('ATTACK')}
                 style={[styles.attackOption, { borderColor: '#ef4444', backgroundColor: '#ef444418' }, pixelStyle]}
               >
                 <Text style={{ fontSize: 15 }}>{ELEMENT_EMOJI[playerFighter.attackElement ?? playerFighter.element] ?? '⚔️'}</Text>
@@ -1341,7 +1443,7 @@ export default function BattleScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 activeOpacity={canSpirit ? 0.8 : 1}
-                onPress={() => canSpirit && handlePlayerAction('SPIRIT')}
+                onPress={() => canSpirit && requestEnemyTarget('SPIRIT')}
                 style={[styles.attackOption, {
                   borderColor: canSpirit ? '#a855f7' : colors.border,
                   backgroundColor: canSpirit ? '#a855f718' : colors.card,
@@ -1370,7 +1472,7 @@ export default function BattleScreen() {
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 22, height: 22 }} resizeMode="contain" />
                 <Text style={[styles.autoIndicatorText, { color: '#22c55e' }]}>{t('battle.auto')}…</Text>
               </View>
-            ) : awaitingPlayerAction && !attackMenuOpen ? (
+            ) : awaitingPlayerAction && !attackMenuOpen && !pendingTargetAction ? (
               <>
                 {/* ATAQUE */}
                 <TouchableOpacity
@@ -1683,7 +1785,7 @@ const styles = StyleSheet.create({
   arenaEnemyRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 8, flexWrap: 'wrap' },
   arenaEnemySlot: { alignItems: 'center', gap: 4, position: 'relative' as const, minWidth: 80 },
   arenaEnemyDead: { opacity: 0.4 },
-  targetRing: { position: 'absolute', top: -4, left: -4, right: -4, bottom: 20, borderRadius: 12, borderWidth: 2.5, zIndex: 1 },
+  targetReticle: { position: 'absolute', alignSelf: 'center', top: -8, zIndex: 20 },
   elementFlashImg: { position: 'absolute', width: 72, height: 72, zIndex: 20, pointerEvents: 'none' as const },
   arenaEnemySprite: { width: 72, height: 72 },
   arenaSingleSprite: { width: 110, height: 110 },
