@@ -45,9 +45,9 @@ const ELEMENT_GIFS: Record<string, any> = {
 
 const SPECIAL_GIFS: Record<string, any> = {
   omegamon:              require('../../assets/images/omegamon_digivolve.webp'),
-  shineGreymonBurstMode: require('../../assets/images/characters/shinegreymonbm_special.webp'),
-  rosemonBurstMode:      require('../../assets/images/characters/rosemonBurstMode_status.webp'),
-  imperialDramonPM:      require('../../assets/images/characters/imperialDramonPM_status.webp'),
+  shineGreymonBurstMode: require('../../assets/images/digimons/shinegreymonbm.gif'),
+  rosemonBurstMode:      require('../../assets/images/digimons/Rosemon_BM.gif'),
+  imperialDramonPM:      require('../../assets/images/digimons/imperialDramonPM.gif'),
 };
 
 export default function HomeScreen() {

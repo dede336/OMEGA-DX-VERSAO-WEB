@@ -16,7 +16,11 @@ const UNNAMED_TEMP_DIR = path.join(__dirname, "seeds", "unnamed_temp");
 const EXPO_IMAGES_DIR = path.join(__dirname, "..", "..", "omega-dx10", "assets", "images", "digimons");
 
 function readImage(filename: string): { base64: string; mime: string } | null {
-  const filepath = [path.join(IMPORTED_IMAGES_DIR, filename), path.join(IMAGES_DIR, filename)]
+  const filepath = [
+    path.join(EXPO_IMAGES_DIR, filename),
+    path.join(IMPORTED_IMAGES_DIR, filename),
+    path.join(IMAGES_DIR, filename),
+  ]
     .find((candidate) => fs.existsSync(candidate));
   if (!filepath) return null;
   const ext = path.extname(filename).toLowerCase();
@@ -3548,7 +3552,9 @@ export async function syncImagesFromFolder(): Promise<void> {
       digiByNorm.set(key, rows);
     }
 
-    // Coleta arquivos de todas as pastas de imagem disponíveis
+    // Coleta arquivos de todas as pastas de imagem disponíveis.
+    // O lote novo do app é a fonte canônica; as pastas antigas só completam
+    // nomes que ainda não existem no lote.
     const VALID_EXTS = [".gif", ".webp", ".png", ".jpg", ".jpeg"];
     const allFiles: { fullPath: string; filename: string }[] = [];
     const manualKeys = new Set<string>(
@@ -3557,7 +3563,7 @@ export async function syncImagesFromFolder(): Promise<void> {
         : [],
     );
 
-    for (const dir of [IMPORTED_IMAGES_DIR, IMAGES_DIR, EXPO_IMAGES_DIR]) {
+    for (const dir of [EXPO_IMAGES_DIR, IMPORTED_IMAGES_DIR, IMAGES_DIR]) {
       if (!fs.existsSync(dir)) continue;
       for (const f of fs.readdirSync(dir)) {
         if (VALID_EXTS.includes(path.extname(f).toLowerCase())) {

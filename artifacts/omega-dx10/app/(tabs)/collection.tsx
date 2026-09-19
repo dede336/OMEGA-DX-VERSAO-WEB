@@ -22,9 +22,9 @@ import { useLanguage } from '@/context/LanguageContext';
 const DIGIVO_GIF       = require('../../assets/images/digivolution.webp');
 const DIGIVO_INTRO_GIF = require('../../assets/images/digivolution_intro.webp');
 const OMEGAMON_GIF          = require('../../assets/images/omegamon_digivolve.webp');
-const SHINEGREYMON_BM_GIF   = require('../../assets/images/characters/shinegreymonbm_special.webp');
-const ROSEMON_BM_GIF        = require('../../assets/images/characters/rosemonBurstMode_status.webp');
-const IMPERIALDRAMON_PM_GIF = require('../../assets/images/characters/imperialDramonPM_status.webp');
+const SHINEGREYMON_BM_GIF   = require('../../assets/images/digimons/shinegreymonbm.gif');
+const ROSEMON_BM_GIF        = require('../../assets/images/digimons/Rosemon_BM.gif');
+const IMPERIALDRAMON_PM_GIF = require('../../assets/images/digimons/imperialDramonPM.gif');
 
 
 type EvoPhase = 'playing' | 'reveal' | 'done';
