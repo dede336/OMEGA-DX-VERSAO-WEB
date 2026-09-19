@@ -22,9 +22,9 @@ import { useLanguage } from '@/context/LanguageContext';
 const DIGIVO_GIF       = require('../../assets/images/digivolution.webp');
 const DIGIVO_INTRO_GIF = require('../../assets/images/digivolution_intro.webp');
 const OMEGAMON_GIF          = require('../../assets/images/omegamon_digivolve.webp');
-const SHINEGREYMON_BM_GIF   = require('../../assets/images/digimons/shinegreymonbm.gif');
-const ROSEMON_BM_GIF        = require('../../assets/images/digimons/Rosemon_BM.gif');
-const IMPERIALDRAMON_PM_GIF = require('../../assets/images/digimons/imperialDramonPM.gif');
+const SHINEGREYMON_BM_GIF   = require('../../assets/images/characters/shinegreymonbm_special.webp');
+const ROSEMON_BM_GIF        = require('../../assets/images/characters/rosemonBurstMode_status.webp');
+const IMPERIALDRAMON_PM_GIF = require('../../assets/images/characters/imperialDramonPM_status.webp');
 
 
 type EvoPhase = 'playing' | 'reveal' | 'done';
@@ -269,16 +269,16 @@ export default function CollectionScreen() {
   const modalEvo       = modalOwned ? EVOLUTIONS[modalOwned.characterId] : undefined;
   const hasReqItem     = !modalEvo?.requiredItem || (pieces[modalEvo.requiredItem] ?? 0) > 0;
   const modalCanEvolve = !!(modalOwned && modalEvo && modalOwned.level >= modalEvo.requiredLevel && hasReqItem);
-  const modalEvoChar   = modalEvo ? (getCharacter(modalEvo.evolvesTo) ?? CHARACTERS[modalEvo.evolvesTo]) : undefined;
+  const modalEvoChar   = modalEvo ? CHARACTERS[modalEvo.evolvesTo] : undefined;
 
   const modalFormChangeId      = modalOwned ? (FORM_CHANGES[modalOwned.characterId] ?? null) : null;
-  const modalFormChangeChar    = modalFormChangeId ? (getCharacter(modalFormChangeId) ?? CHARACTERS[modalFormChangeId]) : null;
+  const modalFormChangeChar    = modalFormChangeId ? CHARACTERS[modalFormChangeId] : null;
 
   const modalAltEvo            = modalOwned ? ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
   const hasAltReqItem          = !modalAltEvo?.requiredItem || (pieces[modalAltEvo.requiredItem] ?? 0) > 0;
   const altSacrificeCharId     = modalAltEvo?.requiredSacrificeCharacter;
   const altSacrificeCharIds    = (modalAltEvo as any)?.requiredSacrificeCharacters as string[] | undefined;
-  const altSacrificeChar       = altSacrificeCharId ? (getCharacter(altSacrificeCharId) ?? CHARACTERS[altSacrificeCharId]) : undefined;
+  const altSacrificeChar       = altSacrificeCharId ? CHARACTERS[altSacrificeCharId] : undefined;
   const altSacrificeCopies     = altSacrificeCharId
     ? collection.filter((c) => c.ownedId !== modalOwned?.ownedId && c.characterId === altSacrificeCharId)
     : [];
@@ -290,13 +290,13 @@ export default function CollectionScreen() {
     ? hasAltMultiSacrifice
     : (!altSacrificeCharId || altSacrificeCopies.length > 0);
   const modalCanAltEvolve = !!(modalOwned && modalAltEvo && modalOwned.level >= modalAltEvo.requiredLevel && hasAltReqItem && hasAltSacrifice);
-  const modalAltEvoChar   = modalAltEvo ? (getCharacter(modalAltEvo.evolvesTo) ?? CHARACTERS[modalAltEvo.evolvesTo]) : undefined;
+  const modalAltEvoChar   = modalAltEvo ? CHARACTERS[modalAltEvo.evolvesTo] : undefined;
 
   // ── Extra Alternate Evolution (alt2) ──────────────────────────────────────
   const modalAlt2Evo          = modalOwned ? EXTRA_ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
   const hasAlt2ReqItem        = !modalAlt2Evo?.requiredItem || (pieces[modalAlt2Evo.requiredItem] ?? 0) > 0;
   const modalCanAlt2Evolve    = !!(modalOwned && modalAlt2Evo && modalOwned.level >= modalAlt2Evo.requiredLevel && hasAlt2ReqItem);
-  const modalAlt2EvoChar      = modalAlt2Evo ? (getCharacter(modalAlt2Evo.evolvesTo) ?? CHARACTERS[modalAlt2Evo.evolvesTo]) : undefined;
+  const modalAlt2EvoChar      = modalAlt2Evo ? CHARACTERS[modalAlt2Evo.evolvesTo] : undefined;
 
   // Sacrifice info for current modal character
   const modalChar = modalOwned ? (getCharacter(modalOwned.characterId) ?? CHARACTERS[modalOwned.characterId] ?? null) : null;
@@ -306,8 +306,8 @@ export default function CollectionScreen() {
   const sacrificeScanPct  = modalChar ? (SACRIFICE_SCAN_PCT[modalChar.rarity] ?? 0) : 0;
   const canSacrifice = !!(modalChar && modalChar.rarity !== 'COMMON');
 
-  const toChar = evoAnim ? (getCharacter(evoAnim.toCharId) ?? CHARACTERS[evoAnim.toCharId]) : null;
-  const fromChar = evoAnim ? (getCharacter(evoAnim.fromCharId) ?? CHARACTERS[evoAnim.fromCharId]) : null;
+  const toChar = evoAnim ? CHARACTERS[evoAnim.toCharId] : null;
+  const fromChar = evoAnim ? CHARACTERS[evoAnim.fromCharId] : null;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -598,7 +598,7 @@ export default function CollectionScreen() {
                       onPress={() => { closeModal(); router.push(`/character/${modalOwned.ownedId}`); }}
                     >
                       <Feather name="info" size={15} color={colors.foreground} />
-                      <Text style={[styles.detailBtnText, { color: colors.foreground }]}>{t('collection.details')}</Text>
+                      <Text style={[styles.detailBtnText, { color: colors.foreground }]}>{t('collection.viewDetails')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.closeBtn, { borderColor: colors.border }, pixelStyle]}
