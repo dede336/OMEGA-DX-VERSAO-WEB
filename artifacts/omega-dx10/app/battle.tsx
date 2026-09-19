@@ -61,7 +61,7 @@ const ELEMENT_EFFECT_IMAGES: Record<ElementId, any> = {
   NULL: require('../assets/images/effects/nulo.gif'),
   EARTH: require('../assets/images/effects/terra.gif'),
   DARK: require('../assets/images/effects/trevas.gif'),
-  LIGHTNING: require('../assets/images/effects/trovão.gif'),
+  LIGHTNING: require('../assets/images/effects/trovao.gif'),
   WIND: require('../assets/images/effects/vento.gif'),
 };
 
