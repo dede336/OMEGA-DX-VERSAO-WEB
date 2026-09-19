@@ -113,8 +113,8 @@ function buildActivePath(root: TreeNode, selections: Record<string, number>): Pa
   let current: TreeNode | null = root;
 
   while (current) {
-    const total = current.children.length;
-    const idx = total > 0 ? Math.min(selections[current.id] ?? 0, total - 1) : 0;
+    const total: number = current.children.length;
+    const idx: number = total > 0 ? Math.min(selections[current.id] ?? 0, total - 1) : 0;
     steps.push({ node: current, branchIndex: idx, totalBranches: total });
     current = total > 0 ? current.children[idx] : null;
   }
@@ -566,31 +566,69 @@ function FullTreeNodeView({
 // ─── 2D Pan Canvas (drag anywhere, no scrollbars) ────────────────────────────
 
 function PanCanvas({ contentWidth, children }: { contentWidth: number; children: React.ReactNode }) {
+  const panX = useRef(new Animated.Value(0)).current;
+  const panY = useRef(new Animated.Value(0)).current;
+  const lastOffset = useRef({ x: 0, y: 0 });
+  const containerSize = useRef({ w: 1, h: 1 });
+  const contentH = useRef(1);
+  const hasCenteredInitially = useRef(false);
+
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+  const responder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, { dx, dy }) => Math.abs(dx) > 2 || Math.abs(dy) > 2,
+      onPanResponderGrant: () => {
+        panX.setOffset(lastOffset.current.x);
+        panY.setOffset(lastOffset.current.y);
+        panX.setValue(0);
+        panY.setValue(0);
+      },
+      onPanResponderMove: Animated.event([null, { dx: panX, dy: panY }], { useNativeDriver: false }),
+      onPanResponderRelease: () => {
+        panX.flattenOffset();
+        panY.flattenOffset();
+        const cx = (panX as any)._value as number;
+        const cy = (panY as any)._value as number;
+        const minX = Math.min(0, containerSize.current.w - contentWidth);
+        const minY = Math.min(0, containerSize.current.h - contentH.current);
+        const nx = clamp(cx, minX, 0);
+        const ny = clamp(cy, minY, 0);
+        panX.setValue(nx);
+        panY.setValue(ny);
+        lastOffset.current = { x: nx, y: ny };
+      },
+    })
+  ).current;
+
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
+    <View
+      style={{ flex: 1, overflow: 'hidden' }}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        containerSize.current = { w: width, h: height };
+
+        // No desktop, Dimensions.get('window') pode ser muito maior que a
+        // coluna do jogo. Centraliza o conteúdo usando a largura real do canvas
+        // para impedir que a raiz da árvore nasça fora da área visível.
+        if (!hasCenteredInitially.current && width > 1) {
+          const initialX = Math.min(0, (width - contentWidth) / 2);
+          panX.setValue(initialX);
+          panY.setValue(0);
+          lastOffset.current = { x: initialX, y: 0 };
+          hasCenteredInitially.current = true;
+        }
+      }}
+      {...responder.panHandlers}
     >
-      <ScrollView
-        horizontal
-        contentContainerStyle={{
-          width: contentWidth,
-          minHeight: '100%',
-          alignItems: 'flex-start',
-        }}
-        showsHorizontalScrollIndicator={false}
+      <Animated.View
+        style={{ width: contentWidth, transform: [{ translateX: panX }, { translateY: panY }] }}
+        onLayout={(e) => { contentH.current = e.nativeEvent.layout.height; }}
       >
-        <View
-          style={{
-            width: contentWidth,
-            alignItems: 'center',
-          }}
-        >
-          {children}
-        </View>
-      </ScrollView>
-    </ScrollView>
+        {children}
+      </Animated.View>
+    </View>
   );
 }
 
