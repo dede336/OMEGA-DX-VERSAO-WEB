@@ -198,11 +198,7 @@ export default function OnboardingScreen() {
                           <View style={styles.tamerAvatarWrapper}>
                             <Image
                               source={t.image}
-                              style={[
-                                styles.tamerAvatar,
-                                t.id === 'tamer_matt' && { transform: [{ scale: 1.8 }] },
-                                t.id === 'tamer_tk' && { transform: [{ scale: 1.2 }] },
-                              ]}
+                              style={styles.tamerAvatar}
                               contentFit="contain"
                             />
                           </View>
@@ -272,8 +268,8 @@ const styles = StyleSheet.create({
   tamerGridContent:  { paddingBottom: 20, width: '100%' },
   tamerGrid:         { flexDirection: 'row', flexWrap: 'wrap', width: '100%', gap: TAMER_GAP },
   tamerGridCard:     { alignItems: 'center', borderWidth: 1.5, borderColor: '#1e293b', backgroundColor: '#111827', borderRadius: 14, padding: isWeb ? 6 : 8, position: 'relative' as const },
-  tamerAvatarWrapper:{ width: isWeb ? 54 : 62, height: isWeb ? 78 : 88, alignSelf: 'center' as const },
-  tamerAvatar:       { width: '100%', height: '100%' },
+  tamerAvatarWrapper:{ width: 50, height: 100, alignSelf: 'center' as const },
+  tamerAvatar:       { width: 50, height: 100 },
   tamerName:         { fontSize: isWeb ? 13 : 14, fontWeight: '800' as const, color: '#f1f5f9', textAlign: 'center' as const, marginTop: 4 },
   tamerCheck:        { position: 'absolute' as const, top: 6, right: 6, width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
 
