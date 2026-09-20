@@ -17,7 +17,7 @@ const workspaceRoot = path.resolve(here, "../../..");
 async function autoMigrate() {
   try {
     execSync("pnpm --filter @workspace/db push", {
-      cwd: workspaceRoot, stdio: "pipe", timeout: 60000, env: process.env
+      cwd: workspaceRoot, stdio: "inherit", timeout: 60000, env: process.env
     });
     console.log("Database schema ready.");
   } catch (err) {
