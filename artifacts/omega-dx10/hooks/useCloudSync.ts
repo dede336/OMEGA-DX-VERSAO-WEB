@@ -4,10 +4,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 
 const SYNC_DEBOUNCE = 10_000;
-const SAVE_KEY = 'omega_dx10_save_v3';
+const SAVE_KEY_PREFIX = 'omega_dx10_save_v3';
 
-async function pushSaveToServer(apiUrl: string, token: string): Promise<void> {
-  const raw = await AsyncStorage.getItem(SAVE_KEY);
+function getSaveKey(userId: number | null | undefined): string {
+  return `${SAVE_KEY_PREFIX}:${userId ?? 'guest'}`;
+}
+
+async function pushSaveToServer(apiUrl: string, token: string, saveKey: string): Promise<void> {
+  const raw = await AsyncStorage.getItem(saveKey);
   if (!raw) return;
   const saveData = JSON.parse(raw);
   await fetch(`${apiUrl}/saves`, {
@@ -18,23 +22,28 @@ async function pushSaveToServer(apiUrl: string, token: string): Promise<void> {
 }
 
 export function useCloudSync() {
-  const { token, getApiUrl } = useAuth();
+  const { token, user, getApiUrl } = useAuth();
+  const saveKey = getSaveKey(user?.id);
   const { collection, tamerLevel, tamerExp, playerName, team, tamerId, messages, clearedStages, loadFromCloud } = useGame();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokenRef = useRef(token);
   const getApiUrlRef = useRef(getApiUrl);
-  const initialLoadDone = useRef(false);
+  const lastLoadedTokenRef = useRef<string | null>(null);
 
   useEffect(() => { tokenRef.current = token; }, [token]);
   useEffect(() => { getApiUrlRef.current = getApiUrl; }, [getApiUrl]);
 
   // Ao abrir o app com sessão ativa, busca o save do servidor imediatamente
   useEffect(() => {
-    if (!token || initialLoadDone.current) return;
-    initialLoadDone.current = true;
+    if (!token) {
+      lastLoadedTokenRef.current = null;
+      return;
+    }
+    if (lastLoadedTokenRef.current === token) return;
+    lastLoadedTokenRef.current = token;
     loadFromCloud(getApiUrl());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, saveKey]);
 
   const claimedCount = messages.filter((m) => m.rewardClaimed).length;
   const clearedCount = Object.keys(clearedStages).length;
@@ -47,16 +56,16 @@ export function useCloudSync() {
       const currentTok = tokenRef.current;
       if (!currentTok) return;
       try {
-        await pushSaveToServer(getApiUrlRef.current(), currentTok);
+        await pushSaveToServer(getApiUrlRef.current(), currentTok, saveKey);
       } catch {}
     }, SYNC_DEBOUNCE);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, claimedCount, clearedCount]);
+  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, saveKey, claimedCount, clearedCount]);
 
   return { saveNow: () => {
     const tok = tokenRef.current;
     if (!tok) return;
-    pushSaveToServer(getApiUrlRef.current(), tok).catch(() => {});
+    pushSaveToServer(getApiUrlRef.current(), tok, saveKey).catch(() => {});
   }};
 }

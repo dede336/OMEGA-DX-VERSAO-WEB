@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/context/AuthContext';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, useMemo } from 'react';
 import {
   CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FUSIONS, GAME_MAPS, expToNextLevel, tamerExpToNextLevel, CODEX_ORDER,
@@ -235,7 +236,11 @@ interface GameContextValue extends GameState {
   customCharsReady: boolean;
 }
 
-const STORAGE_KEY = 'omega_dx10_save_v3';
+const STORAGE_KEY_PREFIX = 'omega_dx10_save_v3';
+
+function getStorageKey(userId: number | null | undefined): string {
+  return `${STORAGE_KEY_PREFIX}:${userId ?? 'guest'}`;
+}
 
 const DEFAULT_FARM_DECOR_INVENTORY: Record<string, number> = {
   asfalto_curva1: 2,
@@ -297,6 +302,8 @@ const defaultState: GameState = {
 export const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const storageKey = getStorageKey(user?.id);
   const [state, setState] = useState<GameState>(defaultState);
   const stateRef = useRef<GameState>(defaultState);
   const [loaded, setLoaded] = useState(false);
@@ -308,7 +315,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [customCharsReady, setCustomCharsReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
+    let cancelled = false;
+    setLoaded(false);
+    setState(defaultState);
+    AsyncStorage.getItem(storageKey).then((raw) => {
+      if (cancelled) return;
       if (raw) {
         try {
           const parsed = JSON.parse(raw) as Partial<GameState & { playerName?: string; _savedAt?: number }>;
@@ -353,7 +364,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
       setLoaded(true);
     });
-  }, []);
+    return () => { cancelled = true; };
+  }, [storageKey]);
 
   useEffect(() => {
     stateRef.current = state;
@@ -368,12 +380,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!loaded) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, _savedAt: Date.now() }));
+      AsyncStorage.setItem(storageKey, JSON.stringify({ ...state, _savedAt: Date.now() }));
     }, 2000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [state, loaded]);
+  }, [state, loaded, storageKey]);
 
 
   const addToCollection = useCallback((characterId: string) => {
@@ -1346,7 +1358,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!saveData) return;
 
       // Compare timestamps: if local save is newer, keep local but still merge new server messages
-      const localRaw = await AsyncStorage.getItem(STORAGE_KEY);
+      const localRaw = await AsyncStorage.getItem(storageKey);
       if (localRaw) {
         try {
           const localData = JSON.parse(localRaw) as { _savedAt?: number; isOnboarded?: boolean };
@@ -1429,17 +1441,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
       };
       setState(newState);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ ...newState, _savedAt: Date.now() }));
+      await AsyncStorage.setItem(storageKey, JSON.stringify({ ...newState, _savedAt: Date.now() }));
     } catch {
       // Garante que erros de rede não deixam o app travado na tela de carregamento
       setCustomCharsReady(true);
     }
-  }, []);
+  }, [storageKey]);
 
   const resetGame = useCallback(async () => {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    await AsyncStorage.removeItem(storageKey);
     setState(defaultState);
-  }, []);
+  }, [storageKey]);
 
   return (
     <GameContext.Provider
