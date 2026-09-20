@@ -347,7 +347,9 @@ export default function CraftScreen() {
   const [activeCategory, setActiveCategory] = useState<CraftCategory>('evolucao');
   const [selectedRecipe, setSelectedRecipe] = useState<CraftRecipe | null>(null);
 
-  const filteredRecipes = CRAFT_RECIPES.filter(r => getCategoryForRecipe(r) === activeCategory);
+  const filteredRecipes = CRAFT_RECIPES.filter(
+    r => r.resultItemId !== 'taikyoku_feather' && getCategoryForRecipe(r) === activeCategory,
+  );
   const activeCat = CATEGORIES.find(c => c.id === activeCategory)!;
 
   return (
