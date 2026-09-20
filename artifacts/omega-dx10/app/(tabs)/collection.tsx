@@ -22,9 +22,6 @@ import { useLanguage } from '@/context/LanguageContext';
 const DIGIVO_GIF       = require('../../assets/images/digivolution.webp');
 const DIGIVO_INTRO_GIF = require('../../assets/images/digivolution_intro.webp');
 const OMEGAMON_GIF          = require('../../assets/images/omegamon_digivolve.webp');
-const SHINEGREYMON_BM_GIF   = require('../../assets/images/characters/shinegreymonbm_special.webp');
-const ROSEMON_BM_GIF        = require('../../assets/images/characters/rosemonBurstMode_status.webp');
-const IMPERIALDRAMON_PM_GIF = require('../../assets/images/characters/imperialDramonPM_status.webp');
 
 const XP_BATTERIES = [
   { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
@@ -142,7 +139,12 @@ function DigiGridCard({ owned, isSelected, canEvolve, tamerAccent, onPress }: Di
 
 const gridCardStyles = StyleSheet.create({
   card: {
-    flex: 1,
+    width: '32%',
+    maxWidth: '32%',
+    minWidth: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: '32%',
     backgroundColor: '#1a1a2e',
     borderRadius: 10,
     overflow: 'hidden',
@@ -359,7 +361,7 @@ export default function CollectionScreen() {
         keyExtractor={(item) => item.ownedId}
         numColumns={3}
         contentContainerStyle={[styles.grid, { paddingBottom: bottomPad + 40 }]}
-        columnWrapperStyle={{ gap: 6 }}
+        columnWrapperStyle={{ gap: 6, justifyContent: 'flex-start' }}
         showsVerticalScrollIndicator={false}
         initialNumToRender={18}
         maxToRenderPerBatch={12}
@@ -722,8 +724,8 @@ export default function CollectionScreen() {
           <Image
             source={
               evoPhase === 'playing'
-                ? (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : evoAnim?.toCharId === 'shineGreymonBurstMode' ? SHINEGREYMON_BM_GIF : evoAnim?.toCharId === 'rosemonBurstMode' ? ROSEMON_BM_GIF : evoAnim?.toCharId === 'imperialDramonPM' ? IMPERIALDRAMON_PM_GIF : DIGIVO_INTRO_GIF)
-                : (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : evoAnim?.toCharId === 'shineGreymonBurstMode' ? SHINEGREYMON_BM_GIF : evoAnim?.toCharId === 'rosemonBurstMode' ? ROSEMON_BM_GIF : evoAnim?.toCharId === 'imperialDramonPM' ? IMPERIALDRAMON_PM_GIF : DIGIVO_GIF)
+                ? (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : DIGIVO_INTRO_GIF)
+                : (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : DIGIVO_GIF)
             }
             style={styles.evoGifBg}
             resizeMode="cover"
