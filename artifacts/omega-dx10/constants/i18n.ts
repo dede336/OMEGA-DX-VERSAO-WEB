@@ -423,7 +423,7 @@ const pt: TranslationMap = {
   'item.tenis_corrida':        'Tênis de Corrida',
   'item.anel_sagrado':         'Anel Sagrado ✨',
   'item.piece_anel_sagrado':   'Fragmento do Anel Sagrado',
-  'item.permissao_real':       'Permição Real da Deusa ⚔️',
+  'item.permissao_real':       'Permissão Real da Deusa ⚔️',
   'item.gehenna':              'Gehenna 🌑',
   'item.piece_gehenna':        'Fragmento do Gehenna',
   'item.piece_battery_green':  'Bateria Verde',
