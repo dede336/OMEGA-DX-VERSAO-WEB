@@ -8,7 +8,7 @@ import {
   PRE_ROOKIE_STAGE_RARITIES,
   EquipItem, GameMap,
 } from '@/constants/gameData';
-import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget } from '@/constants/extendedCharacters';
+import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';
@@ -619,7 +619,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     let pool: GachaReward[];
     if (adminPool && adminPool.length > 0) {
       pool = adminPool.map((entry) => ({
-        characterId: entry.characterId ?? entry.id,
+        characterId: entry.tipo === 'DIGIMON' && entry.nome
+          ? (findCharacterIdByName(entry.nome.replace(/^✨\s*/, '')) ?? entry.characterId ?? entry.id)
+          : (entry.characterId ?? entry.id),
         raridade: entry.raridade,
         nome: entry.nome,
         tipo: entry.tipo,
@@ -638,7 +640,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         { characterId: 'demiDevimon',   raridade: 'Comum',    tipo: 'DIGIMON', nome: 'DemiDevimon' },
         { characterId: 'tokomon',       raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Tokomon' },
         // Especial (6 slots)
-        { characterId: 'custom_356',    raridade: 'Especial', tipo: 'DIGIMON', nome: 'Dorulumon' },
+        { characterId: findCharacterIdByName('Dorulumon') ?? 'custom_356', raridade: 'Especial', tipo: 'DIGIMON', nome: 'Dorulumon' },
         { characterId: 'magnaAngemon',  raridade: 'Especial', tipo: 'DIGIMON', nome: 'MagnaAngemon' },
         { characterId: 'angewomon',     raridade: 'Especial', tipo: 'DIGIMON', nome: 'Angewomon' },
         { characterId: 'metalGreymon',  raridade: 'Especial', tipo: 'DIGIMON', nome: 'MetalGreymon' },
@@ -686,7 +688,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     // ── Roll rewards synchronously ──
     // Fixed item: Digitama Especial — always 1% chance per pull, only via percentage (never via pity)
-    const DIGITAMA_ESPECIAL_ID = 'custom_1550';
+    const DIGITAMA_ESPECIAL_ID = findCharacterIdByName('Digitama Especial') ?? 'custom_1550';
     const TAXA_DIGITAMA_ESPECIAL = 0.01;
 
     let pity = prev.gachaContadorPity;
@@ -1275,17 +1277,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const isMapUnlocked = useCallback(
     (mapId: string) => {
-      const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
+      const map = GAME_MAPS.find((m) => m.id === mapId);
       if (!map) return false;
       if (map.requiredTamerLevel) {
         if (state.tamerLevel < map.requiredTamerLevel) return false;
       }
       if (!map.requiredMapCleared) return true;
-      const required = GAME_MAPS.find((m) => m.id === map.requiredMapCleared) ?? customGameMaps.find((m) => m.id === map.requiredMapCleared);
+      const required = GAME_MAPS.find((m) => m.id === map.requiredMapCleared);
       if (!required) return false;
       return required.stages.every((s) => state.clearedStages[`${map.requiredMapCleared}-${s.index}`]);
     },
-    [state.clearedStages, state.collection, customGameMaps],
+    [state.clearedStages, state.collection],
   );
 
   const totalEquipBonus = useCallback((): Partial<Record<string, number>> => {
