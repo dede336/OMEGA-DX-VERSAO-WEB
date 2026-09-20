@@ -789,7 +789,11 @@ function styles(colors: ReturnType<typeof useColors>) {
       fontSize: 11,
     },
     gridCard: {
-      flex: 1,
+      width: '32%',
+      maxWidth: '32%',
+      minWidth: 0,
+      flexGrow: 0,
+      flexShrink: 0,
       backgroundColor: colors.card,
       borderRadius: 10,
       overflow: 'hidden',
