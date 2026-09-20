@@ -1397,7 +1397,7 @@ export const SACRIFICE_SCAN_PCT: Partial<Record<RarityId, number>> = {
 export const ITEM_NAMES: Record<string, string> = {
   anel_sagrado:           'Anel Sagrado ✨',
   piece_anel_sagrado:     'Fragmento do Anel Sagrado',
-  permissao_real:         'Permição Real da Deusa ⚔️',
+  permissao_real:         'Permissão Real da Deusa ⚔️',
   gehenna:                'Gehenna 🌑',
   piece_gehenna:          'Fragmento do Gehenna',
   piece_battery_green:    'Bateria Verde',
