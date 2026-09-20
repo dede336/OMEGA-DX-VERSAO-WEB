@@ -30,7 +30,7 @@ let _registeredBaseCharKeys: Set<string> = new Set();
 
 export interface CustomDigimonRaw {
   id: string; dbId: number; name: string; attribute: string; rarity: string; element: string;
-  baseStats: { hp: number; mp: number; atk: number; def: number; spt: number; spd: number };
+  baseStats: { hp: number; mp: number; atk: number; def: number; spt: number; spd: number; apt: number };
   description: string; attackName?: string; attackElement?: string;
   spiritName?: string; spiritElement?: string;
   isBaseForm: boolean; evolvesFromId?: string; requiredLevel?: number;
@@ -363,6 +363,14 @@ export function getAllCharacters(): Record<string, Character> {
     base[id] = getCharacter(id) ?? _customChars[id];
   }
   return base;
+}
+
+export function findCharacterIdByName(name: string): string | null {
+  const normalizedName = _normKey(name);
+  for (const [id, character] of Object.entries(getAllCharacters())) {
+    if (_normKey(character.name) === normalizedName) return id;
+  }
+  return null;
 }
 
 export function getCharacterImageSource(id: string): any {
