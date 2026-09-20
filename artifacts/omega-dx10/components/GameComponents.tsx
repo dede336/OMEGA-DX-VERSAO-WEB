@@ -16,10 +16,9 @@ import ELEMENT_IMAGES from '@/constants/elementImages';
 import ATTRIBUTE_IMAGES from '@/constants/attributeImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 
-const SPECIAL_EGG_ID = 'custom_1550';
-
 export function AnimatedEgg({ characterId, element, size }: { characterId: string; element: string; size: number }) {
-  const isSpecial = characterId === SPECIAL_EGG_ID;
+  const characterName = getCharacter(characterId)?.name ?? '';
+  const isSpecial = element === 'SPECIAL' || characterName.toLowerCase() === 'digitama especial';
   const imgSource = isSpecial ? EGG_IMAGES.SPECIAL : (EGG_IMAGES[element] ?? EGG_IMAGES.NULL);
 
   const rockAnim = useRef(new Animated.Value(0)).current;
