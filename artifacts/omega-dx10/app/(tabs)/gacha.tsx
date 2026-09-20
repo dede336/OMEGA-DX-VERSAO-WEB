@@ -9,7 +9,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame, GachaReward, GachaPoolEntry } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
-import { getCharacterImageSource, getCharacter } from '@/constants/extendedCharacters';
+import { getCharacterImageSource, getCharacter, findCharacterIdByName } from '@/constants/extendedCharacters';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
@@ -57,9 +57,12 @@ function GachaBubble({ item, opacity }: { item: typeof BUBBLE_ITEMS[0]; opacity:
   const tX = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, 5, 0, -5, 0] });
   const tY = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [-5, 0, 5, 0, -5] });
 
+  const resolvedCharacterId = item.nome === 'Dorulumon'
+    ? (findCharacterIdByName('Dorulumon') ?? item.characterId)
+    : item.characterId;
   const img = item.isItem
     ? (EQUIP_ITEM_IMAGES[item.characterId] ?? null)
-    : getCharacterImageSource(item.characterId);
+    : getCharacterImageSource(resolvedCharacterId);
 
   return (
     <Animated.View style={{ opacity, transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
