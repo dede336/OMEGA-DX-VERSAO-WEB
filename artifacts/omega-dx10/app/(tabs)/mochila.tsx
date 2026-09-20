@@ -18,6 +18,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import SaveManagerSection from '@/components/SaveManagerSection';
 import { getCharacter } from '@/constants/extendedCharacters';
 import { CharacterAvatar } from '@/components/GameComponents';
+import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
 
 const XP_BATTERIES = [
   { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
@@ -553,24 +554,16 @@ export default function MochilaScreen() {
             })}
           </ScrollView>
 
-          <View style={styles.batteryQtyRow}>
-            <TouchableOpacity
-              style={[styles.batteryQtyButton, { borderColor: colors.border }]}
-              onPress={() => setBatteryQty((quantity) => Math.max(1, quantity - 1))}
-            >
-              <Feather name="minus" size={18} color={colors.foreground} />
-            </TouchableOpacity>
-            <View style={styles.batteryQtyCenter}>
-              <Text style={[styles.batteryQtyNumber, { color: colors.foreground }]}>{batteryQty}</Text>
-              <Text style={[styles.batteryQtyAvailable, { color: colors.mutedForeground }]}>Disponível: {selectedBatteryStock}</Text>
-            </View>
-            <TouchableOpacity
-              style={[styles.batteryQtyButton, { borderColor: colors.border }]}
-              onPress={() => setBatteryQty((quantity) => Math.min(selectedBatteryStock, quantity + 1))}
-            >
-              <Feather name="plus" size={18} color={colors.foreground} />
-            </TouchableOpacity>
-          </View>
+          <BatteryQuantityPicker
+            value={batteryQty}
+            max={selectedBatteryStock}
+            onChange={setBatteryQty}
+            color={selectedBattery.color}
+            borderColor={colors.border}
+            textColor={colors.foreground}
+            mutedColor={colors.mutedForeground}
+            availableLabel={`Disponível: ${selectedBatteryStock}`}
+          />
 
           <Text style={[styles.batteryTotalXp, { color: selectedBattery.color }]}>+{(selectedBattery.xp * batteryQty).toLocaleString()} EXP</Text>
 

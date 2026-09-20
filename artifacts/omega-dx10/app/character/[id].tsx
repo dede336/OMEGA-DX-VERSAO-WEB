@@ -31,6 +31,7 @@ import {
 import { getCharacter } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
+import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
 
 const DIGIVO_GIF             = require('../../assets/images/digivolution.webp');
 const FUSION_GIF             = require('../../assets/images/fusion_crimson.webp');
@@ -572,27 +573,20 @@ export default function CharacterDetailScreen() {
               const totalXp = bat.xp * batteryQty;
               return (
                 <>
-                  <View style={styles.qtyRow}>
-                    <TouchableOpacity
-                      style={[styles.qtyBtn, { borderColor: colors.border }]}
-                      onPress={() => setBatteryQty((q) => Math.max(1, q - 1))}
-                    >
-                      <Feather name="minus" size={18} color={colors.foreground} />
-                    </TouchableOpacity>
-                    <Text style={[styles.qtyNum, { color: colors.foreground }]}>{batteryQty}</Text>
-                    <TouchableOpacity
-                      style={[styles.qtyBtn, { borderColor: colors.border }]}
-                      onPress={() => setBatteryQty((q) => Math.min(maxQty, q + 1))}
-                    >
-                      <Feather name="plus" size={18} color={colors.foreground} />
-                    </TouchableOpacity>
-                  </View>
+                  <BatteryQuantityPicker
+                    value={batteryQty}
+                    max={maxQty}
+                    onChange={setBatteryQty}
+                    color={bat.color}
+                    borderColor={colors.border}
+                    textColor={colors.foreground}
+                    mutedColor={colors.mutedForeground}
+                    availableLabel={`${t('char.available')} ${maxQty}`}
+                  />
                   <Text style={{ color: bat.color, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
                     +{totalXp.toLocaleString()} {t('char.xpTotal')}
                   </Text>
-                  <Text style={{ color: colors.mutedForeground, fontSize: 11, textAlign: 'center', marginBottom: 16 }}>
-                    {t('char.available')} {maxQty}
-                  </Text>
+
                   <View style={styles.confirmBtnRow}>
                     <TouchableOpacity
                       style={[styles.confirmCancel, { borderColor: colors.border }]}
