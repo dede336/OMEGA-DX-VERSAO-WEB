@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, TextInput, Image, Modal, Pressable,
+  Platform, Image, Modal, Pressable,
 } from 'react-native';
-import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -12,7 +11,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import {
   EQUIP_SLOT_ICONS, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER,
   RARITY_COLORS, ELEMENTS, EquipSlot, RarityId, ElementId,
-  TAMERS, tamerExpToNextLevel, CRAFT_RECIPES,
+  CRAFT_RECIPES,
 } from '@/constants/gameData';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
@@ -32,21 +31,12 @@ export default function MochilaScreen() {
   const insets = useSafeAreaInsets();
   const game = useGame();
   const {
-    playerName, gender, tamerId, inventory, equippedItems,
-    tamerExp, tamerLevel, pieces, bits, collection,
-    equipItem, unequipItem, setPlayerName, craftItem, useXpItem,
+    inventory, equippedItems, pieces, bits, collection,
+    equipItem, unequipItem, craftItem, useXpItem,
   } = game;
 
   const { t } = useLanguage();
-  const genderColor = gender === 'M' ? '#3b82f6' : gender === 'F' ? '#ec4899' : '#a855f7';
-  const genderSymbol = gender === 'M' ? '♂' : gender === 'F' ? '♀' : '⚧';
-  const genderLabel = gender === 'M' ? t('mochila.genderM') : gender === 'F' ? t('mochila.genderF') : t('mochila.genderN');
-
-  const selectedTamer = TAMERS.find((t) => t.id === tamerId) ?? null;
-
   const [selectedSlot, setSelectedSlot] = useState<EquipSlot | null>(null);
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState(playerName);
   const [batteryModalVisible, setBatteryModalVisible] = useState(false);
   const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
   const [selectedDigimonId, setSelectedDigimonId] = useState<string | null>(null);
@@ -77,12 +67,6 @@ export default function MochilaScreen() {
     }
   }
 
-  function saveName() {
-    const trimmed = nameInput.trim();
-    if (trimmed.length > 0) setPlayerName(trimmed);
-    setEditingName(false);
-  }
-
   function openBattery(batteryId: string) {
     setSelectedBatteryId(batteryId);
     setSelectedDigimonId(collection[0]?.ownedId ?? null);
@@ -100,94 +84,6 @@ export default function MochilaScreen() {
       contentContainerStyle={[styles.content, { paddingTop: topPad + 20, paddingBottom: botPad }]}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Tamer Card ── */}
-      <View style={[styles.tamerCard, { backgroundColor: colors.card, borderColor: selectedTamer ? selectedTamer.accentColor + '88' : colors.border }, pixelStyle]}>
-        <View style={styles.tamerAvatarWrap}>
-          {selectedTamer ? (
-            <View style={[styles.tamerAvatarImg, { borderColor: selectedTamer.accentColor }]}>
-              <ExpoImage
-                source={selectedTamer.image}
-                style={[styles.tamerAvatarImageStyle, { marginTop: selectedTamer.avatarOffset }]}
-                contentFit="cover"
-              />
-            </View>
-          ) : (
-            <View style={[styles.tamerAvatar, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
-              <Feather name="user" size={40} color={colors.primary} />
-            </View>
-          )}
-          {gender === 'M' && (
-            <View style={[styles.genderBadge, { backgroundColor: '#3b82f6' }]}>
-              <Text style={styles.genderBadgeText}>♂</Text>
-            </View>
-          )}
-          {gender === 'F' && (
-            <View style={[styles.genderBadge, { backgroundColor: '#ec4899' }]}>
-              <Text style={styles.genderBadgeText}>♀</Text>
-            </View>
-          )}
-          {gender === 'N' && (
-            <View style={[styles.genderBadge, { backgroundColor: '#a855f7' }]}>
-              <Text style={styles.genderBadgeText}>⚧</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.tamerInfo}>
-          {editingName ? (
-            <View style={styles.nameEditRow}>
-              <TextInput
-                style={[styles.nameInput, { color: colors.foreground, borderColor: colors.primary }]}
-                value={nameInput}
-                onChangeText={setNameInput}
-                autoFocus
-                maxLength={16}
-                onBlur={saveName}
-                onSubmitEditing={saveName}
-                returnKeyType="done"
-              />
-              <TouchableOpacity onPress={saveName} style={styles.nameConfirm}>
-                <Feather name="check" size={18} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <TouchableOpacity style={styles.nameRow} onPress={() => { setNameInput(playerName); setEditingName(true); }}>
-              <Text style={[styles.tamerName, { color: colors.foreground }]}>{playerName}</Text>
-              <Feather name="edit-2" size={14} color={colors.mutedForeground} style={{ marginLeft: 6, marginTop: 4 }} />
-            </TouchableOpacity>
-          )}
-          <View style={styles.tamerMetaRow}>
-            <Text style={[styles.tamerLabel, { color: colors.mutedForeground }]}>{t('mochila.tamerDigital')}</Text>
-            <View style={[styles.genderPill, { backgroundColor: genderColor + '22', borderColor: genderColor + '66' }]}>
-              <Text style={[styles.genderPillText, { color: genderColor }]}>{genderSymbol}</Text>
-            </View>
-          </View>
-          {/* Tamer XP Bar */}
-          <View style={styles.tamerXpRow}>
-            <Text style={[styles.tamerXpLabel, { color: colors.mutedForeground }]}>
-              Lv {tamerLevel}
-            </Text>
-            <View style={[styles.tamerXpBarBg, { backgroundColor: colors.border }]}>
-              <View
-                style={[
-                  styles.tamerXpBarFill,
-                  {
-                    backgroundColor: selectedTamer?.accentColor ?? colors.primary,
-                    width: `${Math.min(100, (tamerExp / tamerExpToNextLevel(tamerLevel)) * 100)}%`,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[styles.tamerXpNum, { color: colors.mutedForeground }]}>
-              {tamerExp}/{tamerExpToNextLevel(tamerLevel)}
-            </Text>
-          </View>
-          <Text style={[styles.tamerXpMissing, { color: colors.mutedForeground }]}>
-            {t('mochila.expNeeded')} {tamerExpToNextLevel(tamerLevel) - tamerExp} EXP {t('mochila.forLevel')} {tamerLevel + 1}
-          </Text>
-        </View>
-      </View>
-
       {/* ── Gerenciar Save ── */}
       <SaveManagerSection />
 
