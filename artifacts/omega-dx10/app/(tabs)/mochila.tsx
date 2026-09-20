@@ -11,7 +11,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import {
   EQUIP_SLOT_ICONS, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER,
   RARITY_COLORS, ELEMENTS, EquipSlot, RarityId, ElementId,
-  CRAFT_RECIPES,
+  CRAFT_RECIPES, ITEM_NAMES,
 } from '@/constants/gameData';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
@@ -76,6 +76,15 @@ export default function MochilaScreen() {
 
   const selectedBattery = XP_BATTERIES.find((battery) => battery.id === selectedBatteryId) ?? XP_BATTERIES[0];
   const selectedBatteryStock = pieces[selectedBattery.id] ?? 0;
+  const inventoryCounts = inventory.reduce<Record<string, number>>((counts, itemId) => {
+    counts[itemId] = (counts[itemId] ?? 0) + 1;
+    return counts;
+  }, {});
+  const visibleInventoryItems = Object.entries(inventoryCounts);
+  const batteryIds = new Set(XP_BATTERIES.map((battery) => battery.id));
+  const visibleMaterials = Object.entries(pieces).filter(
+    ([itemId, quantity]) => quantity > 0 && !batteryIds.has(itemId as any),
+  );
 
   return (
     <>
@@ -289,6 +298,58 @@ export default function MochilaScreen() {
           );
         })}
       </View>
+
+      {/* ── Itens obtidos ── */}
+      {visibleInventoryItems.length > 0 && (
+        <>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Itens da Mochila</Text>
+          <View style={styles.inventoryGrid}>
+            {visibleInventoryItems.map(([itemId, quantity]) => {
+              const equipment = allEquipmentItems.find((item) => item.id === itemId);
+              const itemName = ITEM_NAMES[itemId] ?? equipment?.name ?? itemId;
+              const itemImg = EQUIP_ITEM_IMAGES[itemId];
+              return (
+                <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+                  {itemImg ? (
+                    <Image source={itemImg} style={styles.inventoryImage} resizeMode="contain" />
+                  ) : (
+                    <Feather name="package" size={30} color={colors.primary} />
+                  )}
+                  <Text style={[styles.inventoryName, { color: colors.foreground }]} numberOfLines={2}>{itemName}</Text>
+                  <View style={[styles.inventoryQuantity, { backgroundColor: colors.primary }]}> 
+                    <Text style={styles.inventoryQuantityText}>×{quantity}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </>
+      )}
+
+      {/* ── Materiais e fragmentos obtidos ── */}
+      {visibleMaterials.length > 0 && (
+        <>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Materiais e Fragmentos</Text>
+          <View style={styles.inventoryGrid}>
+            {visibleMaterials.map(([itemId, quantity]) => {
+              const itemImg = EQUIP_ITEM_IMAGES[itemId];
+              return (
+                <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+                  {itemImg ? (
+                    <Image source={itemImg} style={styles.inventoryImage} resizeMode="contain" />
+                  ) : (
+                    <Feather name="box" size={30} color={colors.primary} />
+                  )}
+                  <Text style={[styles.inventoryName, { color: colors.foreground }]} numberOfLines={2}>{ITEM_NAMES[itemId] ?? itemId}</Text>
+                  <View style={[styles.inventoryQuantity, { backgroundColor: colors.primary }]}> 
+                    <Text style={styles.inventoryQuantityText}>×{quantity}</Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </>
+      )}
 
       {/* ── Itens Forjados ── */}
       {CRAFT_RECIPES.some((r) => inventory.includes(r.resultItemId)) && (
@@ -597,6 +658,19 @@ const styles = StyleSheet.create({
   batteryXp: { fontSize: 11, marginTop: 3 },
   batteryQuantity: { minWidth: 42, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 6, alignItems: 'center' },
   batteryQuantityText: { color: '#fff', fontSize: 12, fontWeight: '900' as const },
+  inventoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
+  inventoryCard: {
+    width: '47%', minHeight: 118, borderRadius: 14, borderWidth: 1.5,
+    padding: 12, alignItems: 'center', justifyContent: 'center', gap: 7,
+    position: 'relative',
+  },
+  inventoryImage: { width: 52, height: 52 },
+  inventoryName: { fontSize: 11, fontWeight: '800' as const, textAlign: 'center' as const },
+  inventoryQuantity: {
+    position: 'absolute', top: 7, right: 7, minWidth: 30, borderRadius: 8,
+    paddingHorizontal: 6, paddingVertical: 3, alignItems: 'center',
+  },
+  inventoryQuantityText: { color: '#fff', fontSize: 10, fontWeight: '900' as const },
   batteryModalOverlay: { flex: 1, backgroundColor: '#000000aa', justifyContent: 'center', alignItems: 'center', padding: 20 },
   batteryModalBox: { width: '100%', maxWidth: 390, maxHeight: '88%', borderRadius: 18, borderWidth: 2, padding: 16 },
   batteryModalHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
