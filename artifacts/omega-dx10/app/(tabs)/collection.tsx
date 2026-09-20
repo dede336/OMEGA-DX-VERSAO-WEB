@@ -13,6 +13,7 @@ import {
   CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES,
   RARITY_COLORS, RARITY_LABELS,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, ITEM_NAMES, TAMERS,
+  Character,
 } from '@/constants/gameData';
 import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -102,16 +103,15 @@ const digiviceStyles = StyleSheet.create({
 // ─── Grid card component (must be outside CollectionScreen for hooks) ─────────
 interface DigiGridCardProps {
   owned: OwnedCharacter;
+  char: Character;
   isSelected: boolean;
   canEvolve: boolean;
   tamerAccent?: string;
   onPress: () => void;
 }
 
-function DigiGridCard({ owned, isSelected, canEvolve, tamerAccent, onPress }: DigiGridCardProps) {
+function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress }: DigiGridCardProps) {
   const colors = useColors();
-  const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
-  if (!char) return null;
   const rarityColor = RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] ?? '#888';
   return (
     <TouchableOpacity
@@ -139,12 +139,8 @@ function DigiGridCard({ owned, isSelected, canEvolve, tamerAccent, onPress }: Di
 
 const gridCardStyles = StyleSheet.create({
   card: {
-    width: '32%',
-    maxWidth: '32%',
+    width: '100%',
     minWidth: 0,
-    flexGrow: 0,
-    flexShrink: 0,
-    flexBasis: '32%',
     backgroundColor: '#1a1a2e',
     borderRadius: 10,
     overflow: 'hidden',
@@ -209,15 +205,17 @@ export default function CollectionScreen() {
 
   const [digiTab, setDigiTab] = useState<'digimons' | 'eggs'>('digimons');
 
-  const digimons = collection.filter(owned => {
+  const resolvedCollection = collection.flatMap((owned) => {
     const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
-    return char?.rarity !== 'EGG';
+    return char ? [{ owned, char }] : [];
   });
-  const eggs = collection.filter(owned => {
-    const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
-    return char?.rarity === 'EGG';
-  });
+  const digimons = resolvedCollection.filter(({ char }) => char.rarity !== 'EGG');
+  const eggs = resolvedCollection.filter(({ char }) => char.rarity === 'EGG');
   const activeCollection = digiTab === 'digimons' ? digimons : eggs;
+  const activeRows: { owned: OwnedCharacter; char: Character }[][] = [];
+  for (let index = 0; index < activeCollection.length; index += 3) {
+    activeRows.push(activeCollection.slice(index, index + 3));
+  }
 
   // Modal state
   const [modalOwned, setModalOwned] = useState<OwnedCharacter | null>(null);
@@ -230,7 +228,6 @@ export default function CollectionScreen() {
   // Alt-evo sacrifice picker
   const [sacrificePickerVisible, setSacrificePickerVisible] = useState(false);
   const [pendingAltEvo, setPendingAltEvo] = useState<{ ownedId: string; fromCharId: string; toCharId: string } | null>(null);
-
   // Evolution animation state
   const [evoAnim, setEvoAnim] = useState<{ fromCharId: string; toCharId: string } | null>(null);
   const [evoPhase, setEvoPhase] = useState<EvoPhase>('playing');
@@ -357,27 +354,37 @@ export default function CollectionScreen() {
       </View>
 
       <FlatList
-        data={activeCollection}
-        keyExtractor={(item) => item.ownedId}
-        numColumns={3}
+        data={activeRows}
+        keyExtractor={(_, index) => `digibank-row-${index}`}
         contentContainerStyle={[styles.grid, { paddingBottom: bottomPad + 40 }]}
-        columnWrapperStyle={{ gap: 6, justifyContent: 'flex-start' }}
         showsVerticalScrollIndicator={false}
-        initialNumToRender={18}
-        maxToRenderPerBatch={12}
+        initialNumToRender={6}
+        maxToRenderPerBatch={4}
         windowSize={5}
-        removeClippedSubviews={true}
-        renderItem={({ item: owned }) => {
-          const evo = EVOLUTIONS[owned.characterId];
-          const canEvolve = !!(evo && owned.level >= evo.requiredLevel);
+        removeClippedSubviews={false}
+        renderItem={({ item: row, index: rowIndex }) => {
           return (
-            <DigiGridCard
-              owned={owned}
-              isSelected={selectedCharacter?.ownedId === owned.ownedId}
-              canEvolve={canEvolve}
-              tamerAccent={tamerAccent}
-              onPress={() => openModal(owned)}
-            />
+            <View style={styles.gridRow}>
+              {[0, 1, 2].map((columnIndex) => {
+                const entry = row[columnIndex];
+                if (!entry) return <View key={`empty-${columnIndex}`} style={styles.gridSlot} />;
+                const { owned, char } = entry;
+                const evo = EVOLUTIONS[owned.characterId];
+                const canEvolve = !!(evo && owned.level >= evo.requiredLevel);
+                return (
+                  <View key={`cell-${rowIndex}-${columnIndex}-${owned.ownedId}`} style={styles.gridSlot}>
+                    <DigiGridCard
+                      owned={owned}
+                      char={char}
+                      isSelected={selectedCharacter?.ownedId === owned.ownedId}
+                      canEvolve={canEvolve}
+                      tamerAccent={tamerAccent}
+                      onPress={() => openModal(owned)}
+                    />
+                  </View>
+                );
+              })}
+            </View>
           );
         }}
       />
@@ -940,6 +947,17 @@ const styles = StyleSheet.create({
   grid: {
     padding: 10,
     gap: 6,
+  },
+  gridRow: {
+    width: '100%',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  gridSlot: {
+    minWidth: 0,
+    flex: 1,
+    flexBasis: 0,
+    overflow: 'hidden',
   },
 
   // ── Grid cards ──────────────────────────────────────────────────────────────
