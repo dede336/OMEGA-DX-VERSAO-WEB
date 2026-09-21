@@ -13,6 +13,14 @@ import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvol
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';
+import {
+  ASCENSION_LEVEL_REQUIREMENT,
+  GOLDEN_STAR_FRAGMENT_ID,
+  GOLDEN_STAR_FRAGMENTS_REQUIRED,
+  GOLDEN_STAR_ITEM_ID,
+  getAscensionStars,
+  getStarryNightAvailability,
+} from '@/utils/ascension';
 
 export interface SacrificeResult {
   droppedItem: string | null;
@@ -53,6 +61,12 @@ export interface OwnedCharacter {
   characterId: string;
   level: number;
   exp: number;
+  ascensionStars?: number;
+}
+
+export interface AscensionResult {
+  success: boolean;
+  message: string;
 }
 
 type EquippedItems = Record<EquipSlot, string | null>;
@@ -169,6 +183,7 @@ interface GameState {
   farmDecorations: FarmDecoration[];
   farmDecorInventory: Record<string, number>;
   bossCooldowns: Record<string, number>;
+  starryNightClaimCycle: string;
 }
 
 interface GameContextValue extends GameState {
@@ -205,6 +220,9 @@ interface GameContextValue extends GameState {
   readMessage: (id: string) => void;
   claimReward: (id: string) => void;
   useXpItem: (ownedId: string, batteryId: string, qty: number) => void;
+  ascendDigimon: (baseOwnedId: string, sacrificeOwnedId: string) => AscensionResult;
+  craftGoldenAscensionStar: () => boolean;
+  claimStarryNightReward: () => boolean;
   setTeam: (ownedIds: string[]) => void;
   loadFromCloud: (apiUrl: string) => Promise<void>;
   refreshCustomData: (apiUrl: string) => Promise<void>;
@@ -297,6 +315,7 @@ const defaultState: GameState = {
   farmDecorations: [],
   farmDecorInventory: { ...DEFAULT_FARM_DECOR_INVENTORY },
   bossCooldowns: {},
+  starryNightClaimCycle: '',
 };
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -356,6 +375,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             farmDecorations: (parsed as any).farmDecorations ?? [],
             farmDecorInventory: mergeDefaultDecorInventory((parsed as any).farmDecorInventory ?? {}),
             bossCooldowns: (parsed as any).bossCooldowns ?? {},
+            starryNightClaimCycle: (parsed as any).starryNightClaimCycle ?? '',
             gemas: (parsed as any).gemas ?? 1000,
             gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
             ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
@@ -390,11 +410,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const addToCollection = useCallback((characterId: string) => {
     setState((prev) => {
-      if (prev.collection.some((c) => c.characterId === characterId)) return prev;
       const limit = prev.isAdmin ? 5000 : 500;
       if (prev.collection.length >= limit) return prev;
       const ownedId = `owned_${characterId}_${Date.now()}`;
-      const newChar: OwnedCharacter = { ownedId, characterId, level: 1, exp: 0 };
+      const newChar: OwnedCharacter = { ownedId, characterId, level: 1, exp: 0, ascensionStars: 0 };
       return { ...prev, collection: [...prev.collection, newChar] };
     });
   }, []);
@@ -439,15 +458,73 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => {
       const scan = prev.scanProgress[characterId] ?? 0;
       if (scan < 100) return prev;
-      if (prev.collection.some((c) => c.characterId === characterId)) return prev;
       const limit = prev.isAdmin ? 5000 : 500;
       if (prev.collection.length >= limit) return prev;
       const ownedId = `owned_${characterId}_${Date.now()}`;
       return {
         ...prev,
-        collection: [...prev.collection, { ownedId, characterId, level: 1, exp: 0 }],
+        collection: [...prev.collection, { ownedId, characterId, level: 1, exp: 0, ascensionStars: 0 }],
+        scanProgress: { ...prev.scanProgress, [characterId]: 0 },
       };
     });
+  }, []);
+
+  const ascendDigimon = useCallback((baseOwnedId: string, sacrificeOwnedId: string): AscensionResult => {
+    const current = stateRef.current;
+    const base = current.collection.find((c) => c.ownedId === baseOwnedId);
+    const sacrifice = current.collection.find((c) => c.ownedId === sacrificeOwnedId);
+    if (!base || !sacrifice || base.ownedId === sacrifice.ownedId) return { success: false, message: 'Selecione dois Digimons diferentes.' };
+    const baseChar = getCharacter(base.characterId) ?? CHARACTERS[base.characterId];
+    const sacrificeChar = getCharacter(sacrifice.characterId) ?? CHARACTERS[sacrifice.characterId];
+    if (!baseChar || !sacrificeChar || base.characterId !== sacrifice.characterId) return { success: false, message: 'A base e o sacrifício precisam ser o mesmo Digimon.' };
+    const currentStars = getAscensionStars(base);
+    if (currentStars >= 4) return { success: false, message: 'Este Digimon já alcançou a ascensão máxima.' };
+    if (baseChar.rarity !== 'LEGENDARY' || sacrificeChar.rarity !== 'LEGENDARY') return { success: false, message: 'Somente Digimons na fase Mega podem ascender.' };
+    if (base.level < ASCENSION_LEVEL_REQUIREMENT || sacrifice.level < ASCENSION_LEVEL_REQUIREMENT) return { success: false, message: 'Os dois Digimons precisam estar no nível 60.' };
+    if (getAscensionStars(sacrifice) !== currentStars) return { success: false, message: `O sacrifício precisa ter ${currentStars} estrela(s), igual à base.` };
+    if (currentStars === 3 && !current.inventory.includes(GOLDEN_STAR_ITEM_ID)) return { success: false, message: 'A 4ª ascensão exige uma Estrela de Ascensão Dourada.' };
+
+    setState((prev) => {
+      const inventory = currentStars === 3 ? [...prev.inventory] : prev.inventory;
+      if (currentStars === 3) inventory.splice(inventory.indexOf(GOLDEN_STAR_ITEM_ID), 1);
+      const collection = prev.collection
+        .filter((c) => c.ownedId !== sacrificeOwnedId)
+        .map((c) => c.ownedId === baseOwnedId ? { ...c, ascensionStars: currentStars + 1 } : c);
+      return { ...prev, collection, inventory, team: prev.team.filter((id) => id !== sacrificeOwnedId) };
+    });
+    return { success: true, message: `Ascensão concluída! ${baseChar.name} agora possui ${currentStars + 1} estrela(s).` };
+  }, []);
+
+  const craftGoldenAscensionStar = useCallback((): boolean => {
+    if ((stateRef.current.pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0) < GOLDEN_STAR_FRAGMENTS_REQUIRED) return false;
+    setState((prev) => {
+      const fragments = prev.pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0;
+      if (fragments < GOLDEN_STAR_FRAGMENTS_REQUIRED) return prev;
+      return {
+        ...prev,
+        pieces: { ...prev.pieces, [GOLDEN_STAR_FRAGMENT_ID]: fragments - GOLDEN_STAR_FRAGMENTS_REQUIRED },
+        inventory: [...prev.inventory, GOLDEN_STAR_ITEM_ID],
+      };
+    });
+    return true;
+  }, []);
+
+  const claimStarryNightReward = useCallback((): boolean => {
+    const availability = getStarryNightAvailability();
+    const cycle = String(availability.closesAt);
+    if (!availability.isOpen || stateRef.current.starryNightClaimCycle === cycle) return false;
+    setState((prev) => {
+      if (prev.starryNightClaimCycle === cycle) return prev;
+      return {
+        ...prev,
+        starryNightClaimCycle: cycle,
+        pieces: {
+          ...prev.pieces,
+          [GOLDEN_STAR_FRAGMENT_ID]: (prev.pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0) + 5,
+        },
+      };
+    });
+    return true;
   }, []);
 
   const evolveDigimon = useCallback((ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean) => {
@@ -1301,7 +1378,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!required) return false;
       return required.stages.every((s) => state.clearedStages[`${map.requiredMapCleared}-${s.index}`]);
     },
-    [state.clearedStages, state.collection],
+    [state.clearedStages, state.tamerLevel],
   );
 
   const totalEquipBonus = useCallback((): Partial<Record<string, number>> => {
@@ -1481,6 +1558,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         unequipItem,
         totalEquipBonus,
         gainPiece,
+        ascendDigimon,
+        craftGoldenAscensionStar,
+        claimStarryNightReward,
         craftItem,
         gainBits,
         gainTamerExp,
