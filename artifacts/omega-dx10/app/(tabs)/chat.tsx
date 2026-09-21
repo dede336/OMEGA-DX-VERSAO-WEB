@@ -3,6 +3,7 @@ import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, Platform, Modal, Pressable,
   TextInput, KeyboardAvoidingView,
+  Alert, ScrollView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSocket, GlobalChatMessage } from '@/context/SocketContext';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
+import { CHAT_EMOJIS, CHAT_UNIT_LIMIT, countChatUnits } from '@/utils/chat';
 
 interface Conversation {
   partnerId: number;
@@ -137,11 +139,25 @@ export default function ChatScreen() {
 
   function handleSendGlobal() {
     const content = globalInput.trim();
-    if (!content) return;
+    if (!content || countChatUnits(content) > CHAT_UNIT_LIMIT) return;
     setSendingGlobal(true);
     sendGlobalMessage(content);
     setGlobalInput('');
     setSendingGlobal(false);
+  }
+
+  function reportGlobalMessage(messageId: number) {
+    Alert.alert('Denunciar mensagem', 'A denúncia é sigilosa. A moderação analisará a mensagem e o contexto.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Denunciar', style: 'destructive', onPress: async () => {
+        const response = await fetch(`${apiUrl}/chat/report`, {
+          method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageKind: 'global', messageId, reason: 'Conteúdo ofensivo' }),
+        });
+        const data = await response.json();
+        Alert.alert(response.ok ? 'Denúncia enviada' : 'Não foi possível denunciar', data.message || data.error);
+      } },
+    ]);
   }
 
   // ── Private conversations ────────────────────────────────────────────────
@@ -248,7 +264,11 @@ export default function ChatScreen() {
               renderItem={({ item }) => {
                 const isMe = item.from === user?.username;
                 return (
-                  <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+                  <TouchableOpacity
+                    style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}
+                    activeOpacity={0.85}
+                    onLongPress={() => !isMe && reportGlobalMessage(item.id)}
+                  >
                     <View style={[
                       styles.bubbleContent,
                       { backgroundColor: isMe ? '#3b82f6' : colors.card, borderColor: colors.border },
@@ -266,7 +286,7 @@ export default function ChatScreen() {
                         {formatTime(item.createdAt)}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 );
               }}
             />
@@ -281,6 +301,16 @@ export default function ChatScreen() {
           )}
 
           {/* Input */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.emojiBar} contentContainerStyle={{ gap: 8 }}>
+            {CHAT_EMOJIS.map((emoji) => (
+              <TouchableOpacity key={emoji} onPress={() => setGlobalInput((value) => `${value}${emoji}`)}>
+                <Text style={{ fontSize: 22 }}>{emoji}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <Text style={[styles.counter, { color: countChatUnits(globalInput) > CHAT_UNIT_LIMIT ? '#ef4444' : colors.mutedForeground }]}>
+            {countChatUnits(globalInput)}/{CHAT_UNIT_LIMIT} palavras/emojis
+          </Text>
           <View style={[styles.inputRow, { backgroundColor: colors.card, borderColor: colors.border, paddingBottom: botPad }]}>
             <TextInput
               style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }, pixelStyle]}
@@ -289,14 +319,14 @@ export default function ChatScreen() {
               placeholder={t('chat.messagePlaceholder')}
               placeholderTextColor={colors.mutedForeground}
               multiline
-              maxLength={300}
+              maxLength={2000}
               onSubmitEditing={handleSendGlobal}
               blurOnSubmit={false}
             />
             <TouchableOpacity
               style={[styles.sendBtn, { opacity: globalInput.trim() ? 1 : 0.4 }]}
               onPress={handleSendGlobal}
-              disabled={!globalInput.trim() || sendingGlobal}
+              disabled={!globalInput.trim() || sendingGlobal || countChatUnits(globalInput) > CHAT_UNIT_LIMIT}
             >
               <Feather name="send" size={20} color="#fff" />
             </TouchableOpacity>
@@ -494,6 +524,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, paddingVertical: 8,
     borderRadius: 10,
   },
+  emojiBar: { maxHeight: 38, marginHorizontal: 12, marginTop: 6 },
+  counter: { fontSize: 10, textAlign: 'right', marginHorizontal: 14, marginTop: 2 },
   modalOverlay: { flex: 1, backgroundColor: '#00000066', justifyContent: 'flex-end' },
   modalSheet: {
     borderTopLeftRadius: 22, borderTopRightRadius: 22,
