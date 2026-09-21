@@ -17,6 +17,8 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { CustomDigimonRaw, getRawCustomDigimons } from '@/constants/extendedCharacters';
 import { useLanguage } from '@/context/LanguageContext';
+import { AscensionStars } from '@/components/AscensionStars';
+import { getAscensionStars } from '@/utils/ascension';
 
 // ─── Obtain data ────────────────────────────────────────────────────────────
 
@@ -487,6 +489,10 @@ export default function BancoScreen() {
                 <View style={st.detailHeader}>
                   <View style={[st.detailAvatarWrap, !item.isOwned && st.avatarGray]}>
                     <CharacterAvatar characterId={item.id} size={72} />
+                    <AscensionStars
+                      stars={Math.max(0, ...collection.filter((owned) => owned.characterId === item.id).map(getAscensionStars))}
+                      size="small"
+                    />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
@@ -649,6 +655,10 @@ export default function BancoScreen() {
                 {/* Avatar */}
                 <View style={[st.gridAvatarWrap, !item.isOwned && st.avatarGray]}>
                   <CharacterAvatar characterId={item.id} size={60} />
+                  <AscensionStars
+                    stars={Math.max(0, ...collection.filter((owned) => owned.characterId === item.id).map(getAscensionStars))}
+                    size="small"
+                  />
                 </View>
 
                 {/* Attr + Element */}
