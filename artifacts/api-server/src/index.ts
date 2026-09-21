@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import app from "./app";
 import { logger } from "./lib/logger";
-import { seedAccounts, seedCustomDigimons, seedCharacterOverrides, activateAllSeededDigimons, deactivateLegacyEntries, syncImagesFromFolder, applyManualImageDecisions, fixDigimonRarities, deactivateDuplicateEntries, seedSpiritItems, fixBrokenEvolvesFromIds } from "./seed.js";
+import { seedAccounts, seedCustomDigimons, seedCharacterOverrides, activateAllSeededDigimons, deactivateLegacyEntries, syncImagesFromFolder, applyManualImageDecisions, fixDigimonRarities, deactivateDuplicateEntries, removeCanonicalDuplicates, seedSpiritItems, fixBrokenEvolvesFromIds } from "./seed.js";
 import { inicializadorSistema } from "./lib/systemAccounts.js";
 import { initSocket } from "./lib/socket.js";
 
@@ -30,7 +30,7 @@ async function runSeed() {
     await seedAccounts(); await seedCustomDigimons(); await seedCharacterOverrides();
     await syncImagesFromFolder(); await applyManualImageDecisions(); await seedSpiritItems();
     await activateAllSeededDigimons(); await deactivateLegacyEntries();
-    await deactivateDuplicateEntries(); await fixBrokenEvolvesFromIds(); await fixDigimonRarities();
+    await deactivateDuplicateEntries(); await removeCanonicalDuplicates(); await fixBrokenEvolvesFromIds(); await fixDigimonRarities();
     try { await inicializadorSistema.garantirContasEspeciais(); }
     catch (err) { logger.warn({ err }, "Special accounts initialization skipped"); }
     logger.info("Seed completed.");
