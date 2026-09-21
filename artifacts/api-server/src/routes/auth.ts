@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { db, usersTable } from "@workspace/db";
 import { eq, or } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth.js";
+import { getActiveAccountBan } from "../lib/chatPolicy.js";
 
 const router = Router();
 
@@ -88,6 +89,17 @@ router.post("/login", async (req, res) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
     res.status(401).json({ error: "Usuário ou senha inválidos" });
+    return;
+  }
+  const ban = await getActiveAccountBan(user.id);
+  if (ban) {
+    res.status(403).json({
+      code: "ACCOUNT_BANNED",
+      error: `Sua conta está temporariamente suspensa. Motivo: ${ban.reason}. Liberação prevista para ${ban.expiresAt.toLocaleString("pt-BR")}.`,
+      title: "Uma pausa para proteger o Mundo Digital",
+      message: `Sua conta está temporariamente suspensa para preservar um espaço respeitoso e seguro para todos. Motivo: ${ban.reason}`,
+      expiresAt: ban.expiresAt.toISOString(),
+    });
     return;
   }
   const token = signToken(user.id, user.username, user.isAdmin, user.role);
