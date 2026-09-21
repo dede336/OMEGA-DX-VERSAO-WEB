@@ -303,21 +303,24 @@ router.post("/send", requireAuth, async (req, res) => {
     });
   }
   const notifLines: string[] = [];
+  const mailReward: {
+    items?: string[];
+    pieces?: Record<string, number>;
+  } = {};
 
   if (items && items.length > 0) {
-    const inventory = (saveData.inventory ?? []) as string[];
-    saveData.inventory = [...inventory, ...items.map(String)];
+    mailReward.items = items.map(String);
     const names = (req.body as any).itemNames as string[] | undefined;
     const label = names && names.length > 0 ? names.join(', ') : items.join(', ');
     notifLines.push(`⚔️ Itens: ${label}`);
   }
 
   if (fragments && fragments.length > 0) {
-    const pieces = (saveData.pieces ?? {}) as Record<string, number>;
+    const pieces: Record<string, number> = {};
     for (const f of fragments) {
       pieces[f.pieceId] = (pieces[f.pieceId] ?? 0) + Number(f.amount);
     }
-    saveData.pieces = pieces;
+    mailReward.pieces = pieces;
     const fragNames = (req.body as any).fragmentNames as string[] | undefined;
     const fragLines = fragments.map((f, i) => {
       const name = fragNames?.[i] ?? f.pieceId;
@@ -356,9 +359,9 @@ router.post("/send", requireAuth, async (req, res) => {
     messages.push({
       id: notifId,
       title: `🎁 Presente do Administrador!`,
-      body: `Você recebeu um presente:\n${notifLines.join('\n')}\n\nOs itens já foram adicionados automaticamente ao seu inventário.`,
-      reward: null,
-      rewardClaimed: true,
+      body: `Você recebeu um presente:\n${notifLines.join('\n')}\n\nClique em Resgatar para adicionar ao seu inventário.`,
+      reward: mailReward,
+      rewardClaimed: false,
       isRead: false,
       createdAt: Date.now(),
     });
