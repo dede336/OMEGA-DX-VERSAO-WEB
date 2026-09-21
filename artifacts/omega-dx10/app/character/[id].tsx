@@ -32,6 +32,8 @@ import { getCharacter } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
+import { AscensionStars } from '@/components/AscensionStars';
+import { applyAscensionBonus } from '@/utils/ascension';
 
 const DIGIVO_GIF             = require('../../assets/images/digivolution.webp');
 const FUSION_GIF             = require('../../assets/images/fusion_crimson.webp');
@@ -140,7 +142,7 @@ export default function CharacterDetailScreen() {
     );
   }
 
-  const scaled   = getScaledStats(char.baseStats, owned.level);
+  const scaled   = getScaledStats(applyAscensionBonus(char.baseStats, owned.ascensionStars ?? 0), owned.level);
   const isMaxLevel = owned.level >= 100;
   const expNeeded = isMaxLevel ? 1 : expToNextLevel(owned.level);
   const expPct   = isMaxLevel ? 1 : Math.min(1, owned.exp / expNeeded);
@@ -266,6 +268,12 @@ export default function CharacterDetailScreen() {
           </View>
           <View style={styles.heroInfo}>
             <Text style={[styles.heroName, { color: colors.foreground }]}>{char.name}</Text>
+            <AscensionStars stars={owned.ascensionStars} size="large" />
+            {!!owned.ascensionStars && (
+              <Text style={{ color: '#86efac', fontSize: 11, fontWeight: '800' }}>
+                +{owned.ascensionStars * 20}% nos status base
+              </Text>
+            )}
             <Text style={[styles.heroRarity, { color: rarityColor }]}>{t(`rarity.${char.rarity}`)}</Text>
             <View style={styles.heroBadges}>
               <AttributeBadge attr={char.attribute} />
