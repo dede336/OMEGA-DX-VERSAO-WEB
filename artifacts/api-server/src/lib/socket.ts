@@ -1,11 +1,11 @@
 import { Server as IOServer, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
 import jwt from "jsonwebtoken";
-import { db, usersTable, chatMessagesTable, globalChatMessagesTable } from "@workspace/db";
+import { db, usersTable, chatMessagesTable, globalChatMessagesTable, friendshipsTable } from "@workspace/db";
 import { eq, or, and, desc } from "drizzle-orm";
 import { logger } from "./logger.js";
 import { randomUUID } from "crypto";
-import { containsProfanity } from "./profanity.js";
+import { getActiveAccountBan, isRateLimited, validateChatContent } from "./chatPolicy.js";
 
 export interface AuthPayload {
   userId: number;
@@ -23,6 +23,24 @@ export function getOnlineUsers(): string[] {
 
 export function isUserOnline(username: string): boolean {
   return onlineUsers.has(username);
+}
+
+export function disconnectUserForBan(username: string, payload: { title: string; message: string; expiresAt: string }): void {
+  const socketId = onlineUsers.get(username);
+  if (!socketId || !io) return;
+  io.to(socketId).emit("account:banned", payload);
+  setTimeout(() => io.in(socketId).disconnectSockets(true), 250);
+}
+
+async function areFriends(firstId: number, secondId: number): Promise<boolean> {
+  const [row] = await db.select({ id: friendshipsTable.id }).from(friendshipsTable).where(and(
+    eq(friendshipsTable.status, "accepted"),
+    or(
+      and(eq(friendshipsTable.requesterId, firstId), eq(friendshipsTable.addresseeId, secondId)),
+      and(eq(friendshipsTable.requesterId, secondId), eq(friendshipsTable.addresseeId, firstId)),
+    ),
+  )).limit(1);
+  return Boolean(row);
 }
 
 // ─── Battle Types ────────────────────────────────────────────────────────────
@@ -89,12 +107,13 @@ export function initSocket(httpServer: HTTPServer): IOServer {
   });
 
   // Auth middleware
-  io.use((socket, next) => {
+  io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token as string | undefined;
       if (!token) return next(new Error("Missing token"));
       const secret = process.env["SESSION_SECRET"]!;
       const payload = jwt.verify(token, secret) as AuthPayload;
+      if (await getActiveAccountBan(payload.userId)) return next(new Error("ACCOUNT_BANNED"));
       (socket as any).auth = payload;
       next();
     } catch {
@@ -117,12 +136,9 @@ export function initSocket(httpServer: HTTPServer): IOServer {
     socket.on("global:send", async (data: { content: string }) => {
       try {
         const { content } = data;
-        if (!content?.trim()) return;
-
-        if (containsProfanity(content)) {
-          socket.emit("global:error", { message: "Mensagem contém palavras ofensivas e não foi enviada." });
-          return;
-        }
+        const validationError = validateChatContent(content);
+        if (validationError) { socket.emit("global:error", { message: validationError }); return; }
+        if (isRateLimited(userId)) { socket.emit("global:error", { message: "Muitas mensagens em pouco tempo. Aguarde alguns segundos." }); return; }
 
         const [saved] = await db
           .insert(globalChatMessagesTable)
@@ -146,7 +162,10 @@ export function initSocket(httpServer: HTTPServer): IOServer {
     socket.on("chat:send", async (data: { to: string; content: string }) => {
       try {
         const { to, content } = data;
-        if (!to || !content?.trim()) return;
+        if (!to) return;
+        const validationError = validateChatContent(content);
+        if (validationError) { socket.emit("chat:error", { message: validationError }); return; }
+        if (isRateLimited(userId)) { socket.emit("chat:error", { message: "Muitas mensagens em pouco tempo. Aguarde alguns segundos." }); return; }
 
         const [recipient] = await db
           .select({ id: usersTable.id, username: usersTable.username })
@@ -155,6 +174,10 @@ export function initSocket(httpServer: HTTPServer): IOServer {
           .limit(1);
 
         if (!recipient) return;
+        if (!(await areFriends(userId, recipient.id))) {
+          socket.emit("chat:error", { message: "A conversa privada é exclusiva para amigos." });
+          return;
+        }
 
         const [saved] = await db
           .insert(chatMessagesTable)
