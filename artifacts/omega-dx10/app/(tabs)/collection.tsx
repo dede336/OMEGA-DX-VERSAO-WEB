@@ -19,6 +19,14 @@ import { getCharacter, getCharacterImageSource } from '@/constants/extendedChara
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { useLanguage } from '@/context/LanguageContext';
+import { AscensionStars } from '@/components/AscensionStars';
+import {
+  ASCENSION_LEVEL_REQUIREMENT,
+  GOLDEN_STAR_FRAGMENT_ID,
+  GOLDEN_STAR_FRAGMENTS_REQUIRED,
+  GOLDEN_STAR_ITEM_ID,
+  getAscensionStars,
+} from '@/utils/ascension';
 
 const DIGIVO_GIF       = require('../../assets/images/digivolution.webp');
 const DIGIVO_INTRO_GIF = require('../../assets/images/digivolution_intro.webp');
@@ -127,6 +135,7 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
       </View>
       {canEvolve && <DigiviceEvoIndicator tintColor={tamerAccent} />}
       <CharacterAvatar characterId={owned.characterId} size={60} />
+      <AscensionStars stars={owned.ascensionStars} size="small" />
       {char.rarity !== 'EGG' && (
         <View style={gridCardStyles.badgeRow}>
           <AttributeBadge attr={char.attribute} />
@@ -195,7 +204,11 @@ export default function CollectionScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { collection, selectedCharacter, setSelectedCharacter, evolveDigimon, changeFormDigimon, pieces, sacrificeDigimon, isAdmin, tamerId, useXpItem } = useGame();
+  const {
+    collection, selectedCharacter, setSelectedCharacter, evolveDigimon, changeFormDigimon,
+    pieces, inventory, sacrificeDigimon, isAdmin, tamerId, useXpItem,
+    ascendDigimon, craftGoldenAscensionStar,
+  } = useGame();
   const tamerAccent = TAMERS.find(t => t.id === tamerId)?.accentColor;
 
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -224,6 +237,8 @@ export default function CollectionScreen() {
   const [xpPanelVisible, setXpPanelVisible] = useState(false);
   const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
   const [batteryQty, setBatteryQty] = useState(1);
+  const [ascensionPickerVisible, setAscensionPickerVisible] = useState(false);
+  const [ascensionMessage, setAscensionMessage] = useState('');
 
   // Alt-evo sacrifice picker
   const [sacrificePickerVisible, setSacrificePickerVisible] = useState(false);
@@ -325,6 +340,22 @@ export default function CollectionScreen() {
   const sacrificeRookieId = modalOwned ? (ROOKIE_OF[modalOwned.characterId] ?? null) : null;
   const sacrificeScanPct  = modalChar ? (SACRIFICE_SCAN_PCT[modalChar.rarity] ?? 0) : 0;
   const canSacrifice = !!(modalChar && modalChar.rarity !== 'COMMON');
+  const modalAscensionStars = getAscensionStars(modalOwned);
+  const isModalMega = modalChar?.rarity === 'LEGENDARY';
+  const ascensionCandidates = modalOwned
+    ? collection.filter((candidate) =>
+        candidate.ownedId !== modalOwned.ownedId &&
+        candidate.characterId === modalOwned.characterId &&
+        candidate.level >= ASCENSION_LEVEL_REQUIREMENT &&
+        getAscensionStars(candidate) === modalAscensionStars
+      )
+    : [];
+  const hasGoldenAscensionStar = inventory.includes(GOLDEN_STAR_ITEM_ID);
+  const canOpenAscension = !!(
+    modalOwned && isModalMega && modalOwned.level >= ASCENSION_LEVEL_REQUIREMENT &&
+    modalAscensionStars < 4 && ascensionCandidates.length > 0 &&
+    (modalAscensionStars < 3 || hasGoldenAscensionStar)
+  );
 
   const toChar = evoAnim ? CHARACTERS[evoAnim.toCharId] : null;
   const fromChar = evoAnim ? CHARACTERS[evoAnim.fromCharId] : null;
@@ -448,6 +479,7 @@ export default function CollectionScreen() {
                           {' '}· {char ? RARITY_LABELS[char.rarity] : ''}
                         </Text>
                       </View>
+                      <AscensionStars stars={modalOwned.ascensionStars} size="medium" />
                       {char && (
                         <View style={styles.sheetBadgeRow}>
                           <AttributeBadge attr={char.attribute} />
@@ -596,6 +628,62 @@ export default function CollectionScreen() {
                         <CharacterAvatar characterId={modalFormChangeId} size={32} />
                       </View>
                     )
+                  )}
+
+                  {isModalMega && (
+                    <View style={[styles.ascensionBox, { borderColor: modalAscensionStars === 4 ? '#facc15' : '#60a5fa', backgroundColor: '#0f172a' }]}>
+                      <View style={styles.ascensionTitleRow}>
+                        <Feather name="star" size={17} color="#facc15" />
+                        <Text style={styles.ascensionTitle}>ASCENSÃO</Text>
+                        <Text style={styles.ascensionBonus}>+{modalAscensionStars * 20}% status base</Text>
+                      </View>
+                      <AscensionStars stars={modalOwned.ascensionStars} size="large" />
+                      {modalAscensionStars < 4 ? (
+                        <>
+                          <Text style={styles.ascensionRequirement}>
+                            Base e sacrifício: mesmo Digimon · Lv 60 · Mega · {modalAscensionStars} estrela(s)
+                            {modalAscensionStars === 3 ? ' · requer Estrela Dourada' : ''}
+                          </Text>
+                          {modalAscensionStars === 3 && !hasGoldenAscensionStar && (
+                            <View style={styles.fragmentRow}>
+                              <Image source={require('../../assets/images/events/estrela-ascensao-dourada.jpg')} style={styles.goldenStarThumb} />
+                              <Text style={styles.fragmentText}>
+                                Fragmentos: {pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0}/{GOLDEN_STAR_FRAGMENTS_REQUIRED}
+                              </Text>
+                              <TouchableOpacity
+                                style={[styles.craftStarBtn, { opacity: (pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0) >= GOLDEN_STAR_FRAGMENTS_REQUIRED ? 1 : 0.45 }]}
+                                disabled={(pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0) < GOLDEN_STAR_FRAGMENTS_REQUIRED}
+                                onPress={() => {
+                                  const crafted = craftGoldenAscensionStar();
+                                  setAscensionMessage(crafted ? 'Estrela de Ascensão Dourada criada!' : 'Fragmentos insuficientes.');
+                                }}
+                              >
+                                <Text style={styles.craftStarText}>CRIAR</Text>
+                              </TouchableOpacity>
+                            </View>
+                          )}
+                          <TouchableOpacity
+                            style={[styles.ascendBtn, { opacity: canOpenAscension ? 1 : 0.45 }]}
+                            disabled={!canOpenAscension}
+                            onPress={() => { setAscensionMessage(''); setAscensionPickerVisible(true); }}
+                          >
+                            <Text style={styles.ascendBtnText}>ASCENDER PARA {modalAscensionStars + 1}★</Text>
+                          </TouchableOpacity>
+                          {!canOpenAscension && (
+                            <Text style={styles.ascensionHint}>
+                              {ascensionCandidates.length === 0
+                                ? 'Falta uma segunda cópia compatível no nível 60.'
+                                : modalAscensionStars === 3 && !hasGoldenAscensionStar
+                                  ? 'Crie ou obtenha uma Estrela de Ascensão Dourada.'
+                                  : 'Os requisitos ainda não foram cumpridos.'}
+                            </Text>
+                          )}
+                          {!!ascensionMessage && <Text style={styles.ascensionMessage}>{ascensionMessage}</Text>}
+                        </>
+                      ) : (
+                        <Text style={styles.ascensionMax}>ASCENSÃO DOURADA MÁXIMA</Text>
+                      )}
+                    </View>
                   )}
 
                   {/* Sacrifice row */}
@@ -831,6 +919,50 @@ export default function CollectionScreen() {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* ── Ascension Sacrifice Picker ──────────────────────────────── */}
+      <Modal visible={ascensionPickerVisible} transparent animationType="slide" onRequestClose={() => setAscensionPickerVisible(false)}>
+        <Pressable style={styles.modalOverlay} onPress={() => setAscensionPickerVisible(false)}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.card }, pixelStyle]} onPress={(event) => event.stopPropagation()}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.sheetTitle, { color: '#facc15' }]}>⭐ Escolher Digimon para Ascensão</Text>
+            <Text style={[styles.sheetSub, { color: colors.mutedForeground, marginBottom: 12 }]}>A cópia escolhida será consumida permanentemente.</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 360 }}>
+              {ascensionCandidates.map((copy) => {
+                const copyChar = getCharacter(copy.characterId) ?? CHARACTERS[copy.characterId];
+                return (
+                  <View key={copy.ownedId} style={[styles.sacrificePickerCard, { backgroundColor: colors.background, borderColor: '#facc1555' }, pixelStyle]}>
+                    <View style={{ alignItems: 'center' }}>
+                      <CharacterAvatar characterId={copy.characterId} size={56} />
+                      <AscensionStars stars={copy.ascensionStars} size="small" />
+                    </View>
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>{copyChar?.name ?? copy.characterId}</Text>
+                      <Text style={{ color: '#facc15', fontSize: 12, marginTop: 2 }}>Lv {copy.level} · {getAscensionStars(copy)}★</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.sacrificePickerBtn, { backgroundColor: '#ca8a04' }, pixelStyle]}
+                      onPress={() => {
+                        if (!modalOwned) return;
+                        const result = ascendDigimon(modalOwned.ownedId, copy.ownedId);
+                        setAscensionMessage(result.message);
+                        setAscensionPickerVisible(false);
+                        if (result.success) setModalOwned(null);
+                      }}
+                    >
+                      <Feather name="star" size={13} color="#fff" />
+                      <Text style={styles.sacrificePickerBtnText}>ASCENDER</Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+            <TouchableOpacity style={[styles.evoRow, { borderColor: colors.border, marginTop: 12, justifyContent: 'center' }]} onPress={() => setAscensionPickerVisible(false)}>
+              <Text style={{ color: colors.mutedForeground, fontWeight: '700' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
 
       {/* ── Alt-evo Sacrifice Picker Modal ─────────────────────────────── */}
@@ -1266,6 +1398,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700' as const,
   },
+
+  // ── Ascension ────────────────────────────────────────────────────────────
+  ascensionBox: { borderWidth: 1, borderRadius: 14, padding: 12, gap: 8 },
+  ascensionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  ascensionTitle: { color: '#facc15', fontSize: 13, fontWeight: '900' as const, letterSpacing: 1 },
+  ascensionBonus: { color: '#86efac', fontSize: 11, fontWeight: '800' as const, marginLeft: 'auto' },
+  ascensionRequirement: { color: '#cbd5e1', fontSize: 11, lineHeight: 16, textAlign: 'center' as const },
+  ascensionHint: { color: '#94a3b8', fontSize: 10, lineHeight: 15, textAlign: 'center' as const },
+  ascensionMessage: { color: '#fde68a', fontSize: 11, fontWeight: '700' as const, textAlign: 'center' as const },
+  ascensionMax: { color: '#facc15', fontSize: 12, fontWeight: '900' as const, textAlign: 'center' as const, letterSpacing: 0.8 },
+  ascendBtn: { backgroundColor: '#ca8a04', borderRadius: 10, paddingVertical: 10, alignItems: 'center' as const },
+  ascendBtnText: { color: '#fff', fontSize: 12, fontWeight: '900' as const },
+  fragmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#020617', borderRadius: 10, padding: 8 },
+  goldenStarThumb: { width: 34, height: 34, borderRadius: 6 },
+  fragmentText: { color: '#fde68a', fontSize: 11, fontWeight: '700' as const, flex: 1 },
+  craftStarBtn: { backgroundColor: '#eab308', borderRadius: 7, paddingHorizontal: 10, paddingVertical: 7 },
+  craftStarText: { color: '#422006', fontSize: 10, fontWeight: '900' as const },
 
   // ── Confirm & result sheets ───────────────────────────────────────────────
   confirmSheet: {

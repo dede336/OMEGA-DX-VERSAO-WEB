@@ -8,6 +8,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { GAME_MAPS, MapStage, StageDrop } from '@/constants/gameData';
 import { useLanguage } from '@/context/LanguageContext';
+import { formatLongCountdown, getStarryNightAvailability } from '@/utils/ascension';
 
 const STARS_3  = require('../../assets/images/ui/stars3.webp');
 const PADLOCK  = require('../../assets/images/ui/padlock.png');
@@ -74,16 +75,20 @@ export default function MapScreen() {
     })),
   ];
 
-  const worldMaps = allMaps.filter((m) => !m.isDungeon && !(m as any).expiresAt);
+  const worldMaps = allMaps.filter((m) => !m.isDungeon && !(m as any).expiresAt && !m.isBiweeklyEvent);
   const dungeonMaps = allMaps.filter((m) => m.isDungeon === true);
-  const eventMaps = allMaps.filter((m) => !m.isDungeon && (m as any).expiresAt);
+  const eventMaps = allMaps.filter((m) => !m.isDungeon && ((m as any).expiresAt || m.isBiweeklyEvent));
 
   const [activeTab, setActiveTab] = useState<TabId>('digimundo');
   const [expandedMap, setExpandedMap] = useState<string>('map_forest');
   const [countdown, setCountdown] = useState(() => formatCountdown(getMsToMidnight()));
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const tick = setInterval(() => setCountdown(formatCountdown(getMsToMidnight())), 1000);
+    const tick = setInterval(() => {
+      setCountdown(formatCountdown(getMsToMidnight()));
+      setNow(Date.now());
+    }, 1000);
     return () => clearInterval(tick);
   }, []);
 
@@ -93,6 +98,8 @@ export default function MapScreen() {
     if (!selectedCharacter) return;
     if (isDaily && !isDailyDungeonAvailable) return;
     if (!isMapAvailableToday(availableDays)) return;
+    const selectedMap = allMaps.find((candidate) => candidate.id === mapId);
+    if (selectedMap?.isBiweeklyEvent && !getStarryNightAvailability().isOpen) return;
     router.push(`/battle?mapId=${mapId}&stageIndex=${stageIndex}`);
   }
 
@@ -118,7 +125,9 @@ export default function MapScreen() {
     const availableDays = (map as any).availableDays as number[] | undefined;
     const hasAvailableDays = availableDays && availableDays.length > 0;
     const availableToday = isMapAvailableToday(availableDays);
-    const dayLocked = hasAvailableDays && !availableToday;
+    const eventAvailability = map.isBiweeklyEvent ? getStarryNightAvailability(now) : null;
+    const eventLocked = !!eventAvailability && !eventAvailability.isOpen;
+    const dayLocked = (hasAvailableDays && !availableToday) || eventLocked;
 
     const dungeonBorderColor = isDaily
       ? (isDailyDungeonAvailable ? '#f59e0b' : '#6b7280')
@@ -130,8 +139,8 @@ export default function MapScreen() {
       ? dungeonBorderColor
       : unlocked ? (allCleared ? '#22c55e' : colors.border) : colors.border + '44';
 
-    const isEvent = !!(map as any).expiresAt;
-    const expiresAt = isEvent ? new Date((map as any).expiresAt) : null;
+    const isEvent = !!(map as any).expiresAt || !!map.isBiweeklyEvent;
+    const expiresAt = (map as any).expiresAt ? new Date((map as any).expiresAt) : null;
 
     return (
       <View key={map.id} style={[
@@ -186,6 +195,17 @@ export default function MapScreen() {
             <Feather name="clock" size={12} color="#c4b5fd" />
             <Text style={[styles.dungeonBannerText, { color: '#c4b5fd' }]}>
               Evento até {expiresAt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+            </Text>
+          </View>
+        )}
+
+        {map.isBiweeklyEvent && eventAvailability && (
+          <View style={[styles.dungeonBanner, { backgroundColor: eventAvailability.isOpen ? '#facc1533' : '#312e8144', borderBottomColor: eventAvailability.isOpen ? '#facc15' : '#818cf8' }]}>
+            <Feather name={eventAvailability.isOpen ? 'star' : 'clock'} size={12} color={eventAvailability.isOpen ? '#facc15' : '#a5b4fc'} />
+            <Text style={[styles.dungeonBannerText, { color: eventAvailability.isOpen ? '#facc15' : '#c7d2fe' }]}>
+              {eventAvailability.isOpen
+                ? `EVENTO ABERTO · fecha em ${formatLongCountdown(eventAvailability.remainingMs)}`
+                : `PRÓXIMA NOITE ESTRELADA EM ${formatLongCountdown(eventAvailability.remainingMs)}`}
             </Text>
           </View>
         )}
