@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { CHARACTERS, EQUIPMENT_ITEMS, CRAFT_RECIPES, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
+import { CHARACTERS, EQUIPMENT_ITEMS, CRAFT_RECIPES, ITEM_NAMES, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
 import { getCharacterImageSource } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { DigimonPickerModal, FieldInput, ss } from './AdminShared';
@@ -19,14 +19,16 @@ interface ApiItem { id: string; dbId: number; name: string; type: string; rarity
 
 const STATIC_ITEMS = EQUIPMENT_ITEMS.map((i) => ({ id: i.id, name: i.name, rarity: i.rarity }));
 
-// Also include crafted items that exist in inventory (not in EQUIPMENT_ITEMS)
-const EXTRA_STATIC_ITEMS: { id: string; name: string; rarity: string }[] = [
-  { id: 'anel_sagrado', name: 'Anel Sagrado ✨', rarity: 'LEGENDARY' },
-];
+const isMaterialId = (id: string) =>
+  id.startsWith('piece_') ||
+  id.startsWith('spirit_humano_') ||
+  id.startsWith('spirit_besta_');
 
 const ALL_STATIC_ITEMS = [
   ...STATIC_ITEMS,
-  ...EXTRA_STATIC_ITEMS.filter((e) => !STATIC_ITEMS.find((i) => i.id === e.id)),
+  ...Object.entries(ITEM_NAMES)
+    .filter(([id]) => !isMaterialId(id) && !STATIC_ITEMS.some((item) => item.id === id))
+    .map(([id, name]) => ({ id, name })),
 ];
 
 // ── Decoration catalog ───────────────────────────────────────────────────────
@@ -46,7 +48,17 @@ const DECORATION_LIST: { id: string; name: string; emoji: string }[] = [
 
 const STATIC_FRAGMENTS = Array.from(
   new Map(
-    CRAFT_RECIPES.map((r) => [r.pieceId, { id: r.pieceId, name: r.pieceName }])
+    [
+      ...Object.entries(ITEM_NAMES)
+        .filter(([id]) => isMaterialId(id))
+        .map(([id, name]) => [id, { id, name }] as const),
+      ...CRAFT_RECIPES.flatMap((recipe) => [
+        [recipe.pieceId, { id: recipe.pieceId, name: recipe.pieceName }] as const,
+        ...(recipe.pieceRequirements ?? []).map((requirement) =>
+          [requirement.pieceId, { id: requirement.pieceId, name: requirement.pieceName }] as const
+        ),
+      ]),
+    ]
   ).values()
 );
 
@@ -188,7 +200,7 @@ export default function SendSection() {
   // Build combined item lists
   const staticNames = new Set(STATIC_ITEMS.map((i) => i.name.toLowerCase()));
   const apiEquipItems = apiItems
-    .filter((i) => i.type === 'equipment' && !staticNames.has(i.name.toLowerCase()))
+    .filter((i) => i.type !== 'fragment' && !staticNames.has(i.name.toLowerCase()))
     .map((i) => ({ id: i.id, name: i.name, rarity: i.rarity }));
   const apiFrag = apiItems
     .filter((i) => i.type === 'fragment')
