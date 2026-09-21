@@ -85,6 +85,14 @@ const BASE_NAME_MAP = buildBaseNameMap();
 // Normalized name → VG image lookup: strips non-alphanumeric chars and lowercases
 // so "BlackWarGreymon" → "blackwargreymon" matches key "blackWarGreymon"
 const _normKey = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const LUCEMON_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
+  puttimon: 'BABY',
+  cupimon: 'TRAINING',
+  lucemon: 'COMMON',
+  lucemonchaosmode: 'EPIC',
+  lucemonsatanmode: 'LEGENDARY',
+  lucemonlarvamode: 'LEGENDARY',
+};
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
   for (const [key, val] of Object.entries(CHARACTER_IMAGES as Record<string, any>)) {
@@ -98,6 +106,29 @@ export function getRawCustomDigimons(): CustomDigimonRaw[] {
 }
 
 export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) {
+  // The API can still contain the old Lucemon stages/parents. Normalize them
+  // before building either the farm chain or the regular evolution tree.
+  const puttimonId = chars.find((c) => _normKey(c.name ?? '') === 'puttimon')?.id;
+  const cupimonId = chars.find((c) => _normKey(c.name ?? '') === 'cupimon')?.id;
+  chars = chars.map((c) => {
+    const name = _normKey(c.name ?? '');
+    if (name === 'puttimon') {
+      return { ...c, rarity: 'BABY', evolvesFromId: undefined };
+    }
+    if (name === 'cupimon') {
+      return { ...c, rarity: 'TRAINING', ...(puttimonId ? { evolvesFromId: puttimonId } : {}) };
+    }
+    if (name === 'lucemon') {
+      return {
+        ...c,
+        rarity: 'COMMON',
+        ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
+      };
+    }
+    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name];
+    return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
+  });
+
   _apiUrl = apiUrl;
   _rawCustomDigimons = chars;
   _customChars = {};
@@ -268,6 +299,37 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     ALTERNATE_EVOLUTIONS[key] = val;
   }
 
+  // Keep this line authoritative even when stale API relationships are loaded.
+  // Puttimon/Cupimon IDs come from the database, so resolve them by name.
+  if (puttimonId && cupimonId) {
+    const evolutionMaps = [EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS];
+    for (const map of evolutionMaps) {
+      for (const [fromId, evolution] of Object.entries(map)) {
+        if ((evolution.evolvesTo === puttimonId || evolution.evolvesTo === cupimonId) && fromId !== puttimonId) {
+          delete map[fromId];
+        }
+      }
+    }
+
+    delete ALTERNATE_EVOLUTIONS[puttimonId];
+    delete ALTERNATE_EVOLUTIONS[cupimonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[puttimonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[cupimonId];
+    EVOLUTIONS[puttimonId] = { evolvesTo: cupimonId, requiredLevel: 1, label: 'Cupimon' };
+    EVOLUTIONS[cupimonId] = { evolvesTo: 'lucemon', requiredLevel: 12, label: 'Lucemon' };
+    _farmEvoMap[puttimonId] = cupimonId;
+    _farmEvoMap[cupimonId] = 'lucemon';
+  }
+
+  // These base entries may have been removed while refreshing custom data.
+  EVOLUTIONS.lucemon = { evolvesTo: 'lucemonChaosMode', requiredLevel: 40, label: 'Lucemon Chaos Mode' };
+  ALTERNATE_EVOLUTIONS.lucemonChaosMode = {
+    evolvesTo: 'lucemonSatanMode',
+    requiredLevel: 50,
+    label: 'Lucemon Satan Mode',
+    requiredItem: 'gehenna',
+  };
+
   // Inject spirit sacrifice drops for Frontier Warriors by name
   // Remove any previously injected spirit drops before re-injecting
   for (const charName of Object.keys(SPIRIT_SACRIFICE_DROPS_BY_NAME)) {
@@ -330,8 +392,7 @@ export function getCharacter(id: string): Character | undefined {
   const base: Character | undefined = CHARACTERS[id] ?? _customChars[id];
   if (!base) return undefined;
   const ov = _overrides[id];
-  if (!ov) return base;
-  return {
+  const merged: Character = !ov ? base : {
     ...base,
     ...(ov.name ? { name: ov.name } : {}),
     ...(ov.attribute ? { attribute: ov.attribute as Character['attribute'] } : {}),
@@ -352,6 +413,13 @@ export function getCharacter(id: string): Character | undefined {
       ...(ov.spd !== undefined ? { spd: ov.spd } : {}),
     },
   };
+
+  // Stage names in the UI are derived from rarity. Apply this last so an old
+  // server override cannot turn Ultimate into Mega (or alter Baby/Training).
+  const canonicalRarity = LUCEMON_CANONICAL_RARITIES[id] ?? LUCEMON_CANONICAL_RARITIES[_normKey(base.name)];
+  return canonicalRarity && merged.rarity !== canonicalRarity
+    ? { ...merged, rarity: canonicalRarity }
+    : merged;
 }
 
 export function getAllCharacters(): Record<string, Character> {
