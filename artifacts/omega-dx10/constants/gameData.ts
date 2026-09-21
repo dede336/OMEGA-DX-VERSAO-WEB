@@ -252,7 +252,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemonChaosMode: {
     id: 'lucemonChaosMode',
     name: 'Lucemon Chaos Mode',
-    rarity: 'LEGENDARY',
+    rarity: 'EPIC',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 243, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 70 },
@@ -1204,8 +1204,8 @@ export const FUSIONS: Record<string, FusionRecipe> = {
   warGreymon:    { partner: 'metalGarurumon', resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
   metalGarurumon:{ partner: 'warGreymon',     resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
   gallantmon:    { partner: 'seraphimon',     resultId: 'gallantmonCrimsonMode', resultName: 'Gallantmon Crimson Mode', requiredLevel: 60 },
-  angemon:       { partner: 'devimon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 60 },
-  devimon:       { partner: 'angemon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 60 },
+  angemon:       { partner: 'devimon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
+  devimon:       { partner: 'angemon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
 };
 
 // ─── Evolution paths ──────────────────────────────────────────────────────────
