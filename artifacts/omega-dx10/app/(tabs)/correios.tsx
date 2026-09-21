@@ -9,7 +9,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame, MailMessage } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
-import { CHARACTERS } from '@/constants/gameData';
+import { CHARACTERS, ITEM_NAMES } from '@/constants/gameData';
 import { getCharacterImageSource as _getCharImg } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
@@ -224,6 +224,13 @@ export default function CorreiosScreen() {
                     {msg.reward.items?.map((itemId) => (
                       <View key={itemId} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
                         <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>{t(`item.${itemId}`) || itemId}</Text>
+                      </View>
+                    ))}
+                    {msg.reward.pieces && Object.entries(msg.reward.pieces).map(([pieceId, amount]) => (
+                      <View key={pieceId} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
+                        <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>
+                          {amount}× {ITEM_NAMES[pieceId] ?? pieceId}
+                        </Text>
                       </View>
                     ))}
                     {msg.reward.digimon && (() => {
