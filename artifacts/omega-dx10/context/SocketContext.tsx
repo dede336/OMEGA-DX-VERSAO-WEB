@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import { Alert } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -76,6 +77,8 @@ interface SocketContextValue {
   sendGlobalMessage: (content: string) => void;
   globalError: string | null;
   clearGlobalError: () => void;
+  chatError: string | null;
+  clearChatError: () => void;
   // Battle
   pendingBattleInvite: BattleInvite | null;
   activeBattle: ActiveBattleInfo | null;
@@ -103,6 +106,8 @@ const SocketContext = createContext<SocketContextValue>({
   sendGlobalMessage: () => {},
   globalError: null,
   clearGlobalError: () => {},
+  chatError: null,
+  clearChatError: () => {},
   pendingBattleInvite: null,
   activeBattle: null,
   battleInviteSent: null,
@@ -126,7 +131,7 @@ function getSocketUrl(apiUrl: string): string {
 }
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const { token, user, getApiUrl, isAuthLoaded } = useAuth();
+  const { token, user, getApiUrl, isAuthLoaded, logout } = useAuth();
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
@@ -136,6 +141,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   // Global chat state
   const [globalMessages, setGlobalMessages] = useState<GlobalChatMessage[]>([]);
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
 
   // Battle state
   const [pendingBattleInvite, setPendingBattleInvite] = useState<BattleInvite | null>(null);
@@ -187,6 +193,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   }, [getApiUrl, token, user?.username]);
 
   const clearGlobalError = useCallback(() => setGlobalError(null), []);
+  const clearChatError = useCallback(() => setChatError(null), []);
 
   const sendMessage = useCallback((to: string, content: string) => {
     if (socketRef.current?.connected) {
@@ -317,6 +324,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socket.on('global:error', ({ message }: { message: string }) => {
       setGlobalError(message);
     });
+    socket.on('chat:error', ({ message }: { message: string }) => setChatError(message));
+    socket.on('account:banned', async ({ title, message, expiresAt }: { title: string; message: string; expiresAt: string }) => {
+      const notice = `${message}\n\nAcesso liberado em: ${new Date(expiresAt).toLocaleString('pt-BR')}`;
+      setChatError(`${title}\n${notice}`);
+      Alert.alert(title, notice);
+      await logout();
+    });
 
     // Battle events
     socket.on('battle:invite', (data: BattleInvite) => {
@@ -407,6 +421,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       sendGlobalMessage,
       globalError,
       clearGlobalError,
+      chatError,
+      clearChatError,
       pendingBattleInvite,
       activeBattle,
       battleInviteSent,
