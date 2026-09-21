@@ -14,6 +14,7 @@ import tamersRouter from "./tamers.js";
 import chatRouter from "./chat.js";
 import namingToolRouter from "./naming-tool.js";
 import saveMapRouter from "./save-map.js";
+import moderationRouter from "./moderation.js";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use("/tamers", tamersRouter);
 router.use("/chat", chatRouter);
 router.use("/naming-tool", namingToolRouter);
 router.use("/save-map", saveMapRouter);
+router.use("/moderation", moderationRouter);
 
 export default router;
