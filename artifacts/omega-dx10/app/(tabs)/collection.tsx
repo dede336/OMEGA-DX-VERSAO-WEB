@@ -596,7 +596,7 @@ export default function CollectionScreen() {
                         <CharacterAvatar characterId={modalFormChangeId} size={32} />
                       </View>
                     )
-                  ))}
+                  )}
 
                   {/* Sacrifice row */}
                   {canSacrifice && (
