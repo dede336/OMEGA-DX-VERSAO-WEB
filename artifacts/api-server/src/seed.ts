@@ -3021,7 +3021,7 @@ export async function seedCharacterOverrides(): Promise<void> {
       name: "Lucemon Larva Mode",
       attribute: "VR", element: "DARK",
       rarity: "LEGENDARY",
-      hp: 243, mp: 265, atk: 142, def: 113, spt: 119, spd: 118,
+      hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118,
       attackName: "Paradise Lost Kai 🌑", attackElement: "NULL",
       spiritName: "Divine Atonement ⚡", spiritElement: "LIGHTNING",
       ...imgFields("lucemonfm.gif"),
@@ -3031,7 +3031,7 @@ export async function seedCharacterOverrides(): Promise<void> {
     await applyOverride("lucemonsatanmode", {
       attribute: "VR", element: "DARK",
       rarity: "ULTRA",
-      hp: 250, mp: 265, atk: 135, def: 113, spt: 110, spd: 110,
+      hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118,
       attackName: "Divine Atonement 🌑", attackElement: "DARK",
       spiritName: "Purgatorial Flame 🔥", spiritElement: "FIRE",
       ...imgFields("lucemonsatanmode.gif"),

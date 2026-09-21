@@ -571,22 +571,32 @@ export default function CollectionScreen() {
 
                   {/* Form change row */}
                   {modalFormChangeId && modalFormChangeChar && (
-                    <TouchableOpacity
-                      style={[styles.evoRow, { backgroundColor: '#06b6d422', borderColor: '#06b6d4' }]}
-                      activeOpacity={0.85}
-                      onPress={() => {
-                        if (!modalOwned) return;
-                        changeFormDigimon(modalOwned.ownedId);
-                        closeModal();
-                      }}
-                    >
-                      <Feather name="refresh-cw" size={16} color="#06b6d4" />
-                      <Text style={[styles.evoRowText, { color: '#06b6d4', flex: 1 }]}>
-                        {t('collection.changeTo')} {modalFormChangeChar.name}
-                      </Text>
-                      <CharacterAvatar characterId={modalFormChangeId} size={32} />
-                    </TouchableOpacity>
-                  )}
+                    modalCanChangeForm ? (
+                      <TouchableOpacity
+                        style={[styles.evoRow, { backgroundColor: '#06b6d422', borderColor: '#06b6d4' }]}
+                        activeOpacity={0.85}
+                        onPress={() => {
+                          if (!modalOwned) return;
+                          changeFormDigimon(modalOwned.ownedId);
+                          closeModal();
+                        }}
+                      >
+                        <Feather name="refresh-cw" size={16} color="#06b6d4" />
+                        <Text style={[styles.evoRowText, { color: '#06b6d4', flex: 1 }]}>
+                          {t('collection.changeTo')} {modalFormChangeChar.name}
+                        </Text>
+                        <CharacterAvatar characterId={modalFormChangeId} size={32} />
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={[styles.evoRow, { backgroundColor: colors.background, borderColor: '#06b6d444' }]}>
+                        <Feather name="lock" size={16} color="#06b6d4" />
+                        <Text style={[styles.evoRowText, { color: colors.mutedForeground, flex: 1 }]}>
+                          → {modalFormChangeChar.name} · Lv {modalFormChangeRequiredLevel}
+                        </Text>
+                        <CharacterAvatar characterId={modalFormChangeId} size={32} />
+                      </View>
+                    )
+                  ))}
 
                   {/* Sacrifice row */}
                   {canSacrifice && (
