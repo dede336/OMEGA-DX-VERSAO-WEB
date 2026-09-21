@@ -1433,6 +1433,9 @@ export const ITEM_NAMES: Record<string, string> = {
   spirit_besta_terra:       'Spirit Besta da Terra 🌍',
   spirit_humano_madeira:    'Spirit Humano da Madeira 🌿',
   spirit_besta_madeira:     'Spirit Besta da Madeira 🌿',
+  // Exclusivos da distribuição administrativa (sem drop e sem receita).
+  spirit_humano_metal:      'Spirit Humano do Metal ⚙️',
+  spirit_besta_metal:       'Spirit Besta do Metal ⚙️',
   spirit_conjunto_lendario: 'Conjunto dos Espíritos Lendários 🌟',
 };
 
