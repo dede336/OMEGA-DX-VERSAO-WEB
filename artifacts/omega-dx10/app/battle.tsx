@@ -809,8 +809,12 @@ export default function BattleScreen() {
       return;
     }
 
-    // Find first living player target
-    const targetPlayerIdx = fighters.findIndex((f) => f.currentHP > 0);
+    // Choose a random living player target
+    const livingPlayerIndexes = fighters
+      .map((fighter, index) => (fighter.currentHP > 0 ? index : -1))
+      .filter((index) => index >= 0);
+    const targetPlayerIdx =
+      livingPlayerIndexes[Math.floor(Math.random() * livingPlayerIndexes.length)] ?? -1;
     if (targetPlayerIdx < 0) {
       addLog('Toda a equipe foi derrotada!', '#ef4444');
       setWinner('enemy');
