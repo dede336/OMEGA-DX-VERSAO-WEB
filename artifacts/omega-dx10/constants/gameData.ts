@@ -266,7 +266,7 @@ export const CHARACTERS: Record<string, Character> = {
     rarity: 'LEGENDARY',
     attribute: 'VR',
     element: 'DARK',
-    baseStats: { hp: 250, mp: 265, atk: 135, def: 113, spt: 110, spd: 110, apt: 90 },
+    baseStats: { hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 90 },
     description: 'A encarnação definitiva da destruição. Lucemon Satan Mode é a forma final e mais aterrorizante do Anjo Caído, um ser de trevas absolutas capaz de aniquilar qualquer coisa que se oponha a ele com seu poder demoníaco incomparável.',
     attackName: 'Divine Atonement 🌑',
     spiritName: 'Purgatorial Flame 🔥',
@@ -277,7 +277,7 @@ export const CHARACTERS: Record<string, Character> = {
     rarity: 'LEGENDARY',
     attribute: 'VR',
     element: 'DARK',
-    baseStats: { hp: 243, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 80 },
+    baseStats: { hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 80 },
     description: 'A verdadeira forma de Lucemon oculta dentro de Satan Mode. Após a destruição do corpo externo, a Larva emerge — um ser de trevas puras com poder que transcende o nível Mega.',
     attackName: 'Paradise Lost Kai 🌑',
     spiritName: 'Divine Atonement ⚡',
@@ -1231,7 +1231,6 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
   megaloGrowlmon: { evolvesTo: 'gallantmon',     requiredLevel: 60, label: 'Gallantmon' },
   // ── Lucemon Line ──────────────────────────────────────────────────────────
   lucemon:          { evolvesTo: 'lucemonChaosMode', requiredLevel: 40, label: 'Lucemon Chaos Mode' },
-  lucemonSatanMode: { evolvesTo: 'lucemonFM',        requiredLevel: 70, label: 'Lucemon Larva Mode' },
   // ── Biyomon / Phoenixmon (Hououmon) Line ──────────────────────────────────
   pyomon:    { evolvesTo: 'birdramon', requiredLevel: 16, label: 'Birdramon' },
   birdramon: { evolvesTo: 'garudamon', requiredLevel: 32, label: 'Garudamon' },
@@ -1335,6 +1334,11 @@ export const FORM_CHANGES: Record<string, string> = {
   imperialDramonRM: 'imperialDramonFM',
   lucemonFM:        'lucemonSatanMode',
   lucemonSatanMode: 'lucemonFM',
+};
+
+export const FORM_CHANGE_MIN_LEVEL: Record<string, number> = {
+  lucemonSatanMode: 70,
+  lucemonFM: 70,
 };
 
 export const ROOKIE_OF: Record<string, string> = {

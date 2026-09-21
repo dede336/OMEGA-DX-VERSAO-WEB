@@ -10,7 +10,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame, OwnedCharacter, SacrificeResult } from '@/context/GameContext';
 import {
-  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES,
+  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL,
   RARITY_COLORS, RARITY_LABELS,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, ITEM_NAMES, TAMERS,
   Character,
@@ -283,8 +283,16 @@ export default function CollectionScreen() {
   const modalCanEvolve = !!(modalOwned && modalEvo && modalOwned.level >= modalEvo.requiredLevel && hasReqItem);
   const modalEvoChar   = modalEvo ? CHARACTERS[modalEvo.evolvesTo] : undefined;
 
-  const modalFormChangeId      = modalOwned ? (FORM_CHANGES[modalOwned.characterId] ?? null) : null;
-  const modalFormChangeChar    = modalFormChangeId ? CHARACTERS[modalFormChangeId] : null;
+  const modalFormChangeId = modalOwned ? (FORM_CHANGES[modalOwned.characterId] ?? null) : null;
+  const modalFormChangeChar = modalFormChangeId ? CHARACTERS[modalFormChangeId] : null;
+  const modalFormChangeRequiredLevel = modalOwned
+    ? (FORM_CHANGE_MIN_LEVEL[modalOwned.characterId] ?? 0)
+    : 0;
+  const modalCanChangeForm = !!(
+    modalOwned &&
+    modalFormChangeId &&
+    modalOwned.level >= modalFormChangeRequiredLevel
+  );
 
   const modalAltEvo            = modalOwned ? ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
   const hasAltReqItem          = !modalAltEvo?.requiredItem || (pieces[modalAltEvo.requiredItem] ?? 0) > 0;

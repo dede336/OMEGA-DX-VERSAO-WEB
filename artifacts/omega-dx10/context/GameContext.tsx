@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, useMemo } from 'react';
 import {
-  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FUSIONS, GAME_MAPS, expToNextLevel, tamerExpToNextLevel, CODEX_ORDER,
+  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL, FUSIONS, GAME_MAPS, expToNextLevel, tamerExpToNextLevel, CODEX_ORDER,
   EquipSlot, TamerGender, EQUIP_SLOTS_ORDER, DEFAULT_INVENTORY,
   CRAFT_RECIPES, CraftRecipe,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT,
@@ -525,6 +525,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!target) return prev;
       const toFormId = FORM_CHANGES[target.characterId];
       if (!toFormId) return prev;
+      const requiredLevel = FORM_CHANGE_MIN_LEVEL[target.characterId] ?? 0;
+      if (target.level < requiredLevel) return prev;
       const newCollection = prev.collection.map((c) =>
         c.ownedId === ownedId ? { ...c, characterId: toFormId } : c
       );
