@@ -2,8 +2,9 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { db, usersTable, customDigimonsTable, customItemsTable, characterOverridesTable, gameSavesTable } from "@workspace/db";
+import { db, usersTable, customDigimonsTable, customItemsTable, characterOverridesTable, gameSavesTable, customMapsTable } from "@workspace/db";
 import { eq, and, isNull, not, inArray } from "drizzle-orm";
+import { VERIFIED_ATTRIBUTES, VERIFIED_RARITIES } from "./seeds/verifiedDigimonData.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const IMAGES_DIR = path.join(__dirname, "seeds", "images");
@@ -116,7 +117,7 @@ export async function seedAccounts(): Promise<void> {
 async function upsertDigimon(
   byName: Record<string, number>,
   name: string,
-  values: Parameters<typeof customDigimonsTable.$inferInsert>[0] & object,
+  values: typeof customDigimonsTable.$inferInsert & object,
   forceUpdate = false,
 ): Promise<number> {
   if (byName[name]) {
@@ -1563,7 +1564,7 @@ export async function seedCustomDigimons(): Promise<void> {
     await upsertDigimon(byName, "JustMon", { name: "JustMon", attribute: "DA", rarity: "LEGENDARY", element: "LIGHT", hp: 318, mp: 298, atk: 208, def: 188, spt: 195, spd: 182, description: "JustMon em sua forma completa com poder de justiça absoluta. Nenhum crime passa impune.", attackName: "Ultimate Justice", attackElement: "LIGHT", spiritName: "Judgment Day", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("justmon.png") }, true);
     await upsertDigimon(byName, "KudamonSaver", { name: "KudamonSaver", attribute: "DA", rarity: "RARE", element: "LIGHT", hp: 178, mp: 168, atk: 112, def: 102, spt: 108, spd: 112, description: "Versão SAVERS do Kudamon com poder de luz sagrada aprimorado. Cobra sagrada iluminada.", attackName: "Holy Bolt", attackElement: "LIGHT", spiritName: "Jewel of Light", spiritElement: "LIGHT", isBaseForm: true, scannable: false, isFusion: false, ...imgFields("kudamonsaver.gif") }, true);
     await upsertDigimon(byName, "LucemonSatanMode", { name: "LucemonSatanMode", attribute: "VR", rarity: "ULTRA", element: "DARK", hp: 492, mp: 462, atk: 332, def: 302, spt: 318, spd: 278, description: "Forma Satan do Lucemon com poder do Diabo encarnado. O pecado de orgulho em sua forma final.", attackName: "Purgatorial Flame", attackElement: "DARK", spiritName: "Ultimate Sacrifice", spiritElement: "DARK", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("LucemonSatanMode.gif") }, true);
-    await upsertDigimon(byName, "LucemonX", { name: "LucemonX", attribute: "VR", rarity: "LEGENDARY", element: "LIGHT", hp: 488, mp: 458, atk: 328, def: 298, spt: 312, spd: 278, description: "Forma X-Antibody do Lucemon com poder angelical e demoníaco equilibrados. Paradoxo divino supremo.", attackName: "Dragon's Roar X", attackElement: "LIGHT", spiritName: "Grand Cross X", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("lucemonx.png") }, true);
+    await upsertDigimon(byName, "LucemonX", { name: "LucemonX", attribute: "VR", rarity: "LEGENDARY", element: "LIGHT", hp: 488, mp: 458, atk: 328, def: 298, spt: 312, spd: 278, description: "Forma X-Antibody do Lucemon com poder angelical e demoníaco equilibrados. Paradoxo divino supremo.", attackName: "Dragon's Roar X", attackElement: "LIGHT", spiritName: "Grand Cross X", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("LucemonX.png") }, true);
     await upsertDigimon(byName, "MedievalGallantmon", { name: "MedievalGallantmon", attribute: "VR", rarity: "LEGENDARY", element: "LIGHT", hp: 315, mp: 295, atk: 205, def: 185, spt: 192, spd: 175, description: "Versão medieval do Gallantmon com armadura antiga de cavaleiro. Honra e poder em forma pura.", attackName: "Final Justice", attackElement: "LIGHT", spiritName: "Dragon Driver", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("medievalgalantmon.png") }, true);
     await upsertDigimon(byName, "Mercurimon", { name: "Mercurimon", attribute: "DA", rarity: "LEGENDARY", element: "METAL", hp: 312, mp: 288, atk: 202, def: 182, spt: 185, spd: 182, description: "Deus mensageiro com velocidade sobre-humana e poder de metal. Transporta dados pela velocidade.", attackName: "Mercury Hammer", attackElement: "METAL", spiritName: "Quick Silver", spiritElement: "METAL", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("mercurimon.png") }, true);
     await upsertDigimon(byName, "Metalicdramon", { name: "Metalicdramon", attribute: "DA", rarity: "LEGENDARY", element: "METAL", hp: 315, mp: 288, atk: 208, def: 188, spt: 182, spd: 178, description: "Dragão metálico com armadura total de titânio. Cada escama é uma placa de proteção máxima.", attackName: "Metal Roar", attackElement: "METAL", spiritName: "Titanium Claw", spiritElement: "METAL", isBaseForm: false, scannable: false, isFusion: false, ...imgFields("metalicdramon.png") }, true);
@@ -2386,8 +2387,8 @@ export async function seedCustomDigimons(): Promise<void> {
     const lopId = await upsertDigimon(byName, "Lopmon", { name: "Lopmon", attribute: "DA", rarity: "COMMON", element: "EARTH", hp: 76, mp: 78, atk: 40, def: 44, spt: 38, spd: 40, description: "Coelho de treinamento com três chifres. Usa os chifres para cavar e lança torrões de terra comprimida.", attackName: "Chifre Triplo", attackElement: "EARTH", spiritName: "Petit Twister", spiritElement: "WIND", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${kokoId}`, requiredLevel: 8, ...noImg });
     const turuId = await upsertDigimon(byName, "Turuiemon", { name: "Turuiemon", attribute: "DA", rarity: "RARE", element: "EARTH", hp: 100, mp: 112, atk: 72, def: 68, spt: 60, spd: 70, description: "Guerreira coelho com habilidades marciais excepcionais. Seus golpes Rabbit Pummel são rápidos como relâmpagos e devastadores.", attackName: "Rabbit Pummel", attackElement: "EARTH", spiritName: "Gouge", spiritElement: "EARTH", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${lopId}`, requiredLevel: 12, ...noImg });
     // Ramo Vírus do Lopmon
-    const wendiId = await upsertDigimon(byName, "Wendigomon", { name: "Wendigomon", attribute: "VI", rarity: "RARE", element: "DARK", hp: 118, mp: 105, atk: 85, def: 72, spt: 65, spd: 78, description: "Forma corrompida do Lopmon. Seu corpo cresceu de forma grotesca e seus ataques Frozen Claw congelam tudo que tocam com energia das trevas.", attackName: "Frozen Claw", attackElement: "DARK", spiritName: "Blizzard Claws", spiritElement: "ICE", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${lopId}`, requiredLevel: 12, ...noImg }, true);
-    await upsertDigimon(byName, "AntylamonEvil", { name: "AntylamonEvil", attribute: "VI", rarity: "RARE", element: "DARK", hp: 185, mp: 168, atk: 125, def: 108, spt: 95, spd: 100, description: "Forma sombria da Antylamon corrompida pelo vírus. Seus Bunny Blades agora cortam com energia das trevas, destruindo qualquer barreira digital.", attackName: "Bunny Blades", attackElement: "DARK", spiritName: "Darkness Rhythm", spiritElement: "DARK", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${wendiId}`, requiredLevel: 28, ...imgFields("antylamon_evil.png") }, true);
+    const wendiId = await upsertDigimon(byName, "Wendigomon", { name: "Wendigomon", attribute: "VR", rarity: "RARE", element: "DARK", hp: 118, mp: 105, atk: 85, def: 72, spt: 65, spd: 78, description: "Forma corrompida do Lopmon. Seu corpo cresceu de forma grotesca e seus ataques Frozen Claw congelam tudo que tocam com energia das trevas.", attackName: "Frozen Claw", attackElement: "DARK", spiritName: "Blizzard Claws", spiritElement: "ICE", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${lopId}`, requiredLevel: 12, ...noImg }, true);
+    await upsertDigimon(byName, "AntylamonEvil", { name: "AntylamonEvil", attribute: "VR", rarity: "RARE", element: "DARK", hp: 185, mp: 168, atk: 125, def: 108, spt: 95, spd: 100, description: "Forma sombria da Antylamon corrompida pelo vírus. Seus Bunny Blades agora cortam com energia das trevas, destruindo qualquer barreira digital.", attackName: "Bunny Blades", attackElement: "DARK", spiritName: "Darkness Rhythm", spiritElement: "DARK", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${wendiId}`, requiredLevel: 28, ...imgFields("antylamon_evil.png") }, true);
     const antylId = await upsertDigimon(byName, "Antylamon", { name: "Antylamon", attribute: "DA", rarity: "EPIC", element: "EARTH", hp: 178, mp: 165, atk: 112, def: 118, spt: 88, spd: 92, description: "Guardiã de força divina com braços que se transformam em machados ou escudos. Karma Rhythm vibra o espaço ao redor.", attackName: "Bunny Blades", attackElement: "EARTH", spiritName: "Karma Rhythm", spiritElement: "EARTH", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${turuId}`, requiredLevel: 28, ...noImg });
     await upsertDigimon(byName, "Cherubimon", { name: "Cherubimon", attribute: "DA", rarity: "LEGENDARY", element: "LIGHT", hp: 292, mp: 345, atk: 152, def: 162, spt: 195, spd: 148, description: "Anjo querubim de tamanho colossal. Suas Lightning Spear purificam qualquer corrupção e seus raios de luz são irresistíveis.", attackName: "Lightning Spear", attackElement: "LIGHTNING", spiritName: "Storm of Judgment", spiritElement: "LIGHTNING", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${antylId}`, requiredLevel: 60, requiredItem: "anel_sagrado", ...noImg });
 
@@ -2405,7 +2406,7 @@ export async function seedCustomDigimons(): Promise<void> {
     const babydmonId = await upsertDigimon(byName, "Babydmon", { name: "Babydmon", attribute: "DA", rarity: "BABY", element: "EARTH", hp: 68, mp: 62, atk: 28, def: 25, spt: 20, spd: 30, description: "Pequeno dragão bebê da linha do Dracomon. Forma In-Training que se desenvolve em terra firme. Seu Baby Flame é um sopro de fogo fraco mas determinado.", attackName: "Baby Flame", attackElement: "EARTH", spiritName: "Tail Scratch", spiritElement: "EARTH", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${byName["Petitmon"] ?? 0}`, requiredLevel: 10, ...imgFields("babydmon.gif"), imageScale: 0.65 }, true);
     const dracoId = await upsertDigimon(byName, "Dracomon", { name: "Dracomon", attribute: "DA", rarity: "COMMON", element: "EARTH", hp: 108, mp: 102, atk: 80, def: 68, spt: 58, spd: 64, description: "Dragão primordial de terra com escamas durissimas. Seu G Shurunen dispara cristais de energia concentrada pela boca.", attackName: "G Shurunen", attackElement: "EARTH", spiritName: "Tail Smash", spiritElement: "EARTH", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${babydmonId}`, requiredLevel: 10, ...imgFields("dracomon.gif") });
     const coredraBId = await upsertDigimon(byName, "Coredramon Blue", { name: "Coredramon Blue", attribute: "DA", rarity: "RARE", element: "WIND", hp: 182, mp: 168, atk: 118, def: 102, spt: 95, spd: 108, description: "Dragão azul voador com cristais de vento nas asas. Seu Strahl Blau dispara um raio de vento comprimido devastador.", attackName: "Strahl Blau", attackElement: "WIND", spiritName: "Blue Flare", spiritElement: "WIND", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${dracoId}`, requiredLevel: 25, ...imgFields("coredramonblue.gif") });
-    await upsertDigimon(byName, "Coredramon Green", { name: "Coredramon Green", attribute: "VI", rarity: "RARE", element: "EARTH", hp: 188, mp: 155, atk: 125, def: 115, spt: 88, spd: 98, description: "Dragão verde robusto com escamas de terra endurecidas. Sua forma terrestre contrasta com a do irmão azul — usa força bruta e resistência ao invés de velocidade. Seu G Shurunen II dispara cristais de terra com poder destruidor.", attackName: "G Shurunen II", attackElement: "EARTH", spiritName: "Green Flare", spiritElement: "EARTH", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${dracoId}`, requiredLevel: 20, ...imgFields("coredramongreen.gif") });
+    await upsertDigimon(byName, "Coredramon Green", { name: "Coredramon Green", attribute: "VR", rarity: "RARE", element: "EARTH", hp: 188, mp: 155, atk: 125, def: 115, spt: 88, spd: 98, description: "Dragão verde robusto com escamas de terra endurecidas. Sua forma terrestre contrasta com a do irmão azul — usa força bruta e resistência ao invés de velocidade. Seu G Shurunen II dispara cristais de terra com poder destruidor.", attackName: "G Shurunen II", attackElement: "EARTH", spiritName: "Green Flare", spiritElement: "EARTH", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${dracoId}`, requiredLevel: 20, ...imgFields("coredramongreen.gif") });
     const wingdraId = await upsertDigimon(byName, "Wingdramon", { name: "Wingdramon", attribute: "DA", rarity: "EPIC", element: "WIND", hp: 245, mp: 228, atk: 158, def: 132, spt: 118, spd: 142, description: "Dragão alado de velocidade extrema. Seu Wingblast gera um vácuo devastador que aspira o inimigo para dentro de uma esfera de destruição.", attackName: "Wingblast", attackElement: "WIND", spiritName: "Strike of the Seven Stars", spiritElement: "WIND", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${coredraBId}`, requiredLevel: 42, ...noImg });
     await upsertDigimon(byName, "Slayerdramon", { name: "Slayerdramon", attribute: "DA", rarity: "LEGENDARY", element: "WIND", hp: 282, mp: 258, atk: 188, def: 158, spt: 142, spd: 168, description: "Dragão cavaleiro definitivo com espada de energia de vento. Seu Fragarach é um corte circular que destrói qualquer coisa que cercar.", attackName: "Fragarach", attackElement: "WIND", spiritName: "Slayer Edge", spiritElement: "WIND", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${wingdraId}`, requiredLevel: 62, ...imgFields("slayerdramon.gif") }, true);
 
@@ -2589,7 +2590,7 @@ export async function seedCustomDigimons(): Promise<void> {
     const pusuId = await upsertDigimon(byName, "Pusumon", { name: "Pusumon", attribute: "DA", rarity: "BABY", element: "LIGHTNING", hp: 40, mp: 48, atk: 12, def: 10, spt: 14, spd: 16, description: "Forma bebê do Herissmon, uma bolinha fofinha com espinhos minúsculos. Emite faíscas elétricas quando surpreso.", attackName: "Bolha Elétrica", attackElement: "LIGHTNING", isBaseForm: true, scannable: false, isFusion: false, ...imgFields("pusumon.gif"), imageScale: 0.72 }, true);
     const pusuriId = await upsertDigimon(byName, "Pusurimon", { name: "Pusurimon", attribute: "DA", rarity: "TRAINING", element: "LIGHTNING", hp: 60, mp: 68, atk: 32, def: 26, spt: 34, spd: 36, description: "Forma de treinamento do Herissmon. Seus espinhos cresceram e faíscas saltam do corpo ao menor toque.", attackName: "Quill Spark", attackElement: "LIGHTNING", spiritName: "Static Burst", spiritElement: "LIGHTNING", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${pusuId}`, requiredLevel: 5, ...imgFields("pusurimon.gif"), imageScale: 0.72 }, true);
     const herrId = await upsertDigimon(byName, "Herissmon", { name: "Herissmon", attribute: "DA", rarity: "COMMON", element: "LIGHTNING", hp: 105, mp: 108, atk: 80, def: 62, spt: 65, spd: 70, description: "Digimon ouriço digital com espinhos de energia elétrica. Seu Pummel Hedgehog reveste o corpo de espinhos letais.", attackName: "Pummel Hedgehog", attackElement: "LIGHTNING", spiritName: "Quill Stab", spiritElement: "LIGHTNING", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${pusuriId}`, requiredLevel: 10, ...noImg }, true);
-    await upsertDigimon(byName, "Filmon", { name: "Filmon", attribute: "DA", rarity: "CHAMPION", element: "LIGHTNING", hp: 210, mp: 195, atk: 115, def: 98, spt: 90, spd: 110, description: "Forma Champion do Herissmon. Seus espinhos elétricos evoluíram em lâminas de relâmpago que cortam qualquer proteção digital.", attackName: "Lightning Stinger", attackElement: "LIGHTNING", spiritName: "Crimson Slash", spiritElement: "LIGHTNING", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${herrId}`, requiredLevel: 20, ...imgFields("filmon.png") }, true);
+    await upsertDigimon(byName, "Filmon", { name: "Filmon", attribute: "DA", rarity: "RARE", element: "LIGHTNING", hp: 210, mp: 195, atk: 115, def: 98, spt: 90, spd: 110, description: "Forma Champion do Herissmon. Seus espinhos elétricos evoluíram em lâminas de relâmpago que cortam qualquer proteção digital.", attackName: "Lightning Stinger", attackElement: "LIGHTNING", spiritName: "Crimson Slash", spiritElement: "LIGHTNING", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${herrId}`, requiredLevel: 20, ...imgFields("filmon.png") }, true);
     const angGGId = await upsertDigimon(byName, "Angoramon", { name: "Angoramon", attribute: "DA", rarity: "COMMON", element: "DARK", hp: 102, mp: 115, atk: 72, def: 65, spt: 68, spd: 65, description: "Digimon ovelha misterioso do Ghost Game. Seu Wool Flapping cobre o campo de lã que absorve ataques.", attackName: "Wool Flapping", attackElement: "DARK", spiritName: "Gyro Kick", spiritElement: "DARK", isBaseForm: true, scannable: true, isFusion: false, ...imgFields("angoramon.gif") }, true);
     const jellyGGId = await upsertDigimon(byName, "Jellymon", { name: "Jellymon", attribute: "DA", rarity: "COMMON", element: "WATER", hp: 98, mp: 122, atk: 65, def: 58, spt: 78, spd: 72, description: "Medusa digital do Ghost Game. Seus tentáculos elétricos paralisam qualquer oponente.", attackName: "Paralyze Sting", attackElement: "LIGHTNING", spiritName: "Jellyfish Beat", spiritElement: "WATER", isBaseForm: true, scannable: true, isFusion: false, ...imgFields("jellymon.gif"), imageScale: 0.9 }, true);
     const wezenId = await upsertDigimon(byName, "WezenGammamon", { name: "WezenGammamon", attribute: "VR", rarity: "RARE", element: "FIRE", hp: 162, mp: 148, atk: 108, def: 82, spt: 78, spd: 92, description: "Forma Xros do Gammamon baseada na estrela Wezen. Suas chamas têm intensidade de uma gigante vermelha.", attackName: "Wezen Flame", attackElement: "FIRE", spiritName: "Inferno Burst", spiritElement: "FIRE", isBaseForm: false, scannable: true, isFusion: false, evolvesFromId: `custom_${byName["Gammamon"] ?? 0}`, requiredLevel: 20, ...noImg });
@@ -3024,7 +3025,7 @@ export async function seedCharacterOverrides(): Promise<void> {
       hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118,
       attackName: "Paradise Lost Kai 🌑", attackElement: "NULL",
       spiritName: "Divine Atonement ⚡", spiritElement: "LIGHTNING",
-      ...imgFields("lucemonfm.gif"),
+      ...imgFields("lucemonLarvaMode.gif"),
     });
 
     // ── LucemonSatanMode ──────────────────────────────────────────────────────
@@ -3045,7 +3046,7 @@ export async function seedCharacterOverrides(): Promise<void> {
       hp: 255, mp: 270, atk: 148, def: 118, spt: 125, spd: 122,
       attackName: "Paradise Lost X 🌑", attackElement: "DARK",
       spiritName: "Eternal Damnation 💀", spiritElement: "DARK",
-      ...imgFields("lucemonx.png"),
+      ...imgFields("LucemonX.png"),
       imageScale: 1.1,
     });
 
@@ -3108,6 +3109,74 @@ export async function deactivateDuplicateEntries(): Promise<void> {
     console.log(`[seed] Entradas duplicadas Lucemon desativadas.`);
   } catch (err) {
     console.error("[seed] Erro ao desativar duplicatas:", err);
+  }
+}
+
+const CANONICAL_NAME_GROUPS: ReadonlyArray<readonly [string, ...string[]]> = [
+  ["DexDorugoramon", "DexDoruGoramon"], ["Dorugreymon", "DoruGreymon"],
+  ["Eldradimon", "ElDradimon"], ["ExVeemon", "Exveemon"], ["Gaogamon", "GaoGamon"],
+  ["Imperialdramon FM", "ImperialdramonFM"], ["JewelBeemon", "Jewelbeemon"],
+  ["Kazemon", "KazeMon"], ["Kumamon", "KumaMon"], ["Potamon", "PotaMon"],
+  ["Rosemon BM", "RosemonBM"], ["Sakuyamon Maid Mode", "SakuyamonMaidMode"],
+  ["Taomon", "TaoMon"], ["TigerVespamon", "Tigervespamon"],
+  ["WarGreymon X", "WarGreymonX"], ["MetalSeadramon", "Metalseadramon"],
+  ["TorikaraBallmon", "Torikaraballmon"],
+];
+
+function replaceCustomIds(value: unknown, replacements: ReadonlyMap<string, string>): unknown {
+  if (typeof value === "string") return replacements.get(value) ?? value;
+  if (Array.isArray(value)) return value.map((item) => replaceCustomIds(item, replacements));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, replaceCustomIds(item, replacements)]));
+  }
+  return value;
+}
+
+// Consolida grafias duplicadas sem perder equipes, coleções, mapas ou cadeias evolutivas.
+export async function removeCanonicalDuplicates(): Promise<void> {
+  try {
+    const rows = await db.select().from(customDigimonsTable);
+    const replacements = new Map<string, string>();
+    const duplicateIds: number[] = [];
+
+    for (const [canonicalName, ...aliases] of CANONICAL_NAME_GROUPS) {
+      const group = rows.filter((row) => row.name === canonicalName || aliases.includes(row.name));
+      if (group.length === 0) continue;
+      const keeper = group.find((row) => row.manualEdit) ?? group.find((row) => row.name === canonicalName) ?? group[0];
+      if (keeper.name !== canonicalName) {
+        await db.update(customDigimonsTable).set({ name: canonicalName, updatedAt: new Date() }).where(eq(customDigimonsTable.id, keeper.id));
+      }
+      for (const duplicate of group) {
+        if (duplicate.id === keeper.id) continue;
+        replacements.set(`custom_${duplicate.id}`, `custom_${keeper.id}`);
+        duplicateIds.push(duplicate.id);
+        if (!keeper.imageBase64 && duplicate.imageBase64) {
+          await db.update(customDigimonsTable).set({ imageBase64: duplicate.imageBase64, imageMimeType: duplicate.imageMimeType, updatedAt: new Date() }).where(eq(customDigimonsTable.id, keeper.id));
+        }
+      }
+    }
+
+    if (duplicateIds.length === 0) return;
+    for (const [oldId, newId] of replacements) {
+      await db.update(customDigimonsTable).set({ evolvesFromId: newId, updatedAt: new Date() }).where(eq(customDigimonsTable.evolvesFromId, oldId));
+    }
+    for (const save of await db.select().from(gameSavesTable)) {
+      const updated = replaceCustomIds(save.saveData, replacements);
+      if (JSON.stringify(updated) !== JSON.stringify(save.saveData)) {
+        await db.update(gameSavesTable).set({ saveData: updated, updatedAt: new Date() }).where(eq(gameSavesTable.id, save.id));
+      }
+    }
+    for (const map of await db.select().from(customMapsTable)) {
+      const stages = replaceCustomIds(map.stages, replacements);
+      const tileGrid = replaceCustomIds(map.tileGrid, replacements);
+      if (JSON.stringify(stages) !== JSON.stringify(map.stages) || JSON.stringify(tileGrid) !== JSON.stringify(map.tileGrid)) {
+        await db.update(customMapsTable).set({ stages, tileGrid, updatedAt: new Date() }).where(eq(customMapsTable.id, map.id));
+      }
+    }
+    await db.delete(customDigimonsTable).where(inArray(customDigimonsTable.id, duplicateIds));
+    console.log(`[seed] Duplicatas consolidadas e removidas: ${duplicateIds.length}.`);
+  } catch (err) {
+    console.error("[seed] Erro ao consolidar duplicatas:", err);
   }
 }
 
@@ -3457,6 +3526,7 @@ export async function fixDigimonRarities(): Promise<void> {
       ArgomonUltimate: 'EPIC',
     };
 
+    Object.assign(rarityMap, VERIFIED_RARITIES);
     let fixed = 0;
     for (const [name, rarity] of Object.entries(rarityMap)) {
       const result = await db
@@ -3464,6 +3534,11 @@ export async function fixDigimonRarities(): Promise<void> {
         .set({ rarity: rarity as any, updatedAt: new Date() })
         .where(eq(customDigimonsTable.name, name));
       if ((result as any).rowCount > 0) fixed++;
+    }
+    for (const [name, attribute] of Object.entries(VERIFIED_ATTRIBUTES)) {
+      await db.update(customDigimonsTable)
+        .set({ attribute, updatedAt: new Date() })
+        .where(eq(customDigimonsTable.name, name));
     }
     console.log(`[seed] Fases corrigidas: ${fixed} Digimons atualizados.`);
   } catch (err) {
