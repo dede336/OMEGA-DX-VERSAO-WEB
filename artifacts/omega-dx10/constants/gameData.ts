@@ -41,6 +41,7 @@ export interface MapStage {
   enemyCharacterIds?: string[];
   randomEnemyCount?: number;
   enemyLevel: number;
+  enemyAscensionStars?: number;
   expReward: number;
   drops?: StageDrop[];
   bossMultipliers?: { hp?: number; def?: number };
@@ -59,6 +60,7 @@ export interface GameMap {
   isDungeon?: boolean;
   isDaily?: boolean;
   availableDays?: number[];
+  isBiweeklyEvent?: boolean;
   backgroundImage?: number;
   bitsReward?: number;
   tamerExpReward?: number;
@@ -1399,6 +1401,8 @@ export const SACRIFICE_SCAN_PCT: Partial<Record<RarityId, number>> = {
 };
 
 export const ITEM_NAMES: Record<string, string> = {
+  golden_ascension_star:       'Estrela de Ascensão Dourada ⭐',
+  piece_golden_ascension_star: 'Fragmento de Estrela Dourada',
   anel_sagrado:           'Anel Sagrado ✨',
   piece_anel_sagrado:     'Fragmento do Anel Sagrado',
   permissao_real:         'Permissão Real da Deusa ⚔️',
@@ -1845,6 +1849,29 @@ export const GAME_MAPS: GameMap[] = [
     ],
   },
   // ── DUNGEONS (ao final) ──────────────────────────────────────────────────────
+  {
+    id: 'event_starry_night',
+    name: 'Noite Estrelada',
+    description: 'Um céu sagrado se abre a cada quinzena. Derrote os três anjos para receber 5 Fragmentos de Estrela Dourada por evento.',
+    isBiweeklyEvent: true,
+    requiredTamerLevel: 10,
+    backgroundImage: require('../assets/images/events/noite-estrelada.jpg'),
+    bitsReward: 5000,
+    tamerExpReward: 500,
+    stages: [
+      {
+        index: 0,
+        name: 'Noite Estrelada — Trindade Angelical',
+        enemyCharacterId: 'name:Dominimon',
+        enemyCharacterIds: ['name:Dominimon', 'name:ClavisAngemon', 'name:SlashAngemon'],
+        enemyLevel: 60,
+        enemyAscensionStars: 1,
+        expReward: 12000,
+        bossMultipliers: { hp: 1.2, def: 1.1 },
+        isBoss: true,
+      },
+    ],
+  },
   {
     id: 'dungeon_daily_xp',
     name: 'Treinamento Diário',
