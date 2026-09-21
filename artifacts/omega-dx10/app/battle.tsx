@@ -29,10 +29,12 @@ import {
   getScaledStats,
   ElementId,
 } from '@/constants/gameData';
-import { getCharacterImageSource as _getCharImg, getCharacter } from '@/constants/extendedCharacters';
+import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName } from '@/constants/extendedCharacters';
 const CHARACTER_IMAGES = new Proxy({} as Record<string, any>, { get: (_t, p) => _getCharImg(String(p)) });
 import ELEMENT_IMAGES from '@/constants/elementImages';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
+import { applyAscensionBonus, getStarryNightAvailability } from '@/utils/ascension';
+import { AscensionStars } from '@/components/AscensionStars';
 
 import {
   buildFighter,
@@ -175,6 +177,7 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_battery_blue:     { name: 'Bateria Azul',    color: '#3b82f6' },
   piece_battery_purple:   { name: 'Bateria Roxa',    color: '#a855f7' },
   piece_battery_gold:     { name: 'Bateria Dourada', color: '#f59e0b' },
+  piece_golden_ascension_star: { name: 'Fragmento de Estrela Dourada', color: '#facc15' },
 };
 
 export default function BattleScreen() {
@@ -203,6 +206,7 @@ export default function BattleScreen() {
     completeFarmBattle,
     gainFarmDecor,
     customGameMaps,
+    claimStarryNightReward,
   } = useGame();
 
   const TAMER_CREST_MAP: Record<string, string> = {
@@ -222,6 +226,11 @@ export default function BattleScreen() {
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
   const stage = map?.stages[stageIndex];
   const alreadyCleared = isStageCleared(mapId, stageIndex);
+
+  function resolveEnemyId(id: string): string {
+    if (!id.startsWith('name:')) return id;
+    return findCharacterIdByName(id.slice(5)) ?? id;
+  }
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -418,10 +427,11 @@ export default function BattleScreen() {
 
   // ── Build single enemy ─────────────────────────────────────────────────────
   function buildEnemy(charId: string): BattleFighter {
-    const eChar = getCharacter(charId);
+    const resolvedId = resolveEnemyId(charId);
+    const eChar = getCharacter(resolvedId);
     if (!eChar) throw new Error(`Digimon inimigo não encontrado: ${charId}`);
     let f = buildFighter(
-      eChar.name, eChar.attribute, eChar.element, eChar.baseStats, stage!.enemyLevel,
+      eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, stage!.enemyAscensionStars ?? 0), stage!.enemyLevel,
       undefined, { attackName: eChar.attackName, spiritName: eChar.spiritName },
     );
     if (stage!.bossMultipliers) {
@@ -443,6 +453,13 @@ export default function BattleScreen() {
       addLog('📅 Treinamento diário concluído! Volta amanhã às 00:00.', '#f59e0b');
     } else {
       clearStage(mapId, stageIndex);
+    }
+    if (map?.isBiweeklyEvent) {
+      if (claimStarryNightReward()) {
+        addLog('⭐ +5 Fragmentos de Estrela Dourada!', '#facc15');
+      } else {
+        addLog('⭐ Recompensa quinzenal já coletada neste evento.', '#a5b4fc');
+      }
     }
     if (!wasCleared && stage?.firstClearReward) {
       addToInventory(stage.firstClearReward);
@@ -604,7 +621,7 @@ export default function BattleScreen() {
       const ch = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
       if (!ch) continue;
       fighters.push({
-        ...buildFighter(ch.name, ch.attribute, ch.element, ch.baseStats, owned.level, eqBonuses,
+        ...buildFighter(ch.name, ch.attribute, ch.element, applyAscensionBonus(ch.baseStats, owned.ascensionStars ?? 0), owned.level, eqBonuses,
           { attackName: ch.attackName, spiritName: ch.spiritName }),
         ownedId,
         spiritHitsAll: ch.spiritHitsAll,
@@ -640,7 +657,7 @@ export default function BattleScreen() {
     if (dvParts.length > 0) addLog(`✨ Dádiva Divina: ${dvParts.join(' | ')}`, '#f59e0b');
 
     // Build enemies — random subset if randomEnemyCount is set
-    const pool = stage.enemyCharacterIds ?? [stage.enemyCharacterId];
+    const pool = (stage.enemyCharacterIds ?? [stage.enemyCharacterId]).map(resolveEnemyId);
     let charIds: string[];
     if (stage.randomEnemyCount && stage.randomEnemyCount < pool.length) {
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -1128,7 +1145,19 @@ export default function BattleScreen() {
     );
   }
 
-  const stageCharIds = stage.enemyCharacterIds ?? [stage.enemyCharacterId];
+  if (map.isBiweeklyEvent && !getStarryNightAvailability().isOpen) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, paddingTop: topPad, alignItems: 'center', justifyContent: 'center', gap: 16 }]}>
+        <Feather name="clock" size={42} color="#a5b4fc" />
+        <Text style={[styles.errorText, { color: '#c7d2fe', textAlign: 'center' }]}>A Noite Estrelada ainda não começou.</Text>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+          <Text style={{ color: colors.primary }}>{t('common.back')}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const stageCharIds = (stage.enemyCharacterIds ?? [stage.enemyCharacterId]).map(resolveEnemyId);
   const canSpirit = !!playerFighter && playerFighter.currentMP >= SPIRIT_MP_COST;
   const livingEnemies = enemies.filter((e) => e.currentHP > 0);
   const pOwned = teamFighters[activeTeamIdx]
@@ -1369,11 +1398,14 @@ export default function BattleScreen() {
             <View style={styles.arenaEnemyRow}>
               {enemies.map((enemy, i) => {
                 const charId = battleCharIds[i] ?? stageCharIds[i] ?? stageCharIds[0];
-                const eChar = CHARACTERS[charId];
+                const eChar = getCharacter(charId);
                 const eAttr = eChar ? ATTRIBUTES[eChar.attribute] : null;
                 const isTarget = i === targetIdx;
                 const isDead = enemy.currentHP <= 0;
-                const maxHP = getScaledStats(eChar?.baseStats ?? enemy.stats, stage.enemyLevel).hp;
+                const maxHP = getScaledStats(
+                  eChar ? applyAscensionBonus(eChar.baseStats, stage.enemyAscensionStars ?? 0) : enemy.stats,
+                  stage.enemyLevel,
+                ).hp;
                 const hasBg = !!map.backgroundImage;
                 return (
                   <TouchableOpacity
@@ -1405,6 +1437,7 @@ export default function BattleScreen() {
                     </Animated.View>
                     <View style={[styles.arenaEnemyInfo, { backgroundColor: hasBg ? 'rgba(0,0,0,0.6)' : colors.card }]}>
                       <Text style={[styles.arenaEnemyName, !hasBg && { color: colors.foreground }]} numberOfLines={1}>{enemy.name}</Text>
+                      <AscensionStars stars={stage.enemyAscensionStars} size="small" />
                       <View style={[styles.arenaEnemyHpTrack, { backgroundColor: hasBg ? 'rgba(255,255,255,0.2)' : colors.border }]}>
                         <View style={[
                           styles.arenaEnemyHpFill,
