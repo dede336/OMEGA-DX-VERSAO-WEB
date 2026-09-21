@@ -1,11 +1,22 @@
 import { Router } from "express";
-import { db, usersTable, chatMessagesTable, globalChatMessagesTable } from "@workspace/db";
-import { eq, or, and, desc, sql, asc } from "drizzle-orm";
+import { db, usersTable, chatMessagesTable, globalChatMessagesTable, friendshipsTable, chatReportsTable, chatNotificationsTable } from "@workspace/db";
+import { eq, or, and, desc, sql, isNull } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { isUserOnline, getOnlineUsers } from "../lib/socket.js";
-import { containsProfanity } from "../lib/profanity.js";
+import { isRateLimited, validateChatContent } from "../lib/chatPolicy.js";
 
 const router = Router();
+
+async function areFriends(firstId: number, secondId: number): Promise<boolean> {
+  const [row] = await db.select({ id: friendshipsTable.id }).from(friendshipsTable).where(and(
+    eq(friendshipsTable.status, "accepted"),
+    or(
+      and(eq(friendshipsTable.requesterId, firstId), eq(friendshipsTable.addresseeId, secondId)),
+      and(eq(friendshipsTable.requesterId, secondId), eq(friendshipsTable.addresseeId, firstId)),
+    ),
+  )).limit(1);
+  return Boolean(row);
+}
 
 // GET /api/chat/online — list of currently online usernames
 router.get("/online", requireAuth, (_req, res) => {
@@ -80,7 +91,7 @@ router.get("/conversations", requireAuth, async (req, res) => {
 // GET /api/chat/messages/:username — history with a specific user
 router.get("/messages/:username", requireAuth, async (req, res) => {
   const userId = req.auth!.userId;
-  const { username } = req.params;
+  const username = String(req.params.username);
   try {
     const [partner] = await db
       .select({ id: usersTable.id })
@@ -88,7 +99,8 @@ router.get("/messages/:username", requireAuth, async (req, res) => {
       .where(eq(usersTable.username, username))
       .limit(1);
 
-    if (!partner) return res.status(404).json({ error: "User not found" });
+    if (!partner) { res.status(404).json({ error: "User not found" }); return; }
+    if (!(await areFriends(userId, partner.id))) { res.status(403).json({ error: "A conversa privada é exclusiva para amigos." }); return; }
 
     const msgs = await db
       .select()
@@ -120,19 +132,23 @@ router.get("/messages/:username", requireAuth, async (req, res) => {
 router.post("/messages/:username", requireAuth, async (req, res) => {
   const userId = req.auth!.userId;
   const senderUsername = req.auth!.username;
-  const { username } = req.params;
+  const username = String(req.params.username);
   const { content } = req.body as { content?: string };
-  if (!content?.trim()) return res.status(400).json({ error: "content required" });
+  const validationError = validateChatContent(content);
+  if (validationError) { res.status(400).json({ error: validationError }); return; }
+  if (isRateLimited(userId)) { res.status(429).json({ error: "Muitas mensagens em pouco tempo. Aguarde alguns segundos." }); return; }
+  const cleanContent = content!.trim();
   try {
     const [recipient] = await db
       .select({ id: usersTable.id })
       .from(usersTable)
       .where(eq(usersTable.username, username))
       .limit(1);
-    if (!recipient) return res.status(404).json({ error: "User not found" });
+    if (!recipient) { res.status(404).json({ error: "User not found" }); return; }
+    if (!(await areFriends(userId, recipient.id))) { res.status(403).json({ error: "A conversa privada é exclusiva para amigos." }); return; }
     const [saved] = await db
       .insert(chatMessagesTable)
-      .values({ fromUserId: userId, toUserId: recipient.id, content: content.trim() })
+      .values({ fromUserId: userId, toUserId: recipient.id, content: cleanContent })
       .returning();
     res.json({
       message: {
@@ -151,7 +167,7 @@ router.post("/messages/:username", requireAuth, async (req, res) => {
 // POST /api/chat/messages/:username/read — mark all unread from this user as read
 router.post("/messages/:username/read", requireAuth, async (req, res) => {
   const userId = req.auth!.userId;
-  const { username } = req.params;
+  const username = String(req.params.username);
   try {
     const [partner] = await db
       .select({ id: usersTable.id })
@@ -159,7 +175,7 @@ router.post("/messages/:username/read", requireAuth, async (req, res) => {
       .where(eq(usersTable.username, username))
       .limit(1);
 
-    if (!partner) return res.status(404).json({ error: "User not found" });
+    if (!partner) { res.status(404).json({ error: "User not found" }); return; }
 
     await db
       .update(chatMessagesTable)
@@ -190,6 +206,7 @@ router.get("/global", requireAuth, async (_req, res) => {
       })
       .from(globalChatMessagesTable)
       .innerJoin(usersTable, eq(globalChatMessagesTable.fromUserId, usersTable.id))
+      .where(isNull(globalChatMessagesTable.deletedAt))
       .orderBy(desc(globalChatMessagesTable.createdAt))
       .limit(100);
 
@@ -204,12 +221,14 @@ router.post("/global", requireAuth, async (req, res) => {
   const userId = req.auth!.userId;
   const username = req.auth!.username;
   const { content } = req.body as { content?: string };
-  if (!content?.trim()) return res.status(400).json({ error: "content required" });
-  if (containsProfanity(content)) return res.status(400).json({ error: "Mensagem contém palavras ofensivas." });
+  const validationError = validateChatContent(content);
+  if (validationError) { res.status(400).json({ error: validationError }); return; }
+  if (isRateLimited(userId)) { res.status(429).json({ error: "Muitas mensagens em pouco tempo. Aguarde alguns segundos." }); return; }
+  const cleanContent = content!.trim();
   try {
     const [saved] = await db
       .insert(globalChatMessagesTable)
-      .values({ fromUserId: userId, content: content.trim() })
+      .values({ fromUserId: userId, content: cleanContent })
       .returning();
     res.json({
       message: { id: saved.id, from: username, content: saved.content, createdAt: saved.createdAt.toISOString() },
@@ -217,6 +236,55 @@ router.post("/global", requireAuth, async (req, res) => {
   } catch {
     res.status(500).json({ error: "Failed to send message" });
   }
+});
+
+// POST /api/chat/report — denúncia sigilosa de mensagem pública ou privada
+router.post("/report", requireAuth, async (req, res) => {
+  const reporterUserId = req.auth!.userId;
+  const { messageKind, messageId, reason } = req.body as { messageKind?: "global" | "private"; messageId?: number; reason?: string };
+  if (!messageKind || !Number.isInteger(messageId)) { res.status(400).json({ error: "Mensagem inválida." }); return; }
+  if (messageKind !== "global" && messageKind !== "private") { res.status(400).json({ error: "Tipo de mensagem inválido." }); return; }
+
+  let reportedUserId: number | null = null;
+  if (messageKind === "global") {
+    const [message] = await db.select().from(globalChatMessagesTable).where(eq(globalChatMessagesTable.id, messageId!)).limit(1);
+    reportedUserId = message?.fromUserId ?? null;
+  } else {
+    const [message] = await db.select().from(chatMessagesTable).where(and(
+      eq(chatMessagesTable.id, messageId!),
+      or(eq(chatMessagesTable.fromUserId, reporterUserId), eq(chatMessagesTable.toUserId, reporterUserId)),
+    )).limit(1);
+    reportedUserId = message?.fromUserId ?? null;
+  }
+  if (!reportedUserId) { res.status(404).json({ error: "Mensagem não encontrada." }); return; }
+  if (reportedUserId === reporterUserId) { res.status(400).json({ error: "Você não pode denunciar sua própria mensagem." }); return; }
+
+  const [existing] = await db.select({ id: chatReportsTable.id }).from(chatReportsTable).where(and(
+    eq(chatReportsTable.reporterUserId, reporterUserId), eq(chatReportsTable.messageKind, messageKind),
+    eq(chatReportsTable.messageId, messageId!), eq(chatReportsTable.status, "pending"),
+  )).limit(1);
+  if (existing) { res.status(409).json({ error: "Esta mensagem já foi denunciada por você." }); return; }
+
+  await db.insert(chatReportsTable).values({
+    reporterUserId, reportedUserId, messageKind, messageId: messageId!,
+    reason: String(reason || "Conteúdo ofensivo").trim().slice(0, 300),
+  });
+  res.status(201).json({ ok: true, message: "Denúncia enviada de forma sigilosa para a moderação." });
+});
+
+router.get("/notifications", requireAuth, async (req, res) => {
+  const notifications = await db.select().from(chatNotificationsTable)
+    .where(eq(chatNotificationsTable.userId, req.auth!.userId))
+    .orderBy(desc(chatNotificationsTable.createdAt)).limit(20);
+  res.json({ notifications });
+});
+
+router.post("/notifications/:id/read", requireAuth, async (req, res) => {
+  const id = Number(req.params.id);
+  await db.update(chatNotificationsTable).set({ read: true }).where(and(
+    eq(chatNotificationsTable.id, id), eq(chatNotificationsTable.userId, req.auth!.userId),
+  ));
+  res.json({ ok: true });
 });
 
 export default router;
