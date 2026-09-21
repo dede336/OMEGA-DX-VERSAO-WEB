@@ -6,6 +6,8 @@ export const chatMessagesTable = pgTable("chat_messages", {
   fromUserId: integer("from_user_id").notNull().references(() => usersTable.id),
   toUserId: integer("to_user_id").notNull().references(() => usersTable.id),
   content: text("content").notNull(),
+  messageType: text("message_type").notNull().default("text"),
+  stickerId: text("sticker_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   readAt: timestamp("read_at"),
 });
