@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity,
   StyleSheet, Platform, KeyboardAvoidingView, ActivityIndicator,
+  Alert, ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { useSocket, ChatMessage } from '@/context/SocketContext';
 import { pixelStyle } from '@/constants/pixelStyle';
+import { CHAT_EMOJIS, CHAT_UNIT_LIMIT, countChatUnits } from '@/utils/chat';
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
@@ -25,7 +27,7 @@ export default function ChatConversationScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { token, user, getApiUrl } = useAuth();
-  const { onlineUsers, sendMessage, markRead, recentMessages } = useSocket();
+  const { onlineUsers, sendMessage, markRead, recentMessages, chatError, clearChatError } = useSocket();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,11 +77,26 @@ export default function ChatConversationScreen() {
 
   function handleSend() {
     const content = input.trim();
-    if (!content || !username) return;
+    if (!content || !username || countChatUnits(content) > CHAT_UNIT_LIMIT) return;
     setSending(true);
     sendMessage(username, content);
     setInput('');
     setSending(false);
+  }
+
+  function reportPrivateMessage(messageId: number) {
+    Alert.alert('Denunciar mensagem', 'A denúncia é sigilosa. A moderação poderá analisar esta conversa, mas o jogador não saberá quem denunciou.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Denunciar', style: 'destructive', onPress: async () => {
+        const response = await fetch(`${apiUrl}/chat/report`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messageKind: 'private', messageId, reason: 'Conteúdo ofensivo' }),
+        });
+        const data = await response.json();
+        Alert.alert(response.ok ? 'Denúncia enviada' : 'Não foi possível denunciar', data.message || data.error);
+      } },
+    ]);
   }
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
@@ -146,7 +163,11 @@ export default function ChatConversationScreen() {
                       <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{msgDate}</Text>
                     </View>
                   )}
-                  <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
+                  <TouchableOpacity
+                    style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}
+                    activeOpacity={0.85}
+                    onLongPress={() => !isMe && reportPrivateMessage(item.id)}
+                  >
                     <View style={[
                       styles.bubbleContent,
                       { backgroundColor: isMe ? '#3b82f6' : colors.card, borderColor: colors.border },
@@ -159,13 +180,28 @@ export default function ChatConversationScreen() {
                         {formatTime(item.createdAt)}
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 </>
               );
             }}
           />
         )}
 
+        {!!chatError && (
+          <TouchableOpacity style={styles.errorBanner} onPress={clearChatError}>
+            <Text style={{ color: '#fff', fontSize: 12, flex: 1 }}>{chatError}</Text>
+          </TouchableOpacity>
+        )}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.emojiBar} contentContainerStyle={{ gap: 8 }}>
+          {CHAT_EMOJIS.map((emoji) => (
+            <TouchableOpacity key={emoji} onPress={() => setInput((value) => `${value}${emoji}`)}>
+              <Text style={{ fontSize: 22 }}>{emoji}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <Text style={[styles.counter, { color: countChatUnits(input) > CHAT_UNIT_LIMIT ? '#ef4444' : colors.mutedForeground }]}>
+          {countChatUnits(input)}/{CHAT_UNIT_LIMIT} palavras/emojis
+        </Text>
         {/* Input */}
         <View style={[styles.inputRow, { backgroundColor: colors.card, borderColor: colors.border, paddingBottom: botPad }]}>
           <TextInput
@@ -175,14 +211,14 @@ export default function ChatConversationScreen() {
             placeholder="Mensagem..."
             placeholderTextColor={colors.mutedForeground}
             multiline
-            maxLength={500}
+            maxLength={2000}
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
           <TouchableOpacity
             style={[styles.sendBtn, { opacity: input.trim() ? 1 : 0.4 }]}
             onPress={handleSend}
-            disabled={!input.trim() || sending}
+            disabled={!input.trim() || sending || countChatUnits(input) > CHAT_UNIT_LIMIT}
           >
             <Feather name="send" size={20} color="#fff" />
           </TouchableOpacity>
@@ -238,4 +274,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 60 },
+  emojiBar: { maxHeight: 38, marginHorizontal: 12, marginTop: 6 },
+  counter: { fontSize: 10, textAlign: 'right', marginHorizontal: 14, marginTop: 2 },
+  errorBanner: { backgroundColor: '#ef4444', padding: 10, marginHorizontal: 12, borderRadius: 10 },
 });
