@@ -11,13 +11,15 @@ import FarmSection from '@/components/admin/FarmSection';
 import TamersSection from '@/components/admin/TamersSection';
 import GachaSection from '@/components/admin/GachaSection';
 import SendSection from '@/components/admin/SendSection';
+import ModerationSection from '@/components/admin/ModerationSection';
 
-type Section = 'digimons' | 'items' | 'maps' | 'fazenda' | 'tamers' | 'gacha' | 'enviar';
+type Section = 'digimons' | 'moderacao' | 'items' | 'maps' | 'fazenda' | 'tamers' | 'gacha' | 'enviar';
 
 const ADMIN_ICON = require('../../assets/images/admin_icon.webp');
 
 const ALL_SECTIONS: { key: Section; label: string; emoji: string; color: string; adminOnly: boolean }[] = [
   { key: 'digimons', label: 'Digimons', emoji: '🦖', color: '#3b82f6', adminOnly: false },
+  { key: 'moderacao', label: 'Moderação', emoji: '🛡️', color: '#dc2626', adminOnly: false },
   { key: 'items',    label: 'Itens',    emoji: '⚔️',  color: '#f59e0b', adminOnly: true },
   { key: 'maps',     label: 'Fases',    emoji: '🗺️',  color: '#22c55e', adminOnly: true },
   { key: 'fazenda',  label: 'Fazenda',  emoji: '🌿',  color: '#84cc16', adminOnly: true },
@@ -83,6 +85,7 @@ export default function AdminScreen() {
         keyboardShouldPersistTaps="always"
       >
         {validSection === 'digimons' && <DigimonSection />}
+        {validSection === 'moderacao' && <ModerationSection />}
         {validSection === 'items'    && isAdmin && <ItemsSection />}
         {validSection === 'maps'     && isAdmin && <MapsSection />}
         {validSection === 'fazenda'  && isAdmin && <FarmSection />}
