@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Image as ExpoImage } from 'expo-image';
 import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
 import { applyAscensionBonus } from '@/utils/ascension';
 import { AscensionStars } from '@/components/AscensionStars';
 
 type Props = { visible: boolean; characterId: string; previousStars: number; onClose: () => void };
 const COLORS = ['#ffffff', '#ffffff', '#3b82f6', '#ef4444', '#facc15'];
-const FUSION_GIF = require('../assets/images/fusion_crimson.webp');
 
 export default function AscensionAnimation({ visible, characterId, previousStars, onClose }: Props) {
   const left = useRef(new Animated.Value(-150)).current;
@@ -42,7 +40,6 @@ export default function AscensionAnimation({ visible, characterId, previousStars
   const whiteStyle = Platform.OS === 'web' ? ({ filter: 'brightness(0) invert(1)' } as any) : { tintColor: '#fff' };
   return <Modal visible={visible} transparent={false} animationType="fade" onRequestClose={onClose}>
     <View style={styles.screen}>
-      <ExpoImage source={FUSION_GIF} style={StyleSheet.absoluteFill} contentFit="cover" /><View style={styles.backgroundDim} />
       <TouchableOpacity style={styles.skip} onPress={onClose}><Text style={styles.skipText}>PULAR</Text></TouchableOpacity>
       <View style={styles.stage}>
         <Animated.View style={[styles.silhouette, { opacity: silhouettes, transform: [{ translateX: left }] }]}><Image source={image} style={[styles.sprite, whiteStyle]} resizeMode="contain" /></Animated.View>
@@ -56,5 +53,5 @@ export default function AscensionAnimation({ visible, characterId, previousStars
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', padding: 20 }, backgroundDim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.28)' }, skip: { position: 'absolute', top: 24, right: 20, zIndex: 20, padding: 12 }, skipText: { color: '#94a3b8', fontSize: 11, fontWeight: '900' }, stage: { width: '100%', height: 300, alignItems: 'center', justifyContent: 'center' }, silhouette: { position: 'absolute' }, sprite: { width: 150, height: 150 }, glow: { position: 'absolute', width: 210, height: 210, borderRadius: 105, shadowOpacity: 1, shadowRadius: 55, elevation: 30 }, result: { position: 'absolute', alignItems: 'center', gap: 8, shadowOpacity: 1, shadowRadius: 30 }, resultSprite: { width: 180, height: 180 }, summary: { width: '100%', maxWidth: 480, borderWidth: 2, borderRadius: 18, padding: 16, backgroundColor: '#09090b', shadowOpacity: 0.8, shadowRadius: 18 }, title: { textAlign: 'center', fontSize: 18, fontWeight: '900' }, subtitle: { color: '#86efac', textAlign: 'center', fontSize: 13, fontWeight: '800', marginTop: 4, marginBottom: 12 }, grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, stat: { width: '48%', backgroundColor: '#18181b', borderRadius: 10, padding: 8 }, statLabel: { color: '#94a3b8', fontSize: 10, fontWeight: '900' }, statValue: { color: '#fff', fontSize: 12, fontWeight: '800', marginTop: 2 }, statGain: { fontSize: 11, fontWeight: '900', marginTop: 2 }, continue: { marginTop: 14, borderRadius: 10, paddingVertical: 12 }, continueText: { color: '#000', textAlign: 'center', fontWeight: '900' },
+  screen: { flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', padding: 20 }, skip: { position: 'absolute', top: 24, right: 20, zIndex: 20, padding: 12 }, skipText: { color: '#94a3b8', fontSize: 11, fontWeight: '900' }, stage: { width: '100%', height: 300, alignItems: 'center', justifyContent: 'center' }, silhouette: { position: 'absolute' }, sprite: { width: 150, height: 150 }, glow: { position: 'absolute', width: 210, height: 210, borderRadius: 105, shadowOpacity: 1, shadowRadius: 55, elevation: 30 }, result: { position: 'absolute', alignItems: 'center', gap: 8, shadowOpacity: 1, shadowRadius: 30 }, resultSprite: { width: 180, height: 180 }, summary: { width: '100%', maxWidth: 480, borderWidth: 2, borderRadius: 18, padding: 16, backgroundColor: '#09090b', shadowOpacity: 0.8, shadowRadius: 18 }, title: { textAlign: 'center', fontSize: 18, fontWeight: '900' }, subtitle: { color: '#86efac', textAlign: 'center', fontSize: 13, fontWeight: '800', marginTop: 4, marginBottom: 12 }, grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, stat: { width: '48%', backgroundColor: '#18181b', borderRadius: 10, padding: 8 }, statLabel: { color: '#94a3b8', fontSize: 10, fontWeight: '900' }, statValue: { color: '#fff', fontSize: 12, fontWeight: '800', marginTop: 2 }, statGain: { fontSize: 11, fontWeight: '900', marginTop: 2 }, continue: { marginTop: 14, borderRadius: 10, paddingVertical: 12 }, continueText: { color: '#000', textAlign: 'center', fontWeight: '900' },
 });
