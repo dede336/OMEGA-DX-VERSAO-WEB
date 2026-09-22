@@ -350,6 +350,28 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   // records can receive different database IDs between environments.
   const findCustomByName = (name: string) =>
     chars.find((c) => _normKey(c.name ?? '') === _normKey(name));
+
+  // A mesma linha pode ter registros antigos duplicados no banco. Se apenas o
+  // registro atualmente encontrado for corrigido, um pai antigo ainda pode
+  // reintroduzir um custom_* (por exemplo custom_1324) entre Gulus e Regulus.
+  // Limpe todos os IDs equivalentes antes de registrar a linha canônica.
+  const evolutionIdsForName = (name: string): string[] => {
+    const normalized = _normKey(name);
+    const ids = chars
+      .filter((c) => _normKey(c.name ?? '') === normalized)
+      .map((c) => c.id);
+    const baseId = BASE_NAME_MAP[normalized];
+    if (baseId) ids.push(baseId);
+    return [...new Set(ids)];
+  };
+  const clearEvolutionParents = (name: string) => {
+    for (const id of evolutionIdsForName(name)) {
+      delete EVOLUTIONS[id];
+      delete ALTERNATE_EVOLUTIONS[id];
+      delete EXTRA_ALTERNATE_EVOLUTIONS[id];
+    }
+  };
+
   const gammamonLine = {
     gammamon: findCustomByName('Gammamon'),
     gulus: findCustomByName('GulusGammamon'),
@@ -357,6 +379,9 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     arcturius: findCustomByName('Arcturiusmon'),
   };
   if (gammamonLine.gammamon && gammamonLine.gulus && gammamonLine.regulus && gammamonLine.arcturius) {
+    clearEvolutionParents('GulusGammamon');
+    clearEvolutionParents('Regulusmon');
+
     ALTERNATE_EVOLUTIONS[gammamonLine.gammamon.id] = {
       evolvesTo: gammamonLine.gulus.id,
       requiredLevel: 20,
@@ -369,15 +394,11 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
       requiredLevel: 40,
       label: gammamonLine.regulus.name,
     };
-    delete ALTERNATE_EVOLUTIONS[gammamonLine.gulus.id];
-    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.gulus.id];
     EVOLUTIONS[gammamonLine.regulus.id] = {
       evolvesTo: gammamonLine.arcturius.id,
       requiredLevel: 60,
       label: gammamonLine.arcturius.name,
     };
-    delete ALTERNATE_EVOLUTIONS[gammamonLine.regulus.id];
-    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.regulus.id];
   }
 
   // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
