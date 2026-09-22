@@ -442,6 +442,11 @@ export function findCharacterIdByName(name: string): string | null {
 }
 
 export function getCharacterImageSource(id: string): any {
+  // Lucemon X must always use the bundled animated GIF. Old API records can
+  // still point to the obsolete PNG, so this check must precede all overrides.
+  if (_normKey(id) === 'lucemonx' && (CHARACTER_IMAGES as Record<string, any>).lucemonX) {
+    return (CHARACTER_IMAGES as Record<string, any>).lucemonX;
+  }
   const ov = _overrides[id];
   if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
