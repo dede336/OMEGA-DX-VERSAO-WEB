@@ -29,7 +29,7 @@ import {
   getScaledStats,
   ElementId,
 } from '@/constants/gameData';
-import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName } from '@/constants/extendedCharacters';
+import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName, hasDivineGiftPassive } from '@/constants/extendedCharacters';
 const CHARACTER_IMAGES = new Proxy({} as Record<string, any>, { get: (_t, p) => _getCharImg(String(p)) });
 import ELEMENT_IMAGES from '@/constants/elementImages';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
@@ -158,7 +158,11 @@ function ElementAttackEffect({ element, large = false }: { element: ElementId; l
       style={[
         styles.elementAttackEffect,
         large && styles.elementAttackEffectLarge,
-        { opacity, transform: [{ scale }] },
+        {
+          opacity,
+          // Move the visual hit effect upward by 12% of its rendered height.
+          transform: [{ translateY: large ? -20 : -14 }, { scale }],
+        },
       ]}
     />
   );
@@ -233,6 +237,13 @@ export default function BattleScreen() {
   const paramAutoMode = params.auto === '1';
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
   const stage = map?.stages[stageIndex];
+  const equippedDigivice = equippedItems.digivice
+    ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.digivice)
+    : undefined;
+  const stagePlayerXpMultiplier = 1 + stageIndex * 0.10;
+  const playerXpReward = map?.tamerExpReward
+    ? Math.floor(map.tamerExpReward * stagePlayerXpMultiplier * (1 + (equippedDigivice?.tamerXpBonusPercent ?? 0)))
+    : 0;
   const alreadyCleared = isStageCleared(mapId, stageIndex);
   const regularMaps = GAME_MAPS.filter((candidate) =>
     !(candidate as any).isDungeon &&
@@ -262,7 +273,6 @@ export default function BattleScreen() {
   const [busy, setBusy] = useState(false);
   const [log, setLog] = useState<BattleLog[]>([]);
   const [droppedItems, setDroppedItems] = useState<DroppedItem[]>([]);
-  const [dvBonusInfo, setDvBonusInfo] = useState<{ active: number; bank: number; bankCount: number } | null>(null);
   const dadivaDivinaRef = useRef<DadivaBonus>({});
   const [alphaHealModal, setAlphaHealModal] = useState(false);
   const alphaHealCtxRef = useRef<{ fighters: TeamFighter[]; alphaIdx: number } | null>(null);
@@ -505,8 +515,6 @@ export default function BattleScreen() {
 
   // ── Grant rewards ──────────────────────────────────────────────────────────
   function grantRewards(activeOwnedId: string) {
-    setDvBonusInfo(null);
-
     const wasCleared = isStageCleared(mapId, stageIndex);
     if (map?.isDaily) {
       claimDailyDungeon();
@@ -541,11 +549,9 @@ export default function BattleScreen() {
     if (map?.tamerExpReward) {
       const ei = equippedItemsRef.current;
       const dv = ei.digivice ? EQUIPMENT_ITEMS.find((i) => i.id === ei.digivice) : null;
-      const tx = dv?.tamerXpBonusPercent
-        ? Math.floor(map.tamerExpReward * (1 + dv.tamerXpBonusPercent))
-        : map.tamerExpReward;
+      const tx = Math.floor(map.tamerExpReward * stagePlayerXpMultiplier * (1 + (dv?.tamerXpBonusPercent ?? 0)));
       gainTamerExp(tx);
-      addLog(`⭐ +${tx} XP Tamer!`, '#a78bfa');
+      addLog(`⭐ +${tx} XP do Jogador!`, '#a78bfa');
     }
 
     const drops: DroppedItem[] = [];
@@ -690,16 +696,13 @@ export default function BattleScreen() {
     if (fighters.length === 0) return;
 
     // ── Dádiva Divina: compute passive buffs from team composition ────────────
-    const anelSagradoFlags = teamIds.map((ownedId) => {
-      const owned = collection.find((c) => c.ownedId === ownedId);
-      if (!owned) return false;
-      const ch = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
-      return (ch as any)?.requiredItem === 'anel_sagrado';
-    });
     const dvBonus = computeDadivaDivina(
       fighters.map((f) => f.name),
       fighters.map((f) => f.element),
-      anelSagradoFlags,
+      teamIds.map((ownedId) => {
+        const owned = collection.find((c) => c.ownedId === ownedId);
+        return !!owned && hasDivineGiftPassive(owned.characterId);
+      }),
     );
     dadivaDivinaRef.current = dvBonus;
     for (const f of fighters) {
@@ -848,17 +851,26 @@ export default function BattleScreen() {
       activeTeamIdxRef.current = entry.idx;
       setActiveTeamIdx(entry.idx);
 
-      // Alphamon Dádiva Divina: choose an ally to heal 20% HP before attacking
+      // Alphamon Dádiva Divina: automatically heal the weakest ally before attacking.
       if (
         dadivaDivinaRef.current.alphamonPresent &&
         pf.name.toLowerCase().includes('alphamon') &&
         pf.currentHP > 0 &&
         fighters.some((f, i) => i !== entry.idx && f.currentHP > 0 && f.currentHP < f.stats.hp)
       ) {
+        const weakestAllyIdx = fighters.reduce((weakestIdx, fighter, fighterIdx) => {
+          if (fighterIdx === entry.idx || fighter.currentHP <= 0 || fighter.currentHP >= fighter.stats.hp) return weakestIdx;
+          if (weakestIdx < 0) return fighterIdx;
+          const fighterRatio = fighter.currentHP / fighter.stats.hp;
+          const weakestRatio = fighters[weakestIdx].currentHP / fighters[weakestIdx].stats.hp;
+          return fighterRatio < weakestRatio ? fighterIdx : weakestIdx;
+        }, -1);
         alphaHealCtxRef.current = { fighters, alphaIdx: entry.idx };
-        setAlphaHealModal(true);
-        setBusy(false);
-        return;
+        if (weakestAllyIdx >= 0) {
+          handleAlphaHeal(weakestAllyIdx);
+          setBusy(false);
+          return;
+        }
       }
 
       addLog(`🎮 Vez de ${pf.name}!`, colors.primary);
@@ -1265,7 +1277,7 @@ export default function BattleScreen() {
             <Text style={[styles.enemyLevel, { color: colors.primary }]}>{t('common.level')} {effectiveEnemyLevel}</Text>
             <View style={[styles.expBadge, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
               <Feather name="award" size={11} color={colors.primary} />
-              <Text style={[styles.expBadgeText, { color: colors.primary }]}>+{stage.expReward} EXP</Text>
+              <Text style={[styles.expBadgeText, { color: colors.primary }]}>+{playerXpReward} XP do Jogador</Text>
             </View>
             <Text style={[styles.possibleLabel, { color: colors.mutedForeground }]} numberOfLines={2}>
               {stageCharIds.map((id) => CHARACTERS[id]?.name ?? id).join(', ')}
@@ -1551,7 +1563,7 @@ export default function BattleScreen() {
             </View>
             <Animated.View style={{ transform: [{ translateX: playerShake }] }}>
               <View style={{ position: 'relative' }}>
-                <CharacterAvatar characterId={pOwned?.characterId ?? ''} size={64} />
+                <CharacterAvatar characterId={pOwned?.characterId ?? ''} size={64} ascensionStars={pOwned?.ascensionStars} />
                 {playerHitFlash && (
                   <ElementAttackEffect key={playerHitFlash.key} element={playerHitFlash.element} />
                 )}
@@ -1587,7 +1599,7 @@ export default function BattleScreen() {
                     {isActive && (
                       <View style={[styles.teamChipActiveDot, { backgroundColor: colors.primary }]} />
                     )}
-                    <CharacterAvatar characterId={tfOwned?.characterId ?? ''} size={28} />
+                    <CharacterAvatar characterId={tfOwned?.characterId ?? ''} size={28} ascensionStars={tfOwned?.ascensionStars} />
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={[styles.teamChipName, { color: isActive ? colors.primary : colors.mutedForeground }]} numberOfLines={1}>
                         {tfChar?.name ?? '—'}
@@ -1745,31 +1757,14 @@ export default function BattleScreen() {
           <Text style={[styles.resultTitle, { color: won ? '#22c55e' : '#ef4444' }]}>
             {won ? t('battle.result.victory') : t('battle.result.defeat')}
           </Text>
-          {won && dvBonusInfo && (
-            <View style={[styles.rewardBox, { backgroundColor: '#60a5fa18', borderColor: '#60a5fa55' }]}>
-              <Text style={{ fontSize: 14 }}>📡</Text>
-              <View style={{ gap: 2 }}>
-                {dvBonusInfo.active > 0 && (
-                  <Text style={[styles.rewardText, { color: '#60a5fa' }]}>+{dvBonusInfo.active} XP ativo (D-2)</Text>
-                )}
-                {dvBonusInfo.bank > 0 && dvBonusInfo.bankCount > 0 && (
-                  <Text style={[styles.rewardText, { color: '#60a5fa' }]}>+{dvBonusInfo.bank} XP banco ({dvBonusInfo.bankCount} Digimon)</Text>
-                )}
-              </View>
+          {won && playerXpReward > 0 && (
+            <View style={[styles.rewardBox, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
+              <Feather name="award" size={16} color={colors.primary} />
+              <Text style={[styles.rewardText, { color: colors.primary }]}>
+                +{playerXpReward} XP do Jogador!
+              </Text>
             </View>
           )}
-          {won && stage && (() => {
-            const ec = battleCharIds.length > 0 ? battleCharIds.length : 1;
-            const totalXp = stage.expReward * ec;
-            return (
-              <View style={[styles.rewardBox, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
-                <Feather name="award" size={16} color={colors.primary} />
-                <Text style={[styles.rewardText, { color: colors.primary }]}>
-                  +{totalXp} EXP ganhos{ec > 1 ? ` (${ec}× inimigos)` : ''}!
-                </Text>
-              </View>
-            );
-          })()}
 
           {/* Dropped items */}
           {won && droppedItems.length > 0 && (

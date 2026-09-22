@@ -1298,7 +1298,7 @@ export const SACRIFICE_DROPS: Record<string, { itemId: string; chance: number }[
   leviamon:   [{ itemId: 'piece_gehenna', chance: 1.0 }],
   belphemon:  [{ itemId: 'piece_gehenna', chance: 1.0 }],
   demon:      [{ itemId: 'piece_gehenna', chance: 1.0 }],
-  // ── Fragmentos da Pena Taikyoku (4 Guardiões Celestiais + Huanglongmon) ──
+  // ── Estilhaços Corrompidos (4 Guardiões Celestiais + Huanglongmon) ──
   'custom_327':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
   'custom_328':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
   'custom_329':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
@@ -1412,8 +1412,8 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_battery_blue:     'Bateria Azul',
   piece_battery_purple:   'Bateria Roxa',
   piece_battery_gold:     'Bateria Dourada',
-  taikyoku_feather:       'Pena Taikyoku 🪶',
-  piece_taikyoku_feather: 'Fragmento da Pena Taikyoku',
+  taikyoku_feather:       'Fragmento Corrompido',
+  piece_taikyoku_feather: 'Estilhaço Corrompido',
   black_digitron:         'Black Digitron 🖤',
   piece_black_digitron:   'Fragmento do Black Digitron',
   x_antibody:             'X-Antibody 🧬',
@@ -2013,7 +2013,7 @@ export const EQUIPMENT_ITEMS: EquipItem[] = [
   { id: 'brasao_amor',      name: 'Brasão do Amor',      slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão do Amor. Aumenta em 15% todos os status de Digimon do tipo Fogo e Vento.',     bonuses: {}, elementBonus: { elements: ['FIRE', 'WIND'],   percent: 0.15 } },
   { id: 'brasao_luz',           name: 'Brasão da Luz',           slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Luz. Aumenta em 15% todos os status de Digimon do tipo Luz e Trevas.',           bonuses: {}, elementBonus: { elements: ['LIGHT', 'DARK'],        percent: 0.15 } },
   { id: 'brasao_conhecimento',  name: 'Brasão do Conhecimento',  slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão do Conhecimento. Aumenta em 15% todos os status de Digimon do tipo Trovão e Planta.', bonuses: {}, elementBonus: { elements: ['LIGHTNING', 'PLANT'], percent: 0.15 } },
-  { id: 'digivice_d2',    name: 'Digivice D-2',       slot: 'digivice', rarity: 'EPIC',      description: 'Recompensa por derrotar GulusGammamon. +20% XP para o Digimon em batalha, +25% XP para a reserva e +20% XP Tamer.', bonuses: {}, xpBonusPercent: 0.20, xpSharePercent: 0.25, tamerXpBonusPercent: 0.20 },
+  { id: 'digivice_d2',    name: 'Digivice D-2',       slot: 'digivice', rarity: 'EPIC',      description: 'Recompensa por derrotar GulusGammamon. Aumenta em 20% o XP do Jogador.', bonuses: {}, tamerXpBonusPercent: 0.20 },
   { id: 'digivice_d3',    name: 'Digivice Quebrado',  slot: 'digivice', rarity: 'COMMON',    description: 'Digivice danificado, mas ainda funcional. Potencializa levemente o espírito do parceiro.',             bonuses: { spt: 6 } },
   { id: 'pulseira_forca', name: 'Pulseira de Força',  slot: 'pulseira', rarity: 'COMMON',    description: 'Amplifica a força bruta do Digimon parceiro.',                      bonuses: { atk: 7 } },
   { id: 'pulseira_ouro',  name: 'Pulseira Dourada',   slot: 'pulseira', rarity: 'RARE',      description: 'Pulseira lendária que amplifica múltiplos atributos de batalha.',   bonuses: { atk: 10, spt: 8 } },
@@ -2154,14 +2154,14 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
   // ── Pena Taikyoku: 4 Guardiões Celestiais ─────────────────────────────────
   {
     pieceId: 'piece_taikyoku_feather',
-    pieceName: 'Fragmento da Pena Taikyoku',
-    pieceDescription: 'Obtido sacrificando um dos 4 Guardiões Celestiais (Zhuqiaomon, Baihumon, Azulongmon ou Ebonwumon) ou do próprio Huanglongmon. Junte 4 para forjar a Pena Taikyoku.',
+    pieceName: 'Estilhaço Corrompido',
+    pieceDescription: 'Obtido sacrificando um dos 4 Guardiões Celestiais (Zhuqiaomon, Baihumon, Azulongmon ou Ebonwumon) ou do próprio Huanglongmon. Junte 4 para formar o Fragmento Corrompido.',
     pieceIcon: 'feather',
     pieceColor: '#a855f7',
     requiredCount: 4,
     bitsCost: 0,
     resultItemId: 'taikyoku_feather',
-    resultItemName: 'Pena Taikyoku 🪶',
+    resultItemName: 'Fragmento Corrompido',
     resultRarity: 'BURST',
   },
   // ── Gehenna: Dark Lords sacrifice ─────────────────────────────────────────

@@ -65,7 +65,10 @@ interface AvatarProps {
   bgColor?: string;
   dimmed?: boolean;
   plain?: boolean;
+  ascensionStars?: number;
 }
+
+const GOLDEN_AURA_IMG = require('../assets/images/lens-flare.webp');
 
 // Characters that need a bigger image scale inside the avatar circle
 const AVATAR_SCALE: Record<string, number> = {
@@ -80,7 +83,7 @@ const AVATAR_SCALE: Record<string, number> = {
   agumonSaver:      0.6,
 };
 
-export function CharacterAvatar({ characterId, size = 72, borderColor, bgColor, dimmed, plain }: AvatarProps) {
+export function CharacterAvatar({ characterId, size = 72, borderColor, bgColor, dimmed, plain, ascensionStars = 0 }: AvatarProps) {
   const img = getCharacterImageSource(characterId);
   const sprite = CHARACTER_SPRITE_SHEETS[characterId];
   const char = getCharacter(characterId) ?? CHARACTERS[characterId];
@@ -88,11 +91,39 @@ export function CharacterAvatar({ characterId, size = 72, borderColor, bgColor, 
   const bc = borderColor ?? elemData?.color ?? '#00d4ff';
   const imgScale = AVATAR_SCALE[characterId] ?? getCharacterImageScale(characterId);
   const isEgg = char?.rarity === 'EGG';
+  const auraPulse = useRef(new Animated.Value(0.55)).current;
+
+  useEffect(() => {
+    if (ascensionStars < 4) {
+      auraPulse.setValue(0.55);
+      return;
+    }
+    const animation = Animated.loop(Animated.sequence([
+      Animated.timing(auraPulse, { toValue: 0.95, duration: 1100, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      Animated.timing(auraPulse, { toValue: 0.55, duration: 1100, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+    ]));
+    animation.start();
+    return () => animation.stop();
+  }, [ascensionStars, auraPulse]);
 
   const renderSize = size * imgScale;
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center', opacity: dimmed ? 0.45 : 1, overflow: 'visible' }}>
+      {ascensionStars >= 4 && (
+        <Animated.Image
+          source={GOLDEN_AURA_IMG}
+          resizeMode="contain"
+          style={{
+            position: 'absolute',
+            width: size * 1.42,
+            height: size * 1.42,
+            opacity: auraPulse,
+            tintColor: '#ffd700',
+            transform: [{ scale: auraPulse.interpolate({ inputRange: [0.55, 0.95], outputRange: [0.96, 1.08] }) }],
+          }}
+        />
+      )}
       {isEgg ? (
         <AnimatedEgg characterId={characterId} element={char?.element ?? 'NULL'} size={size * 0.6} />
       ) : sprite ? (

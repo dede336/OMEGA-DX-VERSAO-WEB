@@ -130,7 +130,7 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
         <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
       </View>
       {canEvolve && <DigiviceEvoIndicator tintColor={tamerAccent} />}
-      <CharacterAvatar characterId={owned.characterId} size={60} />
+      <CharacterAvatar characterId={owned.characterId} size={60} ascensionStars={owned.ascensionStars} />
       <AscensionStars stars={owned.ascensionStars} size="small" />
       {char.rarity !== 'EGG' && (
         <View style={gridCardStyles.badgeRow}>
@@ -616,7 +616,7 @@ export default function CollectionScreen() {
                           </Text>
                           {modalAscensionStars === 3 && !hasGoldenAscensionStar && (
                             <View style={styles.fragmentRow}>
-                              <Image source={require('../../assets/images/events/estrela-ascensao-dourada.png')} style={styles.goldenStarThumb} resizeMode="contain" />
+                              <Image source={require('../../assets/images/items/golden_star_fragment.png')} style={styles.goldenStarThumb} resizeMode="contain" />
                               <Text style={styles.fragmentText}>
                                 Fragmentos: {pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0}/{GOLDEN_STAR_FRAGMENTS_REQUIRED}
                               </Text>
@@ -852,6 +852,9 @@ export default function CollectionScreen() {
             <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
             <Text style={[styles.sheetTitle, { color: '#facc15' }]}>⭐ Escolher Digimon para Ascensão</Text>
             <Text style={[styles.sheetSub, { color: colors.mutedForeground, marginBottom: 12 }]}>A cópia escolhida será consumida permanentemente.</Text>
+            <Text style={{ color: '#facc15', fontSize: 11, lineHeight: 16, marginBottom: 12, textAlign: 'center' }}>
+              Na Ascensão, a base e o sacrifício precisam ter a mesma quantidade de estrelas.
+            </Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 360 }}>
               {ascensionCandidates.map((copy) => {
                 const copyChar = getCharacter(copy.characterId) ?? CHARACTERS[copy.characterId];
@@ -908,6 +911,9 @@ export default function CollectionScreen() {
             <Text style={[styles.sheetSub, { color: colors.mutedForeground, marginBottom: 12 }]}>
               {t('collection.pickSacrifice')} {altSacrificeChar?.name}
             </Text>
+            <Text style={{ color: '#facc15', fontSize: 11, lineHeight: 16, marginBottom: 12, textAlign: 'center' }}>
+              Na fusão, prevalece a menor quantidade de estrelas entre os Digimons.
+            </Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 360 }}>
               {altSacrificeCopies.map((copy) => {
                 const copyChar = getCharacter(copy.characterId) ?? CHARACTERS[copy.characterId];
@@ -923,6 +929,11 @@ export default function CollectionScreen() {
                       <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
                         {copyChar ? RARITY_LABELS[copyChar.rarity] : ''}
                       </Text>
+                      {modalOwned && (
+                        <Text style={{ color: '#facc15', fontSize: 11, marginTop: 3 }}>
+                          Resultado: {Math.min(getAscensionStars(modalOwned), getAscensionStars(copy))}★
+                        </Text>
+                      )}
                     </View>
                     <TouchableOpacity
                       style={[styles.sacrificePickerBtn, { backgroundColor: '#a855f7' }, pixelStyle]}

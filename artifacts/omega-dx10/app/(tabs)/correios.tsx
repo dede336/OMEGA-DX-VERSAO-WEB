@@ -7,7 +7,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGame, MailMessage } from '@/context/GameContext';
+import { useGame, MailMessage, OwnedCharacter, getMailGiftAscensionStars } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, ITEM_NAMES } from '@/constants/gameData';
 import { getCharacterImageSource as _getCharImg } from '@/constants/extendedCharacters';
@@ -55,14 +55,32 @@ export default function CorreiosScreen() {
     if (reward?.digimon) {
       reward.digimon.forEach((characterId, i) => {
         if (newCollection.length < 500) {
-          newCollection.push({ ownedId: `owned_${characterId}_${base}_${i}`, characterId, level: 1, exp: 0 });
+          newCollection.push({
+            ownedId: `owned_${characterId}_${base}_${i}`,
+            characterId,
+            level: 1,
+            exp: 0,
+            ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
+            mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
+              ? msg.id as OwnedCharacter['mailGiftId']
+              : undefined,
+          });
         }
       });
     }
     if (reward?.digimonWithLevel) {
       reward.digimonWithLevel.forEach(({ characterId, level }, i) => {
         if (newCollection.length < 500) {
-          newCollection.push({ ownedId: `owned_${characterId}_${base}_digi_${i}`, characterId, level, exp: 0 });
+          newCollection.push({
+            ownedId: `owned_${characterId}_${base}_digi_${i}`,
+            characterId,
+            level,
+            exp: 0,
+            ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
+            mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
+              ? msg.id as OwnedCharacter['mailGiftId']
+              : undefined,
+          });
         }
       });
     }
