@@ -80,12 +80,12 @@ export async function seedAccounts(): Promise<void> {
   try {
     const [dede] = await db.select().from(usersTable).where(eq(usersTable.username, "dede336")).limit(1);
     if (!dede) {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Luca336", 10);
+      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Lucas336", 10);
       const [inserted] = await db.insert(usersTable).values({ username: "dede336", passwordHash: hash, role: "admin", isAdmin: true }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: dede336 (admin)");
       await ensureTamerLevel(inserted.id, 20);
     } else {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Luca336", 10);
+      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Lucas336", 10);
       await db.update(usersTable).set({ isAdmin: true, role: "admin", passwordHash: hash }).where(eq(usersTable.username, "dede336"));
       console.log("[seed] Conta sincronizada: dede336 → admin / senha atualizada");
       await ensureTamerLevel(dede.id, 20);
@@ -93,7 +93,7 @@ export async function seedAccounts(): Promise<void> {
 
     const [rimuru] = await db.select().from(usersTable).where(eq(usersTable.username, "rimuru336")).limit(1);
     if (!rimuru) {
-      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Luca336", 10);
+      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Lucas336", 10);
       const [inserted] = await db.insert(usersTable).values({ username: "rimuru336", passwordHash: hash, role: "digimon_creator", isAdmin: false }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: rimuru336 (digimon_creator)");
       await ensureTamerLevel(inserted.id, 20);
@@ -2691,7 +2691,7 @@ export async function seedCustomDigimons(): Promise<void> {
 
     // SlashAngemon family
     const clavisId = await upsertDigimon(byName, "ClavisAngemon", { name: "ClavisAngemon", attribute: "VC", rarity: "LEGENDARY", element: "LIGHT", hp: 265, mp: 358, atk: 142, def: 140, spt: 208, spd: 162, description: "Anjo guardião das chaves do céu digital. Seu Heaven's Key abre portais de luz devastadores.", attackName: "Heaven's Key", attackElement: "LIGHT", spiritName: "Key of Resolution", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${magnaId}`, requiredLevel: 60, requiredItem: "anel_sagrado", ...imgFields("clavisangemon.gif") }, true);
-    const slashId = await upsertDigimon(byName, "SlashAngemon", { name: "SlashAngemon", attribute: "VC", rarity: "LEGENDARY", element: "LIGHT", hp: 272, mp: 330, atk: 178, def: 148, spt: 175, spd: 180, description: "Anjo guerreiro com lâminas cruzadas de luz pura. Seu Heaven's Ripper corta tudo com precisão angelical.", attackName: "Heaven's Ripper", attackElement: "LIGHT", spiritName: "St. Ripper", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${magnaId}`, requiredLevel: 60, requiredItem: "anel_sagrado", ...noImg });
+    const slashId = await upsertDigimon(byName, "SlashAngemon", { name: "SlashAngemon", attribute: "VC", rarity: "LEGENDARY", element: "LIGHT", hp: 272, mp: 330, atk: 178, def: 148, spt: 175, spd: 180, description: "Anjo guerreiro com lâminas cruzadas de luz pura. Seu Heaven's Ripper corta tudo com precisão angelical.", attackName: "Heaven's Ripper", attackElement: "LIGHT", spiritName: "St. Ripper", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${magnaId}`, requiredLevel: 60, requiredItem: "anel_sagrado", ...imgFields("slashangemon.gif") }, true);
     await upsertDigimon(byName, "Dominimon", { name: "Dominimon", attribute: "VC", rarity: "LEGENDARY", element: "LIGHT", hp: 428, mp: 418, atk: 278, def: 258, spt: 268, spd: 268, description: "Arcanjo de espada de fogo e gelo. Seu Grand Cross atinge todos inimigos com explosão de energia sagrada.", attackName: "Grand Cross", attackElement: "LIGHT", spiritName: "God Flame", spiritElement: "LIGHT", isBaseForm: false, scannable: false, isFusion: false, evolvesFromId: `custom_${slashId}`, requiredLevel: 80, ...imgFields("dominimon.gif") }, true);
 
     // Holy Dragons
