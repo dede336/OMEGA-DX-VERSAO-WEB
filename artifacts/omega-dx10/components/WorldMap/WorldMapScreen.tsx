@@ -806,12 +806,9 @@ export default function WorldMapScreen({ visible, mapId, onClose }: Props) {
           </View>{/* fim viewport clipping */}
 
           {/* Moldura sobre a área do mapa */}
-          <Image
-            source={MAP_FRAME}
-            style={{ position: 'absolute', top: 0, left: 0, width: MAP_VIEW_W, height: MAP_VIEW_W, zIndex: 10 }}
-            resizeMode="stretch"
-            pointerEvents="none"
-          />
+          <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, width: MAP_VIEW_W, height: MAP_VIEW_W, zIndex: 10 }}>
+            <Image source={MAP_FRAME} style={{ width: '100%', height: '100%' }} resizeMode="stretch" />
+          </View>
 
         </View>{/* fim wrapper mapa+moldura */}
 
