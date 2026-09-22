@@ -226,6 +226,13 @@ export default function BattleScreen() {
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
   const stage = map?.stages[stageIndex];
   const alreadyCleared = isStageCleared(mapId, stageIndex);
+  const regularMaps = GAME_MAPS.filter((candidate) => !(candidate as any).isDungeon && !candidate.isDaily);
+  const regularMapNumber = regularMaps.findIndex((candidate) => candidate.id === mapId) + 1;
+  const effectiveEnemyLevel = stage
+    ? regularMapNumber >= 4
+      ? Math.max(1, Math.floor(stage.enemyLevel * 0.7))
+      : stage.enemyLevel
+    : 1;
 
   function resolveEnemyId(id: string): string {
     if (!id.startsWith('name:')) return id;
@@ -431,7 +438,7 @@ export default function BattleScreen() {
     const eChar = getCharacter(resolvedId);
     if (!eChar) throw new Error(`Digimon inimigo não encontrado: ${charId}`);
     let f = buildFighter(
-      eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, stage!.enemyAscensionStars ?? 0), stage!.enemyLevel,
+      eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, stage!.enemyAscensionStars ?? 0), effectiveEnemyLevel,
       undefined, { attackName: eChar.attackName, spiritName: eChar.spiritName },
     );
     if (stage!.bossMultipliers) {
@@ -1202,7 +1209,7 @@ export default function BattleScreen() {
             <ImageBackground source={map.backgroundImage} style={styles.previewBgSmall} imageStyle={{ resizeMode: 'cover' }} />
           )}
           <View style={styles.previewInfoCompact}>
-            <Text style={[styles.enemyLevel, { color: colors.primary }]}>{t('common.level')} {stage.enemyLevel}</Text>
+            <Text style={[styles.enemyLevel, { color: colors.primary }]}>{t('common.level')} {effectiveEnemyLevel}</Text>
             <View style={[styles.expBadge, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
               <Feather name="award" size={11} color={colors.primary} />
               <Text style={[styles.expBadgeText, { color: colors.primary }]}>+{stage.expReward} EXP</Text>
@@ -1404,7 +1411,7 @@ export default function BattleScreen() {
                 const isDead = enemy.currentHP <= 0;
                 const maxHP = getScaledStats(
                   eChar ? applyAscensionBonus(eChar.baseStats, stage.enemyAscensionStars ?? 0) : enemy.stats,
-                  stage.enemyLevel,
+                  effectiveEnemyLevel,
                 ).hp;
                 const hasBg = !!map.backgroundImage;
                 return (

@@ -31,10 +31,10 @@ import {
 } from '@/utils/ascension';
 
 const XP_BATTERIES = [
-  { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
-  { id: 'piece_battery_blue',   name: 'Bateria Azul',    xp: 200, color: '#3b82f6', img: require('../../assets/images/battery_blue.webp') },
-  { id: 'piece_battery_purple', name: 'Bateria Roxa',    xp: 400, color: '#a855f7', img: require('../../assets/images/battery_purple.webp') },
-  { id: 'piece_battery_gold',   name: 'Bateria Dourada', xp: 800, color: '#f59e0b', img: require('../../assets/images/battery_gold.webp') },
+  { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 200,  color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
+  { id: 'piece_battery_blue',   name: 'Bateria Azul',    xp: 400,  color: '#3b82f6', img: require('../../assets/images/battery_blue.webp') },
+  { id: 'piece_battery_purple', name: 'Bateria Roxa',    xp: 800,  color: '#a855f7', img: require('../../assets/images/battery_purple.webp') },
+  { id: 'piece_battery_gold',   name: 'Bateria Dourada', xp: 1600, color: '#f59e0b', img: require('../../assets/images/battery_gold.webp') },
 ] as const;
 
 

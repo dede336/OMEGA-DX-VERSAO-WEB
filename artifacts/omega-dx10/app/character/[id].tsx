@@ -18,10 +18,10 @@ const BATTERY_IMG_PURPLE = require('../../assets/images/battery_purple.webp');
 const BATTERY_IMG_GOLD   = require('../../assets/images/battery_gold.webp');
 
 const XP_BATTERIES = [
-  { id: 'piece_battery_green',  colorKey: 'battery.verde',   xp: 100,  color: '#22c55e', img: BATTERY_IMG_GREEN  },
-  { id: 'piece_battery_blue',   colorKey: 'battery.azul',    xp: 200,  color: '#3b82f6', img: BATTERY_IMG_BLUE   },
-  { id: 'piece_battery_purple', colorKey: 'battery.roxa',    xp: 400,  color: '#a855f7', img: BATTERY_IMG_PURPLE },
-  { id: 'piece_battery_gold',   colorKey: 'battery.dourada', xp: 800,  color: '#f59e0b', img: BATTERY_IMG_GOLD   },
+  { id: 'piece_battery_green',  colorKey: 'battery.verde',   xp: 200,  color: '#22c55e', img: BATTERY_IMG_GREEN  },
+  { id: 'piece_battery_blue',   colorKey: 'battery.azul',    xp: 400,  color: '#3b82f6', img: BATTERY_IMG_BLUE   },
+  { id: 'piece_battery_purple', colorKey: 'battery.roxa',    xp: 800,  color: '#a855f7', img: BATTERY_IMG_PURPLE },
+  { id: 'piece_battery_gold',   colorKey: 'battery.dourada', xp: 1600, color: '#f59e0b', img: BATTERY_IMG_GOLD   },
 ];
 import {
   CHARACTERS, ATTRIBUTES, ELEMENTS,

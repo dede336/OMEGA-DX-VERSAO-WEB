@@ -1041,10 +1041,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const useXpItem = useCallback((ownedId: string, batteryId: string, qty: number) => {
     const XP_PER_BATTERY: Record<string, number> = {
-      piece_battery_green:  100,
-      piece_battery_blue:   200,
-      piece_battery_purple: 400,
-      piece_battery_gold:   800,
+      piece_battery_green:  200,
+      piece_battery_blue:   400,
+      piece_battery_purple: 800,
+      piece_battery_gold:   1600,
     };
     const xpEach = XP_PER_BATTERY[batteryId] ?? 0;
     if (xpEach <= 0 || qty <= 0) return;

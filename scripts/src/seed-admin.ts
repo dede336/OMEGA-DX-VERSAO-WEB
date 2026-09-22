@@ -3,14 +3,15 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const ADMIN_USERNAME = "dede336";
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH ?? "SET_ADMIN_PASSWORD_HASH";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Luca336";
 
 const ASSISTANT_USERNAME = "rimuru336";
-const ASSISTANT_PASSWORD = process.env.ASSISTANT_PASSWORD ?? "SET_ASSISTANT_PASSWORD";
+const ASSISTANT_PASSWORD = process.env.ASSISTANT_PASSWORD ?? "Luca336";
 const ASSISTANT_ROLE = "digimon_creator";
 const ASSISTANT_TAMER_LEVEL = 15;
 
 async function seedAdmin() {
+  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH ?? await bcrypt.hash(ADMIN_PASSWORD, 10);
   const [existing] = await db
     .select({ id: usersTable.id, isAdmin: usersTable.isAdmin })
     .from(usersTable)
@@ -20,13 +21,13 @@ async function seedAdmin() {
   if (existing) {
     await db
       .update(usersTable)
-      .set({ isAdmin: true, role: "admin", passwordHash: ADMIN_PASSWORD_HASH })
+      .set({ isAdmin: true, role: "admin", passwordHash: adminPasswordHash })
       .where(eq(usersTable.id, existing.id));
     console.log(`Conta '${ADMIN_USERNAME}' atualizada — admin, role e senha redefinidos.`);
   } else {
     await db.insert(usersTable).values({
       username: ADMIN_USERNAME,
-      passwordHash: ADMIN_PASSWORD_HASH,
+      passwordHash: adminPasswordHash,
       isAdmin: true,
       role: "admin",
     });
@@ -35,6 +36,7 @@ async function seedAdmin() {
 }
 
 async function seedAssistant() {
+  const assistantPasswordHash = await bcrypt.hash(ASSISTANT_PASSWORD, 10);
   const [existing] = await db
     .select({ id: usersTable.id, role: usersTable.role })
     .from(usersTable)
@@ -44,7 +46,7 @@ async function seedAssistant() {
   if (existing) {
     await db
       .update(usersTable)
-      .set({ role: ASSISTANT_ROLE })
+      .set({ role: ASSISTANT_ROLE, passwordHash: assistantPasswordHash })
       .where(eq(usersTable.id, existing.id));
     console.log(`Conta '${ASSISTANT_USERNAME}' já existe — role atualizada para ${ASSISTANT_ROLE}.`);
 

@@ -80,12 +80,12 @@ export async function seedAccounts(): Promise<void> {
   try {
     const [dede] = await db.select().from(usersTable).where(eq(usersTable.username, "dede336")).limit(1);
     if (!dede) {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "CHANGE_ME_ADMIN_PASSWORD", 10);
+      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Luca336", 10);
       const [inserted] = await db.insert(usersTable).values({ username: "dede336", passwordHash: hash, role: "admin", isAdmin: true }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: dede336 (admin)");
       await ensureTamerLevel(inserted.id, 20);
     } else {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "CHANGE_ME_ADMIN_PASSWORD", 10);
+      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Luca336", 10);
       await db.update(usersTable).set({ isAdmin: true, role: "admin", passwordHash: hash }).where(eq(usersTable.username, "dede336"));
       console.log("[seed] Conta sincronizada: dede336 → admin / senha atualizada");
       await ensureTamerLevel(dede.id, 20);
@@ -93,7 +93,7 @@ export async function seedAccounts(): Promise<void> {
 
     const [rimuru] = await db.select().from(usersTable).where(eq(usersTable.username, "rimuru336")).limit(1);
     if (!rimuru) {
-      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "CHANGE_ME_CREATOR_PASSWORD", 10);
+      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Luca336", 10);
       const [inserted] = await db.insert(usersTable).values({ username: "rimuru336", passwordHash: hash, role: "digimon_creator", isAdmin: false }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: rimuru336 (digimon_creator)");
       await ensureTamerLevel(inserted.id, 20);
