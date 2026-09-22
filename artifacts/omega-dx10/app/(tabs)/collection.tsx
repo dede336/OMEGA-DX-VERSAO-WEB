@@ -21,8 +21,7 @@ import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadg
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import AscensionAnimation from '@/components/AscensionAnimation';
-import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
-import BatteryExpAnimation from '@/components/BatteryExpAnimation';
+import EvolutionAnimation from '@/components/EvolutionAnimation';
 import {
   ASCENSION_LEVEL_REQUIREMENT,
   GOLDEN_STAR_FRAGMENT_ID,
@@ -31,10 +30,6 @@ import {
   getAscensionStars,
 } from '@/utils/ascension';
 
-const DIGIVO_GIF       = require('../../assets/images/digivolution.webp');
-const DIGIVO_INTRO_GIF = require('../../assets/images/digivolution_intro.webp');
-const OMEGAMON_GIF          = require('../../assets/images/omegamon_digivolve.webp');
-
 const XP_BATTERIES = [
   { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 100, color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
   { id: 'piece_battery_blue',   name: 'Bateria Azul',    xp: 200, color: '#3b82f6', img: require('../../assets/images/battery_blue.webp') },
@@ -42,8 +37,6 @@ const XP_BATTERIES = [
   { id: 'piece_battery_gold',   name: 'Bateria Dourada', xp: 800, color: '#f59e0b', img: require('../../assets/images/battery_gold.webp') },
 ] as const;
 
-
-type EvoPhase = 'playing' | 'reveal' | 'done';
 
 const DIGIVICE_IMG   = require('../../assets/images/digivice.webp');
 const LENS_FLARE_IMG = require('../../assets/images/lens-flare.webp');
@@ -240,7 +233,6 @@ export default function CollectionScreen() {
   const [xpPanelVisible, setXpPanelVisible] = useState(false);
   const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
   const [batteryQty, setBatteryQty] = useState(1);
-  const [batteryExpAnim, setBatteryExpAnim] = useState<{ characterId: string; level: number; exp: number; gainedExp: number; color: string } | null>(null);
   const [ascensionPickerVisible, setAscensionPickerVisible] = useState(false);
   const [ascensionMessage, setAscensionMessage] = useState('');
   const [ascensionAnim, setAscensionAnim] = useState<{ characterId: string; previousStars: number } | null>(null);
@@ -250,10 +242,6 @@ export default function CollectionScreen() {
   const [pendingAltEvo, setPendingAltEvo] = useState<{ ownedId: string; fromCharId: string; toCharId: string } | null>(null);
   // Evolution animation state
   const [evoAnim, setEvoAnim] = useState<{ fromCharId: string; toCharId: string } | null>(null);
-  const [evoPhase, setEvoPhase] = useState<EvoPhase>('playing');
-  const fromOpacity   = useRef(new Animated.Value(1)).current;
-  const newFormOpacity = useRef(new Animated.Value(0)).current;
-  const titleScale = useRef(new Animated.Value(0.7)).current;
 
   function openModal(owned: OwnedCharacter) {
     setXpPanelVisible(false);
@@ -270,36 +258,13 @@ export default function CollectionScreen() {
     closeModal();
     setSacrificePickerVisible(false);
     setPendingAltEvo(null);
-    fromOpacity.setValue(1);
-    newFormOpacity.setValue(0);
-    titleScale.setValue(0.7);
-    setEvoPhase('playing');
     setEvoAnim({ fromCharId, toCharId });
     evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2);
   }, [evolveDigimon]);
 
-  // Drive the animation phases
-  useEffect(() => {
-    if (!evoAnim) return;
-
-    if (evoPhase === 'playing') {
-      // Intro GIF is 5.20s — wait for it to finish, then crossfade forms
-      const t = setTimeout(() => setEvoPhase('reveal'), 5200);
-      return () => clearTimeout(t);
-    }
-
-    if (evoPhase === 'reveal') {
-      Animated.parallel([
-        Animated.timing(fromOpacity,    { toValue: 0, duration: 700, useNativeDriver: true }),
-        Animated.timing(newFormOpacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.spring(titleScale,     { toValue: 1, useNativeDriver: true, friction: 6 }),
-      ]).start(() => setEvoPhase('done'));
-    }
-  }, [evoAnim, evoPhase]);
-
   // Computed evolution info for modal
   const modalEvo       = modalOwned ? EVOLUTIONS[modalOwned.characterId] : undefined;
-  const hasReqItem     = !modalEvo?.requiredItem || (pieces[modalEvo.requiredItem] ?? 0) > 0;
+  const hasReqItem     = !modalEvo?.requiredItem || inventory.includes(modalEvo.requiredItem);
   const modalCanEvolve = !!(modalOwned && modalEvo && modalOwned.level >= modalEvo.requiredLevel && hasReqItem);
   const modalEvoChar   = modalEvo ? CHARACTERS[modalEvo.evolvesTo] : undefined;
 
@@ -317,7 +282,7 @@ export default function CollectionScreen() {
   const modalAltEvo            = modalOwned && !(
     modalOwned.characterId === 'lucemonChaosMode' && modalOwned.acquisitionMethod === 'fusion'
   ) ? ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
-  const hasAltReqItem          = !modalAltEvo?.requiredItem || (pieces[modalAltEvo.requiredItem] ?? 0) > 0;
+  const hasAltReqItem          = !modalAltEvo?.requiredItem || inventory.includes(modalAltEvo.requiredItem);
   const altSacrificeCharId     = modalAltEvo?.requiredSacrificeCharacter;
   const altSacrificeCharIds    = (modalAltEvo as any)?.requiredSacrificeCharacters as string[] | undefined;
   const altSacrificeChar       = altSacrificeCharId ? CHARACTERS[altSacrificeCharId] : undefined;
@@ -336,7 +301,7 @@ export default function CollectionScreen() {
 
   // ── Extra Alternate Evolution (alt2) ──────────────────────────────────────
   const modalAlt2Evo          = modalOwned ? EXTRA_ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
-  const hasAlt2ReqItem        = !modalAlt2Evo?.requiredItem || (pieces[modalAlt2Evo.requiredItem] ?? 0) > 0;
+  const hasAlt2ReqItem        = !modalAlt2Evo?.requiredItem || inventory.includes(modalAlt2Evo.requiredItem);
   const modalCanAlt2Evolve    = !!(modalOwned && modalAlt2Evo && modalOwned.level >= modalAlt2Evo.requiredLevel && hasAlt2ReqItem);
   const modalAlt2EvoChar      = modalAlt2Evo ? CHARACTERS[modalAlt2Evo.evolvesTo] : undefined;
 
@@ -364,8 +329,6 @@ export default function CollectionScreen() {
     (modalAscensionStars < 3 || hasGoldenAscensionStar)
   );
 
-  const toChar = evoAnim ? CHARACTERS[evoAnim.toCharId] : null;
-  const fromChar = evoAnim ? CHARACTERS[evoAnim.fromCharId] : null;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -769,16 +732,24 @@ export default function CollectionScreen() {
                           })}
                         </View>
 
-                        <BatteryQuantityPicker
-                          value={batteryQty}
-                          max={available}
-                          onChange={setBatteryQty}
-                          color={battery.color}
-                          borderColor={colors.border}
-                          textColor={colors.foreground}
-                          mutedColor={colors.mutedForeground}
-                          availableLabel={`Disponível: ${available}`}
-                        />
+                        <View style={styles.xpQuantityRow}>
+                          <TouchableOpacity
+                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
+                            onPress={() => setBatteryQty((quantity) => Math.max(1, quantity - 1))}
+                          >
+                            <Feather name="minus" size={17} color={colors.foreground} />
+                          </TouchableOpacity>
+                          <View style={styles.xpQuantityCenter}>
+                            <Text style={[styles.xpQuantityNumber, { color: colors.foreground }]}>{batteryQty}</Text>
+                            <Text style={[styles.xpQuantityAvailable, { color: colors.mutedForeground }]}>Disponível: {available}</Text>
+                          </View>
+                          <TouchableOpacity
+                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
+                            onPress={() => setBatteryQty((quantity) => Math.min(available, quantity + 1))}
+                          >
+                            <Feather name="plus" size={17} color={colors.foreground} />
+                          </TouchableOpacity>
+                        </View>
 
                         <Text style={[styles.xpTotalText, { color: battery.color }]}>+{(battery.xp * batteryQty).toLocaleString()} EXP</Text>
                         <TouchableOpacity
@@ -786,7 +757,6 @@ export default function CollectionScreen() {
                           disabled={available <= 0}
                           onPress={() => {
                             if (available <= 0) return;
-                            setBatteryExpAnim({ characterId: modalOwned.characterId, level: modalOwned.level, exp: modalOwned.exp, gainedExp: battery.xp * batteryQty, color: battery.color });
                             useXpItem(modalOwned.ownedId, battery.id, batteryQty);
                             closeModal();
                           }}
@@ -821,60 +791,14 @@ export default function CollectionScreen() {
         </Pressable>
       </Modal>
 
-      {/* ── Digivolution Animation Overlay ── */}
-      <Modal
-        visible={evoAnim !== null}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => { if (evoPhase === 'done') setEvoAnim(null); }}
-      >
-        <Pressable
-          style={styles.evoOverlay}
-          onPress={() => { if (evoPhase === 'done') setEvoAnim(null); }}
-        >
-          {/* GIF background — intro during 'playing', reveal GIF after */}
-          <Image
-            source={
-              evoPhase === 'playing'
-                ? (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : DIGIVO_INTRO_GIF)
-                : (evoAnim?.toCharId === 'omegamon' ? OMEGAMON_GIF : DIGIVO_GIF)
-            }
-            style={styles.evoGifBg}
-            resizeMode="cover"
-          />
-          <View style={styles.evoOverlayDim} />
-
-          {/* Content */}
-          <View style={styles.evoContent} pointerEvents="none">
-            {(evoPhase === 'reveal' || evoPhase === 'done') && evoAnim && (
-              <>
-                {/* Crossfade: old form fades out, new form fades in */}
-                <View style={styles.evoAvatarWrap}>
-                  <Animated.View style={[StyleSheet.absoluteFill, { opacity: fromOpacity, alignItems: 'center', justifyContent: 'center' }]}>
-                    <CharacterAvatar characterId={evoAnim.fromCharId} size={140} />
-                  </Animated.View>
-                  <Animated.View style={{ opacity: newFormOpacity }}>
-                    <CharacterAvatar characterId={evoAnim.toCharId} size={140} />
-                  </Animated.View>
-                </View>
-                <Animated.Text style={[styles.evoToName, { opacity: newFormOpacity }]}>
-                  {toChar?.name ?? ''}
-                </Animated.Text>
-                {toChar && (
-                  <Animated.View style={[styles.evoBadgesRowBig, { opacity: newFormOpacity }]}>
-                    <AttributeBadge attr={toChar.attribute} />
-                    <ElementBadge elem={toChar.element} />
-                  </Animated.View>
-                )}
-                {evoPhase === 'done' && (
-                  <Text style={styles.evoDismiss}>Toque para continuar</Text>
-                )}
-              </>
-            )}
-          </View>
-        </Pressable>
-      </Modal>
+      {evoAnim && (
+        <EvolutionAnimation
+          visible
+          fromCharacterId={evoAnim.fromCharId}
+          toCharacterId={evoAnim.toCharId}
+          onClose={() => setEvoAnim(null)}
+        />
+      )}
 
       {/* ── Sacrifice Confirm Modal ───────────────────────────────────── */}
       <Modal visible={confirmSacrificeVisible} transparent animationType="fade">
@@ -969,7 +893,6 @@ export default function CollectionScreen() {
       </Modal>
 
       {ascensionAnim && <AscensionAnimation visible characterId={ascensionAnim.characterId} previousStars={ascensionAnim.previousStars} onClose={() => setAscensionAnim(null)} />}
-      {batteryExpAnim && <BatteryExpAnimation visible characterId={batteryExpAnim.characterId} initialLevel={batteryExpAnim.level} initialExp={batteryExpAnim.exp} gainedExp={batteryExpAnim.gainedExp} color={batteryExpAnim.color} onClose={() => setBatteryExpAnim(null)} />}
 
       {/* ── Alt-evo Sacrifice Picker Modal ─────────────────────────────── */}
       <Modal visible={sacrificePickerVisible} transparent animationType="slide" onRequestClose={() => setSacrificePickerVisible(false)}>
