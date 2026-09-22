@@ -442,16 +442,18 @@ export function findCharacterIdByName(name: string): string | null {
 }
 
 export function getCharacterImageSource(id: string): any {
-  const ov = _overrides[id];
-  if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
-  if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
+  // Prefer the bundled canonical catalog. This lets the replacement image set
+  // win over stale server-side overrides for Digimons that have a local match.
   if ((CHARACTER_IMAGES as Record<string, any>)[id]) return (CHARACTER_IMAGES as Record<string, any>)[id];
   const custom = _customChars[id];
-  if (custom?.imageApiUrl) return { uri: custom.imageApiUrl };
   if (custom) {
     const img = custom.name ? _IMAGE_BY_NORM[_normKey(custom.name)] : undefined;
     if (img) return img;
   }
+  const ov = _overrides[id];
+  if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
+  if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
+  if (custom?.imageApiUrl) return { uri: custom.imageApiUrl };
   return null;
 }
 
