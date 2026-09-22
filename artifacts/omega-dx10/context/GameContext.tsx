@@ -543,19 +543,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (alternate2) {
         const evo = EXTRA_ALTERNATE_EVOLUTIONS[target.characterId];
         if (!evo || target.level < evo.requiredLevel) return prev;
-        if (evo.requiredItem && (prev.pieces[evo.requiredItem] ?? 0) <= 0) return prev;
+        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const newCollection = prev.collection.map((c) =>
           c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0 } : c
         );
-        const newPieces = evo.requiredItem
-          ? { ...prev.pieces, [evo.requiredItem]: (prev.pieces[evo.requiredItem] ?? 0) - 1 }
-          : prev.pieces;
-        return { ...prev, collection: newCollection, pieces: newPieces };
+        const newInventory = evo.requiredItem
+          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
+          : prev.inventory;
+        return { ...prev, collection: newCollection, inventory: newInventory };
       } else if (alternate) {
         const evo = ALTERNATE_EVOLUTIONS[target.characterId];
         if (!evo || target.level < evo.requiredLevel) return prev;
         if (target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return prev;
-        if (evo.requiredItem && (prev.pieces[evo.requiredItem] ?? 0) <= 0) return prev;
+        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const sacrificeCharId = evo.requiredSacrificeCharacter;
         const sacrificeCharIds = (evo as any).requiredSacrificeCharacters as string[] | undefined;
 
@@ -587,21 +587,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             newCollection = newCollection.filter((c) => c.ownedId !== resolvedId);
           }
         }
-        const newPieces = evo.requiredItem
-          ? { ...prev.pieces, [evo.requiredItem]: (prev.pieces[evo.requiredItem] ?? 0) - 1 }
-          : prev.pieces;
-        return { ...prev, collection: newCollection, pieces: newPieces };
+        const newInventory = evo.requiredItem
+          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
+          : prev.inventory;
+        return { ...prev, collection: newCollection, inventory: newInventory };
       } else {
         const evo = EVOLUTIONS[target.characterId];
         if (!evo || target.level < evo.requiredLevel) return prev;
-        if (evo.requiredItem && (prev.pieces[evo.requiredItem] ?? 0) <= 0) return prev;
+        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const newCollection = prev.collection.map((c) =>
           c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const } : c
         );
-        const newPieces = evo.requiredItem
-          ? { ...prev.pieces, [evo.requiredItem]: (prev.pieces[evo.requiredItem] ?? 0) - 1 }
-          : prev.pieces;
-        return { ...prev, collection: newCollection, pieces: newPieces };
+        const newInventory = evo.requiredItem
+          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
+          : prev.inventory;
+        return { ...prev, collection: newCollection, inventory: newInventory };
       }
     });
   }, []);
