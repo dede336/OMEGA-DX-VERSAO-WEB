@@ -20,6 +20,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
+import AscensionAnimation from '@/components/AscensionAnimation';
 import {
   ASCENSION_LEVEL_REQUIREMENT,
   GOLDEN_STAR_FRAGMENT_ID,
@@ -239,6 +240,7 @@ export default function CollectionScreen() {
   const [batteryQty, setBatteryQty] = useState(1);
   const [ascensionPickerVisible, setAscensionPickerVisible] = useState(false);
   const [ascensionMessage, setAscensionMessage] = useState('');
+  const [ascensionAnim, setAscensionAnim] = useState<{ characterId: string; previousStars: number } | null>(null);
 
   // Alt-evo sacrifice picker
   const [sacrificePickerVisible, setSacrificePickerVisible] = useState(false);
@@ -309,7 +311,9 @@ export default function CollectionScreen() {
     modalOwned.level >= modalFormChangeRequiredLevel
   );
 
-  const modalAltEvo            = modalOwned ? ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
+  const modalAltEvo            = modalOwned && !(
+    modalOwned.characterId === 'lucemonChaosMode' && modalOwned.acquisitionMethod === 'fusion'
+  ) ? ALTERNATE_EVOLUTIONS[modalOwned.characterId] : undefined;
   const hasAltReqItem          = !modalAltEvo?.requiredItem || (pieces[modalAltEvo.requiredItem] ?? 0) > 0;
   const altSacrificeCharId     = modalAltEvo?.requiredSacrificeCharacter;
   const altSacrificeCharIds    = (modalAltEvo as any)?.requiredSacrificeCharacters as string[] | undefined;
@@ -646,7 +650,7 @@ export default function CollectionScreen() {
                           </Text>
                           {modalAscensionStars === 3 && !hasGoldenAscensionStar && (
                             <View style={styles.fragmentRow}>
-                              <Image source={require('../../assets/images/events/estrela-ascensao-dourada.png')} style={styles.goldenStarThumb} />
+                              <Image source={require('../../assets/images/events/estrela-ascensao-dourada.png')} style={styles.goldenStarThumb} resizeMode="contain" />
                               <Text style={styles.fragmentText}>
                                 Fragmentos: {pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0}/{GOLDEN_STAR_FRAGMENTS_REQUIRED}
                               </Text>
@@ -948,7 +952,10 @@ export default function CollectionScreen() {
                         const result = ascendDigimon(modalOwned.ownedId, copy.ownedId);
                         setAscensionMessage(result.message);
                         setAscensionPickerVisible(false);
-                        if (result.success) setModalOwned(null);
+                        if (result.success) {
+                          setAscensionAnim({ characterId: modalOwned.characterId, previousStars: getAscensionStars(modalOwned) });
+                          setModalOwned(null);
+                        }
                       }}
                     >
                       <Feather name="star" size={13} color="#fff" />
@@ -964,6 +971,8 @@ export default function CollectionScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      {ascensionAnim && <AscensionAnimation visible characterId={ascensionAnim.characterId} previousStars={ascensionAnim.previousStars} onClose={() => setAscensionAnim(null)} />}
 
       {/* ── Alt-evo Sacrifice Picker Modal ─────────────────────────────── */}
       <Modal visible={sacrificePickerVisible} transparent animationType="slide" onRequestClose={() => setSacrificePickerVisible(false)}>
