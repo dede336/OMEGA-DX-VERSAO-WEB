@@ -1218,7 +1218,7 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
   metalGreymon: { evolvesTo: 'warGreymon',    requiredLevel: 52, label: 'WarGreymon' },
   warGreymon:   { evolvesTo: 'omegamon',      requiredLevel: 60, label: 'Omegamon' },
   // ── Tiranomon / SkullGreymon Line (evolução alternativa do Agumon) ────────
-  tiranomon:    { evolvesTo: 'skullgreymon',  requiredLevel: 38, label: 'SkullGreymon' },
+  tyranomon:    { evolvesTo: 'skullgreymon',  requiredLevel: 38, label: 'SkullGreymon' },
   // ── Agumon Savers / ShineGreymon Line ─────────────────────────────────────
   agumonSaver:  { evolvesTo: 'geoGreymon',    requiredLevel: 20, label: 'GeoGreymon' },
   geoGreymon:   { evolvesTo: 'rizeGreymon',   requiredLevel: 35, label: 'RizeGreymon' },
@@ -1347,9 +1347,9 @@ export const ROOKIE_OF: Record<string, string> = {
   // Agumon / WarGreymon / Omegamon
   greymon: 'agumon',          metalGreymon: 'agumon',         warGreymon: 'agumon',
   omegamon: 'agumon',
-  tiranomon: 'agumon',        skullgreymon: 'agumon',
+  tyranomon: 'agumon',        skullgreymon: 'agumon',
   // Agumon Savers / ShineGreymon
-  geoGreymon: 'agumonSaver',  rizeGreymon: 'agumonSaver',     shineGreymon: 'agumonSaver',    shineGreymonBurstMode: 'agumonSaver',
+  geoGreymon: 'agumon',       rizeGreymon: 'agumon',          shineGreymon: 'agumon',         shineGreymonBurstMode: 'agumon',
   // Gabumon / MetalGarurumon
   garurumon: 'gabumon',       wereGarurumon: 'gabumon',       metalGarurumon: 'gabumon',
   // Guilmon / Gallantmon
