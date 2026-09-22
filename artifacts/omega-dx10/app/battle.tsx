@@ -35,6 +35,7 @@ import ELEMENT_IMAGES from '@/constants/elementImages';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { applyAscensionBonus, getStarryNightAvailability } from '@/utils/ascension';
 import { AscensionStars } from '@/components/AscensionStars';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   buildFighter,
@@ -56,6 +57,14 @@ const ATTACK_EFFECT_TIME = 1000;
 const DAMAGE_START_TIME = 800;
 const HP_STEP_TIME = 100;
 const HP_STEP_COUNT = 10;
+const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
+const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
+
+type AutoBattleQuota = { hour: number; usedSeconds: number };
+
+function currentAutoBattleHour() {
+  return Math.floor(Date.now() / (60 * 60 * 1000));
+}
 
 const ELEMENT_EFFECT_IMAGES: Record<ElementId, any> = {
   WATER: require('../assets/images/effects/agua.gif'),
@@ -226,10 +235,16 @@ export default function BattleScreen() {
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
   const stage = map?.stages[stageIndex];
   const alreadyCleared = isStageCleared(mapId, stageIndex);
-  const regularMaps = GAME_MAPS.filter((candidate) => !(candidate as any).isDungeon && !candidate.isDaily);
+  const regularMaps = GAME_MAPS.filter((candidate) =>
+    !(candidate as any).isDungeon &&
+    !candidate.isDaily &&
+    !candidate.isBiweeklyEvent &&
+    !(candidate as any).expiresAt
+  );
   const regularMapNumber = regularMaps.findIndex((candidate) => candidate.id === mapId) + 1;
+  const autoBattleAllowed = regularMapNumber > 0;
   const effectiveEnemyLevel = stage
-    ? regularMapNumber >= 4
+    ? regularMapNumber >= 3
       ? Math.max(1, Math.floor(stage.enemyLevel * 0.7))
       : stage.enemyLevel
     : 1;
@@ -292,13 +307,58 @@ export default function BattleScreen() {
   useEffect(() => { collectionRef.current = collection; }, [collection]);
 
   // ── Auto battle ────────────────────────────────────────────────────────────
-  const [autoMode, setAutoMode] = useState(paramAutoMode);
+  const [autoMode, setAutoMode] = useState(false);
   const [autoRunCount, setAutoRunCount] = useState(paramAutoCount);
-  const autoModeRef = useRef(paramAutoMode);
+  const [autoQuotaReady, setAutoQuotaReady] = useState(false);
+  const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_LIMIT_SECONDS);
+  const autoModeRef = useRef(false);
   const autoRunCountRef = useRef(paramAutoCount);
   const AUTO_RUN_MAX = 10;
   useEffect(() => { autoModeRef.current = autoMode; }, [autoMode]);
   useEffect(() => { autoRunCountRef.current = autoRunCount; }, [autoRunCount]);
+
+  const readAutoQuota = useCallback(async (): Promise<AutoBattleQuota> => {
+    const hour = currentAutoBattleHour();
+    try {
+      const raw = await AsyncStorage.getItem(AUTO_BATTLE_QUOTA_KEY);
+      const saved = raw ? JSON.parse(raw) as AutoBattleQuota : null;
+      if (saved?.hour === hour) {
+        return { hour, usedSeconds: Math.max(0, Math.min(AUTO_BATTLE_LIMIT_SECONDS, Number(saved.usedSeconds) || 0)) };
+      }
+    } catch {}
+    const fresh = { hour, usedSeconds: 0 };
+    await AsyncStorage.setItem(AUTO_BATTLE_QUOTA_KEY, JSON.stringify(fresh));
+    return fresh;
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    readAutoQuota().then((quota) => {
+      if (!active) return;
+      const remaining = AUTO_BATTLE_LIMIT_SECONDS - quota.usedSeconds;
+      setAutoRemainingSeconds(remaining);
+      setAutoQuotaReady(true);
+      if (paramAutoMode && autoBattleAllowed && alreadyCleared && remaining > 0) setAutoMode(true);
+    });
+    return () => { active = false; };
+  }, [alreadyCleared, autoBattleAllowed, paramAutoMode, readAutoQuota]);
+
+  useEffect(() => {
+    if (!autoMode) return;
+    if (!autoBattleAllowed || !alreadyCleared || autoRemainingSeconds <= 0) {
+      setAutoMode(false);
+      return;
+    }
+    const timer = setInterval(async () => {
+      const quota = await readAutoQuota();
+      const usedSeconds = Math.min(AUTO_BATTLE_LIMIT_SECONDS, quota.usedSeconds + 1);
+      await AsyncStorage.setItem(AUTO_BATTLE_QUOTA_KEY, JSON.stringify({ hour: quota.hour, usedSeconds }));
+      const remaining = AUTO_BATTLE_LIMIT_SECONDS - usedSeconds;
+      setAutoRemainingSeconds(remaining);
+      if (remaining <= 0) setAutoMode(false);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [alreadyCleared, autoBattleAllowed, autoMode, autoRemainingSeconds, readAutoQuota]);
 
   // ── Turn queue ─────────────────────────────────────────────────────────────
   type TurnEntry = { side: 'player' | 'enemy'; idx: number };
@@ -378,13 +438,13 @@ export default function BattleScreen() {
 
   // ── Auto-start battle when coming from auto-restart ────────────────────────
   useEffect(() => {
-    if (!paramAutoMode || collection.length === 0) return;
+    if (!autoQuotaReady || !autoMode || !autoBattleAllowed || collection.length === 0) return;
     const autoTeam = team.length > 0 ? team : (selectedCharacter ? [selectedCharacter.ownedId] : []);
     if (autoTeam.length === 0) return;
     startBattle(autoTeam);
   // Run only once on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collection.length]);
+  }, [autoBattleAllowed, autoMode, autoQuotaReady, collection.length]);
 
   // ── Auto-restart after win ─────────────────────────────────────────────────
   useEffect(() => {
@@ -1648,15 +1708,16 @@ export default function BattleScreen() {
             ) : null}
 
             {/* Auto toggle */}
-            {(alreadyCleared || map.isDungeon) && (
+            {alreadyCleared && autoBattleAllowed && autoQuotaReady && (
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => { setAutoMode((p) => { const n = !p; if (n) { setAutoRunCount(0); setAttackMenuOpen(false); } return n; }); }}
+                disabled={autoRemainingSeconds <= 0}
+                onPress={() => { setAutoMode((p) => { const n = !p && autoRemainingSeconds > 0; if (n) { setAutoRunCount(0); setAttackMenuOpen(false); } return n; }); }}
                 style={[styles.autoBtn, { backgroundColor: autoMode ? '#22c55e22' : colors.card, borderColor: autoMode ? '#22c55e' : colors.border }, pixelStyle]}
               >
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 18, height: 18, opacity: autoMode ? 1 : 0.5 }} resizeMode="contain" />
                 <Text style={[styles.autoBtnLabel, { color: autoMode ? '#22c55e' : colors.mutedForeground }]}>
-                  {autoMode ? '⏸' : t('battle.auto')}
+                  {autoMode ? '⏸' : t('battle.auto')} {Math.floor(autoRemainingSeconds / 60)}:{String(autoRemainingSeconds % 60).padStart(2, '0')}
                 </Text>
               </TouchableOpacity>
             )}
