@@ -21,6 +21,8 @@ import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadg
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import AscensionAnimation from '@/components/AscensionAnimation';
+import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
+import BatteryExpAnimation from '@/components/BatteryExpAnimation';
 import {
   ASCENSION_LEVEL_REQUIREMENT,
   GOLDEN_STAR_FRAGMENT_ID,
@@ -238,6 +240,7 @@ export default function CollectionScreen() {
   const [xpPanelVisible, setXpPanelVisible] = useState(false);
   const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
   const [batteryQty, setBatteryQty] = useState(1);
+  const [batteryExpAnim, setBatteryExpAnim] = useState<{ characterId: string; level: number; exp: number; gainedExp: number; color: string } | null>(null);
   const [ascensionPickerVisible, setAscensionPickerVisible] = useState(false);
   const [ascensionMessage, setAscensionMessage] = useState('');
   const [ascensionAnim, setAscensionAnim] = useState<{ characterId: string; previousStars: number } | null>(null);
@@ -766,24 +769,16 @@ export default function CollectionScreen() {
                           })}
                         </View>
 
-                        <View style={styles.xpQuantityRow}>
-                          <TouchableOpacity
-                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
-                            onPress={() => setBatteryQty((quantity) => Math.max(1, quantity - 1))}
-                          >
-                            <Feather name="minus" size={17} color={colors.foreground} />
-                          </TouchableOpacity>
-                          <View style={styles.xpQuantityCenter}>
-                            <Text style={[styles.xpQuantityNumber, { color: colors.foreground }]}>{batteryQty}</Text>
-                            <Text style={[styles.xpQuantityAvailable, { color: colors.mutedForeground }]}>Disponível: {available}</Text>
-                          </View>
-                          <TouchableOpacity
-                            style={[styles.xpQuantityButton, { borderColor: colors.border }]}
-                            onPress={() => setBatteryQty((quantity) => Math.min(available, quantity + 1))}
-                          >
-                            <Feather name="plus" size={17} color={colors.foreground} />
-                          </TouchableOpacity>
-                        </View>
+                        <BatteryQuantityPicker
+                          value={batteryQty}
+                          max={available}
+                          onChange={setBatteryQty}
+                          color={battery.color}
+                          borderColor={colors.border}
+                          textColor={colors.foreground}
+                          mutedColor={colors.mutedForeground}
+                          availableLabel={`Disponível: ${available}`}
+                        />
 
                         <Text style={[styles.xpTotalText, { color: battery.color }]}>+{(battery.xp * batteryQty).toLocaleString()} EXP</Text>
                         <TouchableOpacity
@@ -791,6 +786,7 @@ export default function CollectionScreen() {
                           disabled={available <= 0}
                           onPress={() => {
                             if (available <= 0) return;
+                            setBatteryExpAnim({ characterId: modalOwned.characterId, level: modalOwned.level, exp: modalOwned.exp, gainedExp: battery.xp * batteryQty, color: battery.color });
                             useXpItem(modalOwned.ownedId, battery.id, batteryQty);
                             closeModal();
                           }}
@@ -973,6 +969,7 @@ export default function CollectionScreen() {
       </Modal>
 
       {ascensionAnim && <AscensionAnimation visible characterId={ascensionAnim.characterId} previousStars={ascensionAnim.previousStars} onClose={() => setAscensionAnim(null)} />}
+      {batteryExpAnim && <BatteryExpAnimation visible characterId={batteryExpAnim.characterId} initialLevel={batteryExpAnim.level} initialExp={batteryExpAnim.exp} gainedExp={batteryExpAnim.gainedExp} color={batteryExpAnim.color} onClose={() => setBatteryExpAnim(null)} />}
 
       {/* ── Alt-evo Sacrifice Picker Modal ─────────────────────────────── */}
       <Modal visible={sacrificePickerVisible} transparent animationType="slide" onRequestClose={() => setSacrificePickerVisible(false)}>
