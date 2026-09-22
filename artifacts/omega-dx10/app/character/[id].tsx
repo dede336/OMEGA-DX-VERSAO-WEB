@@ -32,6 +32,8 @@ import { getCharacter } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
+import FusionAnimation from '@/components/FusionAnimation';
+import BatteryExpAnimation from '@/components/BatteryExpAnimation';
 import { AscensionStars } from '@/components/AscensionStars';
 import { applyAscensionBonus } from '@/utils/ascension';
 
@@ -105,9 +107,10 @@ export default function CharacterDetailScreen() {
   const [xpModalVisible, setXpModalVisible] = useState(false);
   const [selectedBattery, setSelectedBattery] = useState<string>('piece_battery_green');
   const [batteryQty, setBatteryQty] = useState(1);
+  const [batteryExpAnim, setBatteryExpAnim] = useState<{ characterId: string; level: number; exp: number; gainedExp: number; color: string } | null>(null);
 
   // ── Fusion animation ────────────────────────────────────────────────────────
-  const [fuseAnim, setFuseAnim] = useState<{ fromCharId: string; toCharId: string } | null>(null);
+  const [fuseAnim, setFuseAnim] = useState<{ fromCharId: string; partnerCharId: string; toCharId: string } | null>(null);
   const [fusePhase, setFusePhase] = useState<FusePhase>('playing');
   const flashOpacity  = useRef(new Animated.Value(1)).current;
   const newFormOpacity = useRef(new Animated.Value(0)).current;
@@ -185,7 +188,7 @@ export default function CharacterDetailScreen() {
     newFormOpacity.setValue(0);
     titleScale.setValue(0.7);
     setFusePhase('playing');
-    setFuseAnim({ fromCharId: owned.characterId, toCharId: fusionRecipe.resultId });
+    setFuseAnim({ fromCharId: owned.characterId, partnerCharId: fusionRecipe.partner, toCharId: fusionRecipe.resultId });
   }
 
   // ── Element background pulse ────────────────────────────────────────────────
@@ -606,6 +609,7 @@ export default function CharacterDetailScreen() {
                       style={[styles.confirmFuse, { backgroundColor: maxQty === 0 ? '#666' : '#22c55e', opacity: maxQty === 0 ? 0.5 : 1 }]}
                       onPress={() => {
                         if (maxQty === 0) return;
+                        setBatteryExpAnim({ characterId: owned.characterId, level: owned.level, exp: owned.exp, gainedExp: totalXp, color: bat.color });
                         useXpItem(owned.ownedId, selectedBattery, batteryQty);
                         setXpModalVisible(false);
                       }}
@@ -658,46 +662,14 @@ export default function CharacterDetailScreen() {
         </Pressable>
       </Modal>
 
-      {/* ── Fusion animation overlay ─────────────────────────────────────── */}
-      <Modal
-        visible={fuseAnim !== null}
-        transparent
-        animationType="fade"
-        statusBarTranslucent
-        onRequestClose={() => { if (fusePhase === 'done') { setFuseAnim(null); router.back(); } }}
-      >
-        <Pressable
-          style={styles.evoOverlay}
-          onPress={() => { if (fusePhase === 'done') { setFuseAnim(null); router.back(); } }}
-        >
-          <ExpoImage source={animGif} style={styles.evoGifBg} contentFit="cover" />
-          <View style={styles.evoOverlayDim} />
-
-          <View style={styles.evoContent} pointerEvents="none">
-            {(fusePhase === 'reveal' || fusePhase === 'done') && fuseAnim && (
-              <>
-                <Animated.Text style={[styles.evoTopLabel, styles.evoTopLabelFusion, { transform: [{ scale: titleScale }] }]}>
-                </Animated.Text>
-                <Animated.View style={[styles.evoAvatarWrap, { opacity: newFormOpacity }]}>
-                  <CharacterAvatar characterId={fuseAnim.toCharId} size={140} />
-                </Animated.View>
-                <Animated.Text style={[styles.evoToName, { opacity: newFormOpacity }]}>
-                  {fuseToChar?.name ?? ''}
-                </Animated.Text>
-                {fuseToChar && (
-                  <Animated.View style={[styles.evoBadgesRowBig, { opacity: newFormOpacity }]}>
-                    <AttributeBadge attr={fuseToChar.attribute} />
-                    <ElementBadge   elem={fuseToChar.element}   />
-                  </Animated.View>
-                )}
-                {fusePhase === 'done' && (
-                  <Text style={styles.evoDismiss}>{t('char.tapToContinue')}</Text>
-                )}
-              </>
-            )}
-          </View>
-        </Pressable>
-      </Modal>
+      {fuseAnim && <FusionAnimation
+        visible
+        baseCharacterId={fuseAnim.fromCharId}
+        partnerCharacterId={fuseAnim.partnerCharId}
+        resultCharacterId={fuseAnim.toCharId}
+        onClose={() => { setFuseAnim(null); router.back(); }}
+      />}
+      {batteryExpAnim && <BatteryExpAnimation visible characterId={batteryExpAnim.characterId} initialLevel={batteryExpAnim.level} initialExp={batteryExpAnim.exp} gainedExp={batteryExpAnim.gainedExp} color={batteryExpAnim.color} onClose={() => setBatteryExpAnim(null)} />}
     </>
   );
 }
