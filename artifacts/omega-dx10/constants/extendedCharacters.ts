@@ -351,6 +351,13 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   const findCustomByName = (name: string) =>
     chars.find((c) => _normKey(c.name ?? '') === _normKey(name));
 
+  // Prefer the bundled/canonical ID when a custom DB record has the same
+  // name. The Gammamon line is present in both sources, and using the custom
+  // ID here makes the evolution tree render a stale duplicate (for example
+  // custom_1324) instead of the canonical GulusGammamon entry.
+  const canonicalIdForName = (name: string, fallbackId: string): string =>
+    BASE_NAME_MAP[name.toLowerCase()] ?? fallbackId;
+
   // A mesma linha pode ter registros antigos duplicados no banco. Se apenas o
   // registro atualmente encontrado for corrigido, um pai antigo ainda pode
   // reintroduzir um custom_* (por exemplo custom_1324) entre Gulus e Regulus.
@@ -379,23 +386,28 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     arcturius: findCustomByName('Arcturiusmon'),
   };
   if (gammamonLine.gammamon && gammamonLine.gulus && gammamonLine.regulus && gammamonLine.arcturius) {
+    const gammamonId = canonicalIdForName('Gammamon', gammamonLine.gammamon.id);
+    const gulusId = canonicalIdForName('GulusGammamon', gammamonLine.gulus.id);
+    const regulusId = canonicalIdForName('Regulusmon', gammamonLine.regulus.id);
+    const arcturiusId = canonicalIdForName('Arcturiusmon', gammamonLine.arcturius.id);
+
     clearEvolutionParents('GulusGammamon');
     clearEvolutionParents('Regulusmon');
 
-    ALTERNATE_EVOLUTIONS[gammamonLine.gammamon.id] = {
-      evolvesTo: gammamonLine.gulus.id,
+    ALTERNATE_EVOLUTIONS[gammamonId] = {
+      evolvesTo: gulusId,
       requiredLevel: 20,
       label: gammamonLine.gulus.name,
       requiredItem: 'black_digitron',
     };
-    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.gammamon.id];
-    EVOLUTIONS[gammamonLine.gulus.id] = {
-      evolvesTo: gammamonLine.regulus.id,
+    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonId];
+    EVOLUTIONS[gulusId] = {
+      evolvesTo: regulusId,
       requiredLevel: 40,
       label: gammamonLine.regulus.name,
     };
-    EVOLUTIONS[gammamonLine.regulus.id] = {
-      evolvesTo: gammamonLine.arcturius.id,
+    EVOLUTIONS[regulusId] = {
+      evolvesTo: arcturiusId,
       requiredLevel: 60,
       label: gammamonLine.arcturius.name,
     };
