@@ -1275,7 +1275,7 @@ export const ALTERNATE_EVOLUTIONS: Record<string, { evolvesTo: string; requiredL
   angewomon:        { evolvesTo: 'ophanimon',      requiredLevel: 60, label: 'Ophanimon',          requiredItem: 'anel_sagrado' },
   magnaAngemon:     { evolvesTo: 'seraphimon',     requiredLevel: 60, label: 'Seraphimon',         requiredItem: 'anel_sagrado' },
   lucemonChaosMode: { evolvesTo: 'lucemonSatanMode', requiredLevel: 50, label: 'Lucemon Satan Mode', requiredItem: 'gehenna' },
-agumon: { evolvesTo: 'tyranomon', requiredLevel: 16, label: 'Tyranomon' },
+  agumon:            { evolvesTo: 'tiranomon',             requiredLevel: 16, label: 'Tiranomon' },
   metalGarurumon:    { evolvesTo: 'omegamon',              requiredLevel: 60, label: 'Omegamon',             requiredSacrificeCharacter: 'warGreymon' },
   shineGreymon:      { evolvesTo: 'shineGreymonBurstMode', requiredLevel: 68, label: 'ShineGreymon Burst Mode', requiredSacrificeCharacter: 'imperialDramonFM' },
   rosemon:           { evolvesTo: 'rosemonBurstMode',      requiredLevel: 64, label: 'Rosemon Burst Mode',      requiredSacrificeCharacter: 'ophanimon' },
@@ -1349,7 +1349,7 @@ export const ROOKIE_OF: Record<string, string> = {
   omegamon: 'agumon',
   tyranomon: 'agumon',        skullgreymon: 'agumon',
   // Agumon Savers / ShineGreymon
-  geoGreymon: 'agumon',       rizeGreymon: 'agumon',          shineGreymon: 'agumon',         shineGreymonBurstMode: 'agumon',
+  geoGreymon: 'agumonSaver',  rizeGreymon: 'agumonSaver',     shineGreymon: 'agumonSaver',    shineGreymonBurstMode: 'agumonSaver',
   // Gabumon / MetalGarurumon
   garurumon: 'gabumon',       wereGarurumon: 'gabumon',       metalGarurumon: 'gabumon',
   // Guilmon / Gallantmon
@@ -1465,7 +1465,7 @@ export const CODEX_ORDER: string[] = [
   // Agumon / WarGreymon / Omegamon
   'agumon', 'greymon', 'metalGreymon', 'warGreymon', 'omegamon',
   // Tiranomon / SkullGreymon / MasterTyrannomon / Gaioumon (linha alternativa do Agumon)
-  'tyranomon', 'skullgreymon',
+  'tiranomon', 'skullgreymon',
   // Agumon Savers / ShineGreymon
   'agumonSaver', 'geoGreymon', 'rizeGreymon', 'shineGreymon', 'shineGreymonBurstMode',
   // Gabumon / MetalGarurumon

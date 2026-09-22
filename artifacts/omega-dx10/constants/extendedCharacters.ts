@@ -330,6 +330,14 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     requiredItem: 'gehenna',
   };
 
+  // Keep the two Agumon families separate. The API may still contain an old
+  // GeoGreymon → Agumon relationship, but it must never replace the classic
+  // Agumon → Greymon line in the game.
+  EVOLUTIONS.agumon = { evolvesTo: 'greymon', requiredLevel: 16, label: 'Greymon' };
+  ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: 'tiranomon', requiredLevel: 16, label: 'Tiranomon' };
+  delete EXTRA_ALTERNATE_EVOLUTIONS.agumon;
+  EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
+
   // Inject spirit sacrifice drops for Frontier Warriors by name
   // Remove any previously injected spirit drops before re-injecting
   for (const charName of Object.keys(SPIRIT_SACRIFICE_DROPS_BY_NAME)) {
