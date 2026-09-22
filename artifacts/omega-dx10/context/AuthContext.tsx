@@ -21,6 +21,7 @@ interface AuthContextValue {
   retryAuth: () => void;
   login: (usernameOrEmail: string, password: string) => Promise<void>;
   register: (username: string, password: string, email?: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
   getApiUrl: () => string;
 }
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextValue>({
   retryAuth: () => {},
   login: async () => {},
   register: async () => {},
+  changePassword: async () => {},
   logout: async () => {},
   getApiUrl: () => '/api',
 });
@@ -169,6 +171,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  async function changePassword(currentPassword: string, newPassword: string) {
+    const res = await apiFetch('/auth/change-password', token ?? undefined, { currentPassword, newPassword });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? 'Erro ao alterar a senha');
+  }
+
   async function logout() {
     await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
     setToken(null);
@@ -178,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const getApiUrl = useCallback(() => apiUrl.current, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthLoaded, serverOffline, retryAuth, login, register, logout, getApiUrl }}>
+    <AuthContext.Provider value={{ user, token, isAuthLoaded, serverOffline, retryAuth, login, register, changePassword, logout, getApiUrl }}>
       {children}
     </AuthContext.Provider>
   );
