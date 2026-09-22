@@ -102,9 +102,9 @@ export async function seedAccounts(): Promise<void> {
     } else {
       const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Lucas336", 10);
       await db.update(usersTable)
-        .set({ role: "digimon_creator", passwordHash: hash, updatedAt: new Date() })
+        .set({ passwordHash: hash, updatedAt: new Date() })
         .where(eq(usersTable.username, "rimuru336"));
-      console.log("[seed] Conta sincronizada: rimuru336 → digimon_creator / senha atualizada");
+      console.log("[seed] Senha sincronizada para rimuru336; cargo preservado.");
       await ensureTamerLevel(rimuru.id, 20);
       await ensureDigimonInCollection(rimuru.id, "1", 1);
       console.log("[seed] Gammamon garantido na coleção de rimuru336");
