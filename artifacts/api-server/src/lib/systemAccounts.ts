@@ -24,7 +24,7 @@ export interface ContaEspecial {
 export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
   {
     username: "dede336",
-    senhaHash: process.env.SEED_ADMIN_PASSWORD ?? "Luca336",
+    senhaHash: process.env.SEED_ADMIN_PASSWORD ?? "Lucas336",
     cargo: "ADMIN",
     isAdmin: true,
     role: "admin",
@@ -38,7 +38,7 @@ export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
   },
   {
     username: "rimuru336",
-    senhaHash: process.env.SEED_CREATOR_PASSWORD ?? "Luca336",
+    senhaHash: process.env.SEED_CREATOR_PASSWORD ?? "Lucas336",
     cargo: "ASSISTENTE",
     isAdmin: false,
     role: "digimon_creator",
