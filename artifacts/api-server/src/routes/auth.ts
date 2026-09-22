@@ -106,6 +106,46 @@ router.post("/login", async (req, res) => {
   res.json({ token, user: { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin, role: user.role, createdAt: user.createdAt } });
 });
 
+// POST /auth/change-password
+router.post("/change-password", requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body as {
+    currentPassword?: string;
+    newPassword?: string;
+  };
+
+  if (typeof currentPassword !== "string" || typeof newPassword !== "string" || !currentPassword || !newPassword) {
+    res.status(400).json({ error: "Informe a senha atual e a nova senha" });
+    return;
+  }
+  if (newPassword.length < 6) {
+    res.status(400).json({ error: "A nova senha deve ter ao menos 6 caracteres" });
+    return;
+  }
+  if (currentPassword === newPassword) {
+    res.status(400).json({ error: "A nova senha deve ser diferente da senha atual" });
+    return;
+  }
+
+  const [user] = await db
+    .select({ id: usersTable.id, passwordHash: usersTable.passwordHash })
+    .from(usersTable)
+    .where(eq(usersTable.id, req.auth!.userId))
+    .limit(1);
+
+  if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+    res.status(400).json({ error: "A senha atual está incorreta" });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await db
+    .update(usersTable)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(usersTable.id, user.id));
+
+  res.json({ message: "Senha alterada com sucesso" });
+});
+
 // GET /auth/me
 router.get("/me", requireAuth, async (req, res) => {
   const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.auth!.userId)).limit(1);
