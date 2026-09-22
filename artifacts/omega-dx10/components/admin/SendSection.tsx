@@ -471,7 +471,7 @@ export default function SendSection() {
         )}
 
         {/* Send button (for non-copiar tabs) */}
-        {tab !== 'copiar' && (
+        {(
           <TouchableOpacity
             style={[styles.sendBtn, {
               backgroundColor: TABS.find((t) => t.key === tab)?.color ?? '#8b5cf6',
