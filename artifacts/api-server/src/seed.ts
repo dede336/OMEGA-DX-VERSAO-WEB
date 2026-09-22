@@ -2846,6 +2846,52 @@ export async function seedCustomDigimons(): Promise<void> {
       console.log(`[seed] Evolução Cupimon (custom_${cupimonNumId}) → Lucemon (custom_${lucemonNumId}) vinculada.`);
     }
 
+    // Formas X e Black que possuem uma contraparte nominal são sempre
+    // evoluções desbloqueadas por item. Também corrige dados antigos, como
+    // BlackAgumon capturável e BlackAgumonX ligado diretamente ao Agumon.
+    const variantRows = await db
+      .select({
+        id: customDigimonsTable.id,
+        name: customDigimonsTable.name,
+        rarity: customDigimonsTable.rarity,
+        requiredLevel: customDigimonsTable.requiredLevel,
+      })
+      .from(customDigimonsTable);
+    const normalizeVariantName = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+    type VariantRow = { id: number; name: string; rarity: string; requiredLevel: number | null };
+    const variantByName = new Map<string, VariantRow>();
+    for (const rawRow of variantRows) {
+      const row = rawRow as VariantRow;
+      variantByName.set(normalizeVariantName(row.name), row);
+    }
+    const levelByRarity: Record<string, number> = {
+      COMMON: 15, RARE: 25, EPIC: 45, LEGENDARY: 60, ULTRA: 70, BURST: 70,
+    };
+
+    for (const rawVariant of variantRows) {
+      const variant = rawVariant as VariantRow;
+      const key = normalizeVariantName(variant.name);
+      let counterpart = key.endsWith("x") ? variantByName.get(key.slice(0, -1)) : undefined;
+      let requiredItem = counterpart ? "x_antibody" : undefined;
+      if (!counterpart && key.startsWith("black")) {
+        counterpart = variantByName.get(key.slice("black".length));
+        if (counterpart) requiredItem = "black_digitron";
+      }
+      if (!counterpart || !requiredItem || counterpart.id === variant.id) continue;
+
+      await db.update(customDigimonsTable)
+        .set({
+          evolvesFromId: `custom_${counterpart.id}`,
+          requiredItem,
+          requiredLevel: variant.requiredLevel ?? levelByRarity[variant.rarity] ?? 20,
+          isBaseForm: false,
+          scannable: false,
+          updatedAt: new Date(),
+        })
+        .where(eq(customDigimonsTable.id, variant.id));
+    }
+    console.log("[seed] Regras de evolução X-Antibody/Black Digitron sincronizadas.");
+
     console.log("[seed] Linhas evolutivas World 2-6: OK");
     console.log("[seed] Digimon customizados: OK");
   } catch (err) {
