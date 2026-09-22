@@ -3,10 +3,10 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const ADMIN_USERNAME = "dede336";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Luca336";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Lucas336";
 
 const ASSISTANT_USERNAME = "rimuru336";
-const ASSISTANT_PASSWORD = process.env.ASSISTANT_PASSWORD ?? "Luca336";
+const ASSISTANT_PASSWORD = process.env.ASSISTANT_PASSWORD ?? "Lucas336";
 const ASSISTANT_ROLE = "digimon_creator";
 const ASSISTANT_TAMER_LEVEL = 15;
 
