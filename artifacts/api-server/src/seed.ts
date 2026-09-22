@@ -76,35 +76,58 @@ async function ensureTamerLevel(userId: number, level: number): Promise<void> {
 }
 
 // ─── Contas ──────────────────────────────────────────────────────────────────
+const DEFAULT_SYSTEM_PASSWORD = "Lucas336";
+
+async function migrateLegacySystemPassword(user: {
+  id: number;
+  username: string;
+  passwordHash: string;
+}): Promise<boolean> {
+  // Older deployments used the username as the initial password. Migrate only
+  // that known legacy value; never overwrite a password changed by the player
+  // on later server starts.
+  const isLegacyPassword = await bcrypt.compare(user.username, user.passwordHash);
+  if (!isLegacyPassword) return false;
+
+  await db
+    .update(usersTable)
+    .set({
+      passwordHash: await bcrypt.hash(DEFAULT_SYSTEM_PASSWORD, 10),
+      updatedAt: new Date(),
+    })
+    .where(eq(usersTable.id, user.id));
+  return true;
+}
+
 export async function seedAccounts(): Promise<void> {
   try {
     const [dede] = await db.select().from(usersTable).where(eq(usersTable.username, "dede336")).limit(1);
     if (!dede) {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Lucas336", 10);
+      const hash = await bcrypt.hash(DEFAULT_SYSTEM_PASSWORD, 10);
       const [inserted] = await db.insert(usersTable).values({ username: "dede336", passwordHash: hash, role: "admin", isAdmin: true }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: dede336 (admin)");
       await ensureTamerLevel(inserted.id, 20);
     } else {
-      const hash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD ?? "Lucas336", 10);
-      await db.update(usersTable).set({ isAdmin: true, role: "admin", passwordHash: hash }).where(eq(usersTable.username, "dede336"));
-      console.log("[seed] Conta sincronizada: dede336 → admin / senha atualizada");
+      await db.update(usersTable).set({ isAdmin: true, role: "admin", updatedAt: new Date() }).where(eq(usersTable.username, "dede336"));
+      await migrateLegacySystemPassword(dede);
+      console.log("[seed] Conta sincronizada: dede336 → admin");
       await ensureTamerLevel(dede.id, 20);
     }
 
     const [rimuru] = await db.select().from(usersTable).where(eq(usersTable.username, "rimuru336")).limit(1);
     if (!rimuru) {
-      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Lucas336", 10);
+      const hash = await bcrypt.hash(DEFAULT_SYSTEM_PASSWORD, 10);
       const [inserted] = await db.insert(usersTable).values({ username: "rimuru336", passwordHash: hash, role: "digimon_creator", isAdmin: false }).returning({ id: usersTable.id });
       console.log("[seed] Conta criada: rimuru336 (digimon_creator)");
       await ensureTamerLevel(inserted.id, 20);
       await ensureDigimonInCollection(inserted.id, "1", 1);
       console.log("[seed] Gammamon adicionado à coleção de rimuru336");
     } else {
-      const hash = await bcrypt.hash(process.env.SEED_CREATOR_PASSWORD ?? "Lucas336", 10);
       await db.update(usersTable)
-        .set({ passwordHash: hash, updatedAt: new Date() })
+        .set({ role: "digimon_creator", isAdmin: false, updatedAt: new Date() })
         .where(eq(usersTable.username, "rimuru336"));
-      console.log("[seed] Senha sincronizada para rimuru336; cargo preservado.");
+      await migrateLegacySystemPassword(rimuru);
+      console.log("[seed] Conta sincronizada: rimuru336 → assistente");
       await ensureTamerLevel(rimuru.id, 20);
       await ensureDigimonInCollection(rimuru.id, "1", 1);
       console.log("[seed] Gammamon garantido na coleção de rimuru336");
