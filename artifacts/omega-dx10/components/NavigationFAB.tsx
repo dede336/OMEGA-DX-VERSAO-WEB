@@ -64,6 +64,7 @@ const NAV_ITEMS: NavItem[] = [
 export default function NavigationFAB() {
   const [open, setOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [fabImageFailed, setFabImageFailed] = useState(false);
 
   const colors = useColors();
   const insets = useSafeAreaInsets();
@@ -275,7 +276,9 @@ export default function NavigationFAB() {
       <Animated.View
         style={[
           styles.fabWrapper,
-          { left: animPos.x, top: animPos.y },
+          Platform.OS === 'web'
+            ? styles.fabWrapperWeb
+            : { left: animPos.x, top: animPos.y },
         ]}
         {...panResponder.panHandlers}
       >
@@ -288,11 +291,16 @@ export default function NavigationFAB() {
           activeOpacity={0.85}
           style={styles.fabBtn}
         >
-          <Image
-            source={FAB_IMG}
-            style={styles.fabImg}
-            resizeMode="contain"
-          />
+          {fabImageFailed ? (
+            <Feather name="menu" size={26} color="#ffffff" />
+          ) : (
+            <Image
+              source={FAB_IMG}
+              style={styles.fabImg}
+              resizeMode="contain"
+              onError={() => setFabImageFailed(true)}
+            />
+          )}
 
           {unreadMailCount > 0 && (
             <View style={styles.badge}>
@@ -594,6 +602,7 @@ const styles = StyleSheet.create({
     right: EDGE_GAP,
     bottom: 24,
     zIndex: 9999,
+    elevation: 20,
   },
 
   fabBtn: {
