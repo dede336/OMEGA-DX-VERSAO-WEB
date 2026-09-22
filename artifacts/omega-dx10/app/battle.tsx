@@ -192,7 +192,7 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
 export default function BattleScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ mapId: string; stageIndex: string; auto?: string; autoCount?: string }>();
+  const params = useLocalSearchParams<{ mapId: string; stageIndex: string; auto?: string }>();
   const {
     collection,
     selectedCharacter,
@@ -231,7 +231,6 @@ export default function BattleScreen() {
   const mapId = params.mapId ?? '';
   const stageIndex = Number(params.stageIndex ?? '0');
   const paramAutoMode = params.auto === '1';
-  const paramAutoCount = Number(params.autoCount ?? '0');
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
   const stage = map?.stages[stageIndex];
   const alreadyCleared = isStageCleared(mapId, stageIndex);
@@ -308,14 +307,10 @@ export default function BattleScreen() {
 
   // ── Auto battle ────────────────────────────────────────────────────────────
   const [autoMode, setAutoMode] = useState(false);
-  const [autoRunCount, setAutoRunCount] = useState(paramAutoCount);
   const [autoQuotaReady, setAutoQuotaReady] = useState(false);
   const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_LIMIT_SECONDS);
   const autoModeRef = useRef(false);
-  const autoRunCountRef = useRef(paramAutoCount);
-  const AUTO_RUN_MAX = 10;
   useEffect(() => { autoModeRef.current = autoMode; }, [autoMode]);
-  useEffect(() => { autoRunCountRef.current = autoRunCount; }, [autoRunCount]);
 
   const readAutoQuota = useCallback(async (): Promise<AutoBattleQuota> => {
     const hour = currentAutoBattleHour();
@@ -449,11 +444,9 @@ export default function BattleScreen() {
   // ── Auto-restart after win ─────────────────────────────────────────────────
   useEffect(() => {
     if (!autoMode || winner !== 'player') return;
-    if (autoRunCountRef.current >= AUTO_RUN_MAX) { setAutoMode(false); return; }
     const timer = setTimeout(() => {
       if (!autoModeRef.current) return;
-      const nextCount = autoRunCountRef.current + 1;
-      router.replace(`/battle?mapId=${mapId}&stageIndex=${stageIndex}&auto=1&autoCount=${nextCount}`);
+      router.replace(`/battle?mapId=${mapId}&stageIndex=${stageIndex}&auto=1`);
     }, 3000);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1712,7 +1705,7 @@ export default function BattleScreen() {
               <TouchableOpacity
                 activeOpacity={0.8}
                 disabled={autoRemainingSeconds <= 0}
-                onPress={() => { setAutoMode((p) => { const n = !p && autoRemainingSeconds > 0; if (n) { setAutoRunCount(0); setAttackMenuOpen(false); } return n; }); }}
+                onPress={() => { setAutoMode((p) => { const n = !p && autoRemainingSeconds > 0; if (n) setAttackMenuOpen(false); return n; }); }}
                 style={[styles.autoBtn, { backgroundColor: autoMode ? '#22c55e22' : colors.card, borderColor: autoMode ? '#22c55e' : colors.border }, pixelStyle]}
               >
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 18, height: 18, opacity: autoMode ? 1 : 0.5 }} resizeMode="contain" />
@@ -1738,7 +1731,7 @@ export default function BattleScreen() {
   // ─── RESULT ─────────────────────────────────────────────────────────────────
   if (phase === 'result') {
     const won = winner === 'player';
-    const autoRunning = autoMode && won && autoRunCount < AUTO_RUN_MAX;
+    const autoRunning = autoMode && won;
     const hasNextStage = !!(map?.stages[stageIndex + 1]) && map?.isDungeon === true;
 
     return (
@@ -1804,18 +1797,12 @@ export default function BattleScreen() {
             <View style={[styles.autoRestartBanner, { backgroundColor: '#22c55e11', borderColor: '#22c55e55' }]}>
               <Feather name="zap" size={14} color="#22c55e" />
               <Text style={[styles.autoRestartText, { color: '#22c55e' }]}>
-                🔄 ({autoRunCount}/{AUTO_RUN_MAX})
+                🔄 {Math.floor(autoRemainingSeconds / 60)}:{String(autoRemainingSeconds % 60).padStart(2, '0')}
               </Text>
             </View>
           )}
-          {autoMode && won && autoRunCount >= AUTO_RUN_MAX && (
-            <View style={[styles.autoRestartBanner, { backgroundColor: '#f59e0b11', borderColor: '#f59e0b55' }]}>
-              <Feather name="check-circle" size={14} color="#f59e0b" />
-              <Text style={[styles.autoRestartText, { color: '#f59e0b' }]}>{t('battle.auto')} ✓ ({AUTO_RUN_MAX}/{AUTO_RUN_MAX})</Text>
-            </View>
-          )}
           {autoMode && won && (
-            <TouchableOpacity onPress={() => { setAutoMode(false); setAutoRunCount(0); }} style={[styles.resultBtnOutline, { borderColor: '#ef4444' }]}>
+            <TouchableOpacity onPress={() => setAutoMode(false)} style={[styles.resultBtnOutline, { borderColor: '#ef4444' }]}> 
               <Text style={[styles.resultBtnText, { color: '#ef4444' }]}>✕ {t('battle.auto')}</Text>
             </TouchableOpacity>
           )}
