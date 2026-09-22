@@ -63,6 +63,7 @@ export interface OwnedCharacter {
   exp: number;
   ascensionStars?: number;
   acquisitionMethod?: 'fusion' | 'evolution';
+  mailGiftId?: 'guilmon_gift_v1' | 'agumon_saver_gift_v1';
 }
 
 export interface AscensionResult {
@@ -290,6 +291,64 @@ function migrateOwnedCharacter(owned: OwnedCharacter): OwnedCharacter {
   return owned;
 }
 
+const TWO_STAR_MAIL_GIFTS: Record<string, string> = {
+  guilmon_gift_v1: 'guilmon',
+  agumon_saver_gift_v1: 'agumonSaver',
+};
+
+const TWO_STAR_MAIL_GIFT_LINES: Record<string, string[]> = {
+  guilmon_gift_v1: ['guilmon', 'growlmon', 'megaloGrowlmon', 'gallantmon', 'gallantmonCrimsonMode'],
+  agumon_saver_gift_v1: ['agumonSaver', 'geoGreymon', 'rizeGreymon', 'shineGreymon', 'shineGreymonBurstMode'],
+};
+
+export function getMailGiftAscensionStars(messageId: string, characterId: string): number {
+  return TWO_STAR_MAIL_GIFTS[messageId] === characterId ? 2 : 0;
+}
+
+function preserveMailGiftStars(owned: OwnedCharacter): Pick<OwnedCharacter, 'ascensionStars' | 'mailGiftId'> {
+  return { ascensionStars: owned.ascensionStars, mailGiftId: owned.mailGiftId };
+}
+
+function resolveMailGiftFusionStars(
+  owned: OwnedCharacter,
+  sacrifices: OwnedCharacter[],
+): Pick<OwnedCharacter, 'ascensionStars' | 'mailGiftId'> {
+  if (!owned.mailGiftId) return preserveMailGiftStars(owned);
+  const lowestStars = Math.min(
+    getAscensionStars(owned),
+    ...sacrifices.map((sacrifice) => getAscensionStars(sacrifice)),
+  );
+  return { ascensionStars: lowestStars, mailGiftId: owned.mailGiftId };
+}
+
+function migrateClaimedMailGiftStars(
+  collection: OwnedCharacter[],
+  messages: MailMessage[],
+): OwnedCharacter[] {
+  const migrated = collection.map(migrateOwnedCharacter);
+
+  for (const message of messages) {
+    if (!message.rewardClaimed) continue;
+    const giftLine = TWO_STAR_MAIL_GIFT_LINES[message.id];
+    if (!giftLine) continue;
+
+    // O prêmio é acrescentado ao fim da coleção no resgate. Para saves antigos,
+    // corrige uma única cópia (a mais recente) sem alterar outras obtidas no jogo.
+    for (let index = migrated.length - 1; index >= 0; index -= 1) {
+      const owned = migrated[index];
+      if (!giftLine.includes(owned.characterId)) continue;
+      migrated[index] = {
+        ...owned,
+        ascensionStars: Math.max(2, owned.ascensionStars ?? 0),
+        mailGiftId: message.id as OwnedCharacter['mailGiftId'],
+      };
+      break;
+    }
+  }
+
+  return migrated;
+}
+
 const defaultState: GameState = {
   playerName: '',
   gender: 'M',
@@ -360,7 +419,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           setState({
             ...defaultState,
             ...parsed,
-            collection: (parsed.collection ?? defaultState.collection).map(migrateOwnedCharacter),
+            collection: migrateClaimedMailGiftStars(
+              parsed.collection ?? defaultState.collection,
+              merged,
+            ),
             scanProgress: parsed.scanProgress ?? {},
             gender: parsed.gender ?? 'M',
             inventory: parsed.inventory ?? DEFAULT_INVENTORY,
@@ -545,7 +607,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!evo || target.level < evo.requiredLevel) return prev;
         if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0 } : c
+          c.ownedId === ownedId
+            ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, ...preserveMailGiftStars(c) }
+            : c
         );
         const newInventory = evo.requiredItem
           ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
@@ -558,20 +622,33 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const sacrificeCharId = evo.requiredSacrificeCharacter;
         const sacrificeCharIds = (evo as any).requiredSacrificeCharacters as string[] | undefined;
+        const fusionSacrifices: OwnedCharacter[] = [];
 
         if (sacrificeCharIds && sacrificeCharIds.length > 0) {
           // Multi-sacrifice: must have ALL required characters in collection
           for (const charId of sacrificeCharIds) {
-            if (!prev.collection.find((c) => c.ownedId !== ownedId && c.characterId === charId)) return prev;
+            const found = prev.collection.find((c) => c.ownedId !== ownedId && c.characterId === charId);
+            if (!found) return prev;
+            fusionSacrifices.push(found);
           }
         } else if (sacrificeCharId) {
           const sacrificeOwned = sacrificeOwnedId
             ? prev.collection.find((c) => c.ownedId === sacrificeOwnedId && c.characterId === sacrificeCharId)
             : prev.collection.find((c) => c.ownedId !== ownedId && c.characterId === sacrificeCharId);
           if (!sacrificeOwned) return prev;
+          fusionSacrifices.push(sacrificeOwned);
         }
         let newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const } : c
+          c.ownedId === ownedId
+            ? {
+                ...c,
+                characterId: evo.evolvesTo,
+                level: 1,
+                exp: 0,
+                acquisitionMethod: 'evolution' as const,
+                ...resolveMailGiftFusionStars(c, fusionSacrifices),
+              }
+            : c
         );
         if (sacrificeCharIds && sacrificeCharIds.length > 0) {
           // Remove all multi-sacrifice characters from collection
@@ -596,7 +673,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!evo || target.level < evo.requiredLevel) return prev;
         if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
         const newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const } : c
+          c.ownedId === ownedId
+            ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const, ...preserveMailGiftStars(c) }
+            : c
         );
         const newInventory = evo.requiredItem
           ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
@@ -632,12 +711,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (keep.level < fusion.requiredLevel) return prev;
       success = true;
       const newSelected = prev.selectedOwnedId === sacrificeOwnedId ? keepOwnedId : prev.selectedOwnedId;
+      const fusionStars = resolveMailGiftFusionStars(keep, [sacrifice]);
       return {
         ...prev,
         selectedOwnedId: newSelected,
         collection: prev.collection
           .filter((c) => c.ownedId !== sacrificeOwnedId)
-          .map((c) => c.ownedId === keepOwnedId ? { ...c, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const } : c),
+          .map((c) => c.ownedId === keepOwnedId
+            ? { ...c, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const, ...fusionStars }
+            : c),
       };
     });
     return success;
@@ -915,7 +997,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         msg.reward.digimon.forEach((characterId, i) => {
           if (newCollection.length < 500) {
             const ownedId = `owned_${characterId}_${base}_${i}`;
-            newCollection.push({ ownedId, characterId, level: 1, exp: 0 });
+            newCollection.push({
+              ownedId,
+              characterId,
+              level: 1,
+              exp: 0,
+              ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
+              mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
+                ? msg.id as OwnedCharacter['mailGiftId']
+                : undefined,
+            });
           }
         });
       }
@@ -924,7 +1015,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         msg.reward.digimonWithLevel.forEach(({ characterId, level }, i) => {
           if (newCollection.length < 500) {
             const ownedId = `owned_${characterId}_${base}_${i}`;
-            newCollection.push({ ownedId, characterId, level, exp: 0 });
+            newCollection.push({
+              ownedId,
+              characterId,
+              level,
+              exp: 0,
+              ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
+              mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
+                ? msg.id as OwnedCharacter['mailGiftId']
+                : undefined,
+            });
           }
         });
       }
@@ -1495,7 +1595,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...DEFAULT_MESSAGES.filter((m) => !savedIds.has(m.id)),
         ...savedMessages,
       ].sort((a, b) => b.createdAt - a.createdAt);
-      const collection: OwnedCharacter[] = (parsed.collection ?? []).map(migrateOwnedCharacter);
+      const collection: OwnedCharacter[] = migrateClaimedMailGiftStars(
+        parsed.collection ?? [],
+        merged,
+      );
       const newState: GameState = {
         ...defaultState,
         ...parsed,

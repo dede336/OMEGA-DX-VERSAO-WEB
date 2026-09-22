@@ -18,7 +18,7 @@ import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/compo
 import { CustomDigimonRaw, getRawCustomDigimons } from '@/constants/extendedCharacters';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
-import { getAscensionStars } from '@/utils/ascension';
+import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';
 
 // ─── Obtain data ────────────────────────────────────────────────────────────
 
@@ -227,6 +227,8 @@ export default function BancoScreen() {
   const [rarityFilter, setRarityFilter] = useState('');
   const [elemFilter, setElemFilter] = useState('');
   const [selected, setSelected] = useState<null | typeof entries[0]>(null);
+  const [previewStars, setPreviewStars] = useState(0);
+  const [showStatusPreview, setShowStatusPreview] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState<'elem' | 'rarity' | 'attr' | null>(null);
 
   // Use the custom digimons already loaded by GameContext — no separate fetch needed.
@@ -479,6 +481,7 @@ export default function BancoScreen() {
         const rarityColor = RARITY_COLORS[rarity] ?? '#888';
         const ownedDigimon = collection.find((c) => c.characterId === item.id);
         const isInactive = !item.isActive;
+        const previewStats = applyAscensionBonus(item.char.baseStats, previewStars);
         return (
           <Modal visible transparent animationType="slide" onRequestClose={() => setSelected(null)}>
             <TouchableOpacity style={st.modalOverlay} activeOpacity={1} onPress={() => setSelected(null)}>
@@ -488,11 +491,8 @@ export default function BancoScreen() {
                 {/* Header: avatar + name + status */}
                 <View style={st.detailHeader}>
                   <View style={[st.detailAvatarWrap, !item.isOwned && st.avatarGray]}>
-                    <CharacterAvatar characterId={item.id} size={72} />
-                    <AscensionStars
-                      stars={Math.max(0, ...collection.filter((owned) => owned.characterId === item.id).map(getAscensionStars))}
-                      size="small"
-                    />
+                    <CharacterAvatar characterId={item.id} size={72} ascensionStars={previewStars} />
+                    <AscensionStars stars={previewStars} size="small" />
                   </View>
                   <View style={{ flex: 1, gap: 6 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 }}>
@@ -542,6 +542,46 @@ export default function BancoScreen() {
 
                 <View style={[st.divider, { backgroundColor: colors.border, marginVertical: 10 }]} />
 
+                {showStatusPreview && <>
+                <Text style={[st.detailSectionTitle, { color: colors.mutedForeground, textAlign: 'center' }]}>Status e Ascensão</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6, marginBottom: 10 }}>
+                  {[0, 1, 2, 3, 4].map((stars) => (
+                    <TouchableOpacity
+                      key={stars}
+                      onPress={() => setPreviewStars(stars)}
+                      style={{
+                        minWidth: 42,
+                        paddingHorizontal: 8,
+                        paddingVertical: 7,
+                        alignItems: 'center',
+                        borderRadius: 9,
+                        borderWidth: 1,
+                        borderColor: previewStars === stars ? '#facc15' : colors.border,
+                        backgroundColor: previewStars === stars ? '#facc1522' : colors.background,
+                      }}
+                    >
+                      <Text style={{ color: previewStars === stars ? '#facc15' : colors.mutedForeground, fontSize: 11, fontWeight: '800' }}>
+                        {stars}★
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={{ color: '#facc15', textAlign: 'center', fontSize: 11, marginBottom: 8 }}>
+                  +{previewStars * 20}% nos status base{previewStars === 4 ? ' · Aura dourada ativa' : ''}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                  {([
+                    ['HP', previewStats.hp], ['MP', previewStats.mp], ['ATK', previewStats.atk],
+                    ['DEF', previewStats.def], ['SPT', previewStats.spt], ['SPD', previewStats.spd],
+                  ] as const).map(([label, value]) => (
+                    <View key={label} style={{ width: '31%', paddingVertical: 7, alignItems: 'center', borderRadius: 8, backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border }}>
+                      <Text style={{ color: colors.mutedForeground, fontSize: 9, fontWeight: '700' }}>{label}</Text>
+                      <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '900' }}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+                </>}
+
                 <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 300 }}>
                   {/* Obtain methods */}
                   <Text style={[st.detailSectionTitle, { color: colors.mutedForeground }]}>Como obter</Text>
@@ -570,15 +610,24 @@ export default function BancoScreen() {
                   )}
                 </ScrollView>
 
-                {/* Árvore Evolutiva button */}
-                <TouchableOpacity
-                  style={[st.evoTreeBtn, { borderColor: '#06b6d4' }, pixelStyle]}
-                  onPress={() => { setSelected(null); router.push(`/evo-tree/${item.id}` as any); }}
-                  activeOpacity={0.85}
-                >
-                  <Image source={require('@/assets/images/evo-tree-icon.webp')} style={{ width: 18, height: 18 }} />
-                  <Text style={[st.evoTreeBtnText, { color: '#06b6d4' }]}>Árvore Evolutiva</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <TouchableOpacity
+                    style={[st.evoTreeBtn, { borderColor: '#06b6d4', flex: 1 }, pixelStyle]}
+                    onPress={() => { setSelected(null); router.push(`/evo-tree/${item.id}` as any); }}
+                    activeOpacity={0.85}
+                  >
+                    <Image source={require('@/assets/images/evo-tree-icon.webp')} style={{ width: 18, height: 18 }} />
+                    <Text style={[st.evoTreeBtnText, { color: '#06b6d4' }]}>Árvore Evolutiva</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[st.evoTreeBtn, { borderColor: '#facc15', flex: 1 }, pixelStyle]}
+                    onPress={() => setShowStatusPreview((visible) => !visible)}
+                    activeOpacity={0.85}
+                  >
+                    <Feather name="bar-chart-2" size={18} color="#facc15" />
+                    <Text style={[st.evoTreeBtnText, { color: '#facc15' }]}>Ver Status</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableOpacity>
           </Modal>
@@ -631,6 +680,10 @@ export default function BancoScreen() {
             const rarityColor = RARITY_COLORS[rarity] ?? '#888';
             const isInactive = !item.isActive;
             const ownedDigimon = collection.find((c) => c.characterId === item.id);
+            const ownedMaxStars = Math.max(
+              0,
+              ...collection.filter((owned) => owned.characterId === item.id).map(getAscensionStars),
+            );
 
             return (
               <TouchableOpacity
@@ -640,7 +693,7 @@ export default function BancoScreen() {
                   isInactive && { opacity: 0.55 },
                   pixelStyle,
                 ]}
-                onPress={() => setSelected(item)}
+                onPress={() => { setPreviewStars(0); setShowStatusPreview(false); setSelected(item); }}
                 activeOpacity={0.8}
               >
                 {/* LV badge — top right */}
@@ -654,11 +707,8 @@ export default function BancoScreen() {
 
                 {/* Avatar */}
                 <View style={[st.gridAvatarWrap, !item.isOwned && st.avatarGray]}>
-                  <CharacterAvatar characterId={item.id} size={60} />
-                  <AscensionStars
-                    stars={Math.max(0, ...collection.filter((owned) => owned.characterId === item.id).map(getAscensionStars))}
-                    size="small"
-                  />
+                  <CharacterAvatar characterId={item.id} size={60} ascensionStars={ownedMaxStars} />
+                  <AscensionStars stars={ownedMaxStars} size="small" />
                 </View>
 
                 {/* Attr + Element */}

@@ -183,7 +183,7 @@ export interface DadivaBonus {
 export function computeDadivaDivina(
   teamNames: string[],
   teamElements: ElementId[],
-  hasAnelSagrado: boolean[],
+  teamDivineGiftPassives: boolean[],
 ): DadivaBonus {
   const has = (name: string) =>
     teamNames.some((n) => n.toLowerCase() === name.toLowerCase());
@@ -229,12 +229,13 @@ export function computeDadivaDivina(
   }
 
   // Enemy 5% dmg/round: LucemonSatanMode, Armagedemon, Apocalymon
-  if (hasAny('LucemonSatanMode', 'Lucemon Satan Mode', 'Armagedemon', 'Apocalymon')) {
+  if (hasAny('LucemonSatanMode', 'Lucemon Satan Mode', 'Armageddemon', 'Apocalymon')) {
     enemyDmgBonuses.push(0.05);
   }
 
-  // Team regen 10% per round: any member evolved with Anel Sagrado
-  if (hasAnelSagrado.some((v) => v)) regenBonuses.push(0.10);
+  // Sacred angel forms carry this as an innate passive. The evolution item is
+  // consumed beforehand and is never checked during battle.
+  if (teamDivineGiftPassives.some(Boolean)) regenBonuses.push(0.10);
 
   // No stacking — best buff wins per stat
   if (atkBonuses.length > 0) bonus.atk = Math.max(...atkBonuses);

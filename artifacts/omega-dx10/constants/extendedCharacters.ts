@@ -25,6 +25,9 @@ let _baseCharImageUrls: Record<string, string> = {};
 let _farmEvoMap: Record<string, string> = {};
 // element → list of BABY char IDs (for random egg hatching; only babies with a training target)
 let _elementBabyMap: Record<string, string[]> = {};
+// Forms whose innate Divine Gift was unlocked through a Sacred Ring evolution.
+// The item is consumed during evolution; battle checks only the resulting form.
+let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon']);
 // Track base char IDs that were registered as evolution targets by custom processing
 let _registeredBaseCharKeys: Set<string> = new Set();
 
@@ -85,6 +88,43 @@ const BASE_NAME_MAP = buildBaseNameMap();
 // Normalized name → VG image lookup: strips non-alphanumeric chars and lowercases
 // so "BlackWarGreymon" → "blackwargreymon" matches key "blackWarGreymon"
 const _normKey = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+const VARIANT_LEVEL_BY_RARITY: Partial<Record<Character['rarity'], number>> = {
+  COMMON: 15, RARE: 25, EPIC: 45, LEGENDARY: 60, ULTRA: 70, BURST: 70,
+};
+
+// A trailing X is an X-Antibody form only when the catalogue also contains
+// the same name without that X. This avoids false matches such as JesmonGX.
+// The Black prefix follows the same counterpart rule.
+function applyVariantEvolutionRules(chars: CustomDigimonRaw[]): CustomDigimonRaw[] {
+  const idByName = new Map<string, string>();
+  for (const [id, character] of Object.entries(CHARACTERS)) idByName.set(_normKey(character.name), id);
+  for (const character of chars) {
+    if (character.name) idByName.set(_normKey(character.name), character.id);
+  }
+
+  return chars.map((character) => {
+    const key = _normKey(character.name ?? '');
+    let counterpartId: string | undefined;
+    let requiredItem: string | undefined;
+    if (key.endsWith('x')) {
+      counterpartId = idByName.get(key.slice(0, -1));
+      if (counterpartId) requiredItem = 'x_antibody';
+    }
+    if (!counterpartId && key.startsWith('black')) {
+      counterpartId = idByName.get(key.slice('black'.length));
+      if (counterpartId) requiredItem = 'black_digitron';
+    }
+    if (!counterpartId || !requiredItem || counterpartId === character.id) return character;
+    return {
+      ...character,
+      evolvesFromId: counterpartId,
+      requiredItem,
+      requiredLevel: character.requiredLevel ?? VARIANT_LEVEL_BY_RARITY[character.rarity as Character['rarity']] ?? 20,
+      isBaseForm: false,
+      scannable: false,
+    };
+  });
+}
 const LUCEMON_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   puttimon: 'BABY',
   cupimon: 'TRAINING',
@@ -129,12 +169,21 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
   });
 
+  chars = applyVariantEvolutionRules(chars);
+
   _apiUrl = apiUrl;
   _rawCustomDigimons = chars;
   _customChars = {};
   _farmEvoMap = {};
   _elementBabyMap = {};
+  _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon']);
   _baseCharImageUrls = {};
+
+  for (const c of chars) {
+    if (c.requiredItem !== 'anel_sagrado') continue;
+    const targetId = (c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined) ?? c.id;
+    _divineGiftCharacterIds.add(targetId);
+  }
 
   for (const c of chars) {
     if (!c.name) continue; // skip entries with null/undefined name (bad DB data)
@@ -330,12 +379,17 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     requiredItem: 'gehenna',
   };
 
-  // Keep the two Agumon families separate. The API may still contain an old
-  // GeoGreymon → Agumon relationship, but it must never replace the classic
-  // Agumon → Greymon line in the game.
+  // Keep Agumon and Agumon Savers separate. The two alternate slots of classic
+  // Agumon are reserved for its item-unlocked X and Black variants.
   EVOLUTIONS.agumon = { evolvesTo: 'greymon', requiredLevel: 16, label: 'Greymon' };
-  ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: 'tiranomon', requiredLevel: 16, label: 'Tiranomon' };
-  delete EXTRA_ALTERNATE_EVOLUTIONS.agumon;
+  const agumonX = chars.find((c) => _normKey(c.name ?? '') === 'agumonx');
+  const blackAgumon = chars.find((c) => _normKey(c.name ?? '') === 'blackagumon');
+  if (agumonX) {
+    ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: agumonX.id, requiredLevel: agumonX.requiredLevel ?? 15, label: agumonX.name, requiredItem: 'x_antibody' };
+  }
+  if (blackAgumon) {
+    EXTRA_ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: blackAgumon.id, requiredLevel: blackAgumon.requiredLevel ?? 15, label: blackAgumon.name, requiredItem: 'black_digitron' };
+  }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
   // Inject spirit sacrifice drops for Frontier Warriors by name
@@ -359,6 +413,10 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
 
 export function getFarmEvolutionTarget(fromCharId: string): string | null {
   return _farmEvoMap[fromCharId] ?? null;
+}
+
+export function hasDivineGiftPassive(characterId: string): boolean {
+  return _divineGiftCharacterIds.has(characterId);
 }
 
 // Returns a random BABY of the given element.

@@ -28,12 +28,12 @@ import {
   getScaledStats, expToNextLevel,
   FUSIONS,
 } from '@/constants/gameData';
-import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
+import { getCharacter, getCharacterImageSource, hasDivineGiftPassive } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
 import { AscensionStars } from '@/components/AscensionStars';
-import { applyAscensionBonus } from '@/utils/ascension';
+import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';
 
 const DIGIVO_GIF             = require('../../assets/images/digivolution.webp');
 const FUSION_GIF             = require('../../assets/images/fusion_crimson.webp');
@@ -69,11 +69,11 @@ interface DadivaInfo {
   condKey?: string;
 }
 
-function getDadivaDivinaInfo(charName: string, requiredItem?: string): DadivaInfo | null {
+function getDadivaDivinaInfo(charId: string, charName: string): DadivaInfo | null {
   const n = charName.toLowerCase();
   if (n === 'magnamon' || n === 'craniummon' || n === 'gallantmon')
     return { descKey: 'dadiva.def_team' };
-  if (n === 'ulforcevedramon')
+  if (n === 'ulforceveedramon')
     return { descKey: 'dadiva.spd_team' };
   if (n === 'examon' || n === 'omegamon' || n === 'leopardmon' || n === 'duftmon' || n === 'dynasmon')
     return { descKey: 'dadiva.atk_team' };
@@ -85,9 +85,9 @@ function getDadivaDivinaInfo(charName: string, requiredItem?: string): DadivaInf
     return { descKey: 'dadiva.atk_15', condKey: 'dadiva.atk_15_cond' };
   if (n === 'imperialdramonpm' || n === 'imperialdramon pm')
     return { descKey: 'dadiva.atk_10_spd_5', condKey: 'dadiva.atk_10_spd_5_cond' };
-  if (n === 'lucemonsatanmode' || n === 'lucemon satan mode' || n === 'armagedemon' || n === 'apocalymon')
+  if (n === 'lucemonsatanmode' || n === 'lucemon satan mode' || n === 'armageddemon' || n === 'apocalymon')
     return { descKey: 'dadiva.dot' };
-  if (requiredItem === 'anel_sagrado')
+  if (hasDivineGiftPassive(charId))
     return { descKey: 'dadiva.heal_team' };
   return null;
 }
@@ -190,7 +190,7 @@ export default function CharacterDetailScreen() {
   const topPad = insets.top;
 
   // ── Dádiva Divina info ───────────────────────────────────────────────────────
-  const dadivaInfo = getDadivaDivinaInfo(char.name, (char as any).requiredItem);
+  const dadivaInfo = getDadivaDivinaInfo(char.id, char.name);
 
   // ── Fusion info ─────────────────────────────────────────────────────────────
   const fusionRecipe   = FUSIONS[owned.characterId] ?? null;
@@ -198,6 +198,9 @@ export default function CharacterDetailScreen() {
     ? collection.filter((c) => c.characterId === fusionRecipe.partner)
     : [];
   const partnerOwned  = allPartnerCopies[0] ?? null;
+  const selectedFusionSacrifice = fuseSacrificeId
+    ? collection.find((copy) => copy.ownedId === fuseSacrificeId) ?? null
+    : null;
   const resultChar    = fusionRecipe ? (getCharacter(fusionRecipe.resultId) ?? null) : null;
   const partnerChar   = fusionRecipe ? (getCharacter(fusionRecipe.partner) ?? null) : null;
   const meetsLevel    = !!(fusionRecipe && owned.level >= fusionRecipe.requiredLevel);
@@ -312,7 +315,7 @@ export default function CharacterDetailScreen() {
             ) : (
               <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: elemData.color, opacity: elemPulse }]} />
             )}
-            <CharacterAvatar characterId={char.id} size={90} />
+            <CharacterAvatar characterId={char.id} size={90} ascensionStars={owned.ascensionStars} />
           </View>
           <View style={styles.heroInfo}>
             <Text style={[styles.heroName, { color: colors.foreground }]}>{char.name}</Text>
@@ -689,6 +692,12 @@ export default function CharacterDetailScreen() {
               <Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{t('char.fuseConfirmPermanent')}</Text>
               {' '}<Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{resultChar?.name}</Text>.
               {'\n\n'}{t('char.fuseConfirmUndo')}
+            </Text>
+            <Text style={{ color: '#facc15', fontSize: 12, lineHeight: 17, textAlign: 'center', marginBottom: 12 }}>
+              Na fusão, prevalece a menor quantidade de estrelas.
+              {selectedFusionSacrifice
+                ? `\n${getAscensionStars(owned)}★ + ${getAscensionStars(selectedFusionSacrifice)}★ → ${Math.min(getAscensionStars(owned), getAscensionStars(selectedFusionSacrifice))}★`
+                : ''}
             </Text>
             <View style={styles.confirmBtnRow}>
               <TouchableOpacity
