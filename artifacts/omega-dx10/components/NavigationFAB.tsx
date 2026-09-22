@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
-  Image, Pressable, Platform, FlatList, Alert,
+  Image, Pressable, Platform, FlatList, Alert, TextInput,
+  ActivityIndicator, KeyboardAvoidingView,
   Animated, PanResponder, useWindowDimensions,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -34,6 +35,162 @@ const IMG_SIZE = 38;
 const EDGE_GAP = 14;
 const TAP_SLOP = 6;
 
+function ChangePasswordModal({
+  visible,
+  onClose,
+}: {
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const { changePassword } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmation, setConfirmation] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!visible) {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmation('');
+      setError('');
+      setSuccess('');
+      setLoading(false);
+    }
+  }, [visible]);
+
+  async function submit() {
+    setError('');
+    setSuccess('');
+    if (!currentPassword || !newPassword || !confirmation) {
+      setError('Preencha a senha atual e os dois campos da nova senha.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('A nova senha deve ter ao menos 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmation) {
+      setError('A confirmação da nova senha não confere.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await changePassword(currentPassword, newPassword);
+      setSuccess('Senha alterada com sucesso.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmation('');
+    } catch (err: any) {
+      setError(err?.message ?? 'Não foi possível alterar a senha.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={styles.passwordOverlay}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <Pressable style={styles.passwordBackdrop} onPress={onClose} />
+        <View
+          style={[
+            styles.passwordSheet,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+              paddingBottom: insets.bottom + 20,
+            },
+            pixelStyle,
+          ]}
+        >
+          <View style={styles.passwordHeader}>
+            <View style={styles.passwordIcon}>
+              <Feather name="key" size={22} color="#60a5fa" />
+            </View>
+            <View style={styles.passwordHeaderCopy}>
+              <Text style={[styles.passwordTitle, { color: colors.foreground }]}>Alterar senha</Text>
+              <Text style={[styles.passwordSubtitle, { color: colors.mutedForeground }]}>
+                Confirme a senha atual para criar uma nova.
+              </Text>
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.passwordClose} activeOpacity={0.7}>
+              <Feather name="x" size={20} color={colors.mutedForeground} />
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            style={[styles.passwordInput, { color: colors.foreground, borderColor: colors.border }]}
+            placeholder="Senha atual"
+            placeholderTextColor={colors.mutedForeground}
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <TextInput
+            style={[styles.passwordInput, { color: colors.foreground, borderColor: colors.border }]}
+            placeholder="Nova senha"
+            placeholderTextColor={colors.mutedForeground}
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <TextInput
+            style={[styles.passwordInput, { color: colors.foreground, borderColor: colors.border }]}
+            placeholder="Confirmar nova senha"
+            placeholderTextColor={colors.mutedForeground}
+            value={confirmation}
+            onChangeText={setConfirmation}
+            secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+
+          {!!error && (
+            <View style={styles.passwordMessageError}>
+              <Feather name="alert-circle" size={14} color="#f87171" />
+              <Text style={styles.passwordMessageErrorText}>{error}</Text>
+            </View>
+          )}
+          {!!success && (
+            <View style={styles.passwordMessageSuccess}>
+              <Feather name="check-circle" size={14} color="#4ade80" />
+              <Text style={styles.passwordMessageSuccessText}>{success}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={[styles.passwordSubmit, loading && { opacity: 0.65 }]}
+            onPress={submit}
+            disabled={loading || !!success}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.passwordSubmitText}>Salvar nova senha</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onClose} style={styles.passwordCancel} activeOpacity={0.7}>
+            <Text style={[styles.passwordCancelText, { color: colors.mutedForeground }]}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
 interface NavItem {
   labelKey: string;
   route: string;
@@ -64,6 +221,7 @@ const NAV_ITEMS: NavItem[] = [
 export default function NavigationFAB() {
   const [open, setOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [fabImageFailed, setFabImageFailed] = useState(false);
 
   const colors = useColors();
@@ -549,6 +707,26 @@ export default function NavigationFAB() {
 
                 <TouchableOpacity
                   style={[
+                    styles.changePasswordBtn,
+                    {
+                      backgroundColor: '#3b82f622',
+                      borderColor: '#3b82f6',
+                    },
+                    pixelStyle,
+                  ]}
+                  onPress={() => {
+                    setOpen(false);
+                    setConfirmLogout(false);
+                    setChangePasswordOpen(true);
+                  }}
+                  activeOpacity={0.75}
+                >
+                  <Feather name="key" size={24} color="#60a5fa" />
+                  <Text style={styles.changePasswordText}>Alterar senha</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
                     styles.logoutBtn,
                     {
                       backgroundColor:
@@ -586,6 +764,11 @@ export default function NavigationFAB() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <ChangePasswordModal
+        visible={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+      />
     </>
   );
 }
@@ -730,6 +913,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
 
+  changePasswordBtn: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    gap: 8,
+    marginTop: 12,
+  },
+
+  changePasswordText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#60a5fa',
+  },
+
   logoutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -744,6 +945,133 @@ const styles = StyleSheet.create({
   logoutText: {
     fontSize: 12,
     fontWeight: '700',
+  },
+
+  passwordOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
+  passwordBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000000aa',
+  },
+
+  passwordSheet: {
+    width: '100%',
+    maxWidth: 430,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 18,
+    gap: 10,
+  },
+
+  passwordHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
+  },
+
+  passwordIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#3b82f622',
+    borderWidth: 1,
+    borderColor: '#3b82f666',
+  },
+
+  passwordHeaderCopy: {
+    flex: 1,
+    gap: 3,
+  },
+
+  passwordTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+
+  passwordSubtitle: {
+    fontSize: 11,
+    lineHeight: 15,
+  },
+
+  passwordClose: {
+    padding: 4,
+  },
+
+  passwordInput: {
+    width: '100%',
+    backgroundColor: '#111827',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    fontSize: 13,
+  },
+
+  passwordMessageError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: '#ef444466',
+    backgroundColor: '#ef444422',
+    padding: 9,
+  },
+
+  passwordMessageErrorText: {
+    flex: 1,
+    color: '#f87171',
+    fontSize: 11,
+  },
+
+  passwordMessageSuccess: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: '#22c55e66',
+    backgroundColor: '#22c55e22',
+    padding: 9,
+  },
+
+  passwordMessageSuccessText: {
+    flex: 1,
+    color: '#4ade80',
+    fontSize: 11,
+  },
+
+  passwordSubmit: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 42,
+    borderRadius: 10,
+    backgroundColor: '#2563eb',
+    marginTop: 4,
+  },
+
+  passwordSubmitText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+
+  passwordCancel: {
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+
+  passwordCancelText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   confirmBox: {
