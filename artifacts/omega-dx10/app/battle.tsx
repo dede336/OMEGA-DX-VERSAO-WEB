@@ -1802,7 +1802,7 @@ export default function BattleScreen() {
             </View>
           )}
           {autoMode && won && (
-            <TouchableOpacity onPress={() => setAutoMode(false)} style={[styles.resultBtnOutline, { borderColor: '#ef4444' }]}> 
+            <TouchableOpacity onPress={() => setAutoMode(false)} style={[styles.resultBtnOutline, { borderColor: '#ef4444' }]}>
               <Text style={[styles.resultBtnText, { color: '#ef4444' }]}>✕ {t('battle.auto')}</Text>
             </TouchableOpacity>
           )}
