@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
 
@@ -50,15 +50,14 @@ export default function FusionAnimation({ visible, baseCharacterId, partnerChara
     ]).start(() => setFinished(true));
   }, [flashOpacity, left, resultOpacity, resultScale, right, sourcesOpacity, visible]);
 
-  const whiteStyle = Platform.OS === 'web' ? ({ filter: 'brightness(0) invert(1)' } as any) : { tintColor: '#fff' };
   return <Modal visible={visible} transparent={false} animationType="fade" onRequestClose={() => { if (finished) onClose(); }}>
     <View style={styles.screen}>
       <ExpoImage source={FUSION_GIF} style={StyleSheet.absoluteFill} contentFit="cover" />
       <View style={styles.dim} />
       <TouchableOpacity style={styles.skip} onPress={onClose}><Text style={styles.skipText}>PULAR</Text></TouchableOpacity>
       <View style={styles.stage}>
-        {!!baseImage && <Animated.View style={[styles.source, { opacity: sourcesOpacity, transform: [{ translateX: left }] }]}><Image source={baseImage} style={[styles.sourceSprite, whiteStyle]} resizeMode="contain" /></Animated.View>}
-        {!!partnerImage && <Animated.View style={[styles.source, { opacity: sourcesOpacity, transform: [{ translateX: right }] }]}><Image source={partnerImage} style={[styles.sourceSprite, whiteStyle]} resizeMode="contain" /></Animated.View>}
+        {!!baseImage && <Animated.View style={[styles.source, { opacity: sourcesOpacity, transform: [{ translateX: left }] }]}><ExpoImage source={baseImage} style={[styles.sourceSprite, styles.whiteSilhouette]} contentFit="contain" /></Animated.View>}
+        {!!partnerImage && <Animated.View style={[styles.source, { opacity: sourcesOpacity, transform: [{ translateX: right }] }]}><ExpoImage source={partnerImage} style={[styles.sourceSprite, styles.whiteSilhouette]} contentFit="contain" /></Animated.View>}
         <Animated.View style={[styles.flash, { opacity: flashOpacity }]} />
         {!!resultImage && <Animated.View style={[styles.result, { opacity: resultOpacity, transform: [{ scale: resultScale }] }]}><Image source={resultImage} style={styles.resultSprite} resizeMode="contain" /><Text style={styles.title}>FUSÃO CONCLUÍDA</Text><Text style={styles.name}>{resultCharacter?.name ?? resultCharacterId}</Text>{finished && <Text style={styles.continueText}>TOQUE PARA CONTINUAR</Text>}</Animated.View>}
       </View>
@@ -73,7 +72,7 @@ const styles = StyleSheet.create({
   skip: { position: 'absolute', top: 24, right: 20, zIndex: 20, padding: 12 },
   skipText: { color: '#fff', fontSize: 11, fontWeight: '900' },
   stage: { width: '100%', height: 440, alignItems: 'center', justifyContent: 'center' },
-  source: { position: 'absolute' }, sourceSprite: { width: 150, height: 150 },
+  source: { position: 'absolute' }, sourceSprite: { width: 150, height: 150 }, whiteSilhouette: { tintColor: '#fff', backgroundColor: 'transparent' },
   flash: { position: 'absolute', width: 260, height: 260, borderRadius: 130, backgroundColor: '#fff', shadowColor: '#ff3c6e', shadowOpacity: 1, shadowRadius: 70, elevation: 40 },
   result: { alignItems: 'center', zIndex: 5 }, resultSprite: { width: 200, height: 200 },
   title: { color: '#ff3c6e', fontSize: 18, fontWeight: '900', marginTop: 12 },

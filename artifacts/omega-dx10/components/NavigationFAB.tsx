@@ -69,6 +69,7 @@ export default function NavigationFAB() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { width: W, height: H } = useWindowDimensions();
+  const stageWidth = Platform.OS === 'web' ? Math.min(W, 430) : W;
 
   const {
     unreadMailCount,
@@ -96,19 +97,19 @@ export default function NavigationFAB() {
 
   useEffect(() => {
     boundsRef.current = {
-      W,
+      W: stageWidth,
       H,
       topClamp: insets.top + 8,
       botClamp: insets.bottom + 60,
     };
     const maxY = H - FAB_SIZE - (insets.bottom + 60);
-    const nextX = Math.max(EDGE_GAP, Math.min(W - FAB_SIZE - EDGE_GAP, fabPos.current.x));
+    const nextX = Math.max(EDGE_GAP, Math.min(stageWidth - FAB_SIZE - EDGE_GAP, fabPos.current.x));
     const nextY = Math.max(insets.top + 8, Math.min(maxY, fabPos.current.y));
     fabPos.current = { x: nextX, y: nextY };
     animPos.setValue({ x: nextX, y: nextY });
-  }, [W, H, insets.top, insets.bottom]);
+  }, [stageWidth, H, insets.top, insets.bottom]);
 
-  const initialX = W - FAB_SIZE - EDGE_GAP;
+  const initialX = stageWidth - FAB_SIZE - EDGE_GAP;
   const initialY =
     H - FAB_SIZE - (insets.bottom + 80);
 
@@ -276,9 +277,7 @@ export default function NavigationFAB() {
       <Animated.View
         style={[
           styles.fabWrapper,
-          Platform.OS === 'web'
-            ? styles.fabWrapperWeb
-            : { left: animPos.x, top: animPos.y },
+          { left: animPos.x, top: animPos.y },
         ]}
         {...panResponder.panHandlers}
       >
@@ -595,14 +594,6 @@ const styles = StyleSheet.create({
   fabWrapper: {
     position: 'absolute',
     zIndex: 999,
-  },
-
-  fabWrapperWeb: {
-    position: 'absolute',
-    right: EDGE_GAP,
-    bottom: 24,
-    zIndex: 9999,
-    elevation: 20,
   },
 
   fabBtn: {

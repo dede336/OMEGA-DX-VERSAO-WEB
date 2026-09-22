@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
 
-type Phase = 'digimon' | 'whiteEgg' | 'rainbowEgg' | 'reveal' | 'done';
+type Phase = 'digimon' | 'egg' | 'whiteEgg' | 'reveal' | 'done';
 type Props = { visible: boolean; fromCharacterId: string; toCharacterId: string; onClose: () => void };
 const EVOLUTION_BACKGROUND = require('../assets/images/digivolution.webp');
+const DIGIVOLUTION_EGG = require('../assets/images/digivolution_egg.png');
 
 export default function EvolutionAnimation({ visible, fromCharacterId, toCharacterId, onClose }: Props) {
   const [phase, setPhase] = useState<Phase>('digimon');
@@ -15,7 +15,8 @@ export default function EvolutionAnimation({ visible, fromCharacterId, toCharact
   const sourceScale = useRef(new Animated.Value(0.82)).current;
   const eggOpacity = useRef(new Animated.Value(0)).current;
   const eggScale = useRef(new Animated.Value(0.45)).current;
-  const rainbowOpacity = useRef(new Animated.Value(0)).current;
+  const whiteEggOpacity = useRef(new Animated.Value(0)).current;
+  const eggRotation = useRef(new Animated.Value(0)).current;
   const resultOpacity = useRef(new Animated.Value(0)).current;
   const resultScale = useRef(new Animated.Value(0.65)).current;
   const flashOpacity = useRef(new Animated.Value(0)).current;
@@ -27,7 +28,7 @@ export default function EvolutionAnimation({ visible, fromCharacterId, toCharact
     if (!visible) return;
     setPhase('digimon');
     sourceOpacity.setValue(1); sourceScale.setValue(0.82);
-    eggOpacity.setValue(0); eggScale.setValue(0.45); rainbowOpacity.setValue(0);
+    eggOpacity.setValue(0); eggScale.setValue(0.45); whiteEggOpacity.setValue(0); eggRotation.setValue(0);
     resultOpacity.setValue(0); resultScale.setValue(0.65); flashOpacity.setValue(0);
     let rainbowTimer: ReturnType<typeof setTimeout> | undefined;
     Animated.sequence([
@@ -39,15 +40,20 @@ export default function EvolutionAnimation({ visible, fromCharacterId, toCharact
         Animated.spring(eggScale, { toValue: 1, friction: 5, tension: 55, useNativeDriver: true }),
       ]),
     ]).start(() => {
-      setPhase('whiteEgg');
+      setPhase('egg');
       rainbowTimer = setTimeout(() => {
-        setPhase('rainbowEgg');
+        const rockOnce = () => Animated.sequence([
+          Animated.timing(eggRotation, { toValue: -1, duration: 125, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(eggRotation, { toValue: 1, duration: 250, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(eggRotation, { toValue: 0, duration: 125, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        ]);
         Animated.sequence([
-          Animated.timing(rainbowOpacity, { toValue: 1, duration: 650, useNativeDriver: true }),
-          Animated.delay(900),
+          Animated.sequence([rockOnce(), rockOnce(), rockOnce(), rockOnce()]),
+          Animated.timing(whiteEggOpacity, { toValue: 1, duration: 320, useNativeDriver: true }),
+          Animated.delay(260),
           Animated.parallel([
             Animated.timing(eggOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
-            Animated.timing(rainbowOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+            Animated.timing(whiteEggOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
             Animated.sequence([
               Animated.timing(flashOpacity, { toValue: 1, duration: 130, useNativeDriver: true }),
               Animated.timing(flashOpacity, { toValue: 0, duration: 500, useNativeDriver: true }),
@@ -63,12 +69,13 @@ export default function EvolutionAnimation({ visible, fromCharacterId, toCharact
       }, 550);
     });
     return () => { if (rainbowTimer) clearTimeout(rainbowTimer); };
-  }, [visible, fromCharacterId, toCharacterId]);
+  }, [visible, fromCharacterId, toCharacterId, eggOpacity, eggRotation, eggScale, flashOpacity, resultOpacity, resultScale, sourceOpacity, sourceScale, whiteEggOpacity]);
 
   if (!fromImage || !toImage) return null;
-  const whiteSilhouette = Platform.OS === 'web'
-    ? ({ filter: 'brightness(0) invert(1) drop-shadow(0 0 18px white)' } as any)
-    : { tintColor: '#fff' };
+  const eggRotate = eggRotation.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: ['-7deg', '0deg', '7deg'],
+  });
   return (
     <Modal visible={visible} transparent={false} animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
       <View style={styles.screen}>
@@ -77,11 +84,13 @@ export default function EvolutionAnimation({ visible, fromCharacterId, toCharact
         <TouchableOpacity style={styles.skip} onPress={onClose}><Text style={styles.skipText}>PULAR</Text></TouchableOpacity>
         <View style={styles.stage}>
           <Animated.View style={[styles.centered, { opacity: sourceOpacity, transform: [{ scale: sourceScale }] }]}>
-            <Image source={fromImage} style={[styles.digimon, whiteSilhouette]} resizeMode="contain" />
+            <ExpoImage source={fromImage} style={[styles.digimon, styles.whiteSilhouette]} contentFit="contain" />
           </Animated.View>
-          <Animated.View style={[styles.centered, { opacity: eggOpacity, transform: [{ scale: eggScale }] }]}><View style={styles.whiteEgg} /></Animated.View>
-          <Animated.View style={[styles.centered, { opacity: rainbowOpacity, transform: [{ scale: eggScale }] }]}>
-            <LinearGradient colors={['#ff334d', '#ff9f1c', '#ffe600', '#25e670', '#22b8ff', '#6757ff', '#d946ef', '#ff334d']} start={{ x: 0.08, y: 0 }} end={{ x: 0.92, y: 1 }} style={styles.rainbowEgg} />
+          <Animated.View style={[styles.centered, { opacity: eggOpacity, transform: [{ scale: eggScale }, { rotate: eggRotate }] }]}>
+            <ExpoImage source={DIGIVOLUTION_EGG} style={styles.eggImage} contentFit="contain" />
+          </Animated.View>
+          <Animated.View style={[styles.centered, { opacity: whiteEggOpacity, transform: [{ scale: eggScale }, { rotate: eggRotate }] }]}>
+            <ExpoImage source={DIGIVOLUTION_EGG} style={[styles.eggImage, styles.whiteSilhouette]} contentFit="contain" />
           </Animated.View>
           <Animated.View style={[styles.flash, { opacity: flashOpacity }]} />
           <Animated.View style={[styles.result, { opacity: resultOpacity, transform: [{ scale: resultScale }] }]}>
@@ -106,8 +115,8 @@ const styles = StyleSheet.create({
   stage: { width: '100%', height: 430, alignItems: 'center', justifyContent: 'center' },
   centered: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   digimon: { width: 190, height: 190 },
-  whiteEgg: { width: 130, height: 172, borderRadius: 70, backgroundColor: '#fff', shadowColor: '#fff', shadowOpacity: 1, shadowRadius: 36, elevation: 30 },
-  rainbowEgg: { width: 130, height: 172, borderRadius: 70, borderWidth: 3, borderColor: '#ffffffcc', shadowColor: '#fff', shadowOpacity: 1, shadowRadius: 42, elevation: 34 },
+  whiteSilhouette: { tintColor: '#fff', backgroundColor: 'transparent' },
+  eggImage: { width: 170, height: 210, backgroundColor: 'transparent' },
   flash: { ...StyleSheet.absoluteFillObject, backgroundColor: '#fff' },
   result: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   resultDigimon: { width: 210, height: 210 },
