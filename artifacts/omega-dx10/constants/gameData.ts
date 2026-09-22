@@ -1275,7 +1275,7 @@ export const ALTERNATE_EVOLUTIONS: Record<string, { evolvesTo: string; requiredL
   angewomon:        { evolvesTo: 'ophanimon',      requiredLevel: 60, label: 'Ophanimon',          requiredItem: 'anel_sagrado' },
   magnaAngemon:     { evolvesTo: 'seraphimon',     requiredLevel: 60, label: 'Seraphimon',         requiredItem: 'anel_sagrado' },
   lucemonChaosMode: { evolvesTo: 'lucemonSatanMode', requiredLevel: 50, label: 'Lucemon Satan Mode', requiredItem: 'gehenna' },
-  agumon:            { evolvesTo: 'tiranomon',             requiredLevel: 16, label: 'Tiranomon' },
+agumon: { evolvesTo: 'tyranomon', requiredLevel: 16, label: 'Tyranomon' },
   metalGarurumon:    { evolvesTo: 'omegamon',              requiredLevel: 60, label: 'Omegamon',             requiredSacrificeCharacter: 'warGreymon' },
   shineGreymon:      { evolvesTo: 'shineGreymonBurstMode', requiredLevel: 68, label: 'ShineGreymon Burst Mode', requiredSacrificeCharacter: 'imperialDramonFM' },
   rosemon:           { evolvesTo: 'rosemonBurstMode',      requiredLevel: 64, label: 'Rosemon Burst Mode',      requiredSacrificeCharacter: 'ophanimon' },
