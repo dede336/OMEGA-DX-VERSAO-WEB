@@ -62,6 +62,7 @@ export interface OwnedCharacter {
   level: number;
   exp: number;
   ascensionStars?: number;
+  acquisitionMethod?: 'fusion' | 'evolution';
 }
 
 export interface AscensionResult {
@@ -282,6 +283,13 @@ function mergeDefaultDecorInventory(saved: Record<string, number>): Record<strin
   return merged;
 }
 
+function migrateOwnedCharacter(owned: OwnedCharacter): OwnedCharacter {
+  if (owned.characterId === 'lucemonChaosMode' && !owned.acquisitionMethod && !owned.ownedId.toLowerCase().includes('lucemon')) {
+    return { ...owned, acquisitionMethod: 'fusion' };
+  }
+  return owned;
+}
+
 const defaultState: GameState = {
   playerName: '',
   gender: 'M',
@@ -352,6 +360,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           setState({
             ...defaultState,
             ...parsed,
+            collection: (parsed.collection ?? defaultState.collection).map(migrateOwnedCharacter),
             scanProgress: parsed.scanProgress ?? {},
             gender: parsed.gender ?? 'M',
             inventory: parsed.inventory ?? DEFAULT_INVENTORY,
@@ -545,6 +554,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       } else if (alternate) {
         const evo = ALTERNATE_EVOLUTIONS[target.characterId];
         if (!evo || target.level < evo.requiredLevel) return prev;
+        if (target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return prev;
         if (evo.requiredItem && (prev.pieces[evo.requiredItem] ?? 0) <= 0) return prev;
         const sacrificeCharId = evo.requiredSacrificeCharacter;
         const sacrificeCharIds = (evo as any).requiredSacrificeCharacters as string[] | undefined;
@@ -561,7 +571,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           if (!sacrificeOwned) return prev;
         }
         let newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0 } : c
+          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const } : c
         );
         if (sacrificeCharIds && sacrificeCharIds.length > 0) {
           // Remove all multi-sacrifice characters from collection
@@ -586,7 +596,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!evo || target.level < evo.requiredLevel) return prev;
         if (evo.requiredItem && (prev.pieces[evo.requiredItem] ?? 0) <= 0) return prev;
         const newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0 } : c
+          c.ownedId === ownedId ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const } : c
         );
         const newPieces = evo.requiredItem
           ? { ...prev.pieces, [evo.requiredItem]: (prev.pieces[evo.requiredItem] ?? 0) - 1 }
@@ -627,7 +637,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         selectedOwnedId: newSelected,
         collection: prev.collection
           .filter((c) => c.ownedId !== sacrificeOwnedId)
-          .map((c) => c.ownedId === keepOwnedId ? { ...c, characterId: fusion.resultId, level: 1, exp: 0 } : c),
+          .map((c) => c.ownedId === keepOwnedId ? { ...c, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const } : c),
       };
     });
     return success;
@@ -1485,7 +1495,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...DEFAULT_MESSAGES.filter((m) => !savedIds.has(m.id)),
         ...savedMessages,
       ].sort((a, b) => b.createdAt - a.createdAt);
-      const collection: OwnedCharacter[] = parsed.collection ?? [];
+      const collection: OwnedCharacter[] = (parsed.collection ?? []).map(migrateOwnedCharacter);
       const newState: GameState = {
         ...defaultState,
         ...parsed,
