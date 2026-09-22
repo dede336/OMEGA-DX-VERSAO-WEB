@@ -4,12 +4,12 @@
     "slug": "omega-dx10",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/android-icon.png",
     "scheme": "omega-dx10",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/icon.png",
+      "image": "./assets/images/android-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#060b14"
     },
@@ -17,12 +17,13 @@
       "supportsTablet": false
     },
     "android": {
+      "icon": "./assets/images/android-icon.png",
       "backgroundColor": "#060b14",
       "softwareKeyboardLayoutMode": "pan",
       "package": "com.omegadx10.app"
     },
     "web": {
-      "favicon": "./assets/images/icon.png"
+      "favicon": "./assets/images/browser-icon.png"
     },
     "plugins": [
       [
