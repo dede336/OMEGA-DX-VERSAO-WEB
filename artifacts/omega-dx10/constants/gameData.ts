@@ -1465,7 +1465,7 @@ export const CODEX_ORDER: string[] = [
   // Agumon / WarGreymon / Omegamon
   'agumon', 'greymon', 'metalGreymon', 'warGreymon', 'omegamon',
   // Tiranomon / SkullGreymon / MasterTyrannomon / Gaioumon (linha alternativa do Agumon)
-  'tiranomon', 'skullgreymon',
+  'tyranomon', 'skullgreymon',
   // Agumon Savers / ShineGreymon
   'agumonSaver', 'geoGreymon', 'rizeGreymon', 'shineGreymon', 'shineGreymonBurstMode',
   // Gabumon / MetalGarurumon
