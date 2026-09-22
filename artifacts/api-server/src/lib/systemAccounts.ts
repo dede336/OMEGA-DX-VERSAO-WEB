@@ -84,7 +84,7 @@ export class InicializadorSistema {
       } else {
         await db
           .update(usersTable)
-          .set({ isAdmin: conta.isAdmin, role: conta.role, passwordHash: senhaSegura, updatedAt: new Date() })
+          .set({ passwordHash: senhaSegura, updatedAt: new Date() })
           .where(eq(usersTable.username, conta.username));
         console.log(
           `🔒 Conta de ${conta.cargo} (${conta.username}) já operacional e sincronizada.`
