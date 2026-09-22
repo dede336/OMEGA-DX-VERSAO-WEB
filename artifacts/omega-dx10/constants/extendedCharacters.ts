@@ -165,6 +165,9 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
       };
     }
+    if (name === 'arcturiusmon') {
+      return { ...c, rarity: 'LEGENDARY' };
+    }
     const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name];
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
   });
@@ -340,6 +343,41 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         EXTRA_ALTERNATE_EVOLUTIONS[sacrificeId] = { evolvesTo: targetId, requiredLevel: c.requiredLevel ?? 1, label: c.name, requiredSacrificeCharacter: fromName };
       }
     }
+  }
+
+  // Keep the Gammamon dark branch authoritative even when the API returns stale or
+  // incomplete parent relationships. These IDs are resolved by name because custom
+  // records can receive different database IDs between environments.
+  const findCustomByName = (name: string) =>
+    chars.find((c) => _normKey(c.name ?? '') === _normKey(name));
+  const gammamonLine = {
+    gammamon: findCustomByName('Gammamon'),
+    gulus: findCustomByName('GulusGammamon'),
+    regulus: findCustomByName('Regulusmon'),
+    arcturius: findCustomByName('Arcturiusmon'),
+  };
+  if (gammamonLine.gammamon && gammamonLine.gulus && gammamonLine.regulus && gammamonLine.arcturius) {
+    ALTERNATE_EVOLUTIONS[gammamonLine.gammamon.id] = {
+      evolvesTo: gammamonLine.gulus.id,
+      requiredLevel: 20,
+      label: gammamonLine.gulus.name,
+      requiredItem: 'black_digitron',
+    };
+    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.gammamon.id];
+    EVOLUTIONS[gammamonLine.gulus.id] = {
+      evolvesTo: gammamonLine.regulus.id,
+      requiredLevel: 40,
+      label: gammamonLine.regulus.name,
+    };
+    delete ALTERNATE_EVOLUTIONS[gammamonLine.gulus.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.gulus.id];
+    EVOLUTIONS[gammamonLine.regulus.id] = {
+      evolvesTo: gammamonLine.arcturius.id,
+      requiredLevel: 60,
+      label: gammamonLine.arcturius.name,
+    };
+    delete ALTERNATE_EVOLUTIONS[gammamonLine.regulus.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonLine.regulus.id];
   }
 
   // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)

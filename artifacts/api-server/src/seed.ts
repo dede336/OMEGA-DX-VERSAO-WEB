@@ -1648,7 +1648,7 @@ export async function seedCustomDigimons(): Promise<void> {
     }, true);
 
     await upsertDigimon(byName, "Arcturiusmon", {
-      name: "Arcturiusmon", attribute: "VR", rarity: "ULTRA", element: "DARK",
+      name: "Arcturiusmon", attribute: "VR", rarity: "LEGENDARY", element: "DARK",
       hp: 600, mp: 500, atk: 390, def: 355, spt: 375, spd: 340,
       description: "A forma definitiva do Gamamon, transcendendo os limites do mundo digital. Seu poder é comparado ao de uma estrela, capaz de iluminar ou destruir tudo ao seu redor.",
       attackName: "Arcturus Nova", attackElement: "LIGHT",
