@@ -100,6 +100,11 @@ export default function NavigationFAB() {
       topClamp: insets.top + 8,
       botClamp: insets.bottom + 60,
     };
+    const maxY = H - FAB_SIZE - (insets.bottom + 60);
+    const nextX = Math.max(EDGE_GAP, Math.min(W - FAB_SIZE - EDGE_GAP, fabPos.current.x));
+    const nextY = Math.max(insets.top + 8, Math.min(maxY, fabPos.current.y));
+    fabPos.current = { x: nextX, y: nextY };
+    animPos.setValue({ x: nextX, y: nextY });
   }, [W, H, insets.top, insets.bottom]);
 
   const initialX = W - FAB_SIZE - EDGE_GAP;
@@ -270,18 +275,9 @@ export default function NavigationFAB() {
       <Animated.View
         style={[
           styles.fabWrapper,
-          Platform.OS === 'web'
-            ? styles.fabWrapperWeb
-            : {
-                left: animPos.x,
-                top: animPos.y,
-              },
+          { left: animPos.x, top: animPos.y },
         ]}
-        {...(
-          Platform.OS === 'web'
-            ? {}
-            : panResponder.panHandlers
-        )}
+        {...panResponder.panHandlers}
       >
         <TouchableOpacity
           onPress={() => {
