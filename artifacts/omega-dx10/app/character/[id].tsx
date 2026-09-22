@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image,
+  Platform, Modal, Pressable, Animated, Image, Easing,
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -38,6 +37,7 @@ import { applyAscensionBonus } from '@/utils/ascension';
 
 const DIGIVO_GIF             = require('../../assets/images/digivolution.webp');
 const FUSION_GIF             = require('../../assets/images/fusion_crimson.webp');
+const FUSION_RAINBOW_CORE    = require('../../assets/images/fusion_rainbow_core.png');
 const OMEGAMON_GIF              = require('../../assets/images/omegamon_digivolve.webp');
 const OMEGAMON_FUSION_INTRO     = require('../../assets/images/omegamon_fusion_intro.webp');
 const SHINEGREYMON_BM_GIF       = require('../../assets/images/digimons/shinegreymonbm.gif');
@@ -110,8 +110,9 @@ export default function CharacterDetailScreen() {
   // ── Fusion animation ────────────────────────────────────────────────────────
   const [fuseAnim, setFuseAnim] = useState<{ fromCharId: string; partnerCharId: string; toCharId: string } | null>(null);
   const [fusePhase, setFusePhase] = useState<FusePhase>('playing');
-  const flashOpacity  = useRef(new Animated.Value(0)).current;
-  const colorGlowOpacity = useRef(new Animated.Value(0)).current;
+  const fusionCoreOpacity = useRef(new Animated.Value(0)).current;
+  const fusionCoreScale = useRef(new Animated.Value(0.72)).current;
+  const fusionCoreRotation = useRef(new Animated.Value(0)).current;
   const leftPosition = useRef(new Animated.Value(-170)).current;
   const rightPosition = useRef(new Animated.Value(170)).current;
   const fusionPairOpacity = useRef(new Animated.Value(1)).current;
@@ -129,23 +130,30 @@ export default function CharacterDetailScreen() {
           Animated.timing(rightPosition, { toValue: 0, duration: 2200, useNativeDriver: true }),
         ]),
         Animated.parallel([
-          Animated.timing(flashOpacity, { toValue: 1, duration: 420, useNativeDriver: true }),
           Animated.timing(fusionPairOpacity, { toValue: 0, duration: 420, useNativeDriver: true }),
+          Animated.timing(fusionCoreOpacity, { toValue: 1, duration: 420, useNativeDriver: true }),
+          Animated.spring(fusionCoreScale, { toValue: 1, friction: 6, tension: 42, useNativeDriver: true }),
         ]),
       ]).start(() => setFusePhase('color'));
     }
     if (fusePhase === 'color') {
-      // A luz branca ganha cores, desaparece e só então revela a fusão.
+      // O núcleo da fusão gira e pulsa devagar; ao desaparecer, revela o resultado.
       Animated.sequence([
         Animated.parallel([
-          Animated.timing(flashOpacity, { toValue: 0.15, duration: 800, useNativeDriver: true }),
-          Animated.timing(colorGlowOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+          Animated.timing(fusionCoreRotation, {
+            toValue: 1,
+            duration: 2400,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+          Animated.sequence([
+            Animated.timing(fusionCoreScale, { toValue: 1.08, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+            Animated.timing(fusionCoreScale, { toValue: 0.94, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+            Animated.timing(fusionCoreScale, { toValue: 1.08, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+            Animated.timing(fusionCoreScale, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          ]),
         ]),
-        Animated.delay(650),
-        Animated.parallel([
-          Animated.timing(flashOpacity, { toValue: 0, duration: 420, useNativeDriver: true }),
-          Animated.timing(colorGlowOpacity, { toValue: 0, duration: 420, useNativeDriver: true }),
-        ]),
+        Animated.timing(fusionCoreOpacity, { toValue: 0, duration: 420, useNativeDriver: true }),
       ]).start(() => setFusePhase('reveal'));
     }
     if (fusePhase === 'reveal') {
@@ -154,7 +162,7 @@ export default function CharacterDetailScreen() {
         Animated.spring(titleScale,     { toValue: 1, useNativeDriver: true, friction: 5 }),
       ]).start(() => setFusePhase('done'));
     }
-  }, [fuseAnim, fusePhase, flashOpacity, colorGlowOpacity, leftPosition, rightPosition, fusionPairOpacity, newFormOpacity, titleScale]);
+  }, [fuseAnim, fusePhase, fusionCoreOpacity, fusionCoreScale, fusionCoreRotation, leftPosition, rightPosition, fusionPairOpacity, newFormOpacity, titleScale]);
 
   const owned = collection.find((c) => c.ownedId === id);
   const char  = owned ? (getCharacter(owned.characterId) ?? null) : null;
@@ -212,8 +220,9 @@ export default function CharacterDetailScreen() {
     // Start animation
     newFormOpacity.setValue(0);
     titleScale.setValue(0.7);
-    flashOpacity.setValue(0);
-    colorGlowOpacity.setValue(0);
+    fusionCoreOpacity.setValue(0);
+    fusionCoreScale.setValue(0.72);
+    fusionCoreRotation.setValue(0);
     leftPosition.setValue(-170);
     rightPosition.setValue(170);
     fusionPairOpacity.setValue(1);
@@ -243,9 +252,10 @@ export default function CharacterDetailScreen() {
   const fuseFromChar = fuseAnim ? (getCharacter(fuseAnim.fromCharId) ?? null) : null;
   const fuseFromImage = fuseAnim ? getCharacterImageSource(fuseAnim.fromCharId) : null;
   const fusePartnerImage = fuseAnim ? getCharacterImageSource(fuseAnim.partnerCharId) : null;
-  const fusionWhiteStyle = Platform.OS === 'web'
-    ? ({ filter: 'brightness(0) invert(1) drop-shadow(0 0 16px white)' } as any)
-    : { tintColor: '#fff' };
+  const fusionCoreRotate = fusionCoreRotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const isOmegamon           = char.id === 'omegamon';
   const isShineGreymonBM     = char.id === 'shineGreymonBurstMode';
@@ -714,22 +724,25 @@ export default function CharacterDetailScreen() {
           {fuseAnim && fuseFromImage && fusePartnerImage && (fusePhase === 'playing' || fusePhase === 'color') && (
             <Animated.View style={[styles.fusionPair, { opacity: fusionPairOpacity }]} pointerEvents="none">
               <Animated.View style={[styles.fusionSideSprite, { transform: [{ translateX: leftPosition }] }]}>
-                <Image source={fuseFromImage} style={[styles.fusionWhiteSprite, fusionWhiteStyle]} resizeMode="contain" />
+                <ExpoImage source={fuseFromImage} style={[styles.fusionWhiteSprite, styles.fusionWhiteSilhouette]} contentFit="contain" />
               </Animated.View>
               <Animated.View style={[styles.fusionSideSprite, { transform: [{ translateX: rightPosition }] }]}>
-                <Image source={fusePartnerImage} style={[styles.fusionWhiteSprite, fusionWhiteStyle]} resizeMode="contain" />
+                <ExpoImage source={fusePartnerImage} style={[styles.fusionWhiteSprite, styles.fusionWhiteSilhouette]} contentFit="contain" />
               </Animated.View>
             </Animated.View>
           )}
 
-          <Animated.View style={[styles.fusionWhiteGlow, { opacity: flashOpacity }]} pointerEvents="none" />
-          <Animated.View style={[styles.fusionColorGlowWrap, { opacity: colorGlowOpacity }]} pointerEvents="none">
-            <LinearGradient
-              colors={['#ffffff', '#22d3ee', '#3b82f6', '#8b5cf6', '#ec4899', '#facc15', '#ffffff']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.fusionColorGlow}
-            />
+          <Animated.View
+            style={[
+              styles.fusionCoreWrap,
+              {
+                opacity: fusionCoreOpacity,
+                transform: [{ rotate: fusionCoreRotate }, { scale: fusionCoreScale }],
+              },
+            ]}
+            pointerEvents="none"
+          >
+            <Image source={FUSION_RAINBOW_CORE} style={styles.fusionCoreImage} resizeMode="contain" />
           </Animated.View>
 
           <View style={styles.evoContent} pointerEvents="none">
@@ -922,11 +935,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject as any,
     backgroundColor: '#00000055',
   },
-  fusionWhiteGlow: {
-    position: 'absolute', width: 210, height: 210, borderRadius: 105,
-    backgroundColor: '#fff', shadowColor: '#fff', shadowOpacity: 1,
-    shadowRadius: 55, elevation: 35,
-  },
   fusionPair: {
     position: 'absolute', width: '100%', height: 240,
     alignItems: 'center', justifyContent: 'center', zIndex: 3,
@@ -935,12 +943,12 @@ const styles = StyleSheet.create({
     position: 'absolute', alignItems: 'center', justifyContent: 'center',
   },
   fusionWhiteSprite: { width: 155, height: 155 },
-  fusionColorGlowWrap: {
-    position: 'absolute', width: 230, height: 230, borderRadius: 115,
-    overflow: 'hidden', shadowColor: '#a855f7', shadowOpacity: 1,
-    shadowRadius: 65, elevation: 38,
+  fusionWhiteSilhouette: { tintColor: '#fff', backgroundColor: 'transparent' },
+  fusionCoreWrap: {
+    position: 'absolute', width: 230, height: 230,
+    alignItems: 'center', justifyContent: 'center', zIndex: 4,
   },
-  fusionColorGlow: { width: '100%', height: '100%', borderRadius: 115 },
+  fusionCoreImage: { width: '100%', height: '100%' },
   evoContent: {
     alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: 32, gap: 16,
