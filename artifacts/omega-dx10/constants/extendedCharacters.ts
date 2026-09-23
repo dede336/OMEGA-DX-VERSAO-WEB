@@ -1,4 +1,4 @@
-import { Character, CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS, SACRIFICE_DROPS } from './gameData';
+import { Character, CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS, FUSIONS, SACRIFICE_DROPS } from './gameData';
 import CHARACTER_IMAGES from './characterImages';
 
 interface CustomCharacterEntry extends Character {
@@ -301,7 +301,22 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     const hasSacrifice = !!c.requiredSacrificeCharacter;
     const mainTarget = EVOLUTIONS[fromId]?.evolvesTo;
     const altTarget  = ALTERNATE_EVOLUTIONS[fromId]?.evolvesTo;
-    if (!hasSacrifice && !EVOLUTIONS[fromId]) {
+
+    if (hasSacrifice) {
+      const sacrificeId = resolveEvolutionCharacterId(c.requiredSacrificeCharacter!);
+      if (sacrificeId) {
+        const recipes = FUSIONS[fromId] ?? (FUSIONS[fromId] = []);
+        if (!recipes.some((recipe) => recipe.resultId === targetId && recipe.partner === sacrificeId)) {
+          recipes.push({
+            partner: sacrificeId,
+            resultId: targetId,
+            resultName: c.name,
+            requiredLevel: c.requiredLevel ?? 1,
+            requiredItem: c.requiredItem,
+          });
+        }
+      }
+    } else if (!EVOLUTIONS[fromId]) {
       EVOLUTIONS[fromId] = {
         evolvesTo: targetId,
         requiredLevel: c.requiredLevel ?? 1,
@@ -309,55 +324,27 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         requiredItem: c.requiredItem,
       };
       if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
-    } else if (!ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId) {
+    } else if (c.requiredItem && !ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId) {
       ALTERNATE_EVOLUTIONS[fromId] = {
         evolvesTo: targetId,
         requiredLevel: c.requiredLevel ?? 1,
         label: c.name,
         requiredItem: c.requiredItem,
-        requiredSacrificeCharacter: c.requiredSacrificeCharacter,
       };
       if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
-    } else if (!EXTRA_ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId && altTarget !== targetId) {
+    } else if (c.requiredItem && !EXTRA_ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId && altTarget !== targetId) {
       EXTRA_ALTERNATE_EVOLUTIONS[fromId] = {
         evolvesTo: targetId,
         requiredLevel: c.requiredLevel ?? 1,
         label: c.name,
         requiredItem: c.requiredItem,
-        requiredSacrificeCharacter: c.requiredSacrificeCharacter,
       };
       if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
     }
   }
 
-  // ── Bidirectional sacrifice entries ──────────────────────────────────────────
-  // When digimon X fuses (evolvesFrom=A, sacrifice=B), also register B→X (sacrifice=A)
-  // so the fusion target appears in BOTH parents' evo lines.
-  for (const c of sortedForEvo) {
-    if (!c.evolvesFromId || !c.requiredSacrificeCharacter || SKIP_RARITIES.has(c.rarity)) continue;
-    const targetId = (c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined) ?? c.id;
-
-    let fromId = c.evolvesFromId;
-    if (fromId.startsWith('custom_')) {
-      const fc = chars.find((x) => x.id === fromId);
-      if (fc) { const baseId = fc.name ? BASE_NAME_MAP[fc.name.toLowerCase()] : undefined; if (baseId) fromId = baseId; }
-    }
-    const fromChar = chars.find((x) => x.id === c.evolvesFromId);
-    const fromName = resolveEvolutionCharacterId(fromChar?.name ?? fromId) ?? fromId;
-    const sacrificeId = resolveEvolutionCharacterId(c.requiredSacrificeCharacter);
-    if (!sacrificeId) continue;
-
-    const ev = EVOLUTIONS[sacrificeId]?.evolvesTo;
-    const av = ALTERNATE_EVOLUTIONS[sacrificeId]?.evolvesTo;
-    const xv = EXTRA_ALTERNATE_EVOLUTIONS[sacrificeId]?.evolvesTo;
-    if (ev !== targetId && av !== targetId && xv !== targetId) {
-      if (!ALTERNATE_EVOLUTIONS[sacrificeId]) {
-        ALTERNATE_EVOLUTIONS[sacrificeId] = { evolvesTo: targetId, requiredLevel: c.requiredLevel ?? 1, label: c.name, requiredSacrificeCharacter: fromName };
-      } else if (!EXTRA_ALTERNATE_EVOLUTIONS[sacrificeId]) {
-        EXTRA_ALTERNATE_EVOLUTIONS[sacrificeId] = { evolvesTo: targetId, requiredLevel: c.requiredLevel ?? 1, label: c.name, requiredSacrificeCharacter: fromName };
-      }
-    }
-  }
+  // Sacrifice relationships are registered only in FUSIONS.
+  // ALTERNATE_EVOLUTIONS and EXTRA_ALTERNATE_EVOLUTIONS are item-only.
 
   // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
   // These are added AFTER the clearing loop so they always survive reloads.
