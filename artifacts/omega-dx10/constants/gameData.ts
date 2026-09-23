@@ -710,7 +710,7 @@ export const CHARACTERS: Record<string, Character> = {
     element: 'FIRE',
     baseStats: { hp: 320, mp: 335, atk: 171, def: 146, spt: 126, spd: 122, apt: 72 },
     attackName: 'Dramon Killer ⚙️',
-    attackElement: 'STEEL',
+    attackElement: 'METAL',
     spiritName: 'Gaia Force 🔥',
     spiritElement: 'FIRE',
     description: 'O ápice da evolução do Agumon. Guerreiro lendário do tipo Vacina revestido por armadura Dramon Destroyer, capaz de destruir qualquer Dragonoid.',
