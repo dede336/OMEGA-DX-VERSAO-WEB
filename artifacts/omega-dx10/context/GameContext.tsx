@@ -641,53 +641,76 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (!evo || target.level < evo.requiredLevel) return prev;
         if (target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return prev;
         if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
+
         const sacrificeCharId = evo.requiredSacrificeCharacter;
         const sacrificeCharIds = (evo as any).requiredSacrificeCharacters as string[] | undefined;
+        const isFusion = !!sacrificeCharId || !!(sacrificeCharIds && sacrificeCharIds.length > 0);
         const fusionSacrifices: OwnedCharacter[] = [];
 
         if (sacrificeCharIds && sacrificeCharIds.length > 0) {
-          // Multi-sacrifice: must have ALL required characters in collection
+          const usedOwnedIds = new Set<string>();
+
           for (const charId of sacrificeCharIds) {
-            const found = prev.collection.find((c) => c.ownedId !== ownedId && c.characterId === charId);
+            const found = prev.collection.find(
+              (c) =>
+                c.ownedId !== ownedId &&
+                c.characterId === charId &&
+                !usedOwnedIds.has(c.ownedId),
+            );
+
+            // A fusão só acontece se TODOS os sacrifícios obrigatórios existirem.
             if (!found) return prev;
+
+            usedOwnedIds.add(found.ownedId);
             fusionSacrifices.push(found);
           }
         } else if (sacrificeCharId) {
-          const sacrificeOwned = sacrificeOwnedId
-            ? prev.collection.find((c) => c.ownedId === sacrificeOwnedId && c.characterId === sacrificeCharId)
-            : prev.collection.find((c) => c.ownedId !== ownedId && c.characterId === sacrificeCharId);
+          // Fusões com um sacrifício exigem a cópia escolhida explicitamente no DigiBank.
+          // Não é permitido escolher silenciosamente qualquer cópia da coleção.
+          if (!sacrificeOwnedId) return prev;
+
+          const sacrificeOwned = prev.collection.find(
+            (c) =>
+              c.ownedId === sacrificeOwnedId &&
+              c.ownedId !== ownedId &&
+              c.characterId === sacrificeCharId,
+          );
+
           if (!sacrificeOwned) return prev;
           fusionSacrifices.push(sacrificeOwned);
         }
-        let newCollection = prev.collection.map((c) =>
+
+        // Proteção final: receita de fusão nunca pode continuar sem sacrifício validado.
+        if (isFusion && fusionSacrifices.length === 0) return prev;
+
+        const sacrificeIds = new Set(fusionSacrifices.map((c) => c.ownedId));
+
+        // Consome exatamente os Digimons que participaram da fusão.
+        let newCollection = prev.collection.filter((c) => !sacrificeIds.has(c.ownedId));
+
+        newCollection = newCollection.map((c) =>
           c.ownedId === ownedId
             ? {
                 ...c,
                 characterId: evo.evolvesTo,
                 level: 1,
                 exp: 0,
-                acquisitionMethod: 'evolution' as const,
-                ...resolveMailGiftFusionStars(c, fusionSacrifices),
+                acquisitionMethod: isFusion ? ('fusion' as const) : ('evolution' as const),
+                ...(isFusion
+                  ? resolveMailGiftFusionStars(c, fusionSacrifices)
+                  : preserveMailGiftStars(c)),
               }
             : c
         );
-        if (sacrificeCharIds && sacrificeCharIds.length > 0) {
-          // Remove all multi-sacrifice characters from collection
-          for (const charId of sacrificeCharIds) {
-            const toRemove = newCollection.find((c) => c.ownedId !== ownedId && c.characterId === charId);
-            if (toRemove) newCollection = newCollection.filter((c) => c.ownedId !== toRemove.ownedId);
-          }
-        } else if (sacrificeCharId) {
-          const resolvedId = sacrificeOwnedId ?? newCollection.find(
-            (c) => c.ownedId !== ownedId && c.characterId === sacrificeCharId
-          )?.ownedId;
-          if (resolvedId) {
-            newCollection = newCollection.filter((c) => c.ownedId !== resolvedId);
-          }
-        }
+
         const newInventory = evo.requiredItem
-          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
+          ? prev.inventory.filter(
+              (itemId, index) =>
+                itemId !== evo.requiredItem ||
+                index !== prev.inventory.indexOf(evo.requiredItem),
+            )
           : prev.inventory;
+
         return { ...prev, collection: newCollection, inventory: newInventory };
       } else {
         const evo = EVOLUTIONS[target.characterId];
