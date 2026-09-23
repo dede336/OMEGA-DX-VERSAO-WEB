@@ -21,9 +21,9 @@ async function seedAdmin() {
   if (existing) {
     await db
       .update(usersTable)
-      .set({ passwordHash: adminPasswordHash, updatedAt: new Date() })
+      .set({ isAdmin: true, role: "admin", passwordHash: adminPasswordHash })
       .where(eq(usersTable.id, existing.id));
-    console.log(`Senha da conta '${ADMIN_USERNAME}' redefinida; cargo preservado.`);
+    console.log(`Conta '${ADMIN_USERNAME}' atualizada — admin, role e senha redefinidos.`);
   } else {
     await db.insert(usersTable).values({
       username: ADMIN_USERNAME,
@@ -46,9 +46,9 @@ async function seedAssistant() {
   if (existing) {
     await db
       .update(usersTable)
-      .set({ passwordHash: assistantPasswordHash, updatedAt: new Date() })
+      .set({ role: ASSISTANT_ROLE, passwordHash: assistantPasswordHash })
       .where(eq(usersTable.id, existing.id));
-    console.log(`Senha da conta '${ASSISTANT_USERNAME}' redefinida; cargo preservado.`);
+    console.log(`Conta '${ASSISTANT_USERNAME}' já existe — role atualizada para ${ASSISTANT_ROLE}.`);
 
     const [existSave] = await db
       .select({ id: gameSavesTable.id })
