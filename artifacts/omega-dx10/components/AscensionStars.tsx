@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { getAscensionStars } from '@/utils/ascension';
 
 interface Props {
@@ -7,43 +7,78 @@ interface Props {
   size?: 'small' | 'medium' | 'large';
 }
 
-const GLOW_COLORS = ['transparent', '#ffffff', '#38bdf8', '#ef4444', '#facc15'] as const;
+const STAR_IMAGES = {
+  1: require('../assets/images/1_star.gif'),
+  2: require('../assets/images/2_star.gif'),
+  3: require('../assets/images/3_star.gif'),
+  4: require('../assets/images/4_star.gif'),
+} as const;
 
 export function AscensionStars({ stars = 0, size = 'medium' }: Props) {
   const count = getAscensionStars({ ascensionStars: stars });
+
   if (count === 0) return null;
 
-  const fontSize = size === 'small' ? 12 : size === 'large' ? 30 : 18;
-  const glow = GLOW_COLORS[count];
-  const isGolden = count === 4;
+  const normalSize =
+    size === 'small' ? 16 :
+    size === 'large' ? 38 :
+    24;
 
+  const fourStarSize =
+    size === 'small' ? 27 :
+    size === 'large' ? 62 :
+    42;
+
+  const imageSource = STAR_IMAGES[count as keyof typeof STAR_IMAGES];
+
+  // 4 estrelas = uma única estrela multicolorida grande.
+  if (count === 4) {
+    return (
+      <View
+        accessibilityLabel="4 estrelas de ascensão"
+        style={styles.row}
+      >
+        <Image
+          source={imageSource}
+          style={{
+            width: fourStarSize,
+            height: fourStarSize,
+          }}
+          resizeMode="contain"
+        />
+      </View>
+    );
+  }
+
+  // 1 estrela = 1 imagem 1_star.gif
+  // 2 estrelas = 2 imagens 2_star.gif
+  // 3 estrelas = 3 imagens 3_star.gif
   return (
     <View
       accessibilityLabel={`${count} estrela${count === 1 ? '' : 's'} de ascensão`}
-      style={[styles.row, isGolden && styles.goldenRow]}
+      style={styles.row}
     >
-      {Array.from({ length: isGolden ? 1 : count }).map((_, index) => (
-        <Text
-          key={index}
-          style={[
-            styles.star,
-            {
-              color: isGolden ? '#ffd700' : '#facc15',
-              fontSize: isGolden ? fontSize * 1.55 : fontSize,
-              textShadowColor: glow,
-              textShadowRadius: isGolden ? 14 : 8,
-            },
-          ]}
-        >
-          ★
-        </Text>
+      {Array.from({ length: count }).map((_, index) => (
+        <Image
+          key={`${count}_star_${index}`}
+          source={imageSource}
+          style={{
+            width: normalSize,
+            height: normalSize,
+          }}
+          resizeMode="contain"
+        />
       ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 18 },
-  goldenRow: { minHeight: 32 },
-  star: { fontWeight: '900', textShadowOffset: { width: 0, height: 0 } },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    minHeight: 18,
+  },
 });
