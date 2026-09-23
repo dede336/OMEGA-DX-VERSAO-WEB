@@ -443,6 +443,36 @@ export default function CharacterDetailScreen() {
           <StatBar label="SPD" value={scaled.spd} max={250} color="#facc15" />
         </View>
 
+        {fusionRecipes.length > 1 && (
+          <View style={{ gap: 8, marginBottom: 10 }}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>ESCOLHA A JOGRESS</Text>
+            {fusionRecipes.map((recipe) => {
+              const target = getCharacter(recipe.resultId) ?? CHARACTERS[recipe.resultId];
+              const selected = fusionRecipe?.resultId === recipe.resultId;
+              return (
+                <TouchableOpacity
+                  key={recipe.resultId}
+                  style={[styles.evoRow, {
+                    backgroundColor: selected ? '#ff3c6e22' : colors.card,
+                    borderColor: selected ? '#ff3c6e' : colors.border,
+                  }, pixelStyle]}
+                  onPress={() => {
+                    setSelectedFusionResultId(recipe.resultId);
+                    setFuseSacrificeId(null);
+                    setSelectedFusionItemId(null);
+                  }}
+                >
+                  <CharacterAvatar characterId={recipe.resultId} size={38} />
+                  <Text style={[styles.fusionName, { color: selected ? '#ff3c6e' : colors.foreground, flex: 1, marginLeft: 10 }]}>
+                    {target?.name ?? recipe.resultName}
+                  </Text>
+                  <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>Lv {recipe.requiredLevel}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+
         {fusionRecipe && resultChar && (
           <View style={[styles.fusionCard, {
             backgroundColor: colors.card,
