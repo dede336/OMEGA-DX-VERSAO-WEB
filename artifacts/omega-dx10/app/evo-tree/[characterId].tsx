@@ -197,7 +197,7 @@ function DigiCard({
   const name = char?.name ?? charId;
   const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
-  const fusionPartner = FUSIONS[charId]?.partner;
+  const fusionPartner = (FUSIONS[charId] ?? [])[0]?.partner;
   const fusionName = fusionPartner
     ? (getCharacter(fusionPartner) ?? CHARACTERS[fusionPartner])?.name ?? fusionPartner
     : null;
