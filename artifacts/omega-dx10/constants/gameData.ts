@@ -1196,78 +1196,655 @@ export const CHARACTERS: Record<string, Character> = {
   },
 };
 
-// ─── Fusion paths ─────────────────────────────────────────────────────────────
+// ─── Fusion / Jogress paths ──────────────────────────────────────────────────
+//
+// REGRA:
+// FUSION = exige obrigatoriamente o consumo de outro Digimon.
+//
+// requiredItem:
+// Quando informado, além do Digimon sacrificado, o jogador também precisa
+// selecionar e consumir o item.
+//
+// partner:
+// Digimon que será sacrificado.
+//
+// partners:
+// Usado quando a fusão exige vários Digimons sacrificados.
+//
+// IMPORTANTE:
+// Item NÃO é sacrifício.
+// Evoluções que exigem somente item ficam em ALTERNATE_EVOLUTIONS.
+//
+
 export interface FusionRecipe {
-  partner: string;
+  partner?: string;
+  partners?: string[];
+
   resultId: string;
   resultName: string;
+
   requiredLevel: number;
+
+  // Opcional.
+  // Se existir, a fusão exige:
+  // Digimon sacrificado + item.
+  requiredItem?: string;
 }
 
-export const FUSIONS: Record<string, FusionRecipe> = {
-  warGreymon:    { partner: 'metalGarurumon', resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
-  metalGarurumon:{ partner: 'warGreymon',     resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
-  gallantmon:    { partner: 'seraphimon',     resultId: 'gallantmonCrimsonMode', resultName: 'Gallantmon Crimson Mode', requiredLevel: 60 },
-  angemon:       { partner: 'devimon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
-  devimon:       { partner: 'angemon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
+// Um Digimon pode possuir MAIS DE UMA fusão.
+// Por isso cada chave possui uma lista de receitas.
+export const FUSIONS: Record<string, FusionRecipe[]> = {
+  // ── Omegamon ──────────────────────────────────────────────────────────────
+
+  warGreymon: [
+    {
+      partner: 'metalGarurumon',
+      resultId: 'omegamon',
+      resultName: 'Omegamon',
+      requiredLevel: 60,
+    },
+  ],
+
+  metalGarurumon: [
+    {
+      partner: 'warGreymon',
+      resultId: 'omegamon',
+      resultName: 'Omegamon',
+      requiredLevel: 60,
+    },
+  ],
+
+  // ── Gallantmon Crimson Mode ───────────────────────────────────────────────
+
+  gallantmon: [
+    {
+      partner: 'seraphimon',
+      resultId: 'gallantmonCrimsonMode',
+      resultName: 'Gallantmon Crimson Mode',
+      requiredLevel: 60,
+    },
+  ],
+
+  // ── Lucemon Chaos Mode ────────────────────────────────────────────────────
+
+  angemon: [
+    {
+      partner: 'devimon',
+      resultId: 'lucemonChaosMode',
+      resultName: 'Lucemon Chaos Mode',
+      requiredLevel: 40,
+    },
+  ],
+
+  devimon: [
+    {
+      partner: 'angemon',
+      resultId: 'lucemonChaosMode',
+      resultName: 'Lucemon Chaos Mode',
+      requiredLevel: 40,
+    },
+  ],
+
+  // ── Paildramon ────────────────────────────────────────────────────────────
+
+  exVeemon: [
+    {
+      partner: 'stingmon',
+      resultId: 'paildramon',
+      resultName: 'Paildramon',
+      requiredLevel: 36,
+    },
+  ],
+
+  stingmon: [
+    {
+      partner: 'exVeemon',
+      resultId: 'paildramon',
+      resultName: 'Paildramon',
+      requiredLevel: 36,
+    },
+  ],
+
+  // ── ShineGreymon ──────────────────────────────────────────────────────────
+  //
+  // ShineGreymon possui DUAS fusões diferentes.
+
+  shineGreymon: [
+    {
+      partner: 'imperialDramonFM',
+      resultId: 'shineGreymonBurstMode',
+      resultName: 'ShineGreymon Burst Mode',
+      requiredLevel: 68,
+    },
+
+    {
+      partner: 'megidramon',
+      resultId: 'shineGreymonRuinMode',
+      resultName: 'ShineGreymon Ruin Mode',
+      requiredLevel: 68,
+    },
+  ],
+
+  // ── Rosemon Burst Mode ────────────────────────────────────────────────────
+
+  rosemon: [
+    {
+      partner: 'ophanimon',
+      resultId: 'rosemonBurstMode',
+      resultName: 'Rosemon Burst Mode',
+      requiredLevel: 64,
+    },
+  ],
+
+  // ── MirageGaogamon Burst Mode ─────────────────────────────────────────────
+
+  mirageGaogamon: [
+    {
+      partner: 'kentaurusmon',
+      resultId: 'mirageGaogamonBurstMode',
+      resultName: 'MirageGaogamon Burst Mode',
+      requiredLevel: 68,
+    },
+  ],
+
+  // ── Ravemon Burst Mode ────────────────────────────────────────────────────
+
+  ravemon: [
+    {
+      partner: 'valkyrimon',
+      resultId: 'ravemonBurstMode',
+      resultName: 'Ravemon Burst Mode',
+      requiredLevel: 68,
+    },
+  ],
+
+  // ── Imperialdramon Paladin Mode ───────────────────────────────────────────
+
+  imperialDramonFM: [
+    {
+      partner: 'omegamon',
+      resultId: 'imperialDramonPM',
+      resultName: 'Imperialdramon PM',
+      requiredLevel: 60,
+    },
+  ],
+
+  // ── Valdurmon ─────────────────────────────────────────────────────────────
+
+  silphymon: [
+    {
+      partner: 'sinduramon',
+      resultId: 'valdurmon',
+      resultName: 'Valdurmon',
+      requiredLevel: 63,
+    },
+  ],
+
+  // ── Millenniummon ─────────────────────────────────────────────────────────
+
+  kimeramon: [
+    {
+      partner: 'machinedramon',
+      resultId: 'millenniummon',
+      resultName: 'Millenniummon',
+      requiredLevel: 60,
+    },
+  ],
+
+  // ── MoonMillenniummon ─────────────────────────────────────────────────────
+
+  millenniummon: [
+    {
+      partner: 'gigaSeadramon',
+      resultId: 'moonMillenniummon',
+      resultName: 'MoonMillenniummon',
+      requiredLevel: 70,
+    },
+  ],
+
+  // ── ZeedMillenniummon ─────────────────────────────────────────────────────
+
+  moonMillenniummon: [
+    {
+      partner: 'millenniummon',
+      resultId: 'zeedMillenniummon',
+      resultName: 'ZeedMillenniummon',
+      requiredLevel: 80,
+    },
+  ],
+
+  // ── Huanglongmon ──────────────────────────────────────────────────────────
+  //
+  // Qualquer um dos quatro pode ser o Digimon principal.
+  // Os outros três são sacrificados.
+
+  custom_327: [
+    {
+      partners: [
+        'custom_328',
+        'custom_1560',
+        'custom_329',
+      ],
+      resultId: 'custom_331',
+      resultName: 'Huanglongmon',
+      requiredLevel: 60,
+    },
+  ],
+
+  custom_328: [
+    {
+      partners: [
+        'custom_327',
+        'custom_1560',
+        'custom_329',
+      ],
+      resultId: 'custom_331',
+      resultName: 'Huanglongmon',
+      requiredLevel: 60,
+    },
+  ],
+
+  custom_1560: [
+    {
+      partners: [
+        'custom_327',
+        'custom_328',
+        'custom_329',
+      ],
+      resultId: 'custom_331',
+      resultName: 'Huanglongmon',
+      requiredLevel: 60,
+    },
+  ],
+
+  custom_329: [
+    {
+      partners: [
+        'custom_327',
+        'custom_328',
+        'custom_1560',
+      ],
+      resultId: 'custom_331',
+      resultName: 'Huanglongmon',
+      requiredLevel: 60,
+    },
+  ],
+
+  // ── Proximamon ────────────────────────────────────────────────────────────
+
+  custom_1330: [
+    {
+      partner: 'custom_1581',
+      resultId: 'custom_1584',
+      resultName: 'Proximamon',
+      requiredLevel: 70,
+    },
+  ],
+
+  custom_1581: [
+    {
+      partner: 'custom_1330',
+      resultId: 'custom_1584',
+      resultName: 'Proximamon',
+      requiredLevel: 70,
+    },
+  ],
 };
 
+
 // ─── Evolution paths ──────────────────────────────────────────────────────────
-export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string }> = {
-  // ── Agumon / WarGreymon / Omegamon Line ──────────────────────────────────
-  agumon:       { evolvesTo: 'greymon',       requiredLevel: 16, label: 'Greymon' },
-  greymon:      { evolvesTo: 'metalGreymon',  requiredLevel: 34, label: 'MetalGreymon' },
-  metalGreymon: { evolvesTo: 'warGreymon',    requiredLevel: 52, label: 'WarGreymon' },
-  // ── Tiranomon / SkullGreymon Line (evolução alternativa do Agumon) ────────
-  tyranomon:    { evolvesTo: 'skullgreymon',  requiredLevel: 38, label: 'SkullGreymon' },
-  // ── Agumon Savers / ShineGreymon Line ─────────────────────────────────────
-  agumonSaver:  { evolvesTo: 'geoGreymon',    requiredLevel: 20, label: 'GeoGreymon' },
-  geoGreymon:   { evolvesTo: 'rizeGreymon',   requiredLevel: 35, label: 'RizeGreymon' },
-  rizeGreymon:  { evolvesTo: 'shineGreymon',  requiredLevel: 59, label: 'ShineGreymon' },
-  // ── Gabumon / MetalGarurumon Line ─────────────────────────────────────────
-  gabumon:      { evolvesTo: 'garurumon',      requiredLevel: 19, label: 'Garurumon' },
-  garurumon:    { evolvesTo: 'wereGarurumon',  requiredLevel: 35, label: 'WereGarurumon' },
-  wereGarurumon:{ evolvesTo: 'metalGarurumon', requiredLevel: 52, label: 'MetalGarurumon' },
-  // ── Guilmon / Gallantmon (Dukemon) Line ───────────────────────────────────
-  guilmon:        { evolvesTo: 'growlmon',       requiredLevel: 16, label: 'Growlmon' },
-  growlmon:       { evolvesTo: 'megaloGrowlmon', requiredLevel: 40, label: 'WarGrowlmon' },
-  megaloGrowlmon: { evolvesTo: 'gallantmon',     requiredLevel: 60, label: 'Gallantmon' },
-  // ── Lucemon Line ──────────────────────────────────────────────────────────
-  lucemon:          { evolvesTo: 'lucemonChaosMode', requiredLevel: 40, label: 'Lucemon Chaos Mode' },
-  // ── Biyomon / Phoenixmon (Hououmon) Line ──────────────────────────────────
-  pyomon:    { evolvesTo: 'birdramon', requiredLevel: 16, label: 'Birdramon' },
-  birdramon: { evolvesTo: 'garudamon', requiredLevel: 32, label: 'Garudamon' },
-  garudamon: { evolvesTo: 'phoenixmon', requiredLevel: 48, label: 'Phoenixmon' },
-  // ── Salamon / Holydramon (Magnadramon) Line ───────────────────────────────
-  salamon:     { evolvesTo: 'tailmon',   requiredLevel: 13, label: 'Tailmon' },
-  tailmon:     { evolvesTo: 'angewomon', requiredLevel: 35, label: 'Angewomon' },
-  angewomon:   { evolvesTo: 'magnadramon', requiredLevel: 60, label: 'Magnadramon' },
-  blackSalamon:{ evolvesTo: 'blacktailmon', requiredLevel: 13, label: 'BlackTailmon' },
-  // ── Palmon / Rosemon Line ─────────────────────────────────────────────────
-  palmon:  { evolvesTo: 'togemon', requiredLevel: 19, label: 'Togemon' },
-  togemon: { evolvesTo: 'lillymon', requiredLevel: 33, label: 'Lillymon' },
-  lillymon:{ evolvesTo: 'rosemon',  requiredLevel: 50, label: 'Rosemon' },
-  // ── Patamon / Goldramon (Goddramon) Line ──────────────────────────────────
-  patamon:     { evolvesTo: 'angemon',     requiredLevel: 19, label: 'Angemon' },
-  angemon:     { evolvesTo: 'magnaAngemon', requiredLevel: 33, label: 'MagnaAngemon' },
-  magnaAngemon:{ evolvesTo: 'goldramon',   requiredLevel: 60, label: 'Goldramon' },
-  // ── Veemon / Imperialdramon Line ──────────────────────────────────────────
-  veemon:     { evolvesTo: 'exVeemon',         requiredLevel: 22, label: 'ExVeemon' },
-  paildramon: { evolvesTo: 'imperialDramonFM', requiredLevel: 60, label: 'Imperialdramon FM' },
-  // ── DemiDevimon / VenomMyotismon Line ─────────────────────────────────────
-  demiDevimon: { evolvesTo: 'devimon',       requiredLevel: 21, label: 'Devimon' },
-  devimon:     { evolvesTo: 'myotismon',     requiredLevel: 32, label: 'Myotismon' },
-  myotismon:   { evolvesTo: 'vnonMyotismon', requiredLevel: 56, label: 'VenomMyotismon' },
-  // ── Wormmon / Stingmon Line ───────────────────────────────────────────────
-  wormon:   { evolvesTo: 'stingmon', requiredLevel: 22, label: 'Stingmon' },
-  // ── Betamon / Seadramon Line ──────────────────────────────────────────────
-  betamon:  { evolvesTo: 'seadramon', requiredLevel: 22, label: 'Seadramon' },
-  // ── Hawkmon / Aquilamon / Silphymon Line ──────────────────────────────────
-  aquilamon: { evolvesTo: 'silphymon', requiredLevel: 35, label: 'Silphymon' },
-  // ── Hagurumon / Guardromon Line ───────────────────────────────────────────
-  hagurumon:  { evolvesTo: 'guardromon', requiredLevel: 22, label: 'Guardromon' },
-  // ── Mushroomon / Woodmon Line ─────────────────────────────────────────────
-  mushroomon: { evolvesTo: 'woodmon', requiredLevel: 22, label: 'Woodmon' },
+//
+// EVOLUTIONS = evolução normal.
+// Não consome outro Digimon.
+// Não representa Jogress.
+//
+
+export const EVOLUTIONS: Record<
+  string,
+  {
+    evolvesTo: string;
+    requiredLevel: number;
+    label: string;
+    requiredItem?: string;
+  }
+> = {
+  // ── Agumon / WarGreymon ──────────────────────────────────────────────────
+
+  agumon: {
+    evolvesTo: 'greymon',
+    requiredLevel: 16,
+    label: 'Greymon',
+  },
+
+  greymon: {
+    evolvesTo: 'metalGreymon',
+    requiredLevel: 34,
+    label: 'MetalGreymon',
+  },
+
+  metalGreymon: {
+    evolvesTo: 'warGreymon',
+    requiredLevel: 52,
+    label: 'WarGreymon',
+  },
+
+  // ── Tiranomon / SkullGreymon ──────────────────────────────────────────────
+
+  tyranomon: {
+    evolvesTo: 'skullgreymon',
+    requiredLevel: 38,
+    label: 'SkullGreymon',
+  },
+
+  // ── Agumon Savers / ShineGreymon ─────────────────────────────────────────
+
+  agumonSaver: {
+    evolvesTo: 'geoGreymon',
+    requiredLevel: 20,
+    label: 'GeoGreymon',
+  },
+
+  geoGreymon: {
+    evolvesTo: 'rizeGreymon',
+    requiredLevel: 35,
+    label: 'RizeGreymon',
+  },
+
+  rizeGreymon: {
+    evolvesTo: 'shineGreymon',
+    requiredLevel: 59,
+    label: 'ShineGreymon',
+  },
+
+  // ── Gabumon / MetalGarurumon ──────────────────────────────────────────────
+
+  gabumon: {
+    evolvesTo: 'garurumon',
+    requiredLevel: 19,
+    label: 'Garurumon',
+  },
+
+  garurumon: {
+    evolvesTo: 'wereGarurumon',
+    requiredLevel: 35,
+    label: 'WereGarurumon',
+  },
+
+  wereGarurumon: {
+    evolvesTo: 'metalGarurumon',
+    requiredLevel: 52,
+    label: 'MetalGarurumon',
+  },
+
+  // ── Guilmon / Gallantmon ──────────────────────────────────────────────────
+
+  guilmon: {
+    evolvesTo: 'growlmon',
+    requiredLevel: 16,
+    label: 'Growlmon',
+  },
+
+  growlmon: {
+    evolvesTo: 'megaloGrowlmon',
+    requiredLevel: 40,
+    label: 'WarGrowlmon',
+  },
+
+  megaloGrowlmon: {
+    evolvesTo: 'gallantmon',
+    requiredLevel: 60,
+    label: 'Gallantmon',
+  },
+
+  // ── Lucemon ───────────────────────────────────────────────────────────────
+
+  lucemon: {
+    evolvesTo: 'lucemonChaosMode',
+    requiredLevel: 40,
+    label: 'Lucemon Chaos Mode',
+  },
+
+  // ── Biyomon / Phoenixmon ──────────────────────────────────────────────────
+
+  pyomon: {
+    evolvesTo: 'birdramon',
+    requiredLevel: 16,
+    label: 'Birdramon',
+  },
+
+  birdramon: {
+    evolvesTo: 'garudamon',
+    requiredLevel: 32,
+    label: 'Garudamon',
+  },
+
+  garudamon: {
+    evolvesTo: 'phoenixmon',
+    requiredLevel: 48,
+    label: 'Phoenixmon',
+  },
+
+  // ── Salamon / Magnadramon ─────────────────────────────────────────────────
+
+  salamon: {
+    evolvesTo: 'tailmon',
+    requiredLevel: 13,
+    label: 'Tailmon',
+  },
+
+  tailmon: {
+    evolvesTo: 'angewomon',
+    requiredLevel: 35,
+    label: 'Angewomon',
+  },
+
+  angewomon: {
+    evolvesTo: 'magnadramon',
+    requiredLevel: 60,
+    label: 'Magnadramon',
+  },
+
+  blackSalamon: {
+    evolvesTo: 'blacktailmon',
+    requiredLevel: 13,
+    label: 'BlackTailmon',
+  },
+
+  // ── Palmon / Rosemon ──────────────────────────────────────────────────────
+
+  palmon: {
+    evolvesTo: 'togemon',
+    requiredLevel: 19,
+    label: 'Togemon',
+  },
+
+  togemon: {
+    evolvesTo: 'lillymon',
+    requiredLevel: 33,
+    label: 'Lillymon',
+  },
+
+  lillymon: {
+    evolvesTo: 'rosemon',
+    requiredLevel: 50,
+    label: 'Rosemon',
+  },
+
+  // ── Patamon / Goldramon ───────────────────────────────────────────────────
+
+  patamon: {
+    evolvesTo: 'angemon',
+    requiredLevel: 19,
+    label: 'Angemon',
+  },
+
+  angemon: {
+    evolvesTo: 'magnaAngemon',
+    requiredLevel: 33,
+    label: 'MagnaAngemon',
+  },
+
+  magnaAngemon: {
+    evolvesTo: 'goldramon',
+    requiredLevel: 60,
+    label: 'Goldramon',
+  },
+
+  // ── Veemon / Imperialdramon ───────────────────────────────────────────────
+
+  veemon: {
+    evolvesTo: 'exVeemon',
+    requiredLevel: 22,
+    label: 'ExVeemon',
+  },
+
+  paildramon: {
+    evolvesTo: 'imperialDramonFM',
+    requiredLevel: 60,
+    label: 'Imperialdramon FM',
+  },
+
+  // ── DemiDevimon / VenomMyotismon ─────────────────────────────────────────
+
+  demiDevimon: {
+    evolvesTo: 'devimon',
+    requiredLevel: 21,
+    label: 'Devimon',
+  },
+
+  devimon: {
+    evolvesTo: 'myotismon',
+    requiredLevel: 32,
+    label: 'Myotismon',
+  },
+
+  myotismon: {
+    evolvesTo: 'vnonMyotismon',
+    requiredLevel: 56,
+    label: 'VenomMyotismon',
+  },
+
+  // ── Wormmon ───────────────────────────────────────────────────────────────
+
+  wormon: {
+    evolvesTo: 'stingmon',
+    requiredLevel: 22,
+    label: 'Stingmon',
+  },
+
+  // ── Betamon ───────────────────────────────────────────────────────────────
+
+  betamon: {
+    evolvesTo: 'seadramon',
+    requiredLevel: 22,
+    label: 'Seadramon',
+  },
+
+  // ── Hawkmon ───────────────────────────────────────────────────────────────
+
+  aquilamon: {
+    evolvesTo: 'silphymon',
+    requiredLevel: 35,
+    label: 'Silphymon',
+  },
+
+  // ── Hagurumon ─────────────────────────────────────────────────────────────
+
+  hagurumon: {
+    evolvesTo: 'guardromon',
+    requiredLevel: 22,
+    label: 'Guardromon',
+  },
+
+  // ── Mushroomon ────────────────────────────────────────────────────────────
+
+  mushroomon: {
+    evolvesTo: 'woodmon',
+    requiredLevel: 22,
+    label: 'Woodmon',
+  },
+};
+
+
+// ─── Alternate Evolutions ─────────────────────────────────────────────────────
+//
+// REGRA:
+//
+// ALTERNATE_EVOLUTIONS = evolução que exige ITEM,
+// mas NÃO exige sacrifício de outro Digimon.
+//
+// O jogador precisa selecionar o item no inventário.
+// O item escolhido é consumido quando a evolução é confirmada.
+//
+// Nenhuma propriedade de "sacrifice" existe mais aqui.
+//
+
+export interface AlternateEvolutionRecipe {
+  evolvesTo: string;
+  requiredLevel: number;
+  label: string;
+  requiredItem: string;
+}
+
+export const ALTERNATE_EVOLUTIONS: Record<
+  string,
+  AlternateEvolutionRecipe[]
+> = {
+  // Angewomon + Anel Sagrado → Ophanimon
+
+  angewomon: [
+    {
+      evolvesTo: 'ophanimon',
+      requiredLevel: 60,
+      label: 'Ophanimon',
+      requiredItem: 'anel_sagrado',
+    },
+  ],
+
+  // MagnaAngemon + Anel Sagrado → Seraphimon
+
+  magnaAngemon: [
+    {
+      evolvesTo: 'seraphimon',
+      requiredLevel: 60,
+      label: 'Seraphimon',
+      requiredItem: 'anel_sagrado',
+    },
+  ],
+
+  // Lucemon Chaos Mode + Gehenna → Lucemon Satan Mode
+
+  lucemonChaosMode: [
+    {
+      evolvesTo: 'lucemonSatanMode',
+      requiredLevel: 50,
+      label: 'Lucemon Satan Mode',
+      requiredItem: 'gehenna',
+    },
+  ],
+
+  // Imperialdramon FM + Black Digitron → Black Imperialdramon FM
+
+  imperialDramonFM: [
+    {
+      evolvesTo: 'blackImperialdramonFM',
+      requiredLevel: 50,
+      label: 'Black Imperialdramon FM',
+      requiredItem: 'black_digitron',
+    },
+  ],
+
+  // Huanglongmon + Fragmento Corrompido
+  // → Huanglongmon Ruin Mode
+
+  custom_331: [
+    {
+      evolvesTo: 'custom_1677',
+      requiredLevel: 70,
+      label: 'Huanglongmon: Ruin Mode',
+      requiredItem: 'fragmento_corrompido',
+    },
+  ],
 };
 
 // ─── Sacrifice System ────────────────────────────────────────────────────────
