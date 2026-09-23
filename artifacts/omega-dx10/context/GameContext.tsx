@@ -203,7 +203,7 @@ interface GameContextValue extends GameState {
   isMapUnlocked: (mapId: string) => boolean;
   gainScan: (characterId: string, amount: number) => void;
   createFromScan: (characterId: string) => void;
-  evolveDigimon: (ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean) => void;
+  evolveDigimon: (ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean, selectedItemId?: string) => boolean;
   changeFormDigimon: (ownedId: string) => void;
   fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string) => boolean;
   sacrificeDigimon: (ownedId: string) => SacrificeResult;
@@ -619,114 +619,62 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, []);
 
-  const evolveDigimon = useCallback((ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean) => {
-    setState((prev) => {
-      const target = prev.collection.find((c) => c.ownedId === ownedId);
-      if (!target) return prev;
-      if (alternate2) {
-        const evo = EXTRA_ALTERNATE_EVOLUTIONS[target.characterId];
-        if (!evo || target.level < evo.requiredLevel) return prev;
-        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
-        const newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId
-            ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, ...preserveMailGiftStars(c) }
-            : c
-        );
-        const newInventory = evo.requiredItem
-          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
-          : prev.inventory;
-        return { ...prev, collection: newCollection, inventory: newInventory };
-      } else if (alternate) {
-        const evo = ALTERNATE_EVOLUTIONS[target.characterId];
-        if (!evo || target.level < evo.requiredLevel) return prev;
-        if (target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return prev;
-        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
+  const evolveDigimon = useCallback((
+    ownedId: string,
+    alternate?: boolean,
+    sacrificeOwnedId?: string,
+    alternate2?: boolean,
+    selectedItemId?: string,
+  ): boolean => {
+    const prev = stateRef.current;
+    const target = prev.collection.find((c) => c.ownedId === ownedId);
+    if (!target) return false;
 
-        const sacrificeCharId = evo.requiredSacrificeCharacter;
-        const sacrificeCharIds = (evo as any).requiredSacrificeCharacters as string[] | undefined;
-        const isFusion = !!sacrificeCharId || !!(sacrificeCharIds && sacrificeCharIds.length > 0);
-        const fusionSacrifices: OwnedCharacter[] = [];
+    const evo = alternate2
+      ? EXTRA_ALTERNATE_EVOLUTIONS[target.characterId]
+      : alternate
+        ? ALTERNATE_EVOLUTIONS[target.characterId]
+        : EVOLUTIONS[target.characterId];
 
-        if (sacrificeCharIds && sacrificeCharIds.length > 0) {
-          const usedOwnedIds = new Set<string>();
+    if (!evo || target.level < evo.requiredLevel) return false;
+    if (alternate && target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return false;
 
-          for (const charId of sacrificeCharIds) {
-            const found = prev.collection.find(
-              (c) =>
-                c.ownedId !== ownedId &&
-                c.characterId === charId &&
-                !usedOwnedIds.has(c.ownedId),
-            );
+    // Evoluções que exigem item só continuam depois que a interface envia
+    // explicitamente o item escolhido pelo jogador.
+    if (evo.requiredItem) {
+      if (!selectedItemId || selectedItemId !== evo.requiredItem) return false;
+      if (!prev.inventory.includes(selectedItemId)) return false;
+    }
 
-            // A fusão só acontece se TODOS os sacrifícios obrigatórios existirem.
-            if (!found) return prev;
+    setState((current) => {
+      const currentTarget = current.collection.find((c) => c.ownedId === ownedId);
+      if (!currentTarget) return current;
 
-            usedOwnedIds.add(found.ownedId);
-            fusionSacrifices.push(found);
-          }
-        } else if (sacrificeCharId) {
-          // Fusões com um sacrifício exigem a cópia escolhida explicitamente no DigiBank.
-          // Não é permitido escolher silenciosamente qualquer cópia da coleção.
-          if (!sacrificeOwnedId) return prev;
+      let inventory = current.inventory;
+      if (evo.requiredItem) {
+        const itemIndex = inventory.indexOf(selectedItemId!);
+        if (itemIndex < 0) return current;
+        inventory = inventory.filter((_, index) => index !== itemIndex);
+      }
 
-          const sacrificeOwned = prev.collection.find(
-            (c) =>
-              c.ownedId === sacrificeOwnedId &&
-              c.ownedId !== ownedId &&
-              c.characterId === sacrificeCharId,
-          );
-
-          if (!sacrificeOwned) return prev;
-          fusionSacrifices.push(sacrificeOwned);
-        }
-
-        // Proteção final: receita de fusão nunca pode continuar sem sacrifício validado.
-        if (isFusion && fusionSacrifices.length === 0) return prev;
-
-        const sacrificeIds = new Set(fusionSacrifices.map((c) => c.ownedId));
-
-        // Consome exatamente os Digimons que participaram da fusão.
-        let newCollection = prev.collection.filter((c) => !sacrificeIds.has(c.ownedId));
-
-        newCollection = newCollection.map((c) =>
-          c.ownedId === ownedId
+      return {
+        ...current,
+        inventory,
+        collection: current.collection.map((owned) =>
+          owned.ownedId === ownedId
             ? {
-                ...c,
+                ...owned,
                 characterId: evo.evolvesTo,
                 level: 1,
                 exp: 0,
-                acquisitionMethod: isFusion ? ('fusion' as const) : ('evolution' as const),
-                ...(isFusion
-                  ? resolveMailGiftFusionStars(c, fusionSacrifices)
-                  : preserveMailGiftStars(c)),
+                acquisitionMethod: 'evolution' as const,
+                ...preserveMailGiftStars(owned),
               }
-            : c
-        );
-
-        const newInventory = evo.requiredItem
-          ? prev.inventory.filter(
-              (itemId, index) =>
-                itemId !== evo.requiredItem ||
-                index !== prev.inventory.indexOf(evo.requiredItem),
-            )
-          : prev.inventory;
-
-        return { ...prev, collection: newCollection, inventory: newInventory };
-      } else {
-        const evo = EVOLUTIONS[target.characterId];
-        if (!evo || target.level < evo.requiredLevel) return prev;
-        if (evo.requiredItem && !prev.inventory.includes(evo.requiredItem)) return prev;
-        const newCollection = prev.collection.map((c) =>
-          c.ownedId === ownedId
-            ? { ...c, characterId: evo.evolvesTo, level: 1, exp: 0, acquisitionMethod: 'evolution' as const, ...preserveMailGiftStars(c) }
-            : c
-        );
-        const newInventory = evo.requiredItem
-          ? prev.inventory.filter((itemId, index) => itemId !== evo.requiredItem || index !== prev.inventory.indexOf(evo.requiredItem))
-          : prev.inventory;
-        return { ...prev, collection: newCollection, inventory: newInventory };
-      }
+            : owned
+        ),
+      };
     });
+    return true;
   }, []);
 
   const changeFormDigimon = useCallback((ownedId: string) => {
