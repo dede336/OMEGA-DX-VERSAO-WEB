@@ -22,6 +22,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import AscensionAnimation from '@/components/AscensionAnimation';
 import EvolutionAnimation from '@/components/EvolutionAnimation';
+import FusionAnimation from '@/components/FusionAnimation';
 import {
   ASCENSION_LEVEL_REQUIREMENT,
   GOLDEN_STAR_FRAGMENT_ID,
@@ -242,6 +243,8 @@ export default function CollectionScreen() {
   const [pendingAltEvo, setPendingAltEvo] = useState<{ ownedId: string; fromCharId: string; toCharId: string } | null>(null);
   // Evolution animation state
   const [evoAnim, setEvoAnim] = useState<{ fromCharId: string; toCharId: string } | null>(null);
+  // Fusion animation state — used when an evolution consumes another Digimon
+  const [fusionAnim, setFusionAnim] = useState<{ baseCharId: string; partnerCharId: string; resultCharId: string } | null>(null);
 
   function openModal(owned: OwnedCharacter) {
     setXpPanelVisible(false);
@@ -254,11 +257,33 @@ export default function CollectionScreen() {
     setModalOwned(null);
   }
 
-  const handleEvolve = useCallback((ownedId: string, fromCharId: string, toCharId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean) => {
+  const handleEvolve = useCallback((
+    ownedId: string,
+    fromCharId: string,
+    toCharId: string,
+    alternate?: boolean,
+    sacrificeOwnedId?: string,
+    alternate2?: boolean,
+    fusionPartnerCharId?: string,
+  ) => {
     closeModal();
     setSacrificePickerVisible(false);
     setPendingAltEvo(null);
-    setEvoAnim({ fromCharId, toCharId });
+
+    // Evolutions that consume another Digimon are fusions.
+    // Normal evolutions keep using EvolutionAnimation.
+    if (fusionPartnerCharId) {
+      setEvoAnim(null);
+      setFusionAnim({
+        baseCharId: fromCharId,
+        partnerCharId: fusionPartnerCharId,
+        resultCharId: toCharId,
+      });
+    } else {
+      setFusionAnim(null);
+      setEvoAnim({ fromCharId, toCharId });
+    }
+
     evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2);
   }, [evolveDigimon]);
 
@@ -507,7 +532,15 @@ export default function CollectionScreen() {
                           if (!modalOwned || !modalAltEvo) return;
                           if (altSacrificeCharIds && altSacrificeCharIds.length > 0) {
                             // Multi-sacrifice: GameContext auto-finds all sacrifices, no picker needed
-                            handleEvolve(modalOwned.ownedId, modalOwned.characterId, modalAltEvo.evolvesTo, true);
+                            handleEvolve(
+                              modalOwned.ownedId,
+                              modalOwned.characterId,
+                              modalAltEvo.evolvesTo,
+                              true,
+                              undefined,
+                              undefined,
+                              altSacrificeCharIds[0],
+                            );
                           } else if (altSacrificeCharId) {
                             setPendingAltEvo({ ownedId: modalOwned.ownedId, fromCharId: modalOwned.characterId, toCharId: modalAltEvo.evolvesTo });
                             setSacrificePickerVisible(true);
@@ -800,6 +833,16 @@ export default function CollectionScreen() {
         />
       )}
 
+      {fusionAnim && (
+        <FusionAnimation
+          visible
+          baseCharacterId={fusionAnim.baseCharId}
+          partnerCharacterId={fusionAnim.partnerCharId}
+          resultCharacterId={fusionAnim.resultCharId}
+          onClose={() => setFusionAnim(null)}
+        />
+      )}
+
       {/* ── Sacrifice Confirm Modal ───────────────────────────────────── */}
       <Modal visible={confirmSacrificeVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -940,7 +983,15 @@ export default function CollectionScreen() {
                       activeOpacity={0.8}
                       onPress={() => {
                         if (!pendingAltEvo) return;
-                        handleEvolve(pendingAltEvo.ownedId, pendingAltEvo.fromCharId, pendingAltEvo.toCharId, true, copy.ownedId);
+                        handleEvolve(
+                          pendingAltEvo.ownedId,
+                          pendingAltEvo.fromCharId,
+                          pendingAltEvo.toCharId,
+                          true,
+                          copy.ownedId,
+                          undefined,
+                          copy.characterId,
+                        );
                       }}
                     >
                       <Feather name="zap" size={13} color="#fff" />
