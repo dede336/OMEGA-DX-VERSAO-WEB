@@ -219,7 +219,11 @@ export default function CollectionScreen() {
     const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
     return char ? [{ owned, char }] : [];
   });
-  const digimons = resolvedCollection.filter(({ char }) => char.rarity !== 'EGG');
+  const digimons = resolvedCollection.filter(({ owned, char }) =>
+    char.rarity !== 'EGG'
+    && owned.characterId !== 'custom_1550'
+    && char.name?.toLowerCase() !== 'digitama especial'
+  );
   const eggs = resolvedCollection.filter(({ owned, char }) =>
     char.rarity === 'EGG'
     || owned.characterId === 'custom_1550'
