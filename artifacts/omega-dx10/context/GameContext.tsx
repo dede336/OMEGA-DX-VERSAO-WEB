@@ -205,7 +205,7 @@ interface GameContextValue extends GameState {
   createFromScan: (characterId: string) => void;
   evolveDigimon: (ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean, selectedItemId?: string) => boolean;
   changeFormDigimon: (ownedId: string) => void;
-  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string) => boolean;
+  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string, selectedItemId?: string) => boolean;
   sacrificeDigimon: (ownedId: string) => SacrificeResult;
   totalPlayerLevel: number;
   setGender: (g: TamerGender) => void;
@@ -692,59 +692,77 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string): boolean => {
-    let success = false;
-    setState((prev) => {
-      const keep = prev.collection.find((c) => c.ownedId === keepOwnedId);
-      if (!keep) return prev;
+  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string, selectedItemId?: string): boolean => {
+    const snapshot = stateRef.current;
+    const keep = snapshot.collection.find((c) => c.ownedId === keepOwnedId);
+    if (!keep) return false;
 
-      const sacrificeIds = Array.isArray(sacrificeOwnedId) ? sacrificeOwnedId : [sacrificeOwnedId];
-      const sacrifices = sacrificeIds
+    const sacrificeIds = Array.isArray(sacrificeOwnedId) ? sacrificeOwnedId : [sacrificeOwnedId];
+    const sacrifices = sacrificeIds
+      .map((id) => snapshot.collection.find((c) => c.ownedId === id))
+      .filter((c): c is OwnedCharacter => !!c && c.ownedId !== keepOwnedId);
+    if (sacrifices.length !== sacrificeIds.length) return false;
+
+    const recipes = FUSIONS[keep.characterId] ?? [];
+    const fusion = recipes.find((recipe) => {
+      if (resultId && recipe.resultId !== resultId) return false;
+      const requiredPartners = recipe.partners ?? (recipe.partner ? [recipe.partner] : []);
+      if (requiredPartners.length !== sacrifices.length) return false;
+      const remaining = [...sacrifices];
+      return requiredPartners.every((partnerId) => {
+        const index = remaining.findIndex((owned) => owned.characterId === partnerId);
+        if (index < 0) return false;
+        remaining.splice(index, 1);
+        return true;
+      });
+    });
+
+    if (!fusion || keep.level < fusion.requiredLevel) return false;
+    if (fusion.requiredItem && (!selectedItemId || selectedItemId !== fusion.requiredItem || !snapshot.inventory.includes(selectedItemId))) return false;
+
+    setState((prev) => {
+      const currentKeep = prev.collection.find((c) => c.ownedId === keepOwnedId);
+      if (!currentKeep) return prev;
+
+      const currentSacrifices = sacrificeIds
         .map((id) => prev.collection.find((c) => c.ownedId === id))
         .filter((c): c is OwnedCharacter => !!c && c.ownedId !== keepOwnedId);
-      if (sacrifices.length !== sacrificeIds.length) return prev;
+      if (currentSacrifices.length !== sacrificeIds.length) return prev;
 
-      const recipes = FUSIONS[keep.characterId] ?? [];
-      const fusion = recipes.find((recipe) => {
-        if (resultId && recipe.resultId !== resultId) return false;
-        const requiredPartners = recipe.partners ?? (recipe.partner ? [recipe.partner] : []);
-        if (requiredPartners.length !== sacrifices.length) return false;
-        const remaining = [...sacrifices];
-        return requiredPartners.every((partnerId) => {
-          const index = remaining.findIndex((owned) => owned.characterId === partnerId);
-          if (index < 0) return false;
-          remaining.splice(index, 1);
-          return true;
-        });
+      const requiredPartners = fusion.partners ?? (fusion.partner ? [fusion.partner] : []);
+      const remaining = [...currentSacrifices];
+      const validPartners = requiredPartners.every((partnerId) => {
+        const index = remaining.findIndex((owned) => owned.characterId === partnerId);
+        if (index < 0) return false;
+        remaining.splice(index, 1);
+        return true;
       });
-
-      if (!fusion || keep.level < fusion.requiredLevel) return prev;
-      if (fusion.requiredItem && !prev.inventory.includes(fusion.requiredItem)) return prev;
-
-      const sacrificeSet = new Set(sacrifices.map((owned) => owned.ownedId));
-      const newSelected = sacrificeSet.has(prev.selectedOwnedId ?? '') ? keepOwnedId : prev.selectedOwnedId;
-      const fusionStars = resolveMailGiftFusionStars(keep, sacrifices);
+      if (!validPartners) return prev;
 
       let inventory = prev.inventory;
       if (fusion.requiredItem) {
-        const itemIndex = inventory.indexOf(fusion.requiredItem);
+        if (!selectedItemId || selectedItemId !== fusion.requiredItem) return prev;
+        const itemIndex = inventory.indexOf(selectedItemId);
         if (itemIndex < 0) return prev;
         inventory = inventory.filter((_, index) => index !== itemIndex);
       }
 
-      success = true;
+      const sacrificeSet = new Set(currentSacrifices.map((owned) => owned.ownedId));
+      const newSelected = sacrificeSet.has(prev.selectedOwnedId ?? '') ? keepOwnedId : prev.selectedOwnedId;
+      const fusionStars = resolveMailGiftFusionStars(currentKeep, currentSacrifices);
+
       return {
         ...prev,
         inventory,
         selectedOwnedId: newSelected,
         collection: prev.collection
-          .filter((c) => !sacrificeSet.has(c.ownedId))
-          .map((c) => c.ownedId === keepOwnedId
-            ? { ...c, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const, ...fusionStars }
-            : c),
+          .filter((owned) => !sacrificeSet.has(owned.ownedId))
+          .map((owned) => owned.ownedId === keepOwnedId
+            ? { ...owned, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const, ...fusionStars }
+            : owned),
       };
     });
-    return success;
+    return true;
   }, []);
 
   const setSelectedCharacter = useCallback((ownedId: string) => {
