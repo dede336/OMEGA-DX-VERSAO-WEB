@@ -85,17 +85,21 @@ function getObtainMethods(charId: string): ObtainMethod[] {
     }
   }
   const fusionSeen = new Set<string>();
-  for (const [, fusion] of Object.entries(FUSIONS)) {
-    if (fusion.resultId === charId) {
-      const key = [fusion.partner, ...Object.keys(FUSIONS).filter(k => FUSIONS[k].resultId === charId && FUSIONS[k].partner !== fusion.partner)].sort().join('-');
-      if (!fusionSeen.has(key)) {
-        fusionSeen.add(key);
-        const partnerA = Object.entries(FUSIONS).find(([, f]) => f.resultId === charId);
-        if (partnerA) {
-          methods.push({ type: 'fusion', a: partnerA[0], b: partnerA[1].partner, level: partnerA[1].requiredLevel });
-        }
-        break;
-      }
+  for (const [fromId, recipes] of Object.entries(FUSIONS)) {
+    for (const fusion of recipes) {
+      if (fusion.resultId !== charId) continue;
+      const sacrifices = fusion.partners ?? (fusion.partner ? [fusion.partner] : []);
+      const key = [fromId, fusion.resultId, ...sacrifices].sort().join('-');
+      if (fusionSeen.has(key)) continue;
+      fusionSeen.add(key);
+      methods.push({
+        type: 'fusion',
+        a: fromId,
+        b: sacrifices[0],
+        sacrifices: sacrifices.length > 1 ? sacrifices : undefined,
+        level: fusion.requiredLevel,
+        item: fusion.requiredItem,
+      });
     }
   }
   return methods;
