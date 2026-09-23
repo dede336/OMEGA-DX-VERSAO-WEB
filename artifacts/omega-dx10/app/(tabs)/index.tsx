@@ -217,7 +217,7 @@ export default function HomeScreen() {
         </View>
         <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
         <View style={styles.statItem}>
-          <Image source={require('../../assets/images/bits-icon.webp')} style={styles.statIcon} resizeMode="contain" />
+          <Image source={require('../../assets/images/bits-icon.gif')} style={styles.statIcon} resizeMode="contain" />
           <Text style={[styles.statNum, { color: '#facc15' }]}>{bits >= 1000 ? `${(bits / 1000).toFixed(1)}k` : bits}</Text>
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.bits')}</Text>
         </View>
