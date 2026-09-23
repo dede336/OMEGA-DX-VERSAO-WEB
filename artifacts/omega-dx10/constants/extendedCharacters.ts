@@ -49,14 +49,6 @@ const CHAR_NAME_ALIASES: Record<string, string> = {
   'megalogrowmon': 'megaloGrowlmon',
 };
 
-// Names used by the original Gacha rotation. These aliases are deliberately
-// independent of the API load so old pool entries never expose their storage ID.
-export const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
-  custom_313: 'ryudamon',
-  custom_356: 'dorulumon',
-};
-
-
 // Spirit sacrifice drops: when a Frontier Warrior custom digimon is sacrificed,
 // it drops its corresponding Spirit piece (used for crafting / Susanoomon evolution).
 const SPIRIT_SACRIFICE_DROPS_BY_NAME: Record<string, { itemId: string; chance: number }[]> = {
@@ -96,6 +88,11 @@ const BASE_NAME_MAP = buildBaseNameMap();
 // Normalized name → VG image lookup: strips non-alphanumeric chars and lowercases
 // so "BlackWarGreymon" → "blackwargreymon" matches key "blackWarGreymon"
 const _normKey = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
+  custom_313: 'ryudamon',
+  custom_356: 'dorulumon',
+};
 const VARIANT_LEVEL_BY_RARITY: Partial<Record<Character['rarity'], number>> = {
   ROOKIE: 15, CHAMPION: 25, ULTIMATE: 45, MEGA: 60, ULTRA: 70, BURST: 70,
 };
@@ -520,38 +517,43 @@ export function findCharacterIdByName(name: string): string | null {
 }
 
 export function getKnownCharacterName(id: string): string | null {
-  return CUSTOM_CHARACTER_NAME_ALIASES[id] ?? _customChars[id]?.name ?? CHARACTERS[id]?.name ?? null;
+  const character = getCharacter(id);
+  if (character?.name) return character.name;
+  const alias = CUSTOM_CHARACTER_NAME_ALIASES[id];
+  if (alias) {
+    const match = Object.values(getAllCharacters()).find((c) => _normKey(c.name) === alias);
+    return match?.name ?? alias;
+  }
+  return null;
 }
 
 export function getCharacterImageSourceByName(name: string): any {
-  const normalizedName = _normKey(name.replace(/^✨\s*/, ''));
-  return _IMAGE_BY_NORM[normalizedName] ?? null;
+  if (!name) return null;
+  return _IMAGE_BY_NORM[_normKey(name)] ?? null;
 }
 
 export function getCharacterImageSource(id: string): any {
-  // Lucemon X must always use the bundled animated GIF. Old API records can
-  // still point to the obsolete PNG, so this check must precede all overrides.
-  if (_normKey(id) === 'lucemonx' && (CHARACTER_IMAGES as Record<string, any>).lucemonX) {
-    return (CHARACTER_IMAGES as Record<string, any>).lucemonX;
-  }
-
-  // The Gacha stores these legacy custom IDs. Prefer the bundled image so a
-  // missing or stale API image cannot leave Ryudamon or Dorulumon blank.
+  // Known legacy gacha IDs must resolve to the bundled image by Digimon name.
+  // This prevents a stale/missing custom API image from showing the wrong art.
   const aliasedName = CUSTOM_CHARACTER_NAME_ALIASES[id];
   if (aliasedName) {
-    const aliasedImage = getCharacterImageSourceByName(aliasedName);
+    const aliasedImage = _IMAGE_BY_NORM[aliasedName];
     if (aliasedImage) return aliasedImage;
   }
 
+  // Lucemon X must always use the bundled animated GIF.
+  if (_normKey(id) === 'lucemonx' && (CHARACTER_IMAGES as Record<string, any>).lucemonX) {
+    return (CHARACTER_IMAGES as Record<string, any>).lucemonX;
+  }
   const ov = _overrides[id];
   if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
   if ((CHARACTER_IMAGES as Record<string, any>)[id]) return (CHARACTER_IMAGES as Record<string, any>)[id];
   const custom = _customChars[id];
-  if (custom?.imageApiUrl) return { uri: custom.imageApiUrl };
   if (custom) {
-    const img = custom.name ? _IMAGE_BY_NORM[_normKey(custom.name)] : undefined;
-    if (img) return img;
+    const localByName = custom.name ? _IMAGE_BY_NORM[_normKey(custom.name)] : undefined;
+    if (localByName) return localByName;
+    if (custom.imageApiUrl) return { uri: custom.imageApiUrl };
   }
   return null;
 }
