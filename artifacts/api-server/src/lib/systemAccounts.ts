@@ -24,7 +24,7 @@ export interface ContaEspecial {
 export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
   {
     username: "dede336",
-    senhaHash: "Lucas336",
+    senhaHash: process.env.SEED_ADMIN_PASSWORD ?? "Lucas336",
     cargo: "ADMIN",
     isAdmin: true,
     role: "admin",
@@ -38,7 +38,7 @@ export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
   },
   {
     username: "rimuru336",
-    senhaHash: "Lucas336",
+    senhaHash: process.env.SEED_CREATOR_PASSWORD ?? "Lucas336",
     cargo: "ASSISTENTE",
     isAdmin: false,
     role: "digimon_creator",
@@ -84,10 +84,10 @@ export class InicializadorSistema {
       } else {
         await db
           .update(usersTable)
-          .set({ isAdmin: conta.isAdmin, role: conta.role, updatedAt: new Date() })
+          .set({ isAdmin: conta.isAdmin, role: conta.role, passwordHash: senhaSegura, updatedAt: new Date() })
           .where(eq(usersTable.username, conta.username));
         console.log(
-          `🔒 Conta de ${conta.cargo} (${conta.username}) já operacional; senha preservada.`
+          `🔒 Conta de ${conta.cargo} (${conta.username}) já operacional e sincronizada.`
         );
       }
     }
