@@ -193,18 +193,24 @@ export default function CharacterDetailScreen() {
   const dadivaInfo = getDadivaDivinaInfo(char.id, char.name);
 
   // ── Fusion info ─────────────────────────────────────────────────────────────
-  const fusionRecipe   = FUSIONS[owned.characterId] ?? null;
-  const allPartnerCopies = fusionRecipe
-    ? collection.filter((c) => c.characterId === fusionRecipe.partner)
-    : [];
-  const partnerOwned  = allPartnerCopies[0] ?? null;
+  const fusionRecipes = FUSIONS[owned.characterId] ?? [];
+  const singlePartnerRecipes = fusionRecipes.filter((recipe) => !!recipe.partner && !(recipe.partners?.length));
+  const allPartnerCopies = collection.filter((copy) =>
+    singlePartnerRecipes.some((recipe) => recipe.partner === copy.characterId)
+  );
   const selectedFusionSacrifice = fuseSacrificeId
     ? collection.find((copy) => copy.ownedId === fuseSacrificeId) ?? null
     : null;
-  const resultChar    = fusionRecipe ? (getCharacter(fusionRecipe.resultId) ?? null) : null;
-  const partnerChar   = fusionRecipe ? (getCharacter(fusionRecipe.partner) ?? null) : null;
-  const meetsLevel    = !!(fusionRecipe && owned.level >= fusionRecipe.requiredLevel);
-  const canFuse       = !!(fusionRecipe && allPartnerCopies.length > 0 && meetsLevel);
+  const fusionRecipe = selectedFusionSacrifice
+    ? singlePartnerRecipes.find((recipe) => recipe.partner === selectedFusionSacrifice.characterId) ?? null
+    : singlePartnerRecipes.find((recipe) =>
+        collection.some((copy) => copy.characterId === recipe.partner)
+      ) ?? singlePartnerRecipes[0] ?? null;
+  const partnerOwned = selectedFusionSacrifice ?? allPartnerCopies[0] ?? null;
+  const resultChar = fusionRecipe ? (getCharacter(fusionRecipe.resultId) ?? null) : null;
+  const partnerChar = fusionRecipe?.partner ? (getCharacter(fusionRecipe.partner) ?? null) : null;
+  const meetsLevel = !!(fusionRecipe && owned.level >= fusionRecipe.requiredLevel);
+  const canFuse = !!(fusionRecipe && partnerOwned && meetsLevel);
 
   function handleFusePress() {
     if (allPartnerCopies.length === 0) return;
@@ -217,10 +223,14 @@ export default function CharacterDetailScreen() {
   }
 
   function handleFuseConfirm() {
-    if (!fuseSacrificeId || !owned || !fusionRecipe) return;
+    if (!fuseSacrificeId || !owned || !selectedFusionSacrifice) return;
+    const selectedRecipe = singlePartnerRecipes.find(
+      (recipe) => recipe.partner === selectedFusionSacrifice.characterId
+    );
+    if (!selectedRecipe) return;
     setConfirmFuseVisible(false);
-    fuseDigimon(owned.ownedId, fuseSacrificeId);
-    // Start animation
+    const fused = fuseDigimon(owned.ownedId, fuseSacrificeId, selectedRecipe.resultId);
+    if (!fused) return;
     newFormOpacity.setValue(0);
     titleScale.setValue(0.7);
     fusionCoreOpacity.setValue(0);
@@ -230,7 +240,7 @@ export default function CharacterDetailScreen() {
     rightPosition.setValue(170);
     fusionPairOpacity.setValue(1);
     setFusePhase('playing');
-    setFuseAnim({ fromCharId: owned.characterId, partnerCharId: fusionRecipe.partner, toCharId: fusionRecipe.resultId });
+    setFuseAnim({ fromCharId: owned.characterId, partnerCharId: selectedRecipe.partner!, toCharId: selectedRecipe.resultId });
   }
 
   // ── Element background pulse ────────────────────────────────────────────────
