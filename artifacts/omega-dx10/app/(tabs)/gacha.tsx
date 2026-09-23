@@ -15,9 +15,10 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 
+const GACHA_MACHINE_IMG = require('../../assets/images/gacha-machine.webp');
 const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
-const GACHA_ANIME_IMG   = require('../../assets/images/gacha-anime.webp');
-const BUBBLE_IMG        = require('../../assets/images/bubble.webp');
+const GACHA_ANIME_IMG = require('../../assets/images/gacha-anime.webp');
+const BUBBLE_IMG = require('../../assets/images/bubble.webp');
 
 const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: string; glow: string }> = {
   Rookie:   { color: '#6b7280', label: 'Rookie',   glow: '#6b728044' },
