@@ -9,7 +9,13 @@ import { useColors } from '@/hooks/useColors';
 import { useGame, GachaReward, GachaPoolEntry } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
-import { getCharacterImageSource, getCharacter, findCharacterIdByName } from '@/constants/extendedCharacters';
+import {
+  getCharacterImageSource,
+  getCharacterImageSourceByName,
+  getCharacter,
+  findCharacterIdByName,
+  getKnownCharacterName,
+} from '@/constants/extendedCharacters';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
@@ -27,6 +33,18 @@ const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: s
 };
 
 const TIPO_EMOJI: Record<string, string> = { ITEM: '⚔️', FRAGMENTO: '🔮', DIGIMON: '🦖' };
+
+function getGachaImageSource(characterId: string, configuredName?: string): any {
+  return getCharacterImageSource(characterId)
+    ?? getCharacterImageSourceByName(getKnownCharacterName(characterId) ?? configuredName ?? '');
+}
+
+function getGachaDisplayName(characterId: string, configuredName?: string, fallback?: string): string {
+  const cleanName = configuredName?.replace(/^✨\s*/, '');
+  return cleanName && !/^custom_\d+$/.test(cleanName)
+    ? configuredName!
+    : getKnownCharacterName(characterId) ?? fallback ?? characterId;
+}
 
 // ── Bubble animation items (Champions e Especiais do pool padrão) ──
 const BUBBLE_ITEMS = [
@@ -62,7 +80,7 @@ function GachaBubble({ item, opacity }: { item: typeof BUBBLE_ITEMS[0]; opacity:
     : item.characterId;
   const img = item.isItem
     ? (EQUIP_ITEM_IMAGES[item.characterId] ?? null)
-    : getCharacterImageSource(resolvedCharacterId);
+    : getGachaImageSource(resolvedCharacterId, item.nome);
 
   return (
     <Animated.View style={{ opacity, transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
@@ -94,7 +112,7 @@ function SpinningResultBubble({ reward }: { reward: GachaReward | null }) {
   const tX = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, 10, 0, -10, 0] });
   const tY = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [-10, 0, 10, 0, -10] });
 
-  const img = reward ? getCharacterImageSource(reward.characterId) : null;
+  const img = reward ? getGachaImageSource(reward.characterId, reward.nome) : null;
 
   return (
     <Animated.View style={{ transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
@@ -152,7 +170,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
   const colors = useColors();
   const char = getCharacter(reward.characterId) ?? CHARACTERS[reward.characterId];
   const cfg = RARIDADE_CONFIG[reward.raridade];
-  const img = getCharacterImageSource(reward.characterId);
+  const img = getGachaImageSource(reward.characterId, reward.nome);
   const rarColor = char ? RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] ?? cfg.color : cfg.color;
 
   const cardSize = big ? 150 : 110;
@@ -160,7 +178,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
 
   const isNonDigimon = reward.tipo === 'ITEM' || reward.tipo === 'FRAGMENTO';
   const isEgg = char?.rarity === 'EGG';
-  const displayName  = reward.nome ?? char?.name ?? reward.characterId;
+  const displayName  = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
   const tipoEmoji    = reward.tipo ? TIPO_EMOJI[reward.tipo] : '🦖';
 
   return (
@@ -430,8 +448,10 @@ export default function GachaScreen() {
 
   // Build destaque display data from admin pool
   const destaqueChar = destaqueRaro?.characterId ? (getCharacter(destaqueRaro.characterId) ?? CHARACTERS[destaqueRaro.characterId]) : null;
-  const destaqueImg  = destaqueRaro?.characterId ? getCharacterImageSource(destaqueRaro.characterId) : null;
-  const destaqueNome = destaqueRaro?.nome ?? destaqueChar?.name ?? null;
+  const destaqueImg  = destaqueRaro?.characterId ? getGachaImageSource(destaqueRaro.characterId, destaqueRaro.nome) : null;
+  const destaqueNome = destaqueRaro?.characterId
+    ? getGachaDisplayName(destaqueRaro.characterId, destaqueRaro.nome, destaqueChar?.name)
+    : null;
   const destaqueIsDigimon = destaqueRaro?.tipo === 'DIGIMON';
   const destaqueIsEgg = destaqueChar?.rarity === 'EGG';
   const destaqueEmoji = destaqueRaro?.tipo ? TIPO_EMOJI[destaqueRaro.tipo] : null;
