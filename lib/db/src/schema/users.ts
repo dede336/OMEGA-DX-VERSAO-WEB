@@ -9,6 +9,11 @@ export const usersTable = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
   role: text("role").notNull().default("user"),
+
+  // Apenas uma sessão pode estar ativa por conta.
+  // Cada novo login substitui este valor e invalida os tokens anteriores.
+  activeSessionId: text("active_session_id"),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
