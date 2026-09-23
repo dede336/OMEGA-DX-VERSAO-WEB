@@ -29,7 +29,7 @@ type Phase =
   | 'evolved'
   | 'done';
 
-// GIF que você colocou em:
+// GIF de Digievolução:
 // artifacts/omega-dx10/assets/images/digivolution.gif
 const DIGIVOLUTION_GIF =
   require('../assets/images/digivolution.gif');
@@ -63,8 +63,10 @@ export default function EvolutionAnimation({
       return;
     }
 
-    // Sempre reinicia a animação do começo
-    // quando o modal é aberto.
+    /*
+     * Sempre reinicia a sequência quando
+     * a tela de Digievolução é aberta.
+     */
     setPhase('initial');
 
     originalOpacity.setValue(1);
@@ -83,21 +85,27 @@ export default function EvolutionAnimation({
       | undefined;
 
     /*
+     * =========================================
      * ETAPA 1
+     * =========================================
      *
      * O Digimon original aparece sozinho
      * durante 1,5 segundo.
      */
     animationStartTimer = setTimeout(() => {
       /*
+       * =========================================
        * ETAPA 2
+       * =========================================
        *
-       * Começa a GIF de Digievolução.
+       * Inicia a GIF de Digievolução.
        */
       setPhase('animation');
 
       /*
+       * =========================================
        * ETAPA 3
+       * =========================================
        *
        * A GIF possui aproximadamente:
        *
@@ -105,10 +113,10 @@ export default function EvolutionAnimation({
        * 300 ms por frame
        *
        * O frame 5 começa aproximadamente
-       * 1,2 segundo depois do início.
+       * 1,2 segundo depois do início da GIF.
        *
-       * Nesse momento trocamos o Digimon
-       * original pelo Digimon evoluído.
+       * Nesse momento o Digimon original
+       * desaparece e o evoluído aparece.
        */
       evolutionTimer = setTimeout(() => {
         originalOpacity.setValue(0);
@@ -118,13 +126,19 @@ export default function EvolutionAnimation({
       }, 1200);
 
       /*
+       * =========================================
        * ETAPA 4
+       * =========================================
        *
-       * A GIF inteira dura aproximadamente
+       * A GIF completa dura aproximadamente
        * 3,6 segundos.
        *
-       * Quando termina, removemos o efeito
-       * e deixamos apenas o Digimon evoluído.
+       * Quando termina:
+       *
+       * - a GIF desaparece;
+       * - o Digimon evoluído permanece;
+       * - aparece DIGIEVOLUÇÃO CONCLUÍDA;
+       * - aparece o botão OK.
        */
       finishTimer = setTimeout(() => {
         setPhase('done');
@@ -133,8 +147,8 @@ export default function EvolutionAnimation({
     }, 1500);
 
     /*
-     * Limpeza dos timers caso o componente
-     * seja fechado antes da animação terminar.
+     * Limpa todos os timers caso o componente
+     * seja desmontado ou fechado.
      */
     return () => {
       if (animationStartTimer) {
@@ -159,8 +173,8 @@ export default function EvolutionAnimation({
   ]);
 
   /*
-   * Se alguma imagem não existir,
-   * não tenta abrir a animação.
+   * Se a imagem do Digimon original ou
+   * evoluído não existir, não abre a animação.
    */
   if (!fromImage || !toImage) {
     return null;
@@ -168,7 +182,7 @@ export default function EvolutionAnimation({
 
   /*
    * A GIF aparece somente durante
-   * a animação.
+   * a sequência de Digievolução.
    */
   const showGif =
     phase === 'animation' ||
@@ -207,8 +221,9 @@ export default function EvolutionAnimation({
         {/* =====================================
             DIGIMON EVOLUÍDO
 
-            Ele já fica preparado atrás da GIF,
-            mas começa invisível.
+            Ele fica preparado na mesma posição
+            do Digimon original, mas começa
+            invisível.
             ===================================== */}
 
         <Animated.View
@@ -230,7 +245,7 @@ export default function EvolutionAnimation({
         {/* =====================================
             GIF DE DIGIEVOLUÇÃO
 
-            Fica NA FRENTE do Digimon.
+            A GIF fica NA FRENTE do Digimon.
             ===================================== */}
 
         {showGif && (
@@ -296,7 +311,8 @@ const styles = StyleSheet.create({
 
 
   /*
-   * Área onde fica o Digimon.
+   * Área central utilizada pelas imagens
+   * do Digimon original e evoluído.
    */
   digimonContainer: {
     position: 'absolute',
@@ -307,26 +323,36 @@ const styles = StyleSheet.create({
 
 
   /*
-   * DIGIMON 30% MENOR
+   * =========================================
+   * TAMANHO DO DIGIMON
+   * =========================================
    *
-   * Antes:
-   * 220 x 220
+   * Tamanho anterior:
    *
-   * Agora:
    * 154 x 154
    *
-   * 220 × 0,70 = 154
+   * Redução adicional solicitada:
+   *
+   * 30%
+   *
+   * 154 × 0,70 = 107,8
+   *
+   * Arredondado:
+   *
+   * 108 x 108
    */
   digimon: {
-    width: 154,
-    height: 154,
+    width: 108,
+    height: 108,
   },
 
 
   /*
-   * Camada da GIF.
+   * =========================================
+   * CAMADA DA GIF
+   * =========================================
    *
-   * zIndex 10 faz a animação ficar
+   * zIndex 10 mantém a animação
    * na frente do Digimon.
    */
   animationLayer: {
@@ -340,15 +366,16 @@ const styles = StyleSheet.create({
 
 
   /*
-   * A GIF continua no tamanho original.
+   * A GIF NÃO foi reduzida.
    *
-   * Portanto:
+   * Digimon:
+   * 108 x 108
    *
-   * Digimon = 154 x 154
-   * GIF      = 320 x 320
+   * GIF:
+   * 320 x 320
    *
-   * O efeito fica claramente maior
-   * que o Digimon.
+   * Assim o efeito continua envolvendo
+   * o Digimon corretamente.
    */
   digivolutionAnimation: {
     width: 320,
@@ -357,7 +384,9 @@ const styles = StyleSheet.create({
 
 
   /*
-   * Resultado final.
+   * =========================================
+   * RESULTADO FINAL
+   * =========================================
    */
   result: {
     position: 'absolute',
@@ -408,7 +437,10 @@ const styles = StyleSheet.create({
 
 
   /*
-   * Botão que retorna ao DigiBank.
+   * Botão OK.
+   *
+   * Ao tocar nele, onClose retorna
+   * o jogador ao DigiBank.
    */
   okButton: {
     marginTop: 22,
