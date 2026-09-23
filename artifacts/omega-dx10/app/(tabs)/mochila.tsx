@@ -382,7 +382,7 @@ export default function MochilaScreen() {
             ))}
             <View style={styles.fragmentSummaryItem}>
               <View style={[styles.fragmentSummaryIcon, { backgroundColor: '#facc1522' }]}>
-                <Image source={require('../../assets/images/bits-icon.webp')} style={{ width: 22, height: 22 }} resizeMode="contain" />
+                <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 22, height: 22 }} resizeMode="contain" />
               </View>
               <Text style={[styles.fragmentSummaryCount, { color: '#facc15' }]}>
                 {bits >= 1000 ? `${(bits / 1000).toFixed(1)}k` : bits.toLocaleString()}
