@@ -22,7 +22,7 @@ const FLAG_IMAGES: Record<Language, any> = {
 const LANG_CYCLE: Language[] = ['pt', 'en', 'es'];
 
 const GACHA_ANIME_IMG  = require('../../assets/images/gacha-anime.webp');
-const GEM_ICON_IMG     = require('../../assets/images/gem-icon.webp');
+const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
 
 const TK_BG_GIF        = require('../../assets/images/tk.png');
 const TAI_BG           = require('../../assets/images/tai.png');
