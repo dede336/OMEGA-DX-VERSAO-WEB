@@ -241,6 +241,8 @@ export default function CollectionScreen() {
   // Alt-evo sacrifice picker
   const [sacrificePickerVisible, setSacrificePickerVisible] = useState(false);
   const [pendingAltEvo, setPendingAltEvo] = useState<{ ownedId: string; fromCharId: string; toCharId: string } | null>(null);
+  const [itemPickerVisible, setItemPickerVisible] = useState(false);
+  const [pendingItemEvo, setPendingItemEvo] = useState<{ ownedId: string; fromCharId: string; toCharId: string; alternate?: boolean; alternate2?: boolean; requiredItem: string } | null>(null);
   // Evolution animation state
   const [evoAnim, setEvoAnim] = useState<{ fromCharId: string; toCharId: string } | null>(null);
   // Fusion animation state — used when an evolution consumes another Digimon
@@ -265,47 +267,35 @@ export default function CollectionScreen() {
     sacrificeOwnedId?: string,
     alternate2?: boolean,
     fusionPartnerCharId?: string,
+    selectedItemId?: string,
   ) => {
-    const altRecipe = alternate ? ALTERNATE_EVOLUTIONS[fromCharId] : undefined;
-    const requiredSingleSacrifice = altRecipe?.requiredSacrificeCharacter;
-    const requiredMultipleSacrifices = (altRecipe as any)?.requiredSacrificeCharacters as string[] | undefined;
+    const recipe = alternate2
+      ? EXTRA_ALTERNATE_EVOLUTIONS[fromCharId]
+      : alternate
+        ? ALTERNATE_EVOLUTIONS[fromCharId]
+        : EVOLUTIONS[fromCharId];
 
-    const requiresFusion =
-      !!requiredSingleSacrifice ||
-      !!(requiredMultipleSacrifices && requiredMultipleSacrifices.length > 0);
+    if (!recipe) return;
 
-    // Uma fusão com sacrifício único só pode começar depois que o jogador
-    // escolher explicitamente qual cópia será consumida.
-    if (requiresFusion && requiredSingleSacrifice && !sacrificeOwnedId) {
+    if (recipe.requiredItem && !selectedItemId) {
+      setPendingItemEvo({
+        ownedId,
+        fromCharId,
+        toCharId,
+        alternate,
+        alternate2,
+        requiredItem: recipe.requiredItem,
+      });
+      setItemPickerVisible(true);
       return;
     }
 
-    const partnerCharacterId =
-      fusionPartnerCharId ??
-      requiredSingleSacrifice ??
-      requiredMultipleSacrifices?.[0];
-
-    // Receita de fusão sem parceiro resolvido nunca deve cair em evolução normal.
-    if (requiresFusion && !partnerCharacterId) {
-      return;
-    }
+    const evolved = evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2, selectedItemId);
+    if (!evolved) return;
 
     closeModal();
-    setSacrificePickerVisible(false);
-    setPendingAltEvo(null);
-
-    evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2);
-
-    if (requiresFusion) {
-      setEvoAnim(null);
-      setFusionAnim({
-        baseCharId: fromCharId,
-        partnerCharId: partnerCharacterId!,
-        resultCharId: toCharId,
-      });
-      return;
-    }
-
+    setItemPickerVisible(false);
+    setPendingItemEvo(null);
     setFusionAnim(null);
     setEvoAnim({ fromCharId, toCharId });
   }, [evolveDigimon]);
@@ -448,6 +438,56 @@ export default function CollectionScreen() {
           );
         }}
       />
+
+      {/* ── Item picker for item-based evolution ── */}
+      <Modal
+        visible={itemPickerVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => { setItemPickerVisible(false); setPendingItemEvo(null); }}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => { setItemPickerVisible(false); setPendingItemEvo(null); }}>
+          <Pressable style={[styles.modalSheet, { backgroundColor: colors.card, maxHeight: 360 }, pixelStyle]} onPress={(e) => e.stopPropagation()}>
+            <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
+            <Text style={[styles.sheetTitle, { color: colors.foreground, textAlign: 'center' }]}>SELECIONE O ITEM</Text>
+            {pendingItemEvo && (() => {
+              const qty = inventory.filter((itemId) => itemId === pendingItemEvo.requiredItem).length;
+              const itemName = ITEM_NAMES[pendingItemEvo.requiredItem] ?? pendingItemEvo.requiredItem;
+              return (
+                <View style={{ paddingVertical: 18 }}>
+                  <TouchableOpacity
+                    style={[styles.evoRow, { backgroundColor: '#a855f722', borderColor: '#a855f7', opacity: qty > 0 ? 1 : 0.45 }]}
+                    disabled={qty <= 0}
+                    onPress={() => {
+                      const pending = pendingItemEvo;
+                      handleEvolve(
+                        pending.ownedId,
+                        pending.fromCharId,
+                        pending.toCharId,
+                        pending.alternate,
+                        undefined,
+                        pending.alternate2,
+                        undefined,
+                        pending.requiredItem,
+                      );
+                    }}
+                  >
+                    <Feather name="package" size={18} color="#a855f7" />
+                    <Text style={[styles.evoRowText, { color: '#a855f7', flex: 1 }]}>{itemName}</Text>
+                    <Text style={{ color: colors.mutedForeground }}>x{qty}</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })()}
+            <TouchableOpacity
+              style={[styles.evoRow, { backgroundColor: colors.background, borderColor: colors.border, justifyContent: 'center' }]}
+              onPress={() => { setItemPickerVisible(false); setPendingItemEvo(null); }}
+            >
+              <Text style={{ color: colors.mutedForeground, fontWeight: '700' }}>CANCELAR</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── Evolution Modal ── */}
       <Modal
