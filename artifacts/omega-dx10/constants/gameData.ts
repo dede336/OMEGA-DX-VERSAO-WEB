@@ -1846,7 +1846,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Pista de Entrada', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 72,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymonBurstMode', 'rosemonBurstMode'] },
       { index: 1, name: 'Centro da Arena',  enemyCharacterId: 'valdurmon',             enemyLevel: 72,  expReward: 54000, gemsFirstClear: 100, enemyCharacterIds: ['valdurmon', 'gulusGammamon', 'sinduramon'] },
       { index: 2, name: 'Final do Torneio', enemyCharacterId: 'rosemonBurstMode',      enemyLevel: 72, expReward: 55000, gemsFirstClear: 200, enemyCharacterIds: ['shineGreymonBurstMode', 'metalGarurumon', 'warGreymon'] },
-      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 88, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['rosemonBurstMode' 'shineGreymonBurstMode', 'omegamon'] },
+      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 88, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'omegamon'] },
     ],
   },
   // ── DUNGEONS (ao final) ──────────────────────────────────────────────────────
