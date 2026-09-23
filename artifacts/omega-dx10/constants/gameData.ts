@@ -1,6 +1,6 @@
 export type AttributeId = 'VC' | 'VR' | 'DA' | 'NO' | 'UN' | 'FR';
 export type ElementId = 'FIRE' | 'PLANT' | 'WATER' | 'WIND' | 'EARTH' | 'LIGHTNING' | 'LIGHT' | 'DARK' | 'NULL' | 'ICE' | 'METAL';
-export type RarityId = 'EGG' | 'BABY' | 'TRAINING' | 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'ULTRA' | 'BURST';
+export type RarityId = 'EGG' | 'BABY' | 'TRAINING' | 'ROOKIE' | 'CHAMPION' | 'ULTIMATE' | 'MEGA' | 'ULTRA' | 'BURST';
 
 export interface BaseStats {
   hp: number;
@@ -98,7 +98,7 @@ export const CHARACTERS: Record<string, Character> = {
   agumon: {
     id: 'agumon',
     name: 'Agumon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 135, mp: 132, atk: 88, def: 73, spt: 60, spd: 66, apt: 40 },
@@ -109,7 +109,7 @@ export const CHARACTERS: Record<string, Character> = {
   arestradamon: {
     id: 'arestradamon',
     name: 'Arestradamon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 188, mp: 174, atk: 126, def: 108, spt: 102, spd: 114, apt: 35 },
@@ -122,7 +122,7 @@ export const CHARACTERS: Record<string, Character> = {
   agumonHakase: {
     id: 'agumonHakase',
     name: 'Agumon Hakase',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 135, mp: 132, atk: 88, def: 73, spt: 60, spd: 66, apt: 40 },
@@ -133,7 +133,7 @@ export const CHARACTERS: Record<string, Character> = {
   agumonSaver: {
     id: 'agumonSaver',
     name: 'Agumon (Saver)',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 135, mp: 130, atk: 94, def: 76, spt: 66, spd: 69, apt: 24 },
@@ -142,7 +142,7 @@ export const CHARACTERS: Record<string, Character> = {
   geoGreymon: {
     id: 'geoGreymon',
     name: 'GeoGreymon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 173, mp: 175, atk: 116, def: 98, spt: 71, spd: 80, apt: 35 },
@@ -151,7 +151,7 @@ export const CHARACTERS: Record<string, Character> = {
   rizeGreymon: {
     id: 'rizeGreymon',
     name: 'RizeGreymon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 220, mp: 247, atk: 138, def: 108, spt: 93, spd: 110, apt: 55 },
@@ -160,7 +160,7 @@ export const CHARACTERS: Record<string, Character> = {
   shineGreymon: {
     id: 'shineGreymon',
     name: 'ShineGreymon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 323, mp: 330, atk: 173, def: 140, spt: 121, spd: 127, apt: 70 },
@@ -169,7 +169,7 @@ export const CHARACTERS: Record<string, Character> = {
   gabumon: {
     id: 'gabumon',
     name: 'Gabumon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'WATER',
     baseStats: { hp: 113, mp: 102, atk: 86, def: 59, spt: 53, spd: 63, apt: 22 },
@@ -178,7 +178,7 @@ export const CHARACTERS: Record<string, Character> = {
   demiDevimon: {
     id: 'demiDevimon',
     name: 'DemiDevimon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 100, mp: 118, atk: 75, def: 67, spt: 63, spd: 64, apt: 22 },
@@ -187,7 +187,7 @@ export const CHARACTERS: Record<string, Character> = {
   guilmon: {
     id: 'guilmon',
     name: 'Guilmon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'FIRE',
     baseStats: { hp: 120, mp: 101, atk: 87, def: 67, spt: 55, spd: 50, apt: 23 },
@@ -198,7 +198,7 @@ export const CHARACTERS: Record<string, Character> = {
   growlmon: {
     id: 'growlmon',
     name: 'Growlmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'FIRE',
     baseStats: { hp: 175, mp: 161, atk: 117, def: 94, spt: 78, spd: 72, apt: 40 },
@@ -209,7 +209,7 @@ export const CHARACTERS: Record<string, Character> = {
   megaloGrowlmon: {
     id: 'megaloGrowlmon',
     name: 'MegaloGrowlmon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VR',
     element: 'FIRE',
     baseStats: { hp: 230, mp: 226, atk: 144, def: 124, spt: 98, spd: 92, apt: 50 },
@@ -220,7 +220,7 @@ export const CHARACTERS: Record<string, Character> = {
   gallantmon: {
     id: 'gallantmon',
     name: 'Gallantmon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 326, mp: 344, atk: 182, def: 165, spt: 165, spd: 137, apt: 85 },
@@ -243,7 +243,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemon: {
     id: 'lucemon',
     name: 'Lucemon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 112, mp: 116, atk: 79, def: 69, spt: 78, spd: 72, apt: 30 },
@@ -254,7 +254,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemonChaosMode: {
     id: 'lucemonChaosMode',
     name: 'Lucemon Chaos Mode',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 243, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 70 },
@@ -265,7 +265,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemonSatanMode: {
     id: 'lucemonSatanMode',
     name: 'Lucemon Satan Mode',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 90 },
@@ -276,7 +276,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemonFM: {
     id: 'lucemonFM',
     name: 'Lucemon Larva Mode',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 250, mp: 265, atk: 142, def: 113, spt: 119, spd: 118, apt: 80 },
@@ -287,7 +287,7 @@ export const CHARACTERS: Record<string, Character> = {
   lucemonX: {
     id: 'lucemonX',
     name: 'Lucemon X',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 255, mp: 270, atk: 148, def: 118, spt: 125, spd: 122, apt: 85 },
@@ -298,7 +298,7 @@ export const CHARACTERS: Record<string, Character> = {
   magnadramon: {
     id: 'magnadramon',
     name: 'Magnadramon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 261, mp: 296, atk: 139, def: 134, spt: 149, spd: 131, apt: 66 },
@@ -309,7 +309,7 @@ export const CHARACTERS: Record<string, Character> = {
   ophanimon: {
     id: 'ophanimon',
     name: 'Ophanimon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 233, mp: 275, atk: 131, def: 124, spt: 141, spd: 125, apt: 80 },
@@ -320,7 +320,7 @@ export const CHARACTERS: Record<string, Character> = {
   angewomon: {
     id: 'angewomon',
     name: 'Angewomon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 215, mp: 237, atk: 127, def: 99, spt: 117, spd: 114, apt: 46 },
@@ -331,7 +331,7 @@ export const CHARACTERS: Record<string, Character> = {
   tailmon: {
     id: 'tailmon',
     name: 'Tailmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 138, mp: 151, atk: 95, def: 77, spt: 86, spd: 89, apt: 32 },
@@ -342,7 +342,7 @@ export const CHARACTERS: Record<string, Character> = {
   salamon: {
     id: 'salamon',
     name: 'Salamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 105, mp: 119, atk: 76, def: 59, spt: 64, spd: 61, apt: 20 },
@@ -353,7 +353,7 @@ export const CHARACTERS: Record<string, Character> = {
   phoenixmon: {
     id: 'phoenixmon',
     name: 'Phoenixmon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 325, mp: 352, atk: 171, def: 141, spt: 167, spd: 141, apt: 80 },
@@ -364,7 +364,7 @@ export const CHARACTERS: Record<string, Character> = {
   garudamon: {
     id: 'garudamon',
     name: 'Garudamon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 215, mp: 250, atk: 128, def: 99, spt: 116, spd: 115, apt: 50 },
@@ -375,7 +375,7 @@ export const CHARACTERS: Record<string, Character> = {
   birdramon: {
     id: 'birdramon',
     name: 'Birdramon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 149, mp: 168, atk: 92, def: 75, spt: 88, spd: 90, apt: 35 },
@@ -386,7 +386,7 @@ export const CHARACTERS: Record<string, Character> = {
   pyomon: {
     id: 'pyomon',
     name: 'Biyomon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 101, mp: 114, atk: 72, def: 61, spt: 66, spd: 79, apt: 21 },
@@ -397,7 +397,7 @@ export const CHARACTERS: Record<string, Character> = {
   patamon: {
     id: 'patamon',
     name: 'Patamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 121, mp: 114, atk: 68, def: 54, spt: 58, spd: 55, apt: 20 },
@@ -408,7 +408,7 @@ export const CHARACTERS: Record<string, Character> = {
   angemon: {
     id: 'angemon',
     name: 'Angemon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 168, mp: 191, atk: 96, def: 79, spt: 89, spd: 78, apt: 37 },
@@ -419,7 +419,7 @@ export const CHARACTERS: Record<string, Character> = {
   magnaAngemon: {
     id: 'magnaAngemon',
     name: 'MagnaAngemon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 234, mp: 264, atk: 128, def: 112, spt: 123, spd: 102, apt: 57 },
@@ -430,7 +430,7 @@ export const CHARACTERS: Record<string, Character> = {
   goldramon: {
     id: 'goldramon',
     name: 'Goldramon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 333, mp: 349, atk: 182, def: 151, spt: 168, spd: 138, apt: 80 },
@@ -441,7 +441,7 @@ export const CHARACTERS: Record<string, Character> = {
   seraphimon: {
     id: 'seraphimon',
     name: 'Seraphimon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 308, mp: 366, atk: 178, def: 148, spt: 177, spd: 137, apt: 77 },
@@ -452,7 +452,7 @@ export const CHARACTERS: Record<string, Character> = {
   devimon: {
     id: 'devimon',
     name: 'Devimon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 166, mp: 170, atk: 108, def: 82, spt: 92, spd: 79, apt: 48 },
@@ -461,7 +461,7 @@ export const CHARACTERS: Record<string, Character> = {
   myotismon: {
     id: 'myotismon',
     name: 'Myotismon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 233, mp: 260, atk: 132, def: 121, spt: 119, spd: 95, apt: 60 },
@@ -470,7 +470,7 @@ export const CHARACTERS: Record<string, Character> = {
   vnonMyotismon: {
     id: 'vnonMyotismon',
     name: 'VenomMyotismon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 322, mp: 345, atk: 231, def: 182, spt: 186, spd: 163, apt: 66 },
@@ -479,7 +479,7 @@ export const CHARACTERS: Record<string, Character> = {
   garurumon: {
     id: 'garurumon',
     name: 'Garurumon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'ICE',
     baseStats: { hp: 144, mp: 107, atk: 91, def: 80, spt: 53, spd: 61, apt: 22 },
@@ -488,7 +488,7 @@ export const CHARACTERS: Record<string, Character> = {
   wereGarurumon: {
     id: 'wereGarurumon',
     name: 'WereGarurumon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'DA',
     element: 'ICE',
     baseStats: { hp: 200, mp: 220, atk: 130, def: 115, spt: 80, spd: 100, apt: 30 },
@@ -497,7 +497,7 @@ export const CHARACTERS: Record<string, Character> = {
   metalGarurumon: {
     id: 'metalGarurumon',
     name: 'MetalGarurumon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'DA',
     element: 'ICE',
     baseStats: { hp: 312, mp: 338, atk: 167, def: 121, spt: 124, spd: 131, apt: 72 },
@@ -528,7 +528,7 @@ export const CHARACTERS: Record<string, Character> = {
   veemon: {
     id: 'veemon',
     name: 'Veemon',
-    rarity: 'RARE',
+    rarity: 'ROOKIE',
     attribute: 'FR',
     element: 'FIRE',
     baseStats: { hp: 116, mp: 104, atk: 81, def: 63, spt: 52, spd: 60, apt: 38 },
@@ -541,7 +541,7 @@ export const CHARACTERS: Record<string, Character> = {
   exVeemon: {
     id: 'exVeemon',
     name: 'ExVeemon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'FR',
     element: 'FIRE',
     baseStats: { hp: 204, mp: 178, atk: 131, def: 97, spt: 85, spd: 105, apt: 60 },
@@ -554,7 +554,7 @@ export const CHARACTERS: Record<string, Character> = {
   paildramon: {
     id: 'paildramon',
     name: 'Paildramon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'DA',
     element: 'FIRE',
     baseStats: { hp: 264, mp: 271, atk: 168, def: 121, spt: 108, spd: 141, apt: 72 },
@@ -567,7 +567,7 @@ export const CHARACTERS: Record<string, Character> = {
   imperialDramonFM: {
     id: 'imperialDramonFM',
     name: 'Imperialdramon FM',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 320, mp: 340, atk: 174, def: 142, spt: 120, spd: 128, apt: 80 },
@@ -580,7 +580,7 @@ export const CHARACTERS: Record<string, Character> = {
   imperialDramonRM: {
     id: 'imperialDramonRM',
     name: 'Imperialdramon RM',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 315, mp: 342, atk: 173, def: 141, spt: 111, spd: 127, apt: 90 },
@@ -606,7 +606,7 @@ export const CHARACTERS: Record<string, Character> = {
   blackImperialdramonFM: {
     id: 'blackImperialdramonFM',
     name: 'Black Imperialdramon FM',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'DARK',
     baseStats: { hp: 330, mp: 355, atk: 185, def: 148, spt: 130, spd: 140, apt: 85 },
@@ -619,7 +619,7 @@ export const CHARACTERS: Record<string, Character> = {
   rosemon: {
     id: 'rosemon',
     name: 'Rosemon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'DA',
     element: 'PLANT',
     baseStats: { hp: 251, mp: 288, atk: 139, def: 117, spt: 132, spd: 121, apt: 62 },
@@ -643,7 +643,7 @@ export const CHARACTERS: Record<string, Character> = {
   lillymon: {
     id: 'lillymon',
     name: 'Lillymon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'DA',
     element: 'PLANT',
     baseStats: { hp: 209, mp: 244, atk: 112, def: 108, spt: 118, spd: 114, apt: 50 },
@@ -654,7 +654,7 @@ export const CHARACTERS: Record<string, Character> = {
   togemon: {
     id: 'togemon',
     name: 'Togemon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'PLANT',
     baseStats: { hp: 166, mp: 166, atk: 108, def: 96, spt: 67, spd: 71, apt: 35 },
@@ -665,7 +665,7 @@ export const CHARACTERS: Record<string, Character> = {
   palmon: {
     id: 'palmon',
     name: 'Palmon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'PLANT',
     baseStats: { hp: 103, mp: 114, atk: 74, def: 57, spt: 55, spd: 61, apt: 20 },
@@ -676,7 +676,7 @@ export const CHARACTERS: Record<string, Character> = {
   gulusGammamon: {
     id: 'gulusGammamon',
     name: 'GulusGammamon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 290, mp: 260, atk: 230, def: 170, spt: 150, spd: 210, apt: 60 },
@@ -685,7 +685,7 @@ export const CHARACTERS: Record<string, Character> = {
   greymon: {
     id: 'greymon',
     name: 'Greymon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 170, mp: 165, atk: 115, def: 92, spt: 72, spd: 80, apt: 35 },
@@ -696,7 +696,7 @@ export const CHARACTERS: Record<string, Character> = {
   metalGreymon: {
     id: 'metalGreymon',
     name: 'MetalGreymon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 215, mp: 210, atk: 137, def: 117, spt: 94, spd: 100, apt: 51 },
@@ -707,7 +707,7 @@ export const CHARACTERS: Record<string, Character> = {
   warGreymon: {
     id: 'warGreymon',
     name: 'WarGreymon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 320, mp: 335, atk: 171, def: 146, spt: 126, spd: 122, apt: 72 },
@@ -716,7 +716,7 @@ export const CHARACTERS: Record<string, Character> = {
   silphymon: {
     id: 'silphymon',
     name: 'Silphymon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 290, mp: 310, atk: 160, def: 135, spt: 155, spd: 165, apt: 74 },
@@ -729,7 +729,7 @@ export const CHARACTERS: Record<string, Character> = {
   sinduramon: {
     id: 'sinduramon',
     name: 'Sinduramon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VC',
     element: 'LIGHTNING',
     baseStats: { hp: 205, mp: 215, atk: 125, def: 105, spt: 115, spd: 110, apt: 52 },
@@ -742,7 +742,7 @@ export const CHARACTERS: Record<string, Character> = {
   valdurmon: {
     id: 'valdurmon',
     name: 'Valdurmon',
-    rarity: 'LEGENDARY',
+    rarity: 'MEGA',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 326, mp: 352, atk: 178, def: 146, spt: 175, spd: 143, apt: 78 },
@@ -755,7 +755,7 @@ export const CHARACTERS: Record<string, Character> = {
   blackSalamon: {
     id: 'blackSalamon',
     name: 'BlackSalamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 110, mp: 105, atk: 78, def: 65, spt: 72, spd: 60, apt: 22 },
@@ -766,7 +766,7 @@ export const CHARACTERS: Record<string, Character> = {
   mushroomon: {
     id: 'mushroomon',
     name: 'Mushroomon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'PLANT',
     baseStats: { hp: 105, mp: 115, atk: 72, def: 62, spt: 75, spd: 58, apt: 20 },
@@ -777,7 +777,7 @@ export const CHARACTERS: Record<string, Character> = {
   tentomon: {
     id: 'tentomon',
     name: 'Tentomon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'LIGHTNING',
     baseStats: { hp: 118, mp: 125, atk: 82, def: 68, spt: 80, spd: 64, apt: 24 },
@@ -788,7 +788,7 @@ export const CHARACTERS: Record<string, Character> = {
   renamon: {
     id: 'renamon',
     name: 'Renamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 108, mp: 120, atk: 92, def: 58, spt: 78, spd: 82, apt: 26 },
@@ -799,7 +799,7 @@ export const CHARACTERS: Record<string, Character> = {
   terriermon: {
     id: 'terriermon',
     name: 'Terriermon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 115, mp: 118, atk: 84, def: 70, spt: 68, spd: 76, apt: 22 },
@@ -810,7 +810,7 @@ export const CHARACTERS: Record<string, Character> = {
   wormon: {
     id: 'wormon',
     name: 'Wormmon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'PLANT',
     baseStats: { hp: 100, mp: 112, atk: 70, def: 60, spt: 65, spd: 55, apt: 18 },
@@ -821,7 +821,7 @@ export const CHARACTERS: Record<string, Character> = {
   kumamon: {
     id: 'kumamon',
     name: 'Kumamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'ICE',
     baseStats: { hp: 122, mp: 110, atk: 80, def: 72, spt: 66, spd: 68, apt: 22 },
@@ -832,7 +832,7 @@ export const CHARACTERS: Record<string, Character> = {
   woodmon: {
     id: 'woodmon',
     name: 'Woodmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'PLANT',
     baseStats: { hp: 168, mp: 162, atk: 112, def: 90, spt: 85, spd: 72, apt: 35 },
@@ -843,7 +843,7 @@ export const CHARACTERS: Record<string, Character> = {
   gomamon: {
     id: 'gomamon',
     name: 'Gomamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'WATER',
     baseStats: { hp: 112, mp: 108, atk: 78, def: 65, spt: 62, spd: 70, apt: 20 },
@@ -854,7 +854,7 @@ export const CHARACTERS: Record<string, Character> = {
   kokwamon: {
     id: 'kokwamon',
     name: 'Kokuwamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'LIGHTNING',
     baseStats: { hp: 106, mp: 130, atk: 74, def: 60, spt: 85, spd: 58, apt: 20 },
@@ -865,7 +865,7 @@ export const CHARACTERS: Record<string, Character> = {
   lalamon: {
     id: 'lalamon',
     name: 'Lalamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'PLANT',
     baseStats: { hp: 105, mp: 122, atk: 72, def: 62, spt: 82, spd: 60, apt: 20 },
@@ -876,7 +876,7 @@ export const CHARACTERS: Record<string, Character> = {
   gaomon: {
     id: 'gaomon',
     name: 'Gaomon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 120, mp: 108, atk: 88, def: 72, spt: 60, spd: 75, apt: 24 },
@@ -887,7 +887,7 @@ export const CHARACTERS: Record<string, Character> = {
   kotemon: {
     id: 'kotemon',
     name: 'Kotemon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'FIRE',
     baseStats: { hp: 115, mp: 105, atk: 85, def: 78, spt: 58, spd: 62, apt: 22 },
@@ -898,7 +898,7 @@ export const CHARACTERS: Record<string, Character> = {
   otamamon: {
     id: 'otamamon',
     name: 'Otamamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'WATER',
     baseStats: { hp: 108, mp: 118, atk: 72, def: 64, spt: 75, spd: 58, apt: 20 },
@@ -909,7 +909,7 @@ export const CHARACTERS: Record<string, Character> = {
   betamon: {
     id: 'betamon',
     name: 'Betamon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'WATER',
     baseStats: { hp: 118, mp: 112, atk: 80, def: 68, spt: 65, spd: 60, apt: 22 },
@@ -920,7 +920,7 @@ export const CHARACTERS: Record<string, Character> = {
   candlemon: {
     id: 'candlemon',
     name: 'Candlemon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'FIRE',
     baseStats: { hp: 108, mp: 122, atk: 78, def: 60, spt: 85, spd: 56, apt: 22 },
@@ -931,7 +931,7 @@ export const CHARACTERS: Record<string, Character> = {
   falcomon: {
     id: 'falcomon',
     name: 'Falcomon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 112, mp: 105, atk: 82, def: 64, spt: 62, spd: 88, apt: 24 },
@@ -942,7 +942,7 @@ export const CHARACTERS: Record<string, Character> = {
   hagurumon: {
     id: 'hagurumon',
     name: 'Hagurumon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'METAL',
     baseStats: { hp: 115, mp: 112, atk: 76, def: 80, spt: 68, spd: 52, apt: 20 },
@@ -953,7 +953,7 @@ export const CHARACTERS: Record<string, Character> = {
   kamemon: {
     id: 'kamemon',
     name: 'Kamemon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'WATER',
     baseStats: { hp: 118, mp: 108, atk: 74, def: 80, spt: 62, spd: 56, apt: 20 },
@@ -964,7 +964,7 @@ export const CHARACTERS: Record<string, Character> = {
   monodramon: {
     id: 'monodramon',
     name: 'Monodramon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VR',
     element: 'EARTH',
     baseStats: { hp: 120, mp: 108, atk: 86, def: 70, spt: 64, spd: 68, apt: 24 },
@@ -975,7 +975,7 @@ export const CHARACTERS: Record<string, Character> = {
   penguinmon: {
     id: 'penguinmon',
     name: 'Penguinmon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'DA',
     element: 'ICE',
     baseStats: { hp: 112, mp: 110, atk: 74, def: 68, spt: 65, spd: 75, apt: 20 },
@@ -986,7 +986,7 @@ export const CHARACTERS: Record<string, Character> = {
   pipismon: {
     id: 'pipismon',
     name: 'Pipismon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'FR',
     element: 'WIND',
     baseStats: { hp: 172, mp: 168, atk: 110, def: 88, spt: 90, spd: 95, apt: 35 },
@@ -997,7 +997,7 @@ export const CHARACTERS: Record<string, Character> = {
   guardromon: {
     id: 'guardromon',
     name: 'Guardromon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'METAL',
     baseStats: { hp: 178, mp: 158, atk: 115, def: 105, spt: 82, spd: 68, apt: 35 },
@@ -1008,7 +1008,7 @@ export const CHARACTERS: Record<string, Character> = {
   solarmon: {
     id: 'solarmon',
     name: 'Solarmon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 108, mp: 112, atk: 76, def: 68, spt: 72, spd: 60, apt: 20 },
@@ -1019,7 +1019,7 @@ export const CHARACTERS: Record<string, Character> = {
   toyagumon: {
     id: 'toyagumon',
     name: 'ToyAgumon',
-    rarity: 'COMMON',
+    rarity: 'ROOKIE',
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 115, mp: 105, atk: 80, def: 72, spt: 58, spd: 64, apt: 20 },
@@ -1030,7 +1030,7 @@ export const CHARACTERS: Record<string, Character> = {
   piddomon: {
     id: 'piddomon',
     name: 'Piddomon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'LIGHT',
     baseStats: { hp: 170, mp: 175, atk: 112, def: 90, spt: 105, spd: 80, apt: 35 },
@@ -1041,7 +1041,7 @@ export const CHARACTERS: Record<string, Character> = {
   reppamon: {
     id: 'reppamon',
     name: 'Reppamon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 175, mp: 165, atk: 118, def: 92, spt: 88, spd: 95, apt: 35 },
@@ -1052,7 +1052,7 @@ export const CHARACTERS: Record<string, Character> = {
   stingmon: {
     id: 'stingmon',
     name: 'Stingmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'PLANT',
     baseStats: { hp: 172, mp: 168, atk: 122, def: 88, spt: 90, spd: 92, apt: 38 },
@@ -1063,7 +1063,7 @@ export const CHARACTERS: Record<string, Character> = {
   aquilamon: {
     id: 'aquilamon',
     name: 'Aquilamon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'WIND',
     baseStats: { hp: 175, mp: 162, atk: 118, def: 90, spt: 85, spd: 95, apt: 35 },
@@ -1074,7 +1074,7 @@ export const CHARACTERS: Record<string, Character> = {
   ogremon: {
     id: 'ogremon',
     name: 'Ogremon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 180, mp: 152, atk: 125, def: 95, spt: 80, spd: 85, apt: 38 },
@@ -1085,7 +1085,7 @@ export const CHARACTERS: Record<string, Character> = {
   airdramon: {
     id: 'airdramon',
     name: 'Airdramon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VC',
     element: 'WIND',
     baseStats: { hp: 168, mp: 168, atk: 112, def: 85, spt: 92, spd: 98, apt: 35 },
@@ -1096,7 +1096,7 @@ export const CHARACTERS: Record<string, Character> = {
   tyranomon: {
     id: 'tyranomon',
     name: 'Tyranomon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'FIRE',
     baseStats: { hp: 182, mp: 155, atk: 120, def: 98, spt: 78, spd: 75, apt: 38 },
@@ -1107,7 +1107,7 @@ export const CHARACTERS: Record<string, Character> = {
   seadramon: {
     id: 'seadramon',
     name: 'Seadramon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'WATER',
     baseStats: { hp: 175, mp: 165, atk: 115, def: 92, spt: 85, spd: 88, apt: 35 },
@@ -1118,7 +1118,7 @@ export const CHARACTERS: Record<string, Character> = {
   allomon: {
     id: 'allomon',
     name: 'Allomon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'DA',
     element: 'FIRE',
     baseStats: { hp: 178, mp: 155, atk: 122, def: 96, spt: 80, spd: 78, apt: 36 },
@@ -1129,7 +1129,7 @@ export const CHARACTERS: Record<string, Character> = {
   darktyranomon: {
     id: 'darktyranomon',
     name: 'DarkTyranomon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 185, mp: 158, atk: 128, def: 102, spt: 82, spd: 78, apt: 38 },
@@ -1140,7 +1140,7 @@ export const CHARACTERS: Record<string, Character> = {
   blacktailmon: {
     id: 'blacktailmon',
     name: 'BlackTailmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 172, mp: 168, atk: 115, def: 90, spt: 100, spd: 88, apt: 36 },
@@ -1151,7 +1151,7 @@ export const CHARACTERS: Record<string, Character> = {
   darklizardmon: {
     id: 'darklizardmon',
     name: 'DarkLizardmon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 175, mp: 162, atk: 118, def: 92, spt: 85, spd: 82, apt: 36 },
@@ -1162,7 +1162,7 @@ export const CHARACTERS: Record<string, Character> = {
   devidramon: {
     id: 'devidramon',
     name: 'Devidramon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 178, mp: 162, atk: 122, def: 92, spt: 88, spd: 85, apt: 36 },
@@ -1173,7 +1173,7 @@ export const CHARACTERS: Record<string, Character> = {
   tiranomon: {
     id: 'tiranomon',
     name: 'Tiranomon',
-    rarity: 'RARE',
+    rarity: 'CHAMPION',
     attribute: 'VR',
     element: 'FIRE',
     baseStats: { hp: 168, mp: 155, atk: 122, def: 85, spt: 68, spd: 92, apt: 35 },
@@ -1184,7 +1184,7 @@ export const CHARACTERS: Record<string, Character> = {
   skullgreymon: {
     id: 'skullgreymon',
     name: 'SkullGreymon',
-    rarity: 'EPIC',
+    rarity: 'ULTIMATE',
     attribute: 'VR',
     element: 'DARK',
     baseStats: { hp: 248, mp: 225, atk: 152, def: 118, spt: 95, spd: 110, apt: 52 },
@@ -1216,7 +1216,6 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
   agumon:       { evolvesTo: 'greymon',       requiredLevel: 16, label: 'Greymon' },
   greymon:      { evolvesTo: 'metalGreymon',  requiredLevel: 34, label: 'MetalGreymon' },
   metalGreymon: { evolvesTo: 'warGreymon',    requiredLevel: 52, label: 'WarGreymon' },
-  warGreymon:   { evolvesTo: 'omegamon',      requiredLevel: 60, label: 'Omegamon' },
   // ── Tiranomon / SkullGreymon Line (evolução alternativa do Agumon) ────────
   tyranomon:    { evolvesTo: 'skullgreymon',  requiredLevel: 38, label: 'SkullGreymon' },
   // ── Agumon Savers / ShineGreymon Line ─────────────────────────────────────
@@ -1299,11 +1298,11 @@ export const SACRIFICE_DROPS: Record<string, { itemId: string; chance: number }[
   belphemon:  [{ itemId: 'piece_gehenna', chance: 1.0 }],
   demon:      [{ itemId: 'piece_gehenna', chance: 1.0 }],
   // ── Estilhaços Corrompidos (4 Guardiões Celestiais + Huanglongmon) ──
-  'custom_327':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
-  'custom_328':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
-  'custom_329':  [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
-  'custom_1560': [{ itemId: 'piece_taikyoku_feather', chance: 1.0 }],
-  'custom_331':  [{ itemId: 'piece_taikyoku_feather', chance: 0.5 }],
+  'custom_327':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'custom_328':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'custom_329':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'custom_1560': [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'custom_331':  [{ itemId: 'piece_fragmento_corrompido', chance: 0.5 }],
 };
 
 // ─── 4 Celestial Beasts → Huanglongmon (hardcoded, survive loadCustomCharacters clears) ──
@@ -1319,7 +1318,7 @@ export const HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS: Record<string, {
   'custom_328':  { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_1560', 'custom_329'] },
   'custom_1560': { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_328', 'custom_329'] },
   'custom_329':  { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_328', 'custom_1560'] },
-  'custom_331':  { evolvesTo: 'custom_1677', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'taikyoku_feather' },
+  'custom_331':  { evolvesTo: 'custom_1677', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'fragmento_corrompido' },
   'custom_1330': { evolvesTo: 'custom_1584', requiredLevel: 70, label: 'Proximamon', requiredSacrificeCharacters: ['custom_1581'] },
   'custom_1581': { evolvesTo: 'custom_1584', requiredLevel: 70, label: 'Proximamon', requiredSacrificeCharacters: ['custom_1330'] },
   // Cupimon (Training, Luz) → Lucemon (Rookie)
@@ -1395,9 +1394,9 @@ export const SACRIFICE_SCAN_OVERRIDES: Record<string, { characterId: string; per
 };
 
 export const SACRIFICE_SCAN_PCT: Partial<Record<RarityId, number>> = {
-  RARE:      0.10,
-  EPIC:      0.20,
-  LEGENDARY: 0.50,
+  CHAMPION:      0.10,
+  ULTIMATE:      0.20,
+  MEGA: 0.50,
 };
 
 export const ITEM_NAMES: Record<string, string> = {
@@ -1412,8 +1411,8 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_battery_blue:     'Bateria Azul',
   piece_battery_purple:   'Bateria Roxa',
   piece_battery_gold:     'Bateria Dourada',
-  taikyoku_feather:       'Fragmento Corrompido',
-  piece_taikyoku_feather: 'Estilhaço Corrompido',
+  fragmento_corrompido:       'Fragmento Corrompido',
+  piece_fragmento_corrompido: 'Fragmento Corrompido',
   black_digitron:         'Black Digitron 🖤',
   piece_black_digitron:   'Fragmento do Black Digitron',
   x_antibody:             'X-Antibody 🧬',
@@ -1444,7 +1443,7 @@ export const ITEM_NAMES: Record<string, string> = {
 };
 
 // Characters that can be scanned (encountered as enemies in battle)
-// Only normal-phase Rookie (COMMON rarity) Digimon can be scanned
+// Only normal-phase Rookie (ROOKIE rarity) Digimon can be scanned
 export const SCANNABLE_CHARACTERS: string[] = [
   // Original Rookies
   'agumon', 'gabumon', 'demiDevimon', 'patamon', 'pyomon', 'salamon', 'palmon',
@@ -1539,9 +1538,9 @@ export const GAME_MAPS: GameMap[] = [
     tamerExpReward: 20,
     stages: [
       { index: 0, name: 'Portal Congelado',  enemyCharacterId: 'blackSalamon', enemyLevel: 12, expReward: 220,  gemsFirstClear: 50,  enemyCharacterIds: ['blackSalamon', 'mushroomon', 'tentomon'], randomEnemyCount: 1 },
-      { index: 1, name: 'Muralhas de Gelo',  enemyCharacterId: 'renamon',      enemyLevel: 15, expReward: 380,  gemsFirstClear: 100, enemyCharacterIds: ['renamon', 'terriermon', 'wormon'], randomEnemyCount: 1 },
-      { index: 2, name: 'Trono de Cristal',  enemyCharacterId: 'kumamon',      enemyLevel: 18, expReward: 650,  gemsFirstClear: 150, enemyCharacterIds: ['kumamon', 'blackSalamon', 'mushroomon'], randomEnemyCount: 1 },
-      { index: 3, name: '⚔️ Boss — Woodmon', enemyCharacterId: 'woodmon', enemyLevel: 21, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['woodmon'] },
+      { index: 1, name: 'Muralhas de Gelo',  enemyCharacterId: 'renamon',      enemyLevel: 12, expReward: 380,  gemsFirstClear: 100, enemyCharacterIds: ['renamon', 'terriermon', 'wormon'], randomEnemyCount: 1 },
+      { index: 2, name: 'Trono de Cristal',  enemyCharacterId: 'kumamon',      enemyLevel: 14, expReward: 650,  gemsFirstClear: 150, enemyCharacterIds: ['kumamon', 'blackSalamon', 'mushroomon'], randomEnemyCount: 1 },
+      { index: 3, name: '⚔️ Boss — Woodmon', enemyCharacterId: 'woodmon', enemyLevel: 16, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['woodmon'] },
     ],
   },
   // ── WORLD 3: Catacumbas Sombrias ────────────────────────────────────────────
@@ -1554,10 +1553,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 500,
     tamerExpReward: 35,
     stages: [
-      { index: 0, name: 'Entrada das Catacumbas', enemyCharacterId: 'wormon',   enemyLevel: 20, expReward: 800,  gemsFirstClear: 50,  enemyCharacterIds: ['wormon', 'salamon', 'patamon'], randomEnemyCount: 1 },
-      { index: 1, name: 'Corredor das Almas',     enemyCharacterId: 'gomamon',  enemyLevel: 23, expReward: 1200, gemsFirstClear: 100, enemyCharacterIds: ['gomamon', 'kokwamon'], randomEnemyCount: 1 },
-      { index: 2, name: 'Câmara das Trevas',      enemyCharacterId: 'lalamon',  enemyLevel: 26, expReward: 1800, gemsFirstClear: 150, enemyCharacterIds: ['lalamon', 'wormon', 'salamon'], randomEnemyCount: 1 },
-      { index: 3, name: '⚔️ Boss — Devimon', enemyCharacterId: 'devimon', enemyLevel: 29, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['devimon'] },
+      { index: 0, name: 'Entrada das Catacumbas', enemyCharacterId: 'wormon',   enemyLevel: 16, expReward: 800,  gemsFirstClear: 50,  enemyCharacterIds: ['wormon', 'salamon', 'patamon'], randomEnemyCount: 1 },
+      { index: 1, name: 'Corredor das Almas',     enemyCharacterId: 'gomamon',  enemyLevel: 16, expReward: 1200, gemsFirstClear: 100, enemyCharacterIds: ['gomamon', 'kokwamon'], randomEnemyCount: 1 },
+      { index: 2, name: 'Câmara das Trevas',      enemyCharacterId: 'lalamon',  enemyLevel: 18, expReward: 1800, gemsFirstClear: 150, enemyCharacterIds: ['lalamon', 'wormon', 'salamon'], randomEnemyCount: 1 },
+      { index: 3, name: '⚔️ Boss — Devimon', enemyCharacterId: 'devimon', enemyLevel: 21, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['devimon'] },
     ],
   },
   // ── WORLD 4: Floresta Encantada ─────────────────────────────────────────────
@@ -1570,10 +1569,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 800,
     tamerExpReward: 50,
     stages: [
-      { index: 0, name: 'Prado das Flores',   enemyCharacterId: 'gaomon',   enemyLevel: 28, expReward: 2200,  gemsFirstClear: 50,  enemyCharacterIds: ['gaomon', 'kotemon', 'gabumon'], randomEnemyCount: 1 },
-      { index: 1, name: 'Estufa Selvagem',    enemyCharacterId: 'otamamon', enemyLevel: 31, expReward: 3000,  gemsFirstClear: 100, enemyCharacterIds: ['otamamon', 'betamon', 'gaomon'], randomEnemyCount: 1 },
-      { index: 2, name: 'Rainha da Floresta', enemyCharacterId: 'greymon',  enemyLevel: 34, expReward: 4200,  gemsFirstClear: 150, enemyCharacterIds: ['greymon', 'garurumon'] },
-      { index: 3, name: '⚔️ Boss — Garurumon', enemyCharacterId: 'garurumon', enemyLevel: 37, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['garurumon'] },
+      { index: 0, name: 'Prado das Flores',   enemyCharacterId: 'gaomon',   enemyLevel: 21, expReward: 2200,  gemsFirstClear: 50,  enemyCharacterIds: ['gaomon', 'kotemon', 'gabumon'], randomEnemyCount: 1 },
+      { index: 1, name: 'Estufa Selvagem',    enemyCharacterId: 'otamamon', enemyLevel: 22, expReward: 3000,  gemsFirstClear: 100, enemyCharacterIds: ['otamamon', 'betamon', 'gaomon'], randomEnemyCount: 1 },
+      { index: 2, name: 'Rainha da Floresta', enemyCharacterId: 'greymon',  enemyLevel: 24, expReward: 4200,  gemsFirstClear: 150, enemyCharacterIds: ['greymon', 'garurumon'] },
+      { index: 3, name: '⚔️ Boss — Garurumon', enemyCharacterId: 'garurumon', enemyLevel: 27, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['garurumon'] },
     ],
   },
   // ── WORLD 5: Mina de Crômio ─────────────────────────────────────────────────
@@ -1586,10 +1585,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 1200,
     tamerExpReward: 70,
     stages: [
-      { index: 0, name: 'Túnel de Entrada',  enemyCharacterId: 'candlemon',  enemyLevel: 36, expReward: 5000,  gemsFirstClear: 50,  enemyCharacterIds: ['candlemon', 'falcomon', 'hagurumon'], randomEnemyCount: 1 },
-      { index: 1, name: 'Veio dos Cristais', enemyCharacterId: 'kamemon',    enemyLevel: 39, expReward: 6500,  gemsFirstClear: 100, enemyCharacterIds: ['kamemon', 'monodramon', 'penguinmon'], randomEnemyCount: 1 },
-      { index: 2, name: 'Câmara de Crômio',  enemyCharacterId: 'pipismon',   enemyLevel: 42, expReward: 8500,  gemsFirstClear: 150, enemyCharacterIds: ['pipismon', 'candlemon'] },
-      { index: 3, name: '⚔️ Boss — Guardromon', enemyCharacterId: 'guardromon', enemyLevel: 45, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['guardromon'] },
+      { index: 0, name: 'Túnel de Entrada',  enemyCharacterId: 'candlemon',  enemyLevel: 27, expReward: 5000,  gemsFirstClear: 50,  enemyCharacterIds: ['candlemon', 'falcomon', 'hagurumon'], randomEnemyCount: 1 },
+      { index: 1, name: 'Veio dos Cristais', enemyCharacterId: 'kamemon',    enemyLevel: 27, expReward: 6500,  gemsFirstClear: 100, enemyCharacterIds: ['kamemon', 'monodramon', 'penguinmon'], randomEnemyCount: 1 },
+      { index: 2, name: 'Câmara de Crômio',  enemyCharacterId: 'pipismon',   enemyLevel: 29, expReward: 8500,  gemsFirstClear: 150, enemyCharacterIds: ['pipismon', 'candlemon'] },
+      { index: 3, name: '⚔️ Boss — Guardromon', enemyCharacterId: 'guardromon', enemyLevel: 30, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['guardromon'] },
     ],
   },
   // ── WORLD 6: Costa da Luz ───────────────────────────────────────────────────
@@ -1602,10 +1601,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 1800,
     tamerExpReward: 90,
     stages: [
-      { index: 0, name: 'Dunas Sagradas',     enemyCharacterId: 'salamon',  enemyLevel: 44, expReward: 9500,  gemsFirstClear: 50,  enemyCharacterIds: ['salamon', 'solarmon', 'toyagumon'], randomEnemyCount: 1 },
-      { index: 1, name: 'Litoral Celestial',  enemyCharacterId: 'patamon',  enemyLevel: 47, expReward: 11500, gemsFirstClear: 100, enemyCharacterIds: ['patamon', 'tailmon', 'angemon'], randomEnemyCount: 1 },
-      { index: 2, name: 'Santuário Costeiro', enemyCharacterId: 'piddomon', enemyLevel: 50, expReward: 14000, gemsFirstClear: 150, enemyCharacterIds: ['piddomon', 'angemon'] },
-      { index: 3, name: '⚔️ Boss — Reppamon', enemyCharacterId: 'reppamon', enemyLevel: 53, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['reppamon'] },
+      { index: 0, name: 'Dunas Sagradas',     enemyCharacterId: 'salamon',  enemyLevel: 30, expReward: 9500,  gemsFirstClear: 50,  enemyCharacterIds: ['salamon', 'solarmon', 'toyagumon'], randomEnemyCount: 1 },
+      { index: 1, name: 'Litoral Celestial',  enemyCharacterId: 'patamon',  enemyLevel: 30, expReward: 11500, gemsFirstClear: 100, enemyCharacterIds: ['patamon', 'tailmon', 'angemon'], randomEnemyCount: 1 },
+      { index: 2, name: 'Santuário Costeiro', enemyCharacterId: 'piddomon', enemyLevel: 31, expReward: 14000, gemsFirstClear: 150, enemyCharacterIds: ['piddomon', 'angemon'] },
+      { index: 3, name: '⚔️ Boss — Reppamon', enemyCharacterId: 'reppamon', enemyLevel: 33, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['reppamon'] },
     ],
   },
   // ── WORLD 7: Deserto de Areia ───────────────────────────────────────────────
@@ -1618,10 +1617,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 2500,
     tamerExpReward: 120,
     stages: [
-      { index: 0, name: 'Cânion das Sombras', enemyCharacterId: 'guardromon', enemyLevel: 51, expReward: 15000, gemsFirstClear: 50,  enemyCharacterIds: ['guardromon', 'greymon', 'birdramon'] },
-      { index: 1, name: 'Arena do Deserto',   enemyCharacterId: 'togemon',    enemyLevel: 54, expReward: 17000, gemsFirstClear: 100, enemyCharacterIds: ['togemon', 'woodmon', 'stingmon'] },
-      { index: 2, name: 'Senhor das Areias',  enemyCharacterId: 'aquilamon',  enemyLevel: 57, expReward: 20000, gemsFirstClear: 150, enemyCharacterIds: ['aquilamon', 'guardromon'] },
-      { index: 3, name: '⚔️ Boss — Ogremon', enemyCharacterId: 'ogremon', enemyLevel: 60, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['ogremon'] },
+      { index: 0, name: 'Cânion das Sombras', enemyCharacterId: 'guardromon', enemyLevel: 33, expReward: 15000, gemsFirstClear: 50,  enemyCharacterIds: ['guardromon', 'greymon', 'birdramon'] },
+      { index: 1, name: 'Arena do Deserto',   enemyCharacterId: 'togemon',    enemyLevel: 33, expReward: 17000, gemsFirstClear: 100, enemyCharacterIds: ['togemon', 'woodmon', 'stingmon'] },
+      { index: 2, name: 'Senhor das Areias',  enemyCharacterId: 'aquilamon',  enemyLevel: 35, expReward: 20000, gemsFirstClear: 150, enemyCharacterIds: ['aquilamon', 'guardromon'] },
+      { index: 3, name: '⚔️ Boss — Ogremon', enemyCharacterId: 'ogremon', enemyLevel: 37, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['ogremon'] },
     ],
   },
   // ── WORLD 8: Templo dos Dragões ─────────────────────────────────────────────
@@ -1634,10 +1633,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 3500,
     tamerExpReward: 150,
     stages: [
-      { index: 0, name: 'Salão dos Guerreiros', enemyCharacterId: 'greymon',     enemyLevel: 58, expReward: 21000, gemsFirstClear: 50,  enemyCharacterIds: ['greymon', 'geoGreymon', 'airdramon'] },
-      { index: 1, name: 'Câmara dos Campeões',  enemyCharacterId: 'tyranomon',   enemyLevel: 61, expReward: 23500, gemsFirstClear: 100, enemyCharacterIds: ['tyranomon', 'seadramon', 'allomon'] },
-      { index: 2, name: 'Trono Dracônico',      enemyCharacterId: 'darktyranomon', enemyLevel: 64, expReward: 26000, gemsFirstClear: 150, enemyCharacterIds: ['darktyranomon', 'airdramon'] },
-      { index: 3, name: '⚔️ Boss — DarkTyranomon', enemyCharacterId: 'darktyranomon', enemyLevel: 67, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.3 }, enemyCharacterIds: ['darktyranomon'] },
+      { index: 0, name: 'Salão dos Guerreiros', enemyCharacterId: 'greymon',     enemyLevel: 37, expReward: 21000, gemsFirstClear: 50,  enemyCharacterIds: ['greymon', 'geoGreymon', 'airdramon'] },
+      { index: 1, name: 'Câmara dos Campeões',  enemyCharacterId: 'tyranomon',   enemyLevel: 37, expReward: 23500, gemsFirstClear: 100, enemyCharacterIds: ['tyranomon', 'seadramon', 'allomon'] },
+      { index: 2, name: 'Trono Dracônico',      enemyCharacterId: 'darktyranomon', enemyLevel: 39, expReward: 26000, gemsFirstClear: 150, enemyCharacterIds: ['darktyranomon', 'airdramon'] },
+      { index: 3, name: '⚔️ Boss — DarkTyranomon', enemyCharacterId: 'darktyranomon', enemyLevel: 41, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.3 }, enemyCharacterIds: ['darktyranomon'] },
     ],
   },
   // ── WORLD 9: Pradaria dos Tamers ────────────────────────────────────────────
@@ -1650,10 +1649,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 5000,
     tamerExpReward: 180,
     stages: [
-      { index: 0, name: 'Campos da Glória',   enemyCharacterId: 'angemon',   enemyLevel: 65, expReward: 27000, gemsFirstClear: 50,  enemyCharacterIds: ['angemon', 'tailmon', 'devimon'] },
-      { index: 1, name: 'Centro da Pradaria', enemyCharacterId: 'garurumon', enemyLevel: 68, expReward: 29500, gemsFirstClear: 100, enemyCharacterIds: ['garurumon', 'geoGreymon', 'birdramon'] },
-      { index: 2, name: 'Altar dos Tamers',   enemyCharacterId: 'geoGreymon',enemyLevel: 71, expReward: 32000, gemsFirstClear: 150, enemyCharacterIds: ['geoGreymon', 'togemon', 'angemon'] },
-      { index: 3, name: '⚔️ Boss — MetalGreymon', enemyCharacterId: 'metalGreymon', enemyLevel: 74, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['metalGreymon'] },
+      { index: 0, name: 'Campos da Glória',   enemyCharacterId: 'angemon',   enemyLevel: 40, expReward: 27000, gemsFirstClear: 50,  enemyCharacterIds: ['angemon', 'tailmon', 'devimon'] },
+      { index: 1, name: 'Centro da Pradaria', enemyCharacterId: 'garurumon', enemyLevel: 40, expReward: 29500, gemsFirstClear: 100, enemyCharacterIds: ['garurumon', 'geoGreymon', 'birdramon'] },
+      { index: 2, name: 'Altar dos Tamers',   enemyCharacterId: 'geoGreymon',enemyLevel: 40, expReward: 32000, gemsFirstClear: 150, enemyCharacterIds: ['geoGreymon', 'togemon', 'angemon'] },
+      { index: 3, name: '⚔️ Boss — MetalGreymon', enemyCharacterId: 'metalGreymon', enemyLevel: 50, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['metalGreymon'] },
     ],
   },
   // ── WORLD 10: Templo das Sombras ────────────────────────────────────────────
@@ -1666,10 +1665,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 7000,
     tamerExpReward: 210,
     stages: [
-      { index: 0, name: 'Entrada Maldita', enemyCharacterId: 'devimon',      enemyLevel: 72, expReward: 33000, gemsFirstClear: 50,  enemyCharacterIds: ['devimon', 'blacktailmon', 'ogremon'] },
-      { index: 1, name: 'Salão dos Olhos', enemyCharacterId: 'darklizardmon',enemyLevel: 75, expReward: 35500, gemsFirstClear: 100, enemyCharacterIds: ['darklizardmon', 'devidramon', 'devimon'] },
-      { index: 2, name: 'Sanctum Sombrio', enemyCharacterId: 'blacktailmon', enemyLevel: 78, expReward: 38000, gemsFirstClear: 150, enemyCharacterIds: ['blacktailmon', 'devidramon', 'ogremon'] },
-      { index: 3, name: '⚔️ Boss — SkullGreymon', enemyCharacterId: 'skullgreymon', enemyLevel: 81, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['skullgreymon'] },
+      { index: 0, name: 'Entrada Maldita', enemyCharacterId: 'devimon',      enemyLevel: 45, expReward: 33000, gemsFirstClear: 50,  enemyCharacterIds: ['devimon', 'blacktailmon', 'ogremon'] },
+      { index: 1, name: 'Salão dos Olhos', enemyCharacterId: 'darklizardmon',enemyLevel: 45, expReward: 35500, gemsFirstClear: 100, enemyCharacterIds: ['darklizardmon', 'devidramon', 'devimon'] },
+      { index: 2, name: 'Sanctum Sombrio', enemyCharacterId: 'blacktailmon', enemyLevel: 45, expReward: 38000, gemsFirstClear: 150, enemyCharacterIds: ['blacktailmon', 'devidramon', 'ogremon'] },
+      { index: 3, name: '⚔️ Boss — SkullGreymon', enemyCharacterId: 'skullgreymon', enemyLevel: 52, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['skullgreymon'] },
     ],
   },
   // ── WORLD 11: Castelo Esquecido ─────────────────────────────────────────────
@@ -1682,10 +1681,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 9000,
     tamerExpReward: 240,
     stages: [
-      { index: 0, name: 'Portão em Ruínas', enemyCharacterId: 'tailmon',      enemyLevel: 76, expReward: 38500, gemsFirstClear: 50,  enemyCharacterIds: ['tailmon', 'geoGreymon'] },
-      { index: 1, name: 'Torre Caída',      enemyCharacterId: 'metalGreymon', enemyLevel: 79, expReward: 40500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'wereGarurumon'] },
-      { index: 2, name: 'Trono Abandonado', enemyCharacterId: 'myotismon',    enemyLevel: 82, expReward: 42500, gemsFirstClear: 150, enemyCharacterIds: ['myotismon', 'metalGreymon'] },
-      { index: 3, name: '⚔️ Boss — Angewomon', enemyCharacterId: 'angewomon', enemyLevel: 85, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angewomon'] },
+      { index: 0, name: 'Portão em Ruínas', enemyCharacterId: 'tailmon',      enemyLevel: 50, expReward: 38500, gemsFirstClear: 50,  enemyCharacterIds: ['tailmon', 'geoGreymon'] },
+      { index: 1, name: 'Torre Caída',      enemyCharacterId: 'metalGreymon', enemyLevel: 50, expReward: 40500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'wereGarurumon'] },
+      { index: 2, name: 'Trono Abandonado', enemyCharacterId: 'myotismon',    enemyLevel: 50, expReward: 42500, gemsFirstClear: 150, enemyCharacterIds: ['myotismon', 'metalGreymon'] },
+      { index: 3, name: '⚔️ Boss — Angewomon', enemyCharacterId: 'angewomon', enemyLevel: 55, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angewomon'] },
     ],
   },
   // ── WORLD 12: Vale dos Fósseis ───────────────────────────────────────────────
@@ -1698,10 +1697,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 11000,
     tamerExpReward: 265,
     stages: [
-      { index: 0, name: 'Cânion dos Ossos',   enemyCharacterId: 'angewomon',    enemyLevel: 80, expReward: 43000, gemsFirstClear: 50,  enemyCharacterIds: ['angewomon', 'wereGarurumon'] },
-      { index: 1, name: 'Gruta dos Fósseis',  enemyCharacterId: 'metalGreymon', enemyLevel: 83, expReward: 44500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'myotismon'] },
-      { index: 2, name: 'Guardião Ancestral', enemyCharacterId: 'garudamon',    enemyLevel: 86, expReward: 46000, gemsFirstClear: 150, enemyCharacterIds: ['garudamon', 'angewomon'] },
-      { index: 3, name: '⚔️ Boss — MagnaAngemon', enemyCharacterId: 'magnaAngemon', enemyLevel: 89, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['magnaAngemon'] },
+      { index: 0, name: 'Cânion dos Ossos',   enemyCharacterId: 'angewomon',    enemyLevel: 50, expReward: 43000, gemsFirstClear: 50,  enemyCharacterIds: ['angewomon', 'wereGarurumon'] },
+      { index: 1, name: 'Gruta dos Fósseis',  enemyCharacterId: 'metalGreymon', enemyLevel: 52, expReward: 44500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'myotismon'] },
+      { index: 2, name: 'Guardião Ancestral', enemyCharacterId: 'garudamon',    enemyLevel: 52, expReward: 46000, gemsFirstClear: 150, enemyCharacterIds: ['garudamon', 'angewomon'] },
+      { index: 3, name: '⚔️ Boss — MagnaAngemon', enemyCharacterId: 'magnaAngemon', enemyLevel: 60, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['magnaAngemon'] },
     ],
   },
   // ── WORLD 13: Base Secreta ───────────────────────────────────────────────────
@@ -1714,10 +1713,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 14000,
     tamerExpReward: 290,
     stages: [
-      { index: 0, name: 'Setor de Armazenamento', enemyCharacterId: 'magnaAngemon', enemyLevel: 83, expReward: 46000, gemsFirstClear: 50,  enemyCharacterIds: ['magnaAngemon', 'garudamon'] },
-      { index: 1, name: 'Câmara de Controle',     enemyCharacterId: 'wereGarurumon',enemyLevel: 86, expReward: 47500, gemsFirstClear: 100, enemyCharacterIds: ['wereGarurumon', 'myotismon'] },
-      { index: 2, name: 'Núcleo da Base',         enemyCharacterId: 'rizeGreymon',  enemyLevel: 89, expReward: 49000, gemsFirstClear: 150, enemyCharacterIds: ['rizeGreymon', 'magnaAngemon'] },
-      { index: 3, name: '⚔️ Boss — Myotismon', enemyCharacterId: 'myotismon', enemyLevel: 92, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['myotismon'] },
+      { index: 0, name: 'Setor de Armazenamento', enemyCharacterId: 'magnaAngemon', enemyLevel: 53, expReward: 46000, gemsFirstClear: 50,  enemyCharacterIds: ['magnaAngemon', 'garudamon'] },
+      { index: 1, name: 'Câmara de Controle',     enemyCharacterId: 'wereGarurumon',enemyLevel: 56, expReward: 47500, gemsFirstClear: 100, enemyCharacterIds: ['wereGarurumon', 'myotismon'] },
+      { index: 2, name: 'Núcleo da Base',         enemyCharacterId: 'rizeGreymon',  enemyLevel: 56, expReward: 49000, gemsFirstClear: 150, enemyCharacterIds: ['rizeGreymon', 'magnaAngemon'] },
+      { index: 3, name: '⚔️ Boss — Myotismon', enemyCharacterId: 'myotismon', enemyLevel: 62, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['myotismon'] },
     ],
   },
   // ── WORLD 14: Monte Infernus ─────────────────────────────────────────────────
@@ -1730,10 +1729,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 17000,
     tamerExpReward: 315,
     stages: [
-      { index: 0, name: 'Planícies de Lava',  enemyCharacterId: 'myotismon',   enemyLevel: 86, expReward: 48000, gemsFirstClear: 50,  enemyCharacterIds: ['myotismon', 'wereGarurumon'] },
-      { index: 1, name: 'Fendas Vulcânicas',  enemyCharacterId: 'garudamon',   enemyLevel: 89, expReward: 49500, gemsFirstClear: 100, enemyCharacterIds: ['garudamon', 'angewomon'] },
-      { index: 2, name: 'Cume do Infernus',   enemyCharacterId: 'lillymon',    enemyLevel: 92, expReward: 50500, gemsFirstClear: 150, enemyCharacterIds: ['lillymon', 'rizeGreymon'] },
-      { index: 3, name: '⚔️ Boss — Rosemon', enemyCharacterId: 'rosemon', enemyLevel: 95, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rosemon'] },
+      { index: 0, name: 'Planícies de Lava',  enemyCharacterId: 'myotismon',   enemyLevel: 66, expReward: 48000, gemsFirstClear: 50,  enemyCharacterIds: ['myotismon', 'wereGarurumon'] },
+      { index: 1, name: 'Fendas Vulcânicas',  enemyCharacterId: 'garudamon',   enemyLevel: 66, expReward: 49500, gemsFirstClear: 100, enemyCharacterIds: ['garudamon', 'angewomon'] },
+      { index: 2, name: 'Cume do Infernus',   enemyCharacterId: 'lillymon',    enemyLevel: 66, expReward: 50500, gemsFirstClear: 150, enemyCharacterIds: ['lillymon', 'rizeGreymon'] },
+      { index: 3, name: '⚔️ Boss — Rosemon', enemyCharacterId: 'rosemon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rosemon'] },
     ],
   },
   // ── WORLD 15: Pântano Digital ────────────────────────────────────────────────
@@ -1746,10 +1745,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 20000,
     tamerExpReward: 340,
     stages: [
-      { index: 0, name: 'Margem do Pântano',   enemyCharacterId: 'rizeGreymon',  enemyLevel: 89, expReward: 49000, gemsFirstClear: 50,  enemyCharacterIds: ['rizeGreymon', 'garudamon'] },
-      { index: 1, name: 'Profundeza do Brejo', enemyCharacterId: 'lillymon',     enemyLevel: 92, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['lillymon', 'magnaAngemon'] },
-      { index: 2, name: 'Raiz das Trevas',     enemyCharacterId: 'vnonMyotismon',enemyLevel: 95, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['vnonMyotismon', 'rosemon'] },
-      { index: 3, name: '⚔️ Boss — WarGreymon', enemyCharacterId: 'warGreymon', enemyLevel: 98, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['warGreymon'] },
+      { index: 0, name: 'Margem do Pântano',   enemyCharacterId: 'rizeGreymon',  enemyLevel: 66, expReward: 49000, gemsFirstClear: 50,  enemyCharacterIds: ['rizeGreymon', 'garudamon'] },
+      { index: 1, name: 'Profundeza do Brejo', enemyCharacterId: 'lillymon',     enemyLevel: 66, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['lillymon', 'magnaAngemon'] },
+      { index: 2, name: 'Raiz das Trevas',     enemyCharacterId: 'vnonMyotismon',enemyLevel: 66, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['vnonMyotismon', 'rosemon'] },
+      { index: 3, name: '⚔️ Boss — WarGreymon', enemyCharacterId: 'warGreymon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['warGreymon'] },
     ],
   },
   // ── WORLD 16: Desfiladeiro dos Ventos ───────────────────────────────────────
@@ -1762,10 +1761,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 24000,
     tamerExpReward: 370,
     stages: [
-      { index: 0, name: 'Entrada do Desfiladeiro', enemyCharacterId: 'warGreymon',    enemyLevel: 91, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['warGreymon', 'metalGarurumon'] },
-      { index: 1, name: 'Passagem dos Ventos',     enemyCharacterId: 'seraphimon',    enemyLevel: 94, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['seraphimon', 'warGreymon'] },
-      { index: 2, name: 'Saída dos Guerreiros',    enemyCharacterId: 'metalGarurumon',enemyLevel: 97, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['metalGarurumon', 'goldramon'] },
-      { index: 3, name: '⚔️ Boss — Ophanimon', enemyCharacterId: 'ophanimon', enemyLevel: 99, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['ophanimon'] },
+      { index: 0, name: 'Entrada do Desfiladeiro', enemyCharacterId: 'warGreymon',    enemyLevel: 66, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['warGreymon', 'metalGarurumon'] },
+      { index: 1, name: 'Passagem dos Ventos',     enemyCharacterId: 'seraphimon',    enemyLevel: 67, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['seraphimon', 'warGreymon'] },
+      { index: 2, name: 'Saída dos Guerreiros',    enemyCharacterId: 'metalGarurumon',enemyLevel: 67, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['metalGarurumon', 'goldramon'] },
+      { index: 3, name: '⚔️ Boss — Ophanimon', enemyCharacterId: 'ophanimon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['ophanimon'] },
     ],
   },
   // ── WORLD 17: Clareira Sagrada ───────────────────────────────────────────────
@@ -1778,10 +1777,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 28000,
     tamerExpReward: 405,
     stages: [
-      { index: 0, name: 'Caminho Iluminado', enemyCharacterId: 'ophanimon',  enemyLevel: 92, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['ophanimon', 'seraphimon'] },
-      { index: 1, name: 'Altar da Floresta', enemyCharacterId: 'goldramon',  enemyLevel: 95, expReward: 51000, gemsFirstClear: 100, enemyCharacterIds: ['goldramon', 'magnadramon'] },
-      { index: 2, name: 'Centro da Clareira',enemyCharacterId: 'phoenixmon', enemyLevel: 98, expReward: 52000, gemsFirstClear: 150, enemyCharacterIds: ['phoenixmon', 'goldramon'] },
-      { index: 3, name: '⚔️ Boss — ShineGreymon', enemyCharacterId: 'shineGreymon', enemyLevel: 100, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['shineGreymon'] },
+      { index: 0, name: 'Caminho Iluminado', enemyCharacterId: 'ophanimon',  enemyLevel: 70, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['ophanimon', 'seraphimon'] },
+      { index: 1, name: 'Altar da Floresta', enemyCharacterId: 'goldramon',  enemyLevel: 70, expReward: 51000, gemsFirstClear: 100, enemyCharacterIds: ['goldramon', 'magnadramon'] },
+      { index: 2, name: 'Centro da Clareira',enemyCharacterId: 'phoenixmon', enemyLevel: 70, expReward: 52000, gemsFirstClear: 150, enemyCharacterIds: ['phoenixmon', 'goldramon'] },
+      { index: 3, name: '⚔️ Boss — ShineGreymon', enemyCharacterId: 'shineGreymon', enemyLevel: 80, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['shineGreymon'] },
     ],
   },
   // ── WORLD 18: Zona Kernel ────────────────────────────────────────────────────
@@ -1794,10 +1793,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 33000,
     tamerExpReward: 440,
     stages: [
-      { index: 0, name: 'Plataformas Flutuantes', enemyCharacterId: 'shineGreymon', enemyLevel: 93, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymon', 'warGreymon'] },
-      { index: 1, name: 'Corredor de Dados',      enemyCharacterId: 'magnadramon',  enemyLevel: 96, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['magnadramon', 'rosemon'] },
-      { index: 2, name: 'Coração do Kernel',      enemyCharacterId: 'rosemon',      enemyLevel: 99, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['rosemon', 'phoenixmon', 'magnadramon'] },
-      { index: 3, name: '⚔️ Boss — Sinduramon', enemyCharacterId: 'sinduramon', enemyLevel: 100, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['sinduramon'] },
+      { index: 0, name: 'Plataformas Flutuantes', enemyCharacterId: 'shineGreymon', enemyLevel: 68, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymon', 'warGreymon'] },
+      { index: 1, name: 'Corredor de Dados',      enemyCharacterId: 'magnadramon',  enemyLevel: 68, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['magnadramon', 'rosemon'] },
+      { index: 2, name: 'Coração do Kernel',      enemyCharacterId: 'rosemon',      enemyLevel: 68, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['rosemon', 'phoenixmon', 'magnadramon'] },
+      { index: 3, name: '⚔️ Boss — Sinduramon', enemyCharacterId: 'sinduramon', enemyLevel: 80, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['sinduramon'] },
     ],
   },
   // ── WORLD 19: Setor Omega ────────────────────────────────────────────────────
@@ -1810,10 +1809,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 40000,
     tamerExpReward: 490,
     stages: [
-      { index: 0, name: 'Setor Industrial',   enemyCharacterId: 'sinduramon',     enemyLevel: 94, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['sinduramon', 'shineGreymon'] },
-      { index: 1, name: 'Núcleo de Controle', enemyCharacterId: 'gulusGammamon',  enemyLevel: 97, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['gulusGammamon', 'sinduramon'] },
-      { index: 2, name: 'Câmara Omega',       enemyCharacterId: 'valdurmon',      enemyLevel: 100, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['valdurmon', 'gulusGammamon'] },
-      { index: 3, name: '⚔️ Boss — GulusGammamon', enemyCharacterId: 'gulusGammamon', enemyLevel: 100, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 2.0 }, enemyCharacterIds: ['gulusGammamon'] },
+      { index: 0, name: 'Setor Industrial',   enemyCharacterId: 'sinduramon',     enemyLevel: 68, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['sinduramon', 'shineGreymon'] },
+      { index: 1, name: 'Núcleo de Controle', enemyCharacterId: 'gulusGammamon',  enemyLevel: 68, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['gulusGammamon', 'sinduramon'] },
+      { index: 2, name: 'Câmara Omega',       enemyCharacterId: 'valdurmon',      enemyLevel: 68, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['valdurmon', 'gulusGammamon'] },
+      { index: 3, name: '⚔️ Boss — GulusGammamon', enemyCharacterId: 'gulusGammamon', enemyLevel: 81, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 2.0 }, enemyCharacterIds: ['gulusGammamon'] },
     ],
   },
   // ── WORLD 20: Corredor Final ─────────────────────────────────────────────────
@@ -1826,10 +1825,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 45000,
     tamerExpReward: 545,
     stages: [
-      { index: 0, name: 'Corredor de Aço',    enemyCharacterId: 'valdurmon',         enemyLevel: 95,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['valdurmon', 'sinduramon'] },
-      { index: 1, name: 'Sala de Julgamento', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 98, expReward: 53000, gemsFirstClear: 100, enemyCharacterIds: ['shineGreymonBurstMode', 'warGreymon'] },
-      { index: 2, name: 'Portal do Fim',      enemyCharacterId: 'rosemonBurstMode',  enemyLevel: 100, expReward: 54000, gemsFirstClear: 150, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'valdurmon'] },
-      { index: 3, name: '⚔️ Boss — RosemonBurstMode', enemyCharacterId: 'rosemonBurstMode', enemyLevel: 100, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.5, def: 2.0 }, enemyCharacterIds: ['rosemonBurstMode'] },
+      { index: 0, name: 'Corredor de Aço',    enemyCharacterId: 'valdurmon',         enemyLevel: 68,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['valdurmon', 'sinduramon'] },
+      { index: 1, name: 'Sala de Julgamento', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 70, expReward: 53000, gemsFirstClear: 100, enemyCharacterIds: ['shineGreymonBurstMode', 'warGreymon'] },
+      { index: 2, name: 'Portal do Fim',      enemyCharacterId: 'rosemonBurstMode',  enemyLevel: 70, expReward: 54000, gemsFirstClear: 150, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'valdurmon'] },
+      { index: 3, name: '⚔️ Boss — RosemonBurstMode', enemyCharacterId: 'rosemonBurstMode', enemyLevel: 85, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.5, def: 2.0 }, enemyCharacterIds: ['rosemonBurstMode'] },
     ],
   },
   // ── WORLD 21: Arena dos Dados ───────────────────────────────────────────────
@@ -1842,10 +1841,10 @@ export const GAME_MAPS: GameMap[] = [
     bitsReward: 50000,
     tamerExpReward: 600,
     stages: [
-      { index: 0, name: 'Pista de Entrada', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 96,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymonBurstMode', 'rosemonBurstMode'] },
-      { index: 1, name: 'Centro da Arena',  enemyCharacterId: 'valdurmon',             enemyLevel: 99,  expReward: 54000, gemsFirstClear: 100, enemyCharacterIds: ['valdurmon', 'gulusGammamon', 'sinduramon'] },
-      { index: 2, name: 'Final do Torneio', enemyCharacterId: 'rosemonBurstMode',      enemyLevel: 100, expReward: 55000, gemsFirstClear: 200, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'metalGarurumon', 'warGreymon'] },
-      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 100, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['omegamon'] },
+      { index: 0, name: 'Pista de Entrada', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 72,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymonBurstMode', 'rosemonBurstMode'] },
+      { index: 1, name: 'Centro da Arena',  enemyCharacterId: 'valdurmon',             enemyLevel: 72,  expReward: 54000, gemsFirstClear: 100, enemyCharacterIds: ['valdurmon', 'gulusGammamon', 'sinduramon'] },
+      { index: 2, name: 'Final do Torneio', enemyCharacterId: 'rosemonBurstMode',      enemyLevel: 72, expReward: 55000, gemsFirstClear: 200, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'metalGarurumon', 'warGreymon'] },
+      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 88, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['omegamon'] },
     ],
   },
   // ── DUNGEONS (ao final) ──────────────────────────────────────────────────────
@@ -1933,10 +1932,10 @@ export const RARITY_COLORS: Record<RarityId, string> = {
   EGG:       '#fde68a',
   BABY:      '#fbcfe8',
   TRAINING:  '#6ee7b7',
-  COMMON:    '#94a3b8',
-  RARE:      '#3b82f6',
-  EPIC:      '#8b5cf6',
-  LEGENDARY: '#f59e0b',
+  ROOKIE:    '#94a3b8',
+  CHAMPION:      '#3b82f6',
+  ULTIMATE:      '#8b5cf6',
+  MEGA: '#f59e0b',
   ULTRA:     '#ff3c6e',
   BURST:     '#ff3c6e',
 };
@@ -1945,15 +1944,15 @@ export const RARITY_LABELS: Record<RarityId, string> = {
   EGG:       'Ovo',
   BABY:      'Bebê',
   TRAINING:  'Treinamento',
-  COMMON:    'Rookie',
-  RARE:      'Champion',
-  EPIC:      'Ultimate',
-  LEGENDARY: 'Mega',
+  ROOKIE:    'Rookie',
+  CHAMPION:      'Champion',
+  ULTIMATE:      'Ultimate',
+  MEGA: 'Mega',
   ULTRA:     'Ultra',
   BURST:     'Burst',
 };
 
-export const RARITY_ORDER: RarityId[] = ['EGG','BABY','TRAINING','COMMON','RARE','EPIC','LEGENDARY','ULTRA','BURST'];
+export const RARITY_ORDER: RarityId[] = ['EGG','BABY','TRAINING','ROOKIE','CHAMPION','ULTIMATE','MEGA','ULTRA','BURST'];
 
 export const PRE_ROOKIE_STAGE_RARITIES = new Set<RarityId>(['EGG', 'BABY', 'TRAINING']);
 
@@ -2001,29 +2000,29 @@ export const EQUIP_SLOT_ICONS: Record<EquipSlot, string> = {
 };
 
 export const EQUIPMENT_ITEMS: EquipItem[] = [
-  { id: 'blusa_tamer',    name: 'Camiseta de Tamer',  slot: 'blusa',    rarity: 'COMMON',    description: 'Camiseta padrão dos Tamers. Aumenta o ataque do parceiro.',          bonuses: { atk: 5 } },
-  { id: 'calca_treino',   name: 'Calça de Treino',    slot: 'calca',    rarity: 'COMMON',    description: 'Calça confortável para treinamento. Aumenta a defesa.',              bonuses: { def: 5 } },
-  { id: 'sapato_tenis',   name: 'Tênis de Corrida',   slot: 'sapato',   rarity: 'COMMON',    description: 'Leve e rápido. Aumenta a velocidade do parceiro.',                  bonuses: { spd: 6 } },
-  { id: 'brasao_digital',  name: 'Brasão Digital',      slot: 'brasao',   rarity: 'COMMON',    description: 'Símbolo de um Tamer legítimo. Aumenta o HP do parceiro.',                           bonuses: { hp: 15 } },
-  { id: 'brasao_coragem',   name: 'Brasão da Coragem',   slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Coragem de Tai. Aumenta em 20% todos os status de Digimon do tipo Fogo.',                          bonuses: {}, elementBonus: { elements: ['FIRE'],          percent: 0.20 } },
-  { id: 'brasao_esperanca', name: 'Brasão da Esperança', slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Esperança de TK. Aumenta em 20% todos os status de Digimon do tipo Luz.',                           bonuses: {}, elementBonus: { elements: ['LIGHT'],         percent: 0.20 } },
-  { id: 'brasao_amizade',   name: 'Brasão da Amizade',   slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Amizade de Matt. Aumenta em 20% todos os status de Digimon do tipo Água e Gelo.', bonuses: {}, elementBonus: { elements: ['WATER', 'ICE'], percent: 0.20 } },
-  { id: 'brasao_confianca', name: 'Brasão da Confiança', slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Confiança. Aumenta em 20% todos os status de Digimon do tipo Água e Metal.', bonuses: {}, elementBonus: { elements: ['WATER', 'METAL'], percent: 0.20 } },
-  { id: 'brasao_pureza',    name: 'Brasão da Pureza',    slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Pureza. Aumenta em 20% todos os status de Digimon do tipo Planta.',          bonuses: {}, elementBonus: { elements: ['PLANT'],          percent: 0.20 } },
-  { id: 'brasao_amor',      name: 'Brasão do Amor',      slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão do Amor. Aumenta em 15% todos os status de Digimon do tipo Fogo e Vento.',     bonuses: {}, elementBonus: { elements: ['FIRE', 'WIND'],   percent: 0.15 } },
-  { id: 'brasao_luz',           name: 'Brasão da Luz',           slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão da Luz. Aumenta em 15% todos os status de Digimon do tipo Luz e Trevas.',           bonuses: {}, elementBonus: { elements: ['LIGHT', 'DARK'],        percent: 0.15 } },
-  { id: 'brasao_conhecimento',  name: 'Brasão do Conhecimento',  slot: 'brasao', rarity: 'LEGENDARY', description: 'O Brasão do Conhecimento. Aumenta em 15% todos os status de Digimon do tipo Trovão e Planta.', bonuses: {}, elementBonus: { elements: ['LIGHTNING', 'PLANT'], percent: 0.15 } },
-  { id: 'digivice_d2',    name: 'Digivice D-2',       slot: 'digivice', rarity: 'EPIC',      description: 'Recompensa por derrotar GulusGammamon. Aumenta em 20% o XP do Jogador.', bonuses: {}, tamerXpBonusPercent: 0.20 },
-  { id: 'digivice_d3',    name: 'Digivice Quebrado',  slot: 'digivice', rarity: 'COMMON',    description: 'Digivice danificado, mas ainda funcional. Potencializa levemente o espírito do parceiro.',             bonuses: { spt: 6 } },
-  { id: 'pulseira_forca', name: 'Pulseira de Força',  slot: 'pulseira', rarity: 'COMMON',    description: 'Amplifica a força bruta do Digimon parceiro.',                      bonuses: { atk: 7 } },
-  { id: 'pulseira_ouro',  name: 'Pulseira Dourada',   slot: 'pulseira', rarity: 'RARE',      description: 'Pulseira lendária que amplifica múltiplos atributos de batalha.',   bonuses: { atk: 10, spt: 8 } },
-  { id: 'oculos_escuro_fitado', name: 'Óculos Escuro Fitado', slot: 'oculos', rarity: 'RARE', description: 'Recompensa do Trono do Caos. Aumenta em 1% a DEF do Digimon e +10% ao XP Tamer.', bonuses: {}, percentBonuses: { def: 0.01 }, tamerXpBonusPercent: 0.10 },
-  { id: 'oculos_scanner', name: 'Óculos de Scanner',  slot: 'oculos',   rarity: 'COMMON',    description: 'Analisa inimigos em tempo real. Aumenta o MP do parceiro.',         bonuses: { mp: 8 } },
+  { id: 'blusa_tamer',    name: 'Camiseta de Tamer',  slot: 'blusa',    rarity: 'ROOKIE',    description: 'Camiseta padrão dos Tamers. Aumenta o ataque do parceiro.',          bonuses: { atk: 5 } },
+  { id: 'calca_treino',   name: 'Calça de Treino',    slot: 'calca',    rarity: 'ROOKIE',    description: 'Calça confortável para treinamento. Aumenta a defesa.',              bonuses: { def: 5 } },
+  { id: 'sapato_tenis',   name: 'Tênis de Corrida',   slot: 'sapato',   rarity: 'ROOKIE',    description: 'Leve e rápido. Aumenta a velocidade do parceiro.',                  bonuses: { spd: 6 } },
+  { id: 'brasao_digital',  name: 'Brasão Digital',      slot: 'brasao',   rarity: 'ROOKIE',    description: 'Símbolo de um Tamer legítimo. Aumenta o HP do parceiro.',                           bonuses: { hp: 15 } },
+  { id: 'brasao_coragem',   name: 'Brasão da Coragem',   slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Coragem de Tai. Aumenta em 20% todos os status de Digimon do tipo Fogo.',                          bonuses: {}, elementBonus: { elements: ['FIRE'],          percent: 0.20 } },
+  { id: 'brasao_esperanca', name: 'Brasão da Esperança', slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Esperança de TK. Aumenta em 20% todos os status de Digimon do tipo Luz.',                           bonuses: {}, elementBonus: { elements: ['LIGHT'],         percent: 0.20 } },
+  { id: 'brasao_amizade',   name: 'Brasão da Amizade',   slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Amizade de Matt. Aumenta em 20% todos os status de Digimon do tipo Água e Gelo.', bonuses: {}, elementBonus: { elements: ['WATER', 'ICE'], percent: 0.20 } },
+  { id: 'brasao_confianca', name: 'Brasão da Confiança', slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Confiança. Aumenta em 20% todos os status de Digimon do tipo Água e Metal.', bonuses: {}, elementBonus: { elements: ['WATER', 'METAL'], percent: 0.20 } },
+  { id: 'brasao_pureza',    name: 'Brasão da Pureza',    slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Pureza. Aumenta em 20% todos os status de Digimon do tipo Planta.',          bonuses: {}, elementBonus: { elements: ['PLANT'],          percent: 0.20 } },
+  { id: 'brasao_amor',      name: 'Brasão do Amor',      slot: 'brasao', rarity: 'MEGA', description: 'O Brasão do Amor. Aumenta em 15% todos os status de Digimon do tipo Fogo e Vento.',     bonuses: {}, elementBonus: { elements: ['FIRE', 'WIND'],   percent: 0.15 } },
+  { id: 'brasao_luz',           name: 'Brasão da Luz',           slot: 'brasao', rarity: 'MEGA', description: 'O Brasão da Luz. Aumenta em 15% todos os status de Digimon do tipo Luz e Trevas.',           bonuses: {}, elementBonus: { elements: ['LIGHT', 'DARK'],        percent: 0.15 } },
+  { id: 'brasao_conhecimento',  name: 'Brasão do Conhecimento',  slot: 'brasao', rarity: 'MEGA', description: 'O Brasão do Conhecimento. Aumenta em 15% todos os status de Digimon do tipo Trovão e Planta.', bonuses: {}, elementBonus: { elements: ['LIGHTNING', 'PLANT'], percent: 0.15 } },
+  { id: 'digivice_d2',    name: 'Digivice D-2',       slot: 'digivice', rarity: 'ULTIMATE',      description: 'Recompensa por derrotar GulusGammamon. Aumenta em 20% o XP do Jogador.', bonuses: {}, tamerXpBonusPercent: 0.20 },
+  { id: 'digivice_d3',    name: 'Digivice Quebrado',  slot: 'digivice', rarity: 'ROOKIE',    description: 'Digivice danificado, mas ainda funcional. Potencializa levemente o espírito do parceiro.',             bonuses: { spt: 6 } },
+  { id: 'pulseira_forca', name: 'Pulseira de Força',  slot: 'pulseira', rarity: 'ROOKIE',    description: 'Amplifica a força bruta do Digimon parceiro.',                      bonuses: { atk: 7 } },
+  { id: 'pulseira_ouro',  name: 'Pulseira Dourada',   slot: 'pulseira', rarity: 'CHAMPION',      description: 'Pulseira lendária que amplifica múltiplos atributos de batalha.',   bonuses: { atk: 10, spt: 8 } },
+  { id: 'oculos_escuro_fitado', name: 'Óculos Escuro Fitado', slot: 'oculos', rarity: 'CHAMPION', description: 'Recompensa do Trono do Caos. Aumenta em 1% a DEF do Digimon e +10% ao XP Tamer.', bonuses: {}, percentBonuses: { def: 0.01 }, tamerXpBonusPercent: 0.10 },
+  { id: 'oculos_scanner', name: 'Óculos de Scanner',  slot: 'oculos',   rarity: 'ROOKIE',    description: 'Analisa inimigos em tempo real. Aumenta o MP do parceiro.',         bonuses: { mp: 8 } },
   // ── Artesanal (crafted from sewing materials) ─────────────────────────────
   // ── Costura Premium (multi-material crafts) ───────────────────────────────
-  { id: 'blusa_social',      name: 'Blusa Social',       slot: 'blusa',  rarity: 'RARE', description: 'Blusa social costurada com materiais premium. Aumenta em 2% o ATK e HP do Digimon.', bonuses: {}, percentBonuses: { atk: 0.02, hp: 0.02 } },
-  { id: 'bermuda_poliester', name: 'Bermuda de Poliéster', slot: 'calca', rarity: 'RARE', description: 'Bermuda leve de poliéster digital. Aumenta em 3% a DEF do Digimon.', bonuses: {}, percentBonuses: { def: 0.03 } },
-  { id: 'tenis_corrida',     name: 'Tênis de Corrida',   slot: 'sapato', rarity: 'RARE', description: 'Tênis aerodinâmico de corrida. Aumenta em 3% a SPD do Digimon.',                    bonuses: {}, percentBonuses: { spd: 0.03 } },
+  { id: 'blusa_social',      name: 'Blusa Social',       slot: 'blusa',  rarity: 'CHAMPION', description: 'Blusa social costurada com materiais premium. Aumenta em 2% o ATK e HP do Digimon.', bonuses: {}, percentBonuses: { atk: 0.02, hp: 0.02 } },
+  { id: 'bermuda_poliester', name: 'Bermuda de Poliéster', slot: 'calca', rarity: 'CHAMPION', description: 'Bermuda leve de poliéster digital. Aumenta em 3% a DEF do Digimon.', bonuses: {}, percentBonuses: { def: 0.03 } },
+  { id: 'tenis_corrida',     name: 'Tênis de Corrida',   slot: 'sapato', rarity: 'CHAMPION', description: 'Tênis aerodinâmico de corrida. Aumenta em 3% a SPD do Digimon.',                    bonuses: {}, percentBonuses: { spd: 0.03 } },
 ];
 
 export const EQUIP_SLOTS_ORDER: EquipSlot[] = ['blusa', 'calca', 'sapato', 'brasao', 'digivice', 'pulseira', 'oculos'];
@@ -2149,18 +2148,18 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 0,
     resultItemId: 'anel_sagrado',
     resultItemName: 'Anel Sagrado ✨',
-    resultRarity: 'EPIC',
+    resultRarity: 'ULTIMATE',
   },
-  // ── Pena Taikyoku: 4 Guardiões Celestiais ─────────────────────────────────
+  // ── fragmento corrompido: 4 Guardiões Celestiais ─────────────────────────────────
   {
-    pieceId: 'piece_taikyoku_feather',
-    pieceName: 'Estilhaço Corrompido',
-    pieceDescription: 'Obtido sacrificando um dos 4 Guardiões Celestiais (Zhuqiaomon, Baihumon, Azulongmon ou Ebonwumon) ou do próprio Huanglongmon. Junte 4 para formar o Fragmento Corrompido.',
+    pieceId: 'piece_fragmento_corrompido',
+    pieceName: 'Fragmento Corrompido',
+    pieceDescription: 'Obtido sacrificando um dos 4 Guardiões Celestiais (Zhuqiaomon, Baihumon, Azulongmon ou Ebonwumon) ou do próprio Huanglongmon. Junte 10 para formar o Fragmento Corrompido.',
     pieceIcon: 'feather',
     pieceColor: '#a855f7',
-    requiredCount: 4,
+    requiredCount: 10,
     bitsCost: 0,
-    resultItemId: 'taikyoku_feather',
+    resultItemId: 'fragmento_corrompido',
     resultItemName: 'Fragmento Corrompido',
     resultRarity: 'BURST',
   },
@@ -2175,7 +2174,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 0,
     resultItemId: 'gehenna',
     resultItemName: 'Gehenna 🌑',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   // ── Chip Forest drops: piece_coragem ──────────────────────────────────────
   // ── Dungeon Gulus drop: piece_brasao_coragem ─────────────────────────────
@@ -2189,7 +2188,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_coragem',
     resultItemName: 'Brasão da Coragem',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_esperanca',
@@ -2201,7 +2200,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_esperanca',
     resultItemName: 'Brasão da Esperança',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_amizade',
@@ -2213,7 +2212,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_amizade',
     resultItemName: 'Brasão da Amizade',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_confianca',
@@ -2225,7 +2224,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_confianca',
     resultItemName: 'Brasão da Confiança',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_pureza',
@@ -2237,7 +2236,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_pureza',
     resultItemName: 'Brasão da Pureza',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_conhecimento',
@@ -2249,7 +2248,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_conhecimento',
     resultItemName: 'Brasão do Conhecimento',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_luz',
@@ -2261,7 +2260,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_luz',
     resultItemName: 'Brasão da Luz',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   {
     pieceId: 'piece_brasao_amor',
@@ -2273,7 +2272,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 50000,
     resultItemId: 'brasao_amor',
     resultItemName: 'Brasão do Amor',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
   // ── Acess Glacier drops: piece_gelo ──────────────────────────────────────
   // ── Costura Premium: multi-material recipes ──────────────────────────────
@@ -2292,7 +2291,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 10000,
     resultItemId: 'blusa_social',
     resultItemName: 'Blusa Social',
-    resultRarity: 'RARE',
+    resultRarity: 'CHAMPION',
   },
   {
     pieceId: 'piece_tecido',
@@ -2309,7 +2308,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 10000,
     resultItemId: 'bermuda_poliester',
     resultItemName: 'Bermuda de Poliéster',
-    resultRarity: 'RARE',
+    resultRarity: 'CHAMPION',
   },
   {
     pieceId: 'piece_tecido',
@@ -2326,7 +2325,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 10000,
     resultItemId: 'tenis_corrida',
     resultItemName: 'Tênis de Corrida',
-    resultRarity: 'RARE',
+    resultRarity: 'CHAMPION',
   },
   // ── Conjunto dos Espíritos Lendários: 8 espíritos não-fogo → Susanoomon ─────
   {
@@ -2362,7 +2361,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 500,
     resultItemId: 'pulseira_ouro',
     resultItemName: 'Pulseira Dourada',
-    resultRarity: 'RARE',
+    resultRarity: 'CHAMPION',
   },
   // ── Black Digitron: Dungeon Gulus drop ────────────────────────────────────
   {
@@ -2375,7 +2374,7 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     bitsCost: 0,
     resultItemId: 'black_digitron',
     resultItemName: 'Black Digitron 🖤',
-    resultRarity: 'LEGENDARY',
+    resultRarity: 'MEGA',
   },
 ];
 

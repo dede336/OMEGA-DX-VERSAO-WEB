@@ -89,7 +89,7 @@ const BASE_NAME_MAP = buildBaseNameMap();
 // so "BlackWarGreymon" → "blackwargreymon" matches key "blackWarGreymon"
 const _normKey = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 const VARIANT_LEVEL_BY_RARITY: Partial<Record<Character['rarity'], number>> = {
-  COMMON: 15, RARE: 25, EPIC: 45, LEGENDARY: 60, ULTRA: 70, BURST: 70,
+  ROOKIE: 15, CHAMPION: 25, ULTIMATE: 45, MEGA: 60, ULTRA: 70, BURST: 70,
 };
 
 // A trailing X is an X-Antibody form only when the catalogue also contains
@@ -128,10 +128,10 @@ function applyVariantEvolutionRules(chars: CustomDigimonRaw[]): CustomDigimonRaw
 const LUCEMON_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   puttimon: 'BABY',
   cupimon: 'TRAINING',
-  lucemon: 'COMMON',
-  lucemonchaosmode: 'EPIC',
-  lucemonsatanmode: 'LEGENDARY',
-  lucemonlarvamode: 'LEGENDARY',
+  lucemon: 'ROOKIE',
+  lucemonchaosmode: 'ULTIMATE',
+  lucemonsatanmode: 'MEGA',
+  lucemonlarvamode: 'MEGA',
 };
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
@@ -161,12 +161,9 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     if (name === 'lucemon') {
       return {
         ...c,
-        rarity: 'COMMON',
+        rarity: 'ROOKIE',
         ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
       };
-    }
-    if (name === 'arcturiusmon') {
-      return { ...c, rarity: 'LEGENDARY' };
     }
     const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name];
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
@@ -214,7 +211,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   }
 
   // Build farm evolution map: BABY→TRAINING, TRAINING→ROOKIE
-  const PRE_CHAIN = new Set(['BABY', 'TRAINING', 'COMMON']);
+  const PRE_CHAIN = new Set(['BABY', 'TRAINING', 'ROOKIE']);
   for (const c of chars) {
     if (c.evolvesFromId && PRE_CHAIN.has(c.rarity)) {
       const fromChar = chars.find((x) => x.id === c.evolvesFromId);
@@ -343,74 +340,6 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         EXTRA_ALTERNATE_EVOLUTIONS[sacrificeId] = { evolvesTo: targetId, requiredLevel: c.requiredLevel ?? 1, label: c.name, requiredSacrificeCharacter: fromName };
       }
     }
-  }
-
-  // Keep the Gammamon dark branch authoritative even when the API returns stale or
-  // incomplete parent relationships. These IDs are resolved by name because custom
-  // records can receive different database IDs between environments.
-  const findCustomByName = (name: string) =>
-    chars.find((c) => _normKey(c.name ?? '') === _normKey(name));
-
-  // Prefer the bundled/canonical ID when a custom DB record has the same
-  // name. The Gammamon line is present in both sources, and using the custom
-  // ID here makes the evolution tree render a stale duplicate (for example
-  // custom_1324) instead of the canonical GulusGammamon entry.
-  const canonicalIdForName = (name: string, fallbackId: string): string =>
-    BASE_NAME_MAP[name.toLowerCase()] ?? fallbackId;
-
-  // A mesma linha pode ter registros antigos duplicados no banco. Se apenas o
-  // registro atualmente encontrado for corrigido, um pai antigo ainda pode
-  // reintroduzir um custom_* (por exemplo custom_1324) entre Gulus e Regulus.
-  // Limpe todos os IDs equivalentes antes de registrar a linha canônica.
-  const evolutionIdsForName = (name: string): string[] => {
-    const normalized = _normKey(name);
-    const ids = chars
-      .filter((c) => _normKey(c.name ?? '') === normalized)
-      .map((c) => c.id);
-    const baseId = BASE_NAME_MAP[normalized];
-    if (baseId) ids.push(baseId);
-    return [...new Set(ids)];
-  };
-  const clearEvolutionParents = (name: string) => {
-    for (const id of evolutionIdsForName(name)) {
-      delete EVOLUTIONS[id];
-      delete ALTERNATE_EVOLUTIONS[id];
-      delete EXTRA_ALTERNATE_EVOLUTIONS[id];
-    }
-  };
-
-  const gammamonLine = {
-    gammamon: findCustomByName('Gammamon'),
-    gulus: findCustomByName('GulusGammamon'),
-    regulus: findCustomByName('Regulusmon'),
-    arcturius: findCustomByName('Arcturiusmon'),
-  };
-  if (gammamonLine.gammamon && gammamonLine.gulus && gammamonLine.regulus && gammamonLine.arcturius) {
-    const gammamonId = canonicalIdForName('Gammamon', gammamonLine.gammamon.id);
-    const gulusId = canonicalIdForName('GulusGammamon', gammamonLine.gulus.id);
-    const regulusId = canonicalIdForName('Regulusmon', gammamonLine.regulus.id);
-    const arcturiusId = canonicalIdForName('Arcturiusmon', gammamonLine.arcturius.id);
-
-    clearEvolutionParents('GulusGammamon');
-    clearEvolutionParents('Regulusmon');
-
-    ALTERNATE_EVOLUTIONS[gammamonId] = {
-      evolvesTo: gulusId,
-      requiredLevel: 20,
-      label: gammamonLine.gulus.name,
-      requiredItem: 'black_digitron',
-    };
-    delete EXTRA_ALTERNATE_EVOLUTIONS[gammamonId];
-    EVOLUTIONS[gulusId] = {
-      evolvesTo: regulusId,
-      requiredLevel: 40,
-      label: gammamonLine.regulus.name,
-    };
-    EVOLUTIONS[regulusId] = {
-      evolvesTo: arcturiusId,
-      requiredLevel: 60,
-      label: gammamonLine.arcturius.name,
-    };
   }
 
   // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
