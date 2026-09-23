@@ -177,7 +177,9 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
   const imgSize  = big ? 90  : 64;
 
   const isNonDigimon = reward.tipo === 'ITEM' || reward.tipo === 'FRAGMENTO';
-  const isEgg = char?.rarity === 'EGG';
+  const isSpecialDigitama = reward.characterId === 'custom_1550'
+    || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+  const isEgg = char?.rarity === 'EGG' || isSpecialDigitama;
   const displayName  = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
   const tipoEmoji    = reward.tipo ? TIPO_EMOJI[reward.tipo] : '🦖';
 
@@ -198,7 +200,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
     ]}>
       <View style={[styles.rewardGlow, { backgroundColor: rarColor + '33' }]} />
       {isEgg && !isNonDigimon ? (
-        <AnimatedEgg characterId={reward.characterId} element={char?.element ?? 'NULL'} size={imgSize} />
+        <AnimatedEgg characterId={reward.characterId} element={isSpecialDigitama ? 'SPECIAL' : (char?.element ?? 'NULL')} size={imgSize} />
       ) : img && !isNonDigimon ? (
         <Image source={img} style={{ width: imgSize, height: imgSize }} resizeMode="contain" />
       ) : (
