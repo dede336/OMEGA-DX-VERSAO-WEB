@@ -12,9 +12,9 @@ import { CHARACTERS, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
 import {
   getCharacterImageSource,
   getCharacterImageSourceByName,
+  getKnownCharacterName,
   getCharacter,
   findCharacterIdByName,
-  getKnownCharacterName,
 } from '@/constants/extendedCharacters';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -22,9 +22,10 @@ import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 
 const GACHA_MACHINE_IMG = require('../../assets/images/gacha-machine.webp');
-const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
-const GACHA_ANIME_IMG = require('../../assets/images/gacha-anime.webp');
-const BUBBLE_IMG = require('../../assets/images/bubble.webp');
+const GEM_ICON_IMG      = require('../../assets/images/diamante.gif');
+const GACHA_ANIME_IMG   = require('../../assets/images/gacha-anime.webp');
+const BUBBLE_IMG        = require('../../assets/images/bubble.webp');
+const FUSION_RAINBOW_CORE = require('../../assets/images/fusion_rainbow_core.png');
 
 const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: string; glow: string }> = {
   Rookie:   { color: '#6b7280', label: 'Rookie',   glow: '#6b728044' },
@@ -34,7 +35,10 @@ const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: s
 
 const TIPO_EMOJI: Record<string, string> = { ITEM: '⚔️', FRAGMENTO: '🔮', DIGIMON: '🦖' };
 
-function getGachaImageSource(characterId: string, configuredName?: string): any {
+function getGachaImageSource(characterId: string, configuredName?: string, tipo?: GachaReward['tipo']): any {
+  if (tipo === 'ITEM' || tipo === 'FRAGMENTO') {
+    return EQUIP_ITEM_IMAGES[characterId] ?? null;
+  }
   return getCharacterImageSource(characterId)
     ?? getCharacterImageSourceByName(getKnownCharacterName(characterId) ?? configuredName ?? '');
 }
@@ -44,6 +48,53 @@ function getGachaDisplayName(characterId: string, configuredName?: string, fallb
   return cleanName && !/^custom_\d+$/.test(cleanName)
     ? configuredName!
     : getKnownCharacterName(characterId) ?? fallback ?? characterId;
+}
+
+function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(0.25)).current;
+  const isSpecialDigitama = reward.characterId === 'custom_1550'
+    || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+
+  useEffect(() => {
+    const rotateLoop = Animated.loop(
+      Animated.timing(rotateAnim, { toValue: 1, duration: 7000, easing: Easing.linear, useNativeDriver: true })
+    );
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 0.9, duration: 1400, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.25, duration: 1400, useNativeDriver: true }),
+      ])
+    );
+    rotateLoop.start();
+    pulseLoop.start();
+    return () => { rotateLoop.stop(); pulseLoop.stop(); };
+  }, []);
+
+  if (reward.raridade === 'Rookie') return null;
+
+  const rotate = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const isRainbow = isSpecialDigitama;
+  const glowColor = reward.raridade === 'Champion' ? '#facc15' : '#38bdf8';
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        width: size * 1.45,
+        height: size * 1.45,
+        borderRadius: size,
+        opacity: pulseAnim,
+        backgroundColor: isRainbow ? 'transparent' : glowColor,
+        transform: [{ rotate }],
+      }}
+    >
+      {isRainbow && (
+        <Image source={FUSION_RAINBOW_CORE} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+      )}
+    </Animated.View>
+  );
 }
 
 // ── Bubble animation items (Champions e Especiais do pool padrão) ──
@@ -80,7 +131,7 @@ function GachaBubble({ item, opacity }: { item: typeof BUBBLE_ITEMS[0]; opacity:
     : item.characterId;
   const img = item.isItem
     ? (EQUIP_ITEM_IMAGES[item.characterId] ?? null)
-    : getGachaImageSource(resolvedCharacterId, item.nome);
+    : getCharacterImageSource(resolvedCharacterId);
 
   return (
     <Animated.View style={{ opacity, transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
@@ -114,13 +165,15 @@ function SpinningResultBubble({ reward }: { reward: GachaReward | null }) {
 
   const isSpecialDigitama = reward?.characterId === 'custom_1550'
     || reward?.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
-  const img = reward && !isSpecialDigitama ? getGachaImageSource(reward.characterId, reward.nome) : null;
+  const img = reward && !isSpecialDigitama
+    ? getGachaImageSource(reward.characterId, reward.nome, reward.tipo)
+    : null;
 
   return (
     <Animated.View style={{ transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
       <View style={styles.pullBubbleContainer}>
-        {isSpecialDigitama ? (
-          <AnimatedEgg characterId={reward!.characterId} element="SPECIAL" size={70} />
+        {isSpecialDigitama && reward ? (
+          <AnimatedEgg characterId={reward.characterId} element="SPECIAL" size={70} />
         ) : img ? (
           <Image source={img} style={styles.pullBubblePrize} resizeMode="contain" />
         ) : null}
@@ -175,47 +228,32 @@ function GachaBubbleColumn() {
 function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolean }) {
   const colors = useColors();
   const char = getCharacter(reward.characterId) ?? CHARACTERS[reward.characterId];
-  const cfg = RARIDADE_CONFIG[reward.raridade];
-  const img = getGachaImageSource(reward.characterId, reward.nome);
-  const rarColor = char ? RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] ?? cfg.color : cfg.color;
-
+  const img = getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
   const cardSize = big ? 150 : 110;
-  const imgSize  = big ? 90  : 64;
-
-  const isNonDigimon = reward.tipo === 'ITEM' || reward.tipo === 'FRAGMENTO';
+  const imgSize = big ? 90 : 64;
   const isSpecialDigitama = reward.characterId === 'custom_1550'
     || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
   const isEgg = char?.rarity === 'EGG' || isSpecialDigitama;
-  const displayName  = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
-  const tipoEmoji    = reward.tipo ? TIPO_EMOJI[reward.tipo] : '🦖';
+  const displayName = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
+  const tipoEmoji = reward.tipo ? TIPO_EMOJI[reward.tipo] : '🦖';
 
   return (
-    <View style={[
-      styles.rewardCard,
-      {
-        backgroundColor: colors.card,
-        borderColor: rarColor,
-        width: cardSize,
-        shadowColor: rarColor,
-        shadowOpacity: 0.5,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 0 },
-        elevation: 6,
-      },
-      pixelStyle,
-    ]}>
-      <View style={[styles.rewardGlow, { backgroundColor: rarColor + '33' }]} />
-      {isEgg && !isNonDigimon ? (
-        <AnimatedEgg characterId={reward.characterId} element={isSpecialDigitama ? 'SPECIAL' : (char?.element ?? 'NULL')} size={imgSize} />
-      ) : img && !isNonDigimon ? (
-        <Image source={img} style={{ width: imgSize, height: imgSize }} resizeMode="contain" />
-      ) : (
-        <View style={[styles.rewardImgPlaceholder, { backgroundColor: cfg.glow, width: imgSize, height: imgSize }]}>
-          <Text style={{ fontSize: big ? 38 : 28 }}>{tipoEmoji}</Text>
-        </View>
-      )}
-      <View style={[styles.rarBadge, { backgroundColor: rarColor + '33', borderColor: rarColor }]}>
-        <Text style={[styles.rarBadgeText, { color: rarColor }]}>{cfg.label}</Text>
+    <View style={[styles.rewardCard, {
+      backgroundColor: colors.card,
+      borderColor: colors.border,
+      width: cardSize,
+    }, pixelStyle]}>
+      <View style={{ width: imgSize * 1.5, height: imgSize * 1.5, alignItems: 'center', justifyContent: 'center' }}>
+        <RewardEffect reward={reward} size={imgSize} />
+        {isEgg && reward.tipo !== 'ITEM' && reward.tipo !== 'FRAGMENTO' ? (
+          <AnimatedEgg characterId={reward.characterId} element={isSpecialDigitama ? 'SPECIAL' : (char?.element ?? 'NULL')} size={imgSize} />
+        ) : img ? (
+          <Image source={img} style={{ width: imgSize, height: imgSize }} resizeMode="contain" />
+        ) : (
+          <View style={[styles.rewardImgPlaceholder, { width: imgSize, height: imgSize }]}>
+            <Text style={{ fontSize: big ? 38 : 28 }}>{tipoEmoji}</Text>
+          </View>
+        )}
       </View>
       <Text style={[styles.rewardName, { color: colors.foreground, fontSize: big ? 13 : 11 }]} numberOfLines={2}>
         {displayName}
@@ -256,7 +294,7 @@ function ResultModal({
   const temResultado = resultado && resultado.length > 0;
   const temRaro = resultado?.some((r) => r.raridade === 'Champion');
   const temEspecial = resultado?.some((r) => r.raridade === 'Especial');
-  const headerColor = temRaro ? '#f59e0b' : temEspecial ? '#8b5cf6' : '#6b7280';
+  const headerColor = temRaro ? '#f59e0b' : temEspecial ? '#38bdf8' : colors.foreground;
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
@@ -270,7 +308,7 @@ function ResultModal({
           {/* Header */}
           <View style={[styles.resultHeader, { borderBottomColor: colors.border }]}>
             <Text style={[styles.resultTitle, { color: headerColor }]}>
-              {temResultado ? (temRaro ? '🌟 CHAMPION OBTIDO!' : '✨ Resultado do Sorteio') : '❌ Sorteio falhou'}
+              {temResultado ? '✨ Resultado do Sorteio' : '❌ Sorteio falhou'}
             </Text>
             <Text style={[styles.resultMsg, { color: colors.mutedForeground }]}>{mensagem}</Text>
           </View>
@@ -297,7 +335,7 @@ function ResultModal({
               <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>
                 🛡️ Pity: <Text style={{ fontWeight: '800', color: pityAtual >= 40 ? '#f59e0b' : colors.foreground }}>{pityAtual}/50</Text>
                 {'  '}
-                <Text style={{ color: colors.mutedForeground }}>({50 - pityAtual} tiros p/ Champion garantido)</Text>
+                <Text style={{ color: colors.mutedForeground }}>({50 - pityAtual} tiros para prêmio garantido)</Text>
               </Text>
             </View>
           )}
@@ -456,10 +494,8 @@ export default function GachaScreen() {
 
   // Build destaque display data from admin pool
   const destaqueChar = destaqueRaro?.characterId ? (getCharacter(destaqueRaro.characterId) ?? CHARACTERS[destaqueRaro.characterId]) : null;
-  const destaqueImg  = destaqueRaro?.characterId ? getGachaImageSource(destaqueRaro.characterId, destaqueRaro.nome) : null;
-  const destaqueNome = destaqueRaro?.characterId
-    ? getGachaDisplayName(destaqueRaro.characterId, destaqueRaro.nome, destaqueChar?.name)
-    : null;
+  const destaqueImg  = destaqueRaro?.characterId ? getCharacterImageSource(destaqueRaro.characterId) : null;
+  const destaqueNome = destaqueRaro?.nome ?? destaqueChar?.name ?? null;
   const destaqueIsDigimon = destaqueRaro?.tipo === 'DIGIMON';
   const destaqueIsEgg = destaqueChar?.rarity === 'EGG';
   const destaqueEmoji = destaqueRaro?.tipo ? TIPO_EMOJI[destaqueRaro.tipo] : null;
