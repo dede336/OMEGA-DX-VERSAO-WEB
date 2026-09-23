@@ -9,7 +9,7 @@ import {
   PRE_ROOKIE_STAGE_RARITIES,
   EquipItem, GameMap,
 } from '@/constants/gameData';
-import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName } from '@/constants/extendedCharacters';
+import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';
@@ -850,14 +850,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     // Build pool: use admin-configured pool if available, else fall back to curated default pool
     let pool: GachaReward[];
     if (adminPool && adminPool.length > 0) {
-      pool = adminPool.map((entry) => ({
-        characterId: entry.tipo === 'DIGIMON' && entry.nome
-          ? (findCharacterIdByName(entry.nome.replace(/^✨\s*/, '')) ?? entry.characterId ?? entry.id)
-          : (entry.characterId ?? entry.id),
-        raridade: entry.raridade,
-        nome: entry.nome,
-        tipo: entry.tipo,
-      }));
+      pool = adminPool.map((entry) => {
+        const storedId = entry.characterId ?? entry.id;
+        const configuredName = entry.nome?.replace(/^✨\s*/, '');
+        const knownName = getKnownCharacterName(storedId);
+        const characterId = entry.tipo === 'DIGIMON' && configuredName
+          ? (findCharacterIdByName(configuredName) ?? storedId)
+          : storedId;
+        const normalizedName = entry.tipo === 'DIGIMON'
+          ? (knownName ?? (configuredName && !/^custom_\d+$/.test(configuredName) ? configuredName : undefined))
+          : entry.nome;
+
+        return {
+          characterId,
+          raridade: entry.raridade,
+          nome: normalizedName ?? entry.nome,
+          tipo: entry.tipo,
+        };
+      });
     } else {
       pool = [
         // Comum (10 slots)
