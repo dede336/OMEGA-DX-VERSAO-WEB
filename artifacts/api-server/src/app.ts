@@ -31,4 +31,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use("/api", router);
 
+// Keep API failures JSON even when a client calls an unknown endpoint. This
+// prevents the frontend from trying to parse an HTML fallback page as JSON.
+app.use("/api", (_req, res) => {
+  res.status(404).json({ error: "Rota da API não encontrada" });
+});
+
+app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error({ err }, "Unhandled API error");
+  res.status(500).json({ error: "Erro interno do servidor" });
+});
+
 export default app;

@@ -554,7 +554,7 @@ export default function CollectionScreen() {
                       >
                         <Feather name="arrow-up-circle" size={18} color="#6366f1" />
                         <Text style={[styles.evoRowText, { color: '#6366f1' }]}>
-                          Evoluir → {modalAlt2Evo.label}
+                          {t('collection.evolveBtn')} {modalAlt2Evo.label}
                         </Text>
                         <CharacterAvatar characterId={modalAlt2Evo.evolvesTo} size={32} />
                       </TouchableOpacity>

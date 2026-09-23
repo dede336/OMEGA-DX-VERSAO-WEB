@@ -45,7 +45,7 @@ export function useAuth() {
 }
 
 function buildApiUrl(): string {
-  const env = process.env.EXPO_PUBLIC_API_URL;
+  const env = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/+$/, '');
   if (env) return env;
   const domain = process.env.EXPO_PUBLIC_DOMAIN;
   if (domain) return `https://${domain}/api`;
@@ -55,6 +55,32 @@ function buildApiUrl(): string {
     if (host) return `https://${host}/api`;
   }
   return '/api';
+}
+
+type ApiResponse = {
+  error?: string;
+  [key: string]: unknown;
+};
+
+async function readApiResponse<T extends ApiResponse>(response: Response): Promise<T> {
+  const body = await response.text();
+  if (!body.trim()) return {} as T;
+
+  try {
+    return JSON.parse(body) as T;
+  } catch {
+    const contentType = response.headers.get('content-type') ?? '';
+    const isHtml = /html/i.test(contentType) || /^\s*</.test(body);
+
+    if (isHtml) {
+      throw new Error(
+        `O servidor da API retornou uma página HTML em vez de JSON (HTTP ${response.status}). ` +
+          'Verifique se EXPO_PUBLIC_API_URL aponta para o backend do OMEGA DX10.',
+      );
+    }
+
+    throw new Error(`O servidor da API retornou uma resposta inválida (HTTP ${response.status}).`);
+  }
 }
 
 const AUTH_TIMEOUT_MS = 15000;
@@ -90,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             AUTH_TIMEOUT_MS,
           );
           if (me.ok) {
-            const data = await me.json();
+            const data = await readApiResponse<AuthUser>(me);
             setToken(stored);
             setUser({
               id: data.id,
@@ -132,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return fetch(`${apiUrl.current}${path}`, {
       method: body ? 'POST' : 'GET',
       headers: {
+        Accept: 'application/json',
         'Content-Type': 'application/json',
         ...(tok ? { Authorization: `Bearer ${tok}` } : {}),
       },
@@ -141,7 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(usernameOrEmail: string, password: string) {
     const res = await apiFetch('/auth/login', undefined, { username: usernameOrEmail, password });
-    const data = await res.json();
+    const data = await readApiResponse<{ error?: string; token: string; user: AuthUser }>(res);
     if (!res.ok) throw new Error(data.error ?? 'Erro ao entrar');
     await AsyncStorage.setItem(AUTH_TOKEN_KEY, data.token);
     setToken(data.token);
@@ -157,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function register(username: string, password: string, email?: string) {
     const res = await apiFetch('/auth/register', undefined, { username, password, email: email || undefined });
-    const data = await res.json();
+    const data = await readApiResponse<{ error?: string; token: string; user: AuthUser }>(res);
     if (!res.ok) throw new Error(data.error ?? 'Erro ao criar conta');
     await AsyncStorage.setItem(AUTH_TOKEN_KEY, data.token);
     setToken(data.token);
@@ -173,7 +200,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function changePassword(currentPassword: string, newPassword: string) {
     const res = await apiFetch('/auth/change-password', token ?? undefined, { currentPassword, newPassword });
-    const data = await res.json();
+    const data = await readApiResponse<{ error?: string }>(res);
     if (!res.ok) throw new Error(data.error ?? 'Erro ao alterar a senha');
   }
 

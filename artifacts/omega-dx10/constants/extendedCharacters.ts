@@ -171,6 +171,29 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
 
   chars = applyVariantEvolutionRules(chars);
 
+  // Evolution requirements stored by the API may use display names while the
+  // collection stores canonical character IDs. Normalize both forms here so a
+  // sacrifice cannot be bypassed by a stale/custom catalog record.
+  const resolveEvolutionCharacterId = (value?: string): string | undefined => {
+    if (!value) return undefined;
+    if (CHARACTERS[value]) return value;
+    const normalized = _normKey(value);
+    const baseId = Object.entries(CHARACTERS).find(([, character]) => _normKey(character.name) === normalized)?.[0];
+    if (baseId) return baseId;
+    const custom = chars.find((character) => _normKey(character.name ?? '') === normalized);
+    return custom?.id ?? value;
+  };
+
+  chars = chars.map((c) => {
+    const isOmnimonFusion = _normKey(c.name ?? '') === 'omnimon' && c.isFusion;
+    return {
+      ...c,
+      requiredSacrificeCharacter: resolveEvolutionCharacterId(
+        c.requiredSacrificeCharacter ?? (isOmnimonFusion ? 'MetalGarurumon' : undefined),
+      ),
+    };
+  });
+
   _apiUrl = apiUrl;
   _rawCustomDigimons = chars;
   _customChars = {};
@@ -320,15 +343,9 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
       if (fc) { const baseId = fc.name ? BASE_NAME_MAP[fc.name.toLowerCase()] : undefined; if (baseId) fromId = baseId; }
     }
     const fromChar = chars.find((x) => x.id === c.evolvesFromId);
-    const fromName = fromChar?.name ?? c.evolvesFromId;
-
-    const sacrificeChar = chars.find((x) => x.name === c.requiredSacrificeCharacter);
-    if (!sacrificeChar) continue;
-    let sacrificeId: string = sacrificeChar.id;
-    if (sacrificeId.startsWith('custom_')) {
-      const baseId = BASE_NAME_MAP[sacrificeChar.name?.toLowerCase() ?? ''];
-      if (baseId) sacrificeId = baseId;
-    }
+    const fromName = resolveEvolutionCharacterId(fromChar?.name ?? fromId) ?? fromId;
+    const sacrificeId = resolveEvolutionCharacterId(c.requiredSacrificeCharacter);
+    if (!sacrificeId) continue;
 
     const ev = EVOLUTIONS[sacrificeId]?.evolvesTo;
     const av = ALTERNATE_EVOLUTIONS[sacrificeId]?.evolvesTo;

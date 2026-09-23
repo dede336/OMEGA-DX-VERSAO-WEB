@@ -215,7 +215,8 @@ const pt: TranslationMap = {
   // ── Collection (DigiBank) ──────────────────────────────────────────────────
   'collection.title': 'Digibank',
   'collection.finalForm': 'Este Digimon está na sua forma final.',
-  'collection.evolveFor': 'Evoluir para',
+  'collection.evolveFor': 'Digievoluir para',
+  'collection.evolveBtn': 'Digievoluir para',
   'collection.requiresItem': 'Requer',
   'collection.toEvolve': 'para evoluir',
   'collection.reachLevel': 'Alcance o Nível',
@@ -733,7 +734,8 @@ const en: TranslationMap = {
   // ── Collection ─────────────────────────────────────────────────────────────
   'collection.title': 'DigiBank',
   'collection.finalForm': 'This Digimon is in its final form.',
-  'collection.evolveFor': 'Evolve to',
+  'collection.evolveFor': 'Digivolve to',
+  'collection.evolveBtn': 'Digivolve to',
   'collection.requiresItem': 'Requires',
   'collection.toEvolve': 'to evolve',
   'collection.reachLevel': 'Reach Level',
@@ -1251,7 +1253,8 @@ const es: TranslationMap = {
   // ── Collection ─────────────────────────────────────────────────────────────
   'collection.title': 'DigiBank',
   'collection.finalForm': 'Este Digimon está en su forma final.',
-  'collection.evolveFor': 'Evolucionar a',
+  'collection.evolveFor': 'Digievolucionar a',
+  'collection.evolveBtn': 'Digievolucionar a',
   'collection.requiresItem': 'Requiere',
   'collection.toEvolve': 'para evolucionar',
   'collection.reachLevel': 'Alcanza el Nivel',
