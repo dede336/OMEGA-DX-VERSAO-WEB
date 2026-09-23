@@ -65,7 +65,7 @@ const STATIC_FRAGMENTS = Array.from(
 // ── Rarity helpers ───────────────────────────────────────────────────────────
 
 function rarityColor(r: string) {
-  const map: Record<string, string> = { COMMON: '#6b7280', RARE: '#3b82f6', EPIC: '#8b5cf6', LEGENDARY: '#f59e0b' };
+  const map: Record<string, string> = { ROOKIE: '#6b7280', CHAMPION: '#3b82f6', ULTIMATE: '#8b5cf6', MEGA: '#f59e0b' };
   return RARITY_COLORS[r as keyof typeof RARITY_COLORS] ?? map[r] ?? '#6b7280';
 }
 function rarityLabel(r: string) {
@@ -89,7 +89,7 @@ function ItemPicker({
 
   if (sel) {
     return (
-      <View style={[pk.selRow, { backgroundColor: colors.background, borderColor: rarityColor(sel.rarity ?? 'COMMON') }, pixelStyle]}>
+      <View style={[pk.selRow, { backgroundColor: colors.background, borderColor: rarityColor(sel.rarity ?? 'ROOKIE') }, pixelStyle]}>
         <View style={{ flex: 1 }}>
           <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>{sel.name}</Text>
           {sel.rarity && (
@@ -331,7 +331,7 @@ export default function SendSection() {
           <>
             <Text style={[ss.label, { color: colors.mutedForeground, marginTop: 8 }]}>Digimon</Text>
             {digimonId ? (
-              <View style={[pk.selRow, { backgroundColor: colors.background, borderColor: RARITY_COLORS[CHARACTERS[digimonId]?.rarity ?? 'COMMON'] ?? '#6b7280' }, pixelStyle]}>
+              <View style={[pk.selRow, { backgroundColor: colors.background, borderColor: RARITY_COLORS[CHARACTERS[digimonId]?.rarity ?? 'ROOKIE'] ?? '#6b7280' }, pixelStyle]}>
                 {getCharacterImageSource(digimonId) ? (
                   <Image source={getCharacterImageSource(digimonId)!} style={{ width: 28, height: 28 }} resizeMode="contain" />
                 ) : null}

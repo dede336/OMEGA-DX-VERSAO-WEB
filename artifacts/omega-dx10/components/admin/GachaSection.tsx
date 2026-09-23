@@ -19,7 +19,7 @@ const STATIC_EQUIP_ITEMS = EQUIPMENT_ITEMS.map((i) => ({
 
 // Extra crafted items that live in inventory
 const EXTRA_STATIC_ITEMS: { id: string; name: string; rarity: string; isStatic: true }[] = [
-  { id: 'anel_sagrado', name: 'Anel Sagrado ✨', rarity: 'LEGENDARY', isStatic: true },
+  { id: 'anel_sagrado', name: 'Anel Sagrado ✨', rarity: 'MEGA', isStatic: true },
 ];
 
 const ALL_STATIC_ITEMS = [
@@ -34,15 +34,15 @@ const STATIC_FRAGMENTS = Array.from(
 
 // Slot limits
 const SLOT_LIMITS: Record<GachaPoolEntry['raridade'], number | null> = {
-  Comum:    10,
+  Rookie:   10,
   Especial: 6,
-  Raro:     null, // dynamic — 1-5 chosen by admin
+  Champion: null, // dynamic — 1-5 chosen by admin
 };
 
 const RARITY_SLOTS: { key: GachaPoolEntry['raridade']; label: string; color: string; emoji: string }[] = [
-  { key: 'Comum',    label: 'Comum',    color: '#6b7280', emoji: '⚪' },
+  { key: 'Rookie',   label: 'Rookie',   color: '#6b7280', emoji: '⚪' },
   { key: 'Especial', label: 'Especial', color: '#8b5cf6', emoji: '🟣' },
-  { key: 'Raro',     label: 'Raro ✦',  color: '#f59e0b', emoji: '🌟' },
+  { key: 'Champion', label: 'Champion ✦', color: '#f59e0b', emoji: '🌟' },
 ];
 
 const TIPO_OPTIONS: { key: GachaPoolEntry['tipo']; label: string; emoji: string }[] = [
@@ -138,7 +138,7 @@ function AddItemModal({
         ...apiItems.filter((i) => i.type === 'equipment').map((i) => ({ id: i.id, name: i.name, rarity: i.rarity, isStatic: false })),
       ]
     : [
-        ...STATIC_FRAGMENTS.filter((i) => !apiFragNames.has(i.name.toLowerCase())).map((i) => ({ ...i, rarity: 'COMMON' })),
+        ...STATIC_FRAGMENTS.filter((i) => !apiFragNames.has(i.name.toLowerCase())).map((i) => ({ ...i, rarity: 'ROOKIE' })),
         ...apiItems.filter((i) => i.type === 'fragment').map((i) => ({ id: i.id, name: i.name, rarity: i.rarity, isStatic: false })),
       ];
 
@@ -159,14 +159,14 @@ function AddItemModal({
 
   function getItemRarityColor(rarity: string): string {
     const map: Record<string, string> = {
-      COMMON: '#6b7280', RARE: '#3b82f6', EPIC: '#8b5cf6', LEGENDARY: '#f59e0b',
+      ROOKIE: '#6b7280', CHAMPION: '#3b82f6', ULTIMATE: '#8b5cf6', MEGA: '#f59e0b',
     };
     return map[rarity] ?? '#6b7280';
   }
 
   function getItemRarityLabel(rarity: string): string {
     const map: Record<string, string> = {
-      COMMON: 'Comum', RARE: 'Raro', EPIC: 'Épico', LEGENDARY: 'Lendário',
+      ROOKIE: 'Rookie', CHAMPION: 'Champion', ULTIMATE: 'Ultimate', MEGA: 'Mega',
     };
     return map[rarity] ?? rarity;
   }
@@ -509,7 +509,7 @@ export default function GachaSection() {
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
   const [modalOpen, setModalOpen]   = useState(false);
-  const [addingTo, setAddingTo]     = useState<GachaPoolEntry['raridade']>('Comum');
+  const [addingTo, setAddingTo]     = useState<GachaPoolEntry['raridade']>('Rookie');
   const [gachaActive, setGachaActive] = useState(false);
   const [togglingActive, setTogglingActive] = useState(false);
 
@@ -558,7 +558,7 @@ export default function GachaSection() {
   }
 
   function handleAdd(entry: Omit<GachaPoolEntry, 'raridade'>) {
-    const limit = addingTo === 'Raro' ? raroMax : SLOT_LIMITS[addingTo] ?? 10;
+    const limit = addingTo === 'Champion' ? raroMax : SLOT_LIMITS[addingTo] ?? 10;
     const currentCount = pool.filter((e) => e.raridade === addingTo).length;
     if (currentCount >= limit) {
       Alert.alert('Slot cheio', `Máximo de ${limit} item(s) para ${addingTo}.`);
@@ -612,11 +612,11 @@ export default function GachaSection() {
       const next = Math.max(1, Math.min(5, prev + delta));
       if (next < prev) {
         setPool((p) => {
-          const raroEntries = p.filter((e) => e.raridade === 'Raro');
+          const raroEntries = p.filter((e) => e.raridade === 'Champion');
           const toKeep = raroEntries.slice(0, next).map((e) => e.id);
           let kept = 0;
           return p.filter((e) => {
-            if (e.raridade !== 'Raro') return true;
+            if (e.raridade !== 'Champion') return true;
             if (kept < next) { kept++; return true; }
             return false;
           });
@@ -627,16 +627,16 @@ export default function GachaSection() {
   }
 
   async function salvar() {
-    const comunCount = pool.filter((e) => e.raridade === 'Comum').length;
+    const comunCount = pool.filter((e) => e.raridade === 'Rookie').length;
     const espCount   = pool.filter((e) => e.raridade === 'Especial').length;
-    const raroCount  = pool.filter((e) => e.raridade === 'Raro').length;
+    const raroCount  = pool.filter((e) => e.raridade === 'Champion').length;
     if (comunCount < 10 || espCount < 6 || raroCount < raroMax) {
       Alert.alert(
         '⚠️ Pool incompleto',
         `Preencha todos os slots antes de salvar:\n\n` +
-        `⚪ Comum: ${comunCount}/10\n` +
+        `⚪ Rookie: ${comunCount}/10\n` +
         `🟣 Especial: ${espCount}/6\n` +
-        `🌟 Raro: ${raroCount}/${raroMax}`,
+        `🌟 Champion: ${raroCount}/${raroMax}`,
         [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Salvar mesmo assim', onPress: () => doSalvar() },
@@ -654,7 +654,7 @@ export default function GachaSection() {
       await fetch(`${apiUrl}/config/gacha_pool`, {
         method: 'PUT', headers, body: JSON.stringify({ value: payload }),
       });
-      Alert.alert('✅ Pool salvo!', `${pool.length} item(s) configurado(s).\n⚪ Comum: 10  🟣 Especial: 6  🌟 Raro: ${raroMax}`);
+      Alert.alert('✅ Pool salvo!', `${pool.length} item(s) configurado(s).\n⚪ Rookie: 10  🟣 Especial: 6  🌟 Champion: ${raroMax}`);
     } catch {
       Alert.alert('Erro', 'Falha ao salvar o pool do Gacha.');
     } finally {
@@ -671,9 +671,9 @@ export default function GachaSection() {
 
   if (loading) return <ActivityIndicator color="#8b5cf6" style={{ marginTop: 40 }} />;
 
-  const comunEntries = pool.filter((e) => e.raridade === 'Comum');
+  const comunEntries = pool.filter((e) => e.raridade === 'Rookie');
   const especEntries = pool.filter((e) => e.raridade === 'Especial');
-  const raroEntries  = pool.filter((e) => e.raridade === 'Raro');
+  const raroEntries  = pool.filter((e) => e.raridade === 'Champion');
   const totalFilled  = comunEntries.length + especEntries.length + raroEntries.length;
   const totalSlots   = 10 + 10 + raroMax;
 
@@ -718,13 +718,13 @@ export default function GachaSection() {
       <View style={[styles.headerCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.cardTitle, { color: colors.foreground }]}>🌌 Pool de Recompensas do Gacha</Text>
         <Text style={[styles.cardDesc, { color: colors.mutedForeground }]}>
-          Configure exatamente quais recompensas aparecem no Gacha. Comum tem 10 slots, Especial tem 6 slots; Raro tem de 1 a 5 slots.
+          Configure exatamente quais recompensas aparecem no Gacha. Rookie tem 10 slots, Especial tem 6 slots; Champion tem de 1 a 5 slots.
         </Text>
 
         <View style={styles.statRow}>
           <View style={[styles.statChip, { backgroundColor: '#6b728022', borderColor: '#6b728055' }]}>
             <Text style={{ color: '#6b7280', fontWeight: '800', fontSize: 14 }}>{comunEntries.length}/10</Text>
-            <Text style={{ color: '#6b7280', fontSize: 11 }}>⚪ Comum</Text>
+            <Text style={{ color: '#6b7280', fontSize: 11 }}>⚪ Rookie</Text>
           </View>
           <View style={[styles.statChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }]}>
             <Text style={{ color: '#8b5cf6', fontWeight: '800', fontSize: 14 }}>{especEntries.length}/6</Text>
@@ -732,7 +732,7 @@ export default function GachaSection() {
           </View>
           <View style={[styles.statChip, { backgroundColor: '#f59e0b22', borderColor: '#f59e0b55' }]}>
             <Text style={{ color: '#f59e0b', fontWeight: '800', fontSize: 14 }}>{raroEntries.length}/{raroMax}</Text>
-            <Text style={{ color: '#f59e0b', fontSize: 11 }}>🌟 Raro</Text>
+            <Text style={{ color: '#f59e0b', fontSize: 11 }}>🌟 Champion</Text>
           </View>
         </View>
 
@@ -750,10 +750,10 @@ export default function GachaSection() {
         </View>
       </View>
 
-      {/* Raro max selector */}
+      {/* Champion max selector */}
       <View style={[styles.raroPickerCard, { backgroundColor: '#f59e0b0A', borderColor: '#f59e0b55' }]}>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: '#f59e0b', fontWeight: '800', fontSize: 12 }}>🌟 Quantidade de slots Raro</Text>
+          <Text style={{ color: '#f59e0b', fontWeight: '800', fontSize: 12 }}>🌟 Quantidade de slots Champion</Text>
           <Text style={{ color: '#f59e0b99', fontSize: 12 }}>Escolha de 1 a 5 Digimons/Itens raros no pool</Text>
         </View>
         <View style={styles.stepper}>
@@ -805,8 +805,8 @@ export default function GachaSection() {
         slot={RARITY_SLOTS[0]}
         entries={comunEntries}
         maxEntries={10}
-        onAdd={() => openAdd('Comum')}
-        onRemove={(_, idx) => handleRemoveBySlot('Comum', idx)}
+        onAdd={() => openAdd('Rookie')}
+        onRemove={(_, idx) => handleRemoveBySlot('Rookie', idx)}
         apiUrl={apiUrl}
       />
       <SlotSection
@@ -821,8 +821,8 @@ export default function GachaSection() {
         slot={RARITY_SLOTS[2]}
         entries={raroEntries}
         maxEntries={raroMax}
-        onAdd={() => openAdd('Raro')}
-        onRemove={(_, idx) => handleRemoveBySlot('Raro', idx)}
+        onAdd={() => openAdd('Champion')}
+        onRemove={(_, idx) => handleRemoveBySlot('Champion', idx)}
         apiUrl={apiUrl}
       />
 

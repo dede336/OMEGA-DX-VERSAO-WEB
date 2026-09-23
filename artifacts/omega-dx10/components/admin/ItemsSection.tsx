@@ -39,7 +39,7 @@ interface ItemForm {
 
 const emptyItemForm = (): ItemForm => ({
   name: '', type: 'equipment', slot: 'blusa',
-  description: '', rarity: 'COMMON', howToObtain: 'drop',
+  description: '', rarity: 'ROOKIE', howToObtain: 'drop',
   hp: '0', mp: '0', atk: '0', def: '0', spt: '0', spd: '0',
   imageData: { base64: null, mimeType: 'image/png', previewUri: null },
 });

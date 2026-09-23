@@ -31,7 +31,7 @@ interface FormState {
 }
 
 const emptyForm = (): FormState => ({
-  name: '', attribute: 'VC', rarity: 'LEGENDARY', element: 'LIGHT',
+  name: '', attribute: 'VC', rarity: 'MEGA', element: 'LIGHT',
   hp: '', mp: '', atk: '', def: '', spt: '', spd: '',
   description: '', attackName: '', attackElement: '',
   spiritName: '', spiritElement: '',
