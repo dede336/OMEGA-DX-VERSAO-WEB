@@ -54,8 +54,8 @@ function buildReverseMap(): Record<string, string[]> {
   for (const [fromId, evolution] of Object.entries(HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS)) {
     addConnection(fromId, evolution.evolvesTo);
   }
-  for (const [fromId, fusion] of Object.entries(FUSIONS)) {
-    addConnection(fromId, fusion.resultId);
+  for (const [fromId, recipes] of Object.entries(FUSIONS)) {
+    for (const fusion of recipes) addConnection(fromId, fusion.resultId);
   }
 
   return rev;
@@ -86,9 +86,15 @@ function getConditionsForChild(parentId: string, childId: string): EvoConditions
   if (hc?.evolvesTo === childId) {
     return { fromId: parentId, requiredLevel: hc.requiredLevel, requiredItem: hc.requiredItem, requiredSacrificeCharacters: hc.requiredSacrificeCharacters };
   }
-  const fusion = FUSIONS[parentId];
-  if (fusion?.resultId === childId) {
-    return { fromId: parentId, requiredLevel: fusion.requiredLevel, requiredSacrificeCharacter: fusion.partner };
+  const fusion = (FUSIONS[parentId] ?? []).find((recipe) => recipe.resultId === childId);
+  if (fusion) {
+    return {
+      fromId: parentId,
+      requiredLevel: fusion.requiredLevel,
+      requiredItem: fusion.requiredItem,
+      requiredSacrificeCharacter: fusion.partner,
+      requiredSacrificeCharacters: fusion.partners,
+    };
   }
   return undefined;
 }
@@ -98,7 +104,7 @@ function buildTreeNode(charId: string, visited: Set<string>, parentId?: string):
   const altNext   = ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
   const alt2Next  = EXTRA_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
   const fixedNext = HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
-  const fusionNext = FUSIONS[charId]?.resultId;
+  const fusionNext = (FUSIONS[charId] ?? []).map((recipe) => recipe.resultId);
 
   const targets: string[] = [];
   const addTarget = (target?: string) => {
@@ -109,7 +115,7 @@ function buildTreeNode(charId: string, visited: Set<string>, parentId?: string):
   addTarget(altNext);
   addTarget(alt2Next);
   addTarget(fixedNext);
-  addTarget(fusionNext);
+  fusionNext.forEach(addTarget);
 
   const conditions = parentId ? getConditionsForChild(parentId, charId) : undefined;
 
@@ -191,7 +197,7 @@ function DigiCard({
   const name = char?.name ?? charId;
   const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
-  const fusionPartner = FUSIONS[charId]?.partner;
+  const fusionPartner = (FUSIONS[charId] ?? [])[0]?.partner;
   const fusionName = fusionPartner
     ? (getCharacter(fusionPartner) ?? CHARACTERS[fusionPartner])?.name ?? fusionPartner
     : null;
