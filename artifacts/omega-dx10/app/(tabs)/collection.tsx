@@ -219,8 +219,16 @@ export default function CollectionScreen() {
     const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
     return char ? [{ owned, char }] : [];
   });
-  const digimons = resolvedCollection.filter(({ char }) => char.rarity !== 'EGG');
-  const eggs = resolvedCollection.filter(({ char }) => char.rarity === 'EGG');
+  const digimons = resolvedCollection.filter(({ owned, char }) =>
+    char.rarity !== 'EGG'
+    && owned.characterId !== 'custom_1550'
+    && char.name?.toLowerCase() !== 'digitama especial'
+  );
+  const eggs = resolvedCollection.filter(({ owned, char }) =>
+    char.rarity === 'EGG'
+    || owned.characterId === 'custom_1550'
+    || char.name?.toLowerCase() === 'digitama especial'
+  );
   const activeCollection = digiTab === 'digimons' ? digimons : eggs;
   const activeRows: { owned: OwnedCharacter; char: Character }[][] = [];
   for (let index = 0; index < activeCollection.length; index += 3) {
@@ -747,7 +755,7 @@ export default function CollectionScreen() {
                           </Text>
                           {modalAscensionStars === 3 && !hasGoldenAscensionStar && (
                             <View style={styles.fragmentRow}>
-                              <Image source={require('../../assets/images/items/golden_star_fragment.gif')} style={styles.goldenStarThumb} resizeMode="contain" />
+                              <Image source={require('../../assets/images/items/golden_star_fragment.png')} style={styles.goldenStarThumb} resizeMode="contain" />
                               <Text style={styles.fragmentText}>
                                 Fragmentos: {pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0}/{GOLDEN_STAR_FRAGMENTS_REQUIRED}
                               </Text>
