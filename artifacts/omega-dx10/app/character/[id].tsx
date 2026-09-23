@@ -452,7 +452,7 @@ export default function CharacterDetailScreen() {
               return (
                 <TouchableOpacity
                   key={recipe.resultId}
-                  style={[styles.evoRow, {
+                  style={[styles.pickerCard, {
                     backgroundColor: selected ? '#ff3c6e22' : colors.card,
                     borderColor: selected ? '#ff3c6e' : colors.border,
                   }, pixelStyle]}
