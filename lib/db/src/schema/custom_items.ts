@@ -6,7 +6,7 @@ export const customItemsTable = pgTable("custom_items", {
   type: text("type").notNull().default("equipment"), // 'equipment' | 'fragment'
   slot: text("slot"),
   description: text("description").notNull().default(""),
-  rarity: text("rarity").notNull().default("COMMON"),
+  rarity: text("rarity").notNull().default("ROOKIE"),
   howToObtain: text("how_to_obtain").notNull().default("drop"), // 'drop' | 'craft' | 'admin'
   bonuses: jsonb("bonuses").notNull().default({}),
   percentBonuses: jsonb("percent_bonuses"),
