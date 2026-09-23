@@ -26,7 +26,7 @@ import {
   CHARACTERS, ATTRIBUTES, ELEMENTS,
   RARITY_COLORS,
   getScaledStats, expToNextLevel,
-  FUSIONS,
+  FUSIONS, ITEM_NAMES,
 } from '@/constants/gameData';
 import { getCharacter, getCharacterImageSource, hasDivineGiftPassive } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
@@ -97,12 +97,14 @@ export default function CharacterDetailScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { collection, selectedCharacter, setSelectedCharacter, fuseDigimon, pieces, useXpItem } = useGame();
+  const { collection, inventory, selectedCharacter, setSelectedCharacter, fuseDigimon, pieces, useXpItem } = useGame();
 
   const [confirmFuseVisible, setConfirmFuseVisible] = useState(false);
   const [fuseSacrificeId, setFuseSacrificeId] = useState<string | null>(null);
   const [selectedFusionResultId, setSelectedFusionResultId] = useState<string | null>(null);
   const [partnerPickerVisible, setPartnerPickerVisible] = useState(false);
+  const [fusionItemPickerVisible, setFusionItemPickerVisible] = useState(false);
+  const [selectedFusionItemId, setSelectedFusionItemId] = useState<string | null>(null);
 
   const [xpModalVisible, setXpModalVisible] = useState(false);
   const [selectedBattery, setSelectedBattery] = useState<string>('piece_battery_green');
@@ -218,7 +220,7 @@ export default function CharacterDetailScreen() {
   const selectedMultiSacrifices = fusionRecipe?.partners
     ? fusionRecipe.partners.map((partnerId) =>
         collection.find((copy) => copy.ownedId !== owned.ownedId && copy.characterId === partnerId)
-      ).filter((copy): copy is NonNullable<typeof copy> => !!copy)
+      ).filter(Boolean) as typeof collection
     : [];
   const resultChar = fusionRecipe ? (getCharacter(fusionRecipe.resultId) ?? null) : null;
   const partnerChar = fusionRecipe?.partner ? (getCharacter(fusionRecipe.partner) ?? null) : null;
@@ -229,7 +231,8 @@ export default function CharacterDetailScreen() {
       ? selectedMultiSacrifices.length === fusionRecipe.partners.length
       : !!partnerOwned
   );
-  const canFuse = !!(fusionRecipe && meetsLevel && hasAllPartners);
+  const hasFusionRequiredItem = !!fusionRecipe && (!fusionRecipe.requiredItem || inventory.includes(fusionRecipe.requiredItem));
+  const canFuse = !!(fusionRecipe && meetsLevel && hasAllPartners && hasFusionRequiredItem);
 
   function startFusionAnimation(recipe: NonNullable<typeof fusionRecipe>) {
     newFormOpacity.setValue(0);
@@ -250,12 +253,17 @@ export default function CharacterDetailScreen() {
     setSelectedFusionResultId(fusionRecipe.resultId);
 
     if (fusionRecipe.partners?.length) {
-      setConfirmFuseVisible(true);
+      if (fusionRecipe.requiredItem) {
+        setFusionItemPickerVisible(true);
+      } else {
+        setConfirmFuseVisible(true);
+      }
       return;
     }
     if (allPartnerCopies.length === 1) {
       setFuseSacrificeId(allPartnerCopies[0].ownedId);
-      setConfirmFuseVisible(true);
+      if (fusionRecipe.requiredItem) setFusionItemPickerVisible(true);
+      else setConfirmFuseVisible(true);
     } else if (allPartnerCopies.length > 1) {
       setPartnerPickerVisible(true);
     }
@@ -270,7 +278,8 @@ export default function CharacterDetailScreen() {
 
     if (sacrificeIds.length !== requiredPartnerIds.length) return;
     setConfirmFuseVisible(false);
-    const fused = fuseDigimon(owned.ownedId, sacrificeIds, fusionRecipe.resultId);
+    if (fusionRecipe.requiredItem && selectedFusionItemId !== fusionRecipe.requiredItem) return;
+    const fused = fuseDigimon(owned.ownedId, sacrificeIds, fusionRecipe.resultId, selectedFusionItemId ?? undefined);
     if (!fused) return;
     startFusionAnimation(fusionRecipe);
   }
@@ -574,7 +583,8 @@ export default function CharacterDetailScreen() {
                       onPress={() => {
                         setFuseSacrificeId(copy.ownedId);
                         setPartnerPickerVisible(false);
-                        setConfirmFuseVisible(true);
+                        if (fusionRecipe?.requiredItem) setFusionItemPickerVisible(true);
+                        else setConfirmFuseVisible(true);
                       }}
                     >
                       <Text style={styles.pickerSelectBtnText}>{t('char.select')}</Text>
@@ -586,6 +596,51 @@ export default function CharacterDetailScreen() {
             <TouchableOpacity
               style={[styles.confirmCancel, { borderColor: colors.border, marginTop: 8 }]}
               onPress={() => setPartnerPickerVisible(false)}
+            >
+              <Text style={[styles.confirmCancelText, { color: colors.mutedForeground }]}>{t('common.cancel')}</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* ── Required item picker for fusion ─────────────────────────────── */}
+      <Modal
+        visible={fusionItemPickerVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFusionItemPickerVisible(false)}
+      >
+        <Pressable style={styles.confirmOverlay} onPress={() => setFusionItemPickerVisible(false)}>
+          <Pressable
+            style={[styles.confirmBox, { backgroundColor: colors.card, borderColor: '#a855f788', maxWidth: 340 }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={[styles.confirmTitle, { color: colors.foreground }]}>SELECIONE O ITEM</Text>
+            {fusionRecipe?.requiredItem && (() => {
+              const itemId = fusionRecipe.requiredItem;
+              const qty = inventory.filter((ownedItemId) => ownedItemId === itemId).length;
+              return (
+                <TouchableOpacity
+                  style={[styles.pickerCard, { backgroundColor: colors.background, borderColor: '#a855f788', opacity: qty > 0 ? 1 : 0.45 }, pixelStyle]}
+                  disabled={qty <= 0}
+                  onPress={() => {
+                    setSelectedFusionItemId(itemId);
+                    setFusionItemPickerVisible(false);
+                    setConfirmFuseVisible(true);
+                  }}
+                >
+                  <Feather name="package" size={22} color="#a855f7" />
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={{ color: colors.foreground, fontWeight: '700' }}>{ITEM_NAMES[itemId] ?? itemId}</Text>
+                    <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>Disponível: x{qty}</Text>
+                  </View>
+                  <Text style={{ color: '#a855f7', fontWeight: '800' }}>USAR</Text>
+                </TouchableOpacity>
+              );
+            })()}
+            <TouchableOpacity
+              style={[styles.confirmCancel, { borderColor: colors.border, marginTop: 8 }]}
+              onPress={() => setFusionItemPickerVisible(false)}
             >
               <Text style={[styles.confirmCancelText, { color: colors.mutedForeground }]}>{t('common.cancel')}</Text>
             </TouchableOpacity>
