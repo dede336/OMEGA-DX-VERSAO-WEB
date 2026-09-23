@@ -16,7 +16,6 @@ import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 
 const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
-const GEM_ICON_IMG      = require('../../assets/images/gem-icon.webp');
 const GACHA_ANIME_IMG   = require('../../assets/images/gacha-anime.webp');
 const BUBBLE_IMG        = require('../../assets/images/bubble.webp');
 
