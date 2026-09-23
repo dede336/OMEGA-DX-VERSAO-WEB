@@ -157,7 +157,7 @@ export interface Item {
 }
 
 export interface GachaRewardItem extends Item {
-  raridade: "Comum" | "Raro" | "Especial";
+  raridade: "Rookie" | "Champion" | "Especial";
 }
 
 export interface PlayerData {
@@ -287,11 +287,11 @@ export class DigimonGameEngine {
       const rng = Math.random();
       let raridade: GachaRewardItem["raridade"];
       if (rng < taxasDrop.Raro) {
-        raridade = "Raro";
+        raridade = "Champion";
       } else if (rng < taxasDrop.Raro + taxasDrop.Especial) {
         raridade = "Especial";
       } else {
-        raridade = "Comum";
+        raridade = "Rookie";
       }
       const pool = itensDisponiveis.filter((i) => i.raridade === raridade);
       return pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : itensDisponiveis[0];
