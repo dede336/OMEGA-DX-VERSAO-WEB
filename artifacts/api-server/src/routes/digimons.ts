@@ -55,7 +55,7 @@ function shapeDigimon(r: Omit<typeof customDigimonsTable.$inferSelect, 'imageBas
 // GET /digimons/custom
 // - Players only see active digimons
 // - Admins see all (active + inactive)
-// - Supports ?attribute=VC &rarity=LEGENDARY &element=FIRE filters
+// - Supports ?attribute=VC &rarity=MEGA &element=FIRE filters
 router.get("/custom", optionalAuth, async (req, res) => {
   const isAdmin = req.auth?.isAdmin ?? false;
 
@@ -88,14 +88,13 @@ router.get("/custom", optionalAuth, async (req, res) => {
     WHEN 'EGG'       THEN 0
     WHEN 'BABY'      THEN 1
     WHEN 'TRAINING'  THEN 2
-    WHEN 'COMMON'    THEN 3
-    WHEN 'RARE'      THEN 4
-    WHEN 'CHAMPION'  THEN 5
-    WHEN 'EPIC'      THEN 6
-    WHEN 'LEGENDARY' THEN 7
-    WHEN 'ULTRA'     THEN 8
-    WHEN 'BURST'     THEN 9
-    ELSE 10
+    WHEN 'ROOKIE'    THEN 3
+    WHEN 'CHAMPION'  THEN 4
+    WHEN 'ULTIMATE'  THEN 5
+    WHEN 'MEGA'      THEN 6
+    WHEN 'ULTRA'     THEN 7
+    WHEN 'BURST'     THEN 8
+    ELSE 9
   END`;
 
   const rows = conditions.length > 0

@@ -52,7 +52,7 @@ router.post("/", requireAuth, async (req, res) => {
     name: String(name), type: String(type ?? "equipment"),
     slot: slot ? String(slot) : null,
     description: description ? String(description) : "",
-    rarity: String(rarity ?? "COMMON"),
+    rarity: String(rarity ?? "ROOKIE"),
     howToObtain: String(howToObtain ?? "drop"),
     bonuses: (bonuses ?? {}) as any,
     percentBonuses: percentBonuses ? percentBonuses as any : null,
