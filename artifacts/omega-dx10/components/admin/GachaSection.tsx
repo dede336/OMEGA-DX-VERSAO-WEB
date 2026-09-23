@@ -278,7 +278,7 @@ function AddItemModal({
                         <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>{selectedDigimon.name}</Text>
                         <Text style={{ color: getDigimonRarityColor(selectedDigimon.rarity), fontSize: 11 }}>
                           {getDigimonRarityLabel(selectedDigimon.rarity)}
-                          {selectedDigimon.isCustom ? ' · Customizado' : ''}
+                          {''}
                         </Text>
                       </View>
                       <TouchableOpacity onPress={() => setSelectedId('')}>
@@ -310,7 +310,7 @@ function AddItemModal({
                               <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>{c.name}</Text>
                               <Text style={{ color: getDigimonRarityColor(c.rarity), fontSize: 11 }}>
                                 {getDigimonRarityLabel(c.rarity)}
-                                {c.isCustom ? ' · ✨ Customizado' : ''}
+                                {''}
                               </Text>
                             </View>
                           </TouchableOpacity>
@@ -351,7 +351,7 @@ function AddItemModal({
                         <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>{selectedItem.name}</Text>
                         <Text style={{ color: getItemRarityColor(selectedItem.rarity), fontSize: 11 }}>
                           {getItemRarityLabel(selectedItem.rarity)}
-                          {(selectedItem as any).isStatic === false ? ' · Customizado' : ''}
+                          {''}
                         </Text>
                       </View>
                       <TouchableOpacity onPress={() => setSelectedId('')}>
@@ -373,7 +373,7 @@ function AddItemModal({
                             <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>{item.name}</Text>
                             <Text style={{ color: getItemRarityColor(item.rarity), fontSize: 11 }}>
                               {getItemRarityLabel(item.rarity)}
-                              {!item.isStatic ? ' · Customizado' : ''}
+                              {''}
                             </Text>
                           </View>
                         </TouchableOpacity>
