@@ -49,6 +49,13 @@ const CHAR_NAME_ALIASES: Record<string, string> = {
   'megalogrowmon': 'megaloGrowlmon',
 };
 
+// Names used by the original Gacha rotation. These aliases are deliberately
+// independent of the API load so old pool entries never expose their storage ID.
+export const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
+  custom_313: 'ryudamon',
+  custom_356: 'dorulumon',
+};
+
 // Spirit sacrifice drops: when a Frontier Warrior custom digimon is sacrificed,
 // it drops its corresponding Spirit piece (used for crafting / Susanoomon evolution).
 const SPIRIT_SACRIFICE_DROPS_BY_NAME: Record<string, { itemId: string; chance: number }[]> = {
@@ -511,12 +518,30 @@ export function findCharacterIdByName(name: string): string | null {
   return null;
 }
 
+export function getKnownCharacterName(id: string): string | null {
+  return CUSTOM_CHARACTER_NAME_ALIASES[id] ?? _customChars[id]?.name ?? CHARACTERS[id]?.name ?? null;
+}
+
+export function getCharacterImageSourceByName(name: string): any {
+  const normalizedName = _normKey(name.replace(/^✨\s*/, ''));
+  return _IMAGE_BY_NORM[normalizedName] ?? null;
+}
+
 export function getCharacterImageSource(id: string): any {
   // Lucemon X must always use the bundled animated GIF. Old API records can
   // still point to the obsolete PNG, so this check must precede all overrides.
   if (_normKey(id) === 'lucemonx' && (CHARACTER_IMAGES as Record<string, any>).lucemonX) {
     return (CHARACTER_IMAGES as Record<string, any>).lucemonX;
   }
+
+  // The Gacha stores these legacy custom IDs. Prefer the bundled image so a
+  // missing or stale API image cannot leave Ryudamon or Dorulumon blank.
+  const aliasedName = CUSTOM_CHARACTER_NAME_ALIASES[id];
+  if (aliasedName) {
+    const aliasedImage = getCharacterImageSourceByName(aliasedName);
+    if (aliasedImage) return aliasedImage;
+  }
+
   const ov = _overrides[id];
   if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
