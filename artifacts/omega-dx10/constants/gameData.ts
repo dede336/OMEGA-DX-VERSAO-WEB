@@ -1198,21 +1198,42 @@ export const CHARACTERS: Record<string, Character> = {
 
 // ─── Fusion paths ─────────────────────────────────────────────────────────────
 export interface FusionRecipe {
-  partner: string;
+  partner?: string;
+  partners?: string[];
   resultId: string;
   resultName: string;
   requiredLevel: number;
+  requiredItem?: string;
 }
 
-export const FUSIONS: Record<string, FusionRecipe> = {
-  warGreymon:    { partner: 'metalGarurumon', resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
-  metalGarurumon:{ partner: 'warGreymon',     resultId: 'omegamon',              resultName: 'Omegamon',              requiredLevel: 60 },
-  gallantmon:    { partner: 'seraphimon',     resultId: 'gallantmonCrimsonMode', resultName: 'Gallantmon Crimson Mode', requiredLevel: 60 },
-  angemon:       { partner: 'devimon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
-  devimon:       { partner: 'angemon',        resultId: 'lucemonChaosMode',      resultName: 'Lucemon Chaos Mode',      requiredLevel: 40 },
+export const FUSIONS: Record<string, FusionRecipe[]> = {
+  warGreymon: [{ partner: 'metalGarurumon', resultId: 'omegamon', resultName: 'Omegamon', requiredLevel: 60 }],
+  metalGarurumon: [{ partner: 'warGreymon', resultId: 'omegamon', resultName: 'Omegamon', requiredLevel: 60 }],
+  gallantmon: [{ partner: 'seraphimon', resultId: 'gallantmonCrimsonMode', resultName: 'Gallantmon Crimson Mode', requiredLevel: 60 }],
+  angemon: [{ partner: 'devimon', resultId: 'lucemonChaosMode', resultName: 'Lucemon Chaos Mode', requiredLevel: 40 }],
+  devimon: [{ partner: 'angemon', resultId: 'lucemonChaosMode', resultName: 'Lucemon Chaos Mode', requiredLevel: 40 }],
+  exVeemon: [{ partner: 'stingmon', resultId: 'paildramon', resultName: 'Paildramon', requiredLevel: 36 }],
+  stingmon: [{ partner: 'exVeemon', resultId: 'paildramon', resultName: 'Paildramon', requiredLevel: 36 }],
+  shineGreymon: [
+    { partner: 'imperialDramonFM', resultId: 'shineGreymonBurstMode', resultName: 'ShineGreymon Burst Mode', requiredLevel: 68 },
+    { partner: 'megidramon', resultId: 'shineGreymonRuinMode', resultName: 'ShineGreymon Ruin Mode', requiredLevel: 68 },
+  ],
+  rosemon: [{ partner: 'ophanimon', resultId: 'rosemonBurstMode', resultName: 'Rosemon Burst Mode', requiredLevel: 64 }],
+  mirageGaogamon: [{ partner: 'kentaurusmon', resultId: 'mirageGaogamonBurstMode', resultName: 'MirageGaogamon Burst Mode', requiredLevel: 68 }],
+  ravemon: [{ partner: 'valkyrimon', resultId: 'ravemonBurstMode', resultName: 'Ravemon Burst Mode', requiredLevel: 68 }],
+  imperialDramonFM: [{ partner: 'omegamon', resultId: 'imperialDramonPM', resultName: 'Imperialdramon PM', requiredLevel: 60 }],
+  silphymon: [{ partner: 'sinduramon', resultId: 'valdurmon', resultName: 'Valdurmon', requiredLevel: 63 }],
+  kimeramon: [{ partner: 'machinedramon', resultId: 'millenniummon', resultName: 'Millenniummon', requiredLevel: 60 }],
+  millenniummon: [{ partner: 'gigaSeadramon', resultId: 'moonMillenniummon', resultName: 'MoonMillenniummon', requiredLevel: 70 }],
+  moonMillenniummon: [{ partner: 'millenniummon', resultId: 'zeedMillenniummon', resultName: 'ZeedMillenniummon', requiredLevel: 80 }],
+  custom_327: [{ partners: ['custom_328','custom_1560','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  custom_328: [{ partners: ['custom_327','custom_1560','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  custom_1560: [{ partners: ['custom_327','custom_328','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  custom_329: [{ partners: ['custom_327','custom_328','custom_1560'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  custom_1330: [{ partner: 'custom_1581', resultId: 'custom_1584', resultName: 'Proximamon', requiredLevel: 70 }],
+  custom_1581: [{ partner: 'custom_1330', resultId: 'custom_1584', resultName: 'Proximamon', requiredLevel: 70 }],
 };
 
-// ─── Evolution paths ──────────────────────────────────────────────────────────
 export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string }> = {
   // ── Agumon / WarGreymon / Omegamon Line ──────────────────────────────────
   agumon:       { evolvesTo: 'greymon',       requiredLevel: 16, label: 'Greymon' },
@@ -1273,17 +1294,9 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
 // ─── Sacrifice System ────────────────────────────────────────────────────────
 
 export const ALTERNATE_EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string; requiredSacrificeCharacter?: string; requiredSacrificeCharacters?: string[] }> = {
-  angewomon:        { evolvesTo: 'ophanimon',      requiredLevel: 60, label: 'Ophanimon',          requiredItem: 'anel_sagrado' },
-  magnaAngemon:     { evolvesTo: 'seraphimon',     requiredLevel: 60, label: 'Seraphimon',         requiredItem: 'anel_sagrado' },
-  lucemonChaosMode: { evolvesTo: 'lucemonSatanMode', requiredLevel: 50, label: 'Lucemon Satan Mode', requiredItem: 'gehenna' },
-  agumon:            { evolvesTo: 'tiranomon',             requiredLevel: 16, label: 'Tiranomon' },
-  metalGarurumon:    { evolvesTo: 'omegamon',              requiredLevel: 60, label: 'Omegamon',             requiredSacrificeCharacter: 'warGreymon' },
-  shineGreymon:      { evolvesTo: 'shineGreymonBurstMode', requiredLevel: 68, label: 'ShineGreymon Burst Mode', requiredSacrificeCharacter: 'imperialDramonFM' },
-  rosemon:           { evolvesTo: 'rosemonBurstMode',      requiredLevel: 64, label: 'Rosemon Burst Mode',      requiredSacrificeCharacter: 'ophanimon' },
-  imperialDramonFM:  { evolvesTo: 'imperialDramonPM',     requiredLevel: 60, label: 'Imperialdramon PM',       requiredSacrificeCharacter: 'omegamon' },
-  exVeemon:          { evolvesTo: 'paildramon',            requiredLevel: 36, label: 'Paildramon',              requiredSacrificeCharacter: 'stingmon' },
-  stingmon:          { evolvesTo: 'paildramon',            requiredLevel: 36, label: 'Paildramon',              requiredSacrificeCharacter: 'exVeemon' },
-  silphymon:         { evolvesTo: 'valdurmon',             requiredLevel: 63, label: 'Valdurmon',               requiredSacrificeCharacter: 'sinduramon' },
+  angewomon:        { evolvesTo: 'ophanimon',          requiredLevel: 60, label: 'Ophanimon',          requiredItem: 'anel_sagrado' },
+  magnaAngemon:     { evolvesTo: 'seraphimon',         requiredLevel: 60, label: 'Seraphimon',         requiredItem: 'anel_sagrado' },
+  lucemonChaosMode: { evolvesTo: 'lucemonSatanMode',  requiredLevel: 50, label: 'Lucemon Satan Mode', requiredItem: 'gehenna' },
 };
 
 export const SACRIFICE_DROPS: Record<string, { itemId: string; chance: number }[]> = {
@@ -1316,15 +1329,7 @@ export const HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS: Record<string, {
   evolvesTo: string; requiredLevel: number; label: string;
   requiredItem?: string; requiredSacrificeCharacters?: string[];
 }> = {
-  'custom_327':  { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_328', 'custom_1560', 'custom_329'] },
-  'custom_328':  { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_1560', 'custom_329'] },
-  'custom_1560': { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_328', 'custom_329'] },
-  'custom_329':  { evolvesTo: 'custom_331', requiredLevel: 60, label: 'Huanglongmon', requiredSacrificeCharacters: ['custom_327', 'custom_328', 'custom_1560'] },
-  'custom_331':  { evolvesTo: 'custom_1677', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'fragmento_corrompido' },
-  'custom_1330': { evolvesTo: 'custom_1584', requiredLevel: 70, label: 'Proximamon', requiredSacrificeCharacters: ['custom_1581'] },
-  'custom_1581': { evolvesTo: 'custom_1584', requiredLevel: 70, label: 'Proximamon', requiredSacrificeCharacters: ['custom_1330'] },
-  // Cupimon (Training, Luz) → Lucemon (Rookie)
-  'custom_1722': { evolvesTo: 'lucemon', requiredLevel: 12, label: 'Lucemon' },
+  'custom_331': { evolvesTo: 'custom_1677', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'fragmento_corrompido' },
 };
 
 export const EXTRA_ALTERNATE_EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string; requiredSacrificeCharacter?: string }> = {
