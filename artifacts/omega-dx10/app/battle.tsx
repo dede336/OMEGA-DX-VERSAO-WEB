@@ -540,7 +540,7 @@ export default function BattleScreen() {
     }
 
     const charIds = stage?.enemyCharacterIds ?? [stage?.enemyCharacterId ?? ''];
-    charIds.forEach((eid) => { if (getCharacter(eid)?.rarity === 'COMMON') gainScan(eid, 5); });
+    charIds.forEach((eid) => { if (getCharacter(eid)?.rarity === 'ROOKIE') gainScan(eid, 5); });
 
     if (map?.bitsReward) {
       gainBits(map.bitsReward);
