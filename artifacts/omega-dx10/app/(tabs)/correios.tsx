@@ -7,7 +7,14 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGame, MailMessage, OwnedCharacter, getMailGiftAscensionStars } from '@/context/GameContext';
+import {
+  useGame,
+  MailMessage,
+  OwnedCharacter,
+  getMailGiftAscensionStars,
+  migrateEvolutionItemId,
+  migrateEvolutionPieceId,
+} from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, ITEM_NAMES } from '@/constants/gameData';
 import { getCharacterImageSource as _getCharImg } from '@/constants/extendedCharacters';
@@ -43,13 +50,15 @@ export default function CorreiosScreen() {
     if (reward?.bits) newBits += reward.bits;
     if (reward?.items) {
       for (const itemId of reward.items) {
-        if (!newInventory.includes(itemId)) newInventory.push(itemId);
+        const migratedItemId = migrateEvolutionItemId(itemId);
+        if (!newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
       }
     }
     const newPieces = { ...(game.pieces ?? {}) };
     if (reward?.pieces) {
       for (const [pieceId, amount] of Object.entries(reward.pieces)) {
-        newPieces[pieceId] = (newPieces[pieceId] ?? 0) + amount;
+        const migratedPieceId = migrateEvolutionPieceId(pieceId);
+        newPieces[migratedPieceId] = (newPieces[migratedPieceId] ?? 0) + amount;
       }
     }
     if (reward?.digimon) {

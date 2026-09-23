@@ -42,7 +42,7 @@ const CATEGORIES: { id: CraftCategory; label: string; icon: string; color: strin
   { id: 'brasao',   label: 'Brasão',   icon: 'shield',       color: '#8b5cf6' },
 ];
 
-const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'taikyoku_feather']);
+const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'fragmento_corrompido']);
 const ROUPA_ITEM_IDS = new Set(['blusa_social', 'bermuda_poliester', 'tenis_corrida', 'pulseira_ouro']);
 
 function getCategoryForRecipe(recipe: CraftRecipe): CraftCategory {
@@ -348,7 +348,7 @@ export default function CraftScreen() {
   const [selectedRecipe, setSelectedRecipe] = useState<CraftRecipe | null>(null);
 
   const filteredRecipes = CRAFT_RECIPES.filter(
-    r => r.resultItemId !== 'taikyoku_feather' && getCategoryForRecipe(r) === activeCategory,
+    r => r.resultItemId !== 'fragmento_corrompido' && getCategoryForRecipe(r) === activeCategory,
   );
   const activeCat = CATEGORIES.find(c => c.id === activeCategory)!;
 

@@ -190,10 +190,10 @@ const RARITY_FILTERS = [
   { key: 'EGG',       label: 'Ovo'         },
   { key: 'BABY',      label: 'Bebê'        },
   { key: 'TRAINING',  label: 'Treinamento' },
-  { key: 'COMMON',    label: 'Rookie'      },
-  { key: 'RARE',      label: 'Champion'    },
-  { key: 'EPIC',      label: 'Ultimate'    },
-  { key: 'LEGENDARY', label: 'Mega'        },
+  { key: 'ROOKIE',    label: 'Rookie'      },
+  { key: 'CHAMPION',      label: 'Champion'    },
+  { key: 'ULTIMATE',      label: 'Ultimate'    },
+  { key: 'MEGA', label: 'Mega'        },
   { key: 'ULTRA',     label: 'Ultra'       },
   { key: 'BURST',     label: 'Burst'       },
 ];
@@ -282,10 +282,7 @@ export default function BancoScreen() {
     }[];
   }, [ownedSet]);
 
-  // DB uses "CHAMPION" as a synonym for the client's "RARE" (Champion tier).
-  // Normalize here so sorting and filters work correctly.
-  const normalizeRarity = (r: string): string =>
-    r === 'CHAMPION' ? 'RARE' : r;
+  const normalizeRarity = (r: string): string => r;
 
   const customEntries = useMemo(() => {
     return customDigimons

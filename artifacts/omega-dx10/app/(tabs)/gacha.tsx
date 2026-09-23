@@ -21,18 +21,18 @@ const GACHA_ANIME_IMG   = require('../../assets/images/gacha-anime.webp');
 const BUBBLE_IMG        = require('../../assets/images/bubble.webp');
 
 const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: string; glow: string }> = {
-  Comum:    { color: '#6b7280', label: 'Comum',    glow: '#6b728044' },
+  Rookie:   { color: '#6b7280', label: 'Rookie',   glow: '#6b728044' },
   Especial: { color: '#8b5cf6', label: 'Especial', glow: '#8b5cf644' },
-  Raro:     { color: '#f59e0b', label: 'Raro ✦',   glow: '#f59e0b66' },
+  Champion: { color: '#f59e0b', label: 'Champion ✦', glow: '#f59e0b66' },
 };
 
 const TIPO_EMOJI: Record<string, string> = { ITEM: '⚔️', FRAGMENTO: '🔮', DIGIMON: '🦖' };
 
-// ── Bubble animation items (Raros e Especiais do pool padrão) ──
+// ── Bubble animation items (Champions e Especiais do pool padrão) ──
 const BUBBLE_ITEMS = [
-  { characterId: 'permissao_real', raridade: 'Raro'     as const, nome: 'Permição Real da Deusa', isItem: true },
-  { characterId: 'dorumon',        raridade: 'Raro'     as const, nome: 'Dorumon' },
-  { characterId: 'custom_313',     raridade: 'Raro'     as const, nome: 'Ryudamon' },
+  { characterId: 'permissao_real', raridade: 'Champion' as const, nome: 'Permição Real da Deusa', isItem: true },
+  { characterId: 'dorumon',        raridade: 'Champion' as const, nome: 'Dorumon' },
+  { characterId: 'custom_313',     raridade: 'Champion' as const, nome: 'Ryudamon' },
   { characterId: 'custom_356',     raridade: 'Especial' as const, nome: 'Dorulumon' },
   { characterId: 'magnaAngemon',   raridade: 'Especial' as const, nome: 'MagnaAngemon' },
   { characterId: 'angewomon',      raridade: 'Especial' as const, nome: 'Angewomon' },
@@ -228,7 +228,7 @@ function ResultModal({
   if (!visible) return null;
 
   const temResultado = resultado && resultado.length > 0;
-  const temRaro = resultado?.some((r) => r.raridade === 'Raro');
+  const temRaro = resultado?.some((r) => r.raridade === 'Champion');
   const temEspecial = resultado?.some((r) => r.raridade === 'Especial');
   const headerColor = temRaro ? '#f59e0b' : temEspecial ? '#8b5cf6' : '#6b7280';
 
@@ -244,7 +244,7 @@ function ResultModal({
           {/* Header */}
           <View style={[styles.resultHeader, { borderBottomColor: colors.border }]}>
             <Text style={[styles.resultTitle, { color: headerColor }]}>
-              {temResultado ? (temRaro ? '🌟 RARO OBTIDO!' : '✨ Resultado do Sorteio') : '❌ Sorteio falhou'}
+              {temResultado ? (temRaro ? '🌟 CHAMPION OBTIDO!' : '✨ Resultado do Sorteio') : '❌ Sorteio falhou'}
             </Text>
             <Text style={[styles.resultMsg, { color: colors.mutedForeground }]}>{mensagem}</Text>
           </View>
@@ -271,7 +271,7 @@ function ResultModal({
               <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>
                 🛡️ Pity: <Text style={{ fontWeight: '800', color: pityAtual >= 40 ? '#f59e0b' : colors.foreground }}>{pityAtual}/50</Text>
                 {'  '}
-                <Text style={{ color: colors.mutedForeground }}>({50 - pityAtual} tiros p/ Raro garantido)</Text>
+                <Text style={{ color: colors.mutedForeground }}>({50 - pityAtual} tiros p/ Champion garantido)</Text>
               </Text>
             </View>
           )}
@@ -331,7 +331,7 @@ export default function GachaScreen() {
   }, []);
 
   // Find the RARO highlighted Digimon from admin pool (or fall back to null)
-  const destaqueRaro = gachaAdminPool?.find((e) => e.raridade === 'Raro' && e.tipo === 'DIGIMON' && e.characterId) ?? null;
+  const destaqueRaro = gachaAdminPool?.find((e) => e.raridade === 'Champion' && e.tipo === 'DIGIMON' && e.characterId) ?? null;
 
   const machineScale   = useRef(new Animated.Value(1)).current;
   const machineRotate  = useRef(new Animated.Value(0)).current;
@@ -528,7 +528,7 @@ export default function GachaScreen() {
             }]} />
           </View>
           <Text style={[styles.pityHint, { color: colors.mutedForeground }]}>
-            {50 - gachaContadorPity} tiros até o Raro garantido
+            {50 - gachaContadorPity} tiros até o Champion garantido
           </Text>
         </View>
       </View>
@@ -544,7 +544,7 @@ export default function GachaScreen() {
           </View>
           <View style={[styles.guaranteeChip, { borderColor: '#f59e0b66', backgroundColor: '#f59e0b22' }, pixelStyle]}>
             <Text style={[styles.guaranteeNum, { color: '#f59e0b' }]}>x50</Text>
-            <Text style={[styles.guaranteeLabel, { color: '#f59e0b' }]}>Raro ✦</Text>
+            <Text style={[styles.guaranteeLabel, { color: '#f59e0b' }]}>Champion ✦</Text>
             <Text style={[styles.guaranteeSub, { color: colors.mutedForeground }]}>garantido</Text>
           </View>
           <View style={[styles.guaranteeChip, { borderColor: '#22c55e66', backgroundColor: '#22c55e22' }, pixelStyle]}>

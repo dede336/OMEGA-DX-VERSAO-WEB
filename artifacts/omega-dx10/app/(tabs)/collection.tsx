@@ -311,9 +311,9 @@ export default function CollectionScreen() {
   const sacrificeOverride = modalOwned ? SACRIFICE_SCAN_OVERRIDES[modalOwned.characterId] : undefined;
   const sacrificeRookieId = modalOwned ? (ROOKIE_OF[modalOwned.characterId] ?? null) : null;
   const sacrificeScanPct  = modalChar ? (SACRIFICE_SCAN_PCT[modalChar.rarity] ?? 0) : 0;
-  const canSacrifice = !!(modalChar && modalChar.rarity !== 'COMMON');
+  const canSacrifice = !!(modalChar && modalChar.rarity !== 'ROOKIE');
   const modalAscensionStars = getAscensionStars(modalOwned);
-  const isModalMega = modalChar?.rarity === 'LEGENDARY';
+  const isModalMega = modalChar?.rarity === 'MEGA';
   const ascensionCandidates = modalOwned
     ? collection.filter((candidate) =>
         candidate.ownedId !== modalOwned.ownedId &&
