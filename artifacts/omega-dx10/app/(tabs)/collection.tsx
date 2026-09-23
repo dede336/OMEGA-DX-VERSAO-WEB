@@ -10,7 +10,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame, OwnedCharacter, SacrificeResult } from '@/context/GameContext';
 import {
-  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL,
+  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FUSIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL,
   RARITY_COLORS, RARITY_LABELS,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, ITEM_NAMES, TAMERS,
   Character,
@@ -353,6 +353,9 @@ export default function CollectionScreen() {
   const modalCanAlt2Evolve    = !!(modalOwned && modalAlt2Evo && modalOwned.level >= modalAlt2Evo.requiredLevel && hasAlt2ReqItem);
   const modalAlt2EvoChar      = modalAlt2Evo ? CHARACTERS[modalAlt2Evo.evolvesTo] : undefined;
 
+  // ── Fusion / Jogress ─────────────────────────────────────────────────────
+  const modalFusionRecipes = modalOwned ? (FUSIONS[modalOwned.characterId] ?? []) : [];
+
   // Sacrifice info for current modal character
   const modalChar = modalOwned ? (getCharacter(modalOwned.characterId) ?? CHARACTERS[modalOwned.characterId] ?? null) : null;
   const sacrificeDrops = modalOwned ? (SACRIFICE_DROPS[modalOwned.characterId] ?? []) : [];
@@ -626,6 +629,38 @@ export default function CollectionScreen() {
                       </View>
                     )
                   )}
+
+                  {/* Fusion / Jogress rows */}
+                  {modalFusionRecipes.map((recipe) => {
+                    const requiredPartners = recipe.partners ?? (recipe.partner ? [recipe.partner] : []);
+                    const hasPartners = requiredPartners.every((partnerId) =>
+                      collection.some((copy) => copy.ownedId !== modalOwned.ownedId && copy.characterId === partnerId)
+                    );
+                    const hasFusionItem = !recipe.requiredItem || inventory.includes(recipe.requiredItem);
+                    const canOpenFusion = modalOwned.level >= recipe.requiredLevel && hasPartners && hasFusionItem;
+                    const result = getCharacter(recipe.resultId) ?? CHARACTERS[recipe.resultId];
+                    return (
+                      <TouchableOpacity
+                        key={`fusion-${recipe.resultId}-${requiredPartners.join('-')}`}
+                        style={[styles.evoRow, { backgroundColor: canOpenFusion ? '#ff3c6e18' : colors.background, borderColor: canOpenFusion ? '#ff3c6e' : '#ff3c6e44' }]}
+                        activeOpacity={0.85}
+                        disabled={!canOpenFusion}
+                        onPress={() => {
+                          closeModal();
+                          router.push(`/character/${modalOwned.ownedId}` as any);
+                        }}
+                      >
+                        <Feather name={canOpenFusion ? 'git-merge' : 'lock'} size={17} color="#ff3c6e" />
+                        <Text style={[styles.evoRowText, { color: canOpenFusion ? '#ff3c6e' : colors.mutedForeground, flex: 1 }]}>
+                          JOGRESS → {result?.name ?? recipe.resultName}
+                          {' · Lv '}{recipe.requiredLevel}
+                          {requiredPartners.length > 0 ? ` · ⚔️ ${requiredPartners.map((id) => (getCharacter(id) ?? CHARACTERS[id])?.name ?? id).join(', ')}` : ''}
+                          {recipe.requiredItem ? ` · ${ITEM_NAMES[recipe.requiredItem] ?? recipe.requiredItem}` : ''}
+                        </Text>
+                        <CharacterAvatar characterId={recipe.resultId} size={32} />
+                      </TouchableOpacity>
+                    );
+                  })}
 
                   {/* Form change row */}
                   {modalFormChangeId && modalFormChangeChar && (
