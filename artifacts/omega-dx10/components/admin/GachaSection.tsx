@@ -6,7 +6,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, RARITY_COLORS, RARITY_LABELS, EQUIPMENT_ITEMS, CRAFT_RECIPES } from '@/constants/gameData';
-import { getCharacterImageSource, getCharacter } from '@/constants/extendedCharacters';
+import { getCharacterImageSource, getCharacter, getCharacterImageSourceByName, getKnownCharacterName } from '@/constants/extendedCharacters';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { EGG_IMAGES } from '@/constants/characterImages';
 import type { GachaPoolEntry } from '@/context/GameContext';
@@ -44,6 +44,16 @@ const RARITY_SLOTS: { key: GachaPoolEntry['raridade']; label: string; color: str
   { key: 'Especial', label: 'Especial', color: '#8b5cf6', emoji: '🟣' },
   { key: 'Champion', label: 'Champion ✦', color: '#f59e0b', emoji: '🌟' },
 ];
+
+function normalizeGachaPoolEntry(entry: GachaPoolEntry): GachaPoolEntry {
+  const configuredName = entry.nome?.replace(/^✨\s*/, '');
+  const knownName = getKnownCharacterName(entry.characterId ?? entry.id);
+  if (entry.tipo !== 'DIGIMON' || !knownName) return entry;
+  return {
+    ...entry,
+    nome: knownName,
+  };
+}
 
 const TIPO_OPTIONS: { key: GachaPoolEntry['tipo']; label: string; emoji: string }[] = [
   { key: 'DIGIMON',   label: 'Digimon',   emoji: '🦖' },
@@ -206,6 +216,11 @@ function AddItemModal({
       : (() => { const c = customDigimonsFiltered.find((d) => d.id === selectedId); return c ? { name: c.name, rarity: c.rarity, isCustom: true, dbId: c.dbId } : null; })())
     : null;
 
+  const selectedDigimonImage = selectedId
+    ? getCharacterImageSource(selectedId)
+      ?? getCharacterImageSourceByName(getKnownCharacterName(selectedId) ?? selectedDigimon?.name ?? '')
+    : null;
+
   const selectedItem = selectedId ? combinedItems.find((i) => i.id === selectedId) : null;
 
   return (
@@ -251,8 +266,8 @@ function AddItemModal({
 
                   {selectedDigimon ? (
                     <View style={[styles.selectedRow, { backgroundColor: colors.background, borderColor: getDigimonRarityColor(selectedDigimon.rarity) }, pixelStyle]}>
-                      {!selectedDigimon.isCustom && getCharacterImageSource(selectedId) ? (
-                        <Image source={getCharacterImageSource(selectedId)!} style={{ width: 32, height: 32 }} resizeMode="contain" />
+                      {selectedDigimonImage ? (
+                        <Image source={selectedDigimonImage} style={{ width: 32, height: 32 }} resizeMode="contain" />
                       ) : selectedDigimon.isCustom && (selectedDigimon as any).dbId ? (
                         <Image source={{ uri: `${apiUrl}/digimons/custom/${(selectedDigimon as any).dbId}/image` }} style={{ width: 32, height: 32 }} resizeMode="contain" />
                       ) : (
@@ -274,7 +289,8 @@ function AddItemModal({
                   ) : (
                     <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled showsVerticalScrollIndicator={false}>
                       {filteredDigimons.map((c) => {
-                        const img = !c.isCustom ? getCharacterImageSource(c.id) : null;
+                        const img = getCharacterImageSource(c.id)
+                          ?? getCharacterImageSourceByName(getKnownCharacterName(c.id) ?? c.name);
                         const customDbId = (c as any).dbId;
                         return (
                           <TouchableOpacity
@@ -441,7 +457,10 @@ function SlotSection({
         const isDigimon = entry.tipo === 'DIGIMON' && entry.characterId;
         const char = isDigimon ? (getCharacter(entry.characterId!) ?? CHARACTERS[entry.characterId!]) : null;
         const isEgg = char?.rarity === 'EGG';
-        const img  = isDigimon && char && !isEgg ? getCharacterImageSource(entry.characterId!) : null;
+        const img  = isDigimon && !isEgg
+          ? getCharacterImageSource(entry.characterId!)
+            ?? getCharacterImageSourceByName(getKnownCharacterName(entry.characterId!) ?? entry.nome)
+          : null;
         const tipoEmoji = entry.tipo === 'DIGIMON' ? '🦖' : entry.tipo === 'ITEM' ? '⚔️' : '🔮';
         const isCustomDigimon = isDigimon && !char;
 
@@ -469,7 +488,7 @@ function SlotSection({
               <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>
                 {tipoEmoji} {entry.tipo}
                 {char ? ` · ${RARITY_LABELS[char.rarity as keyof typeof RARITY_LABELS] ?? char.rarity}` : ''}
-                {isCustomDigimon ? ' · ✨ Customizado' : ''}
+                {''}
               </Text>
             </View>
             <TouchableOpacity onPress={() => onRemove(entry.id, idx)} style={styles.removeBtn}>
@@ -522,10 +541,10 @@ export default function GachaSection() {
           try {
             const parsed = JSON.parse(raw);
             if (parsed && typeof parsed === 'object' && Array.isArray(parsed.pool)) {
-              setPool(parsed.pool);
+              setPool(parsed.pool.map(normalizeGachaPoolEntry));
               if (typeof parsed.raroMax === 'number') setRaroMax(parsed.raroMax);
             } else if (Array.isArray(parsed)) {
-              setPool(parsed);
+              setPool(parsed.map(normalizeGachaPoolEntry));
             }
           } catch {}
         }
@@ -564,7 +583,7 @@ export default function GachaSection() {
       Alert.alert('Slot cheio', `Máximo de ${limit} item(s) para ${addingTo}.`);
       return;
     }
-    const full: GachaPoolEntry = { ...entry, raridade: addingTo };
+    const full: GachaPoolEntry = normalizeGachaPoolEntry({ ...entry, raridade: addingTo });
     setPool((prev) => [...prev, full]);
   }
 
@@ -650,7 +669,7 @@ export default function GachaSection() {
   async function doSalvar() {
     setSaving(true);
     try {
-      const payload = JSON.stringify({ pool, raroMax });
+      const payload = JSON.stringify({ pool: pool.map(normalizeGachaPoolEntry), raroMax });
       await fetch(`${apiUrl}/config/gacha_pool`, {
         method: 'PUT', headers, body: JSON.stringify({ value: payload }),
       });
