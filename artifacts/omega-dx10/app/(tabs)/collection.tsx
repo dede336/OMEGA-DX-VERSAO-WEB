@@ -266,25 +266,48 @@ export default function CollectionScreen() {
     alternate2?: boolean,
     fusionPartnerCharId?: string,
   ) => {
+    const altRecipe = alternate ? ALTERNATE_EVOLUTIONS[fromCharId] : undefined;
+    const requiredSingleSacrifice = altRecipe?.requiredSacrificeCharacter;
+    const requiredMultipleSacrifices = (altRecipe as any)?.requiredSacrificeCharacters as string[] | undefined;
+
+    const requiresFusion =
+      !!requiredSingleSacrifice ||
+      !!(requiredMultipleSacrifices && requiredMultipleSacrifices.length > 0);
+
+    // Uma fusão com sacrifício único só pode começar depois que o jogador
+    // escolher explicitamente qual cópia será consumida.
+    if (requiresFusion && requiredSingleSacrifice && !sacrificeOwnedId) {
+      return;
+    }
+
+    const partnerCharacterId =
+      fusionPartnerCharId ??
+      requiredSingleSacrifice ??
+      requiredMultipleSacrifices?.[0];
+
+    // Receita de fusão sem parceiro resolvido nunca deve cair em evolução normal.
+    if (requiresFusion && !partnerCharacterId) {
+      return;
+    }
+
     closeModal();
     setSacrificePickerVisible(false);
     setPendingAltEvo(null);
 
-    // Evolutions that consume another Digimon are fusions.
-    // Normal evolutions keep using EvolutionAnimation.
-    if (fusionPartnerCharId) {
+    evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2);
+
+    if (requiresFusion) {
       setEvoAnim(null);
       setFusionAnim({
         baseCharId: fromCharId,
-        partnerCharId: fusionPartnerCharId,
+        partnerCharId: partnerCharacterId!,
         resultCharId: toCharId,
       });
-    } else {
-      setFusionAnim(null);
-      setEvoAnim({ fromCharId, toCharId });
+      return;
     }
 
-    evolveDigimon(ownedId, alternate, sacrificeOwnedId, alternate2);
+    setFusionAnim(null);
+    setEvoAnim({ fromCharId, toCharId });
   }, [evolveDigimon]);
 
   // Computed evolution info for modal
