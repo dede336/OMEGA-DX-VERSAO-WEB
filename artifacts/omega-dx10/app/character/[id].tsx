@@ -706,9 +706,12 @@ export default function CharacterDetailScreen() {
             </Text>
             <Text style={{ color: '#facc15', fontSize: 12, lineHeight: 17, textAlign: 'center', marginBottom: 12 }}>
               Na fusão, prevalece a menor quantidade de estrelas.
-              {selectedFusionSacrifice
-                ? `\n${getAscensionStars(owned)}★ + ${getAscensionStars(selectedFusionSacrifice)}★ → ${Math.min(getAscensionStars(owned), getAscensionStars(selectedFusionSacrifice))}★`
-                : ''}
+              {(() => {
+                const sacrifices = fusionRecipe?.partners?.length ? selectedMultiSacrifices : (selectedFusionSacrifice ? [selectedFusionSacrifice] : []);
+                if (sacrifices.length === 0) return '';
+                const stars = [getAscensionStars(owned), ...sacrifices.map(getAscensionStars)];
+                return `\n${stars.map((star) => `${star}★`).join(' + ')} → ${Math.min(...stars)}★`;
+              })()}
             </Text>
             <View style={styles.confirmBtnRow}>
               <TouchableOpacity
