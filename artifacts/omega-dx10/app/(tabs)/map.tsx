@@ -369,7 +369,7 @@ export default function MapScreen() {
                         <>
                           {bitsDrops.map((drop: StageDrop, di: number) => (
                             <View key={`bits-${di}`} style={styles.rewardRow}>
-                              <Image source={require('../../assets/images/bits-icon.webp')} style={{ width: 14, height: 14 }} resizeMode="contain" />
+                              <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 14, height: 14 }} resizeMode="contain" />
                               <Text style={[styles.rewardText, { color: '#facc15' }]}>
                                 {drop.amount.toLocaleString()} Bits ({Math.round(drop.chance * 100)}%)
                               </Text>
