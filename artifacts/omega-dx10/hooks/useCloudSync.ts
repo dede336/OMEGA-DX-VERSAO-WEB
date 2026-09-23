@@ -14,6 +14,22 @@ async function pushSaveToServer(apiUrl: string, token: string, saveKey: string):
   const raw = await AsyncStorage.getItem(saveKey);
   if (!raw) return;
   const saveData = JSON.parse(raw);
+
+  // Safety barrier: never upload a blank/default state over a real cloud save.
+  // A legitimate player save has at least one durable progress marker.
+  const meaningful = Boolean(
+    saveData?.isOnboarded
+    || (typeof saveData?.playerName === 'string' && saveData.playerName.trim().length > 0)
+    || (Array.isArray(saveData?.collection) && saveData.collection.length > 0)
+    || (Array.isArray(saveData?.team) && saveData.team.length > 0)
+    || ((saveData?.tamerLevel ?? 1) > 1)
+    || ((saveData?.tamerExp ?? 0) > 0)
+    || ((saveData?.bits ?? 0) > 0)
+    || ((saveData?.gemas ?? 1000) !== 1000)
+    || (saveData?.clearedStages && Object.keys(saveData.clearedStages).length > 0)
+  );
+  if (!meaningful) return;
+
   await fetch(`${apiUrl}/saves`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
