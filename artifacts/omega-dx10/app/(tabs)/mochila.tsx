@@ -463,7 +463,7 @@ export default function MochilaScreen() {
                   backgroundColor: bitsMet ? '#facc1522' : colors.background,
                   borderColor: bitsMet ? '#facc15' : colors.border,
                 }]}>
-                  <Image source={require('../../assets/images/bits-icon.webp')} style={{ width: 14, height: 14, opacity: bitsMet ? 1 : 0.4 }} resizeMode="contain" />
+                  <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 14, height: 14, opacity: bitsMet ? 1 : 0.4 }} resizeMode="contain" />
                   <Text style={[styles.craftReqText, { color: bitsMet ? '#facc15' : colors.mutedForeground }]}>
                     {recipe.bitsCost.toLocaleString()} Bits
                   </Text>
