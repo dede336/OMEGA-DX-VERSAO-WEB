@@ -139,7 +139,7 @@ function getTodayDateString(): string {
 
 export interface GachaReward {
   characterId: string;
-  raridade: 'Comum' | 'Especial' | 'Raro';
+  raridade: 'Rookie' | 'Especial' | 'Champion';
   nome?: string;
   tipo?: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
 }
@@ -149,7 +149,7 @@ export interface GachaPoolEntry {
   nome: string;
   tipo: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
   characterId?: string;
-  raridade: 'Comum' | 'Especial' | 'Raro';
+  raridade: 'Rookie' | 'Especial' | 'Champion';
 }
 
 interface GameState {
@@ -291,6 +291,27 @@ function migrateOwnedCharacter(owned: OwnedCharacter): OwnedCharacter {
   return owned;
 }
 
+export function migrateEvolutionItemId(itemId: string): string {
+  return itemId;
+}
+
+export function migrateEvolutionPieceId(pieceId: string): string {
+  return pieceId;
+}
+
+function migrateEvolutionInventory(inventory: string[]): string[] {
+  return inventory.map(migrateEvolutionItemId);
+}
+
+function migrateEvolutionPieces(pieces: Record<string, number>): Record<string, number> {
+  const migrated: Record<string, number> = {};
+  for (const [pieceId, amount] of Object.entries(pieces)) {
+    const newId = migrateEvolutionPieceId(pieceId);
+    migrated[newId] = (migrated[newId] ?? 0) + amount;
+  }
+  return migrated;
+}
+
 const TWO_STAR_MAIL_GIFTS: Record<string, string> = {
   guilmon_gift_v1: 'guilmon',
   agumon_saver_gift_v1: 'agumonSaver',
@@ -425,9 +446,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             ),
             scanProgress: parsed.scanProgress ?? {},
             gender: parsed.gender ?? 'M',
-            inventory: parsed.inventory ?? DEFAULT_INVENTORY,
+            inventory: migrateEvolutionInventory(parsed.inventory ?? DEFAULT_INVENTORY),
             equippedItems: { ...defaultEquipped, ...(parsed.equippedItems ?? {}) },
-            pieces: parsed.pieces ?? {},
+            pieces: migrateEvolutionPieces(parsed.pieces ?? {}),
             bits: parsed.bits ?? 0,
             tamerExp: parsed.tamerExp ?? 0,
             tamerLevel: parsed.tamerLevel ?? 1,
@@ -550,7 +571,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!baseChar || !sacrificeChar || base.characterId !== sacrifice.characterId) return { success: false, message: 'A base e o sacrifício precisam ser o mesmo Digimon.' };
     const currentStars = getAscensionStars(base);
     if (currentStars >= 4) return { success: false, message: 'Este Digimon já alcançou a ascensão máxima.' };
-    if (baseChar.rarity !== 'LEGENDARY' || sacrificeChar.rarity !== 'LEGENDARY') return { success: false, message: 'Somente Digimons na fase Mega podem ascender.' };
+    if (baseChar.rarity !== 'MEGA' || sacrificeChar.rarity !== 'MEGA') return { success: false, message: 'Somente Digimons na fase Mega podem ascender.' };
     if (base.level < ASCENSION_LEVEL_REQUIREMENT || sacrifice.level < ASCENSION_LEVEL_REQUIREMENT) return { success: false, message: 'Os dois Digimons precisam estar no nível 60.' };
     if (getAscensionStars(sacrifice) !== currentStars) return { success: false, message: `O sacrifício precisa ter ${currentStars} estrela(s), igual à base.` };
     if (currentStars === 3 && !current.inventory.includes(GOLDEN_STAR_ITEM_ID)) return { success: false, message: 'A 4ª ascensão exige uma Estrela de Ascensão Dourada.' };
@@ -812,16 +833,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     } else {
       pool = [
         // Comum (10 slots)
-        { characterId: 'koromon',       raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Koromon' },
-        { characterId: 'agumon',        raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Agumon' },
-        { characterId: 'tsunomon',      raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Tsunomon' },
-        { characterId: 'gabumon',       raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Gabumon' },
-        { characterId: 'salamon',       raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Salamon' },
-        { characterId: 'blackSalamon',  raridade: 'Comum',    tipo: 'DIGIMON', nome: 'BlackSalamon' },
-        { characterId: 'palmon',        raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Palmon' },
-        { characterId: 'pyomon',        raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Pyomon' },
-        { characterId: 'demiDevimon',   raridade: 'Comum',    tipo: 'DIGIMON', nome: 'DemiDevimon' },
-        { characterId: 'tokomon',       raridade: 'Comum',    tipo: 'DIGIMON', nome: 'Tokomon' },
+        { characterId: 'koromon',       raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Koromon' },
+        { characterId: 'agumon',        raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Agumon' },
+        { characterId: 'tsunomon',      raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Tsunomon' },
+        { characterId: 'gabumon',       raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Gabumon' },
+        { characterId: 'salamon',       raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Salamon' },
+        { characterId: 'blackSalamon',  raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'BlackSalamon' },
+        { characterId: 'palmon',        raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Palmon' },
+        { characterId: 'pyomon',        raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Pyomon' },
+        { characterId: 'demiDevimon',   raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'DemiDevimon' },
+        { characterId: 'tokomon',       raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Tokomon' },
         // Especial (6 slots)
         { characterId: findCharacterIdByName('Dorulumon') ?? 'custom_356', raridade: 'Especial', tipo: 'DIGIMON', nome: 'Dorulumon' },
         { characterId: 'magnaAngemon',  raridade: 'Especial', tipo: 'DIGIMON', nome: 'MagnaAngemon' },
@@ -830,9 +851,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         { characterId: 'wereGarurumon', raridade: 'Especial', tipo: 'DIGIMON', nome: 'WereGarurumon' },
         { characterId: 'garudamon',     raridade: 'Especial', tipo: 'DIGIMON', nome: 'Garudamon' },
         // Raro (3 slots)
-        { characterId: 'permissao_real', raridade: 'Raro',   tipo: 'ITEM',    nome: '⚔️ Permição Real da Deusa' },
-        { characterId: 'dorumon',        raridade: 'Raro',   tipo: 'DIGIMON', nome: 'Dorumon' },
-        { characterId: 'custom_313',     raridade: 'Raro',   tipo: 'DIGIMON', nome: 'Ryudamon' },
+        { characterId: 'permissao_real', raridade: 'Champion',   tipo: 'ITEM',    nome: '⚔️ Permição Real da Deusa' },
+        { characterId: 'dorumon',        raridade: 'Champion',   tipo: 'DIGIMON', nome: 'Dorumon' },
+        { characterId: 'custom_313',     raridade: 'Champion',   tipo: 'DIGIMON', nome: 'Ryudamon' },
       ];
     }
 
@@ -880,7 +901,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     for (let i = 0; i < quantidade; i++) {
       // 1% fixed chance for Digitama Especial (only via percentage, never via pity guarantees)
       if (Math.random() < TAXA_DIGITAMA_ESPECIAL) {
-        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'Raro', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
+        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'Champion', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
         continue;
       }
 
@@ -888,7 +909,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       if (pity >= 50) {
         // Guaranteed Raro at 50 pity — picks from Raro pool (excludes Digitama which is percentage-only)
-        recompensas.push(pickFrom('Raro'));
+        recompensas.push(pickFrom('Champion'));
         pity = 0;
         continue;
       }
@@ -900,12 +921,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const rng = Math.random();
       let raridade: GachaReward['raridade'];
       if (rng < TAXA_RARO) {
-        raridade = 'Raro';
+        raridade = 'Champion';
         pity = 0;
       } else if (rng < TAXA_RARO + TAXA_ESPECIAL) {
         raridade = 'Especial';
       } else {
-        raridade = 'Comum';
+        raridade = 'Rookie';
       }
       recompensas.push(pickFrom(raridade));
     }
@@ -984,12 +1005,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (msg.reward?.bits) newBits += msg.reward.bits;
       if (msg.reward?.items) {
         for (const itemId of msg.reward.items) {
-          if (!newInventory.includes(itemId)) newInventory.push(itemId);
+          const migratedItemId = migrateEvolutionItemId(itemId);
+          if (!newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
         }
       }
       if (msg.reward?.pieces) {
         for (const [pieceId, amount] of Object.entries(msg.reward.pieces)) {
-          newPieces[pieceId] = (newPieces[pieceId] ?? 0) + amount;
+          const migratedPieceId = migrateEvolutionPieceId(pieceId);
+          newPieces[migratedPieceId] = (newPieces[migratedPieceId] ?? 0) + amount;
         }
       }
       if (msg.reward?.digimon) {
@@ -1605,9 +1628,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         collection,
         scanProgress: parsed.scanProgress ?? {},
         gender: parsed.gender ?? 'M',
-        inventory: parsed.inventory ?? DEFAULT_INVENTORY,
+        inventory: migrateEvolutionInventory(parsed.inventory ?? DEFAULT_INVENTORY),
         equippedItems: { ...defaultEquipped, ...(parsed.equippedItems ?? {}) },
-        pieces: parsed.pieces ?? {},
+        pieces: migrateEvolutionPieces(parsed.pieces ?? {}),
         bits: parsed.bits ?? 0,
         tamerExp: parsed.tamerExp ?? 0,
         tamerLevel: parsed.tamerLevel ?? 1,
