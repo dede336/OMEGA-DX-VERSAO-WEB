@@ -196,7 +196,7 @@ function DetailModal({
                 backgroundColor: hasEnoughBits ? '#facc1518' : colors.background,
                 borderColor: hasEnoughBits ? '#facc15' : colors.border,
               }, pixelStyle]}>
-                <Image source={require('../../assets/images/bits-icon.webp')} style={{ width: 16, height: 16, opacity: hasEnoughBits ? 1 : 0.4 }} resizeMode="contain" />
+                <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 16, height: 16, opacity: hasEnoughBits ? 1 : 0.4 }} resizeMode="contain" />
                 <Text style={[chipStyles.name, { color: hasEnoughBits ? '#facc15' : colors.mutedForeground, flex: 1 }]}>Bits</Text>
                 <Text style={[chipStyles.count, { color: hasEnoughBits ? '#facc15' : colors.mutedForeground }]}>
                   {bits.toLocaleString()}/{(recipe.bitsCost ?? 0).toLocaleString()}
