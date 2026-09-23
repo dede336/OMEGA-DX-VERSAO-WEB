@@ -42,7 +42,7 @@ type ObtainMethod =
   | { type: 'mail'; rank: number }
   | { type: 'evolution'; from: string; level: number; item?: string }
   | { type: 'altEvo'; from: string; level: number; sacrifice?: string; sacrifices?: string[]; item?: string }
-  | { type: 'fusion'; a: string; b: string; level: number }
+  | { type: 'fusion'; a: string; b?: string; sacrifices?: string[]; level: number; item?: string }
   | { type: 'customEvo'; fromId: string; fromName: string; level?: number; item?: string }
   | { type: 'customFusion'; partnerAId: string; partnerAName: string; partnerBId: string; partnerBName: string }
   | { type: 'adminGift' };
