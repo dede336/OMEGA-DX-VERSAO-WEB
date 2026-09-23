@@ -433,7 +433,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
-    setState(defaultState);
+    // IMPORTANT: do not clear the current in-memory state before the persisted
+    // save has been read. A transient auth/storage delay must never create a
+    // default save that can later be synchronized over real player progress.
     AsyncStorage.getItem(storageKey).then((raw) => {
       if (cancelled) return;
       if (raw) {
@@ -481,7 +483,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
             ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
           });
-        } catch {}
+        } catch {
+          // Corrupt/unreadable local data must not reset a live player state.
+          // Keep the current state and let cloud recovery try to restore it.
+        }
       }
       setLoaded(true);
     });
@@ -497,16 +502,43 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [gachaAdminPool]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const isMeaningfulSave = useCallback((candidate: Partial<GameState> | null | undefined): boolean => {
+    if (!candidate) return false;
+    return Boolean(
+      candidate.isOnboarded
+      || (candidate.playerName && candidate.playerName.trim().length > 0)
+      || (candidate.collection && candidate.collection.length > 0)
+      || (candidate.team && candidate.team.length > 0)
+      || ((candidate.tamerLevel ?? 1) > 1)
+      || ((candidate.tamerExp ?? 0) > 0)
+      || ((candidate.bits ?? 0) > 0)
+      || ((candidate.gemas ?? 1000) !== 1000)
+      || (candidate.clearedStages && Object.keys(candidate.clearedStages).length > 0)
+    );
+  }, []);
   useEffect(() => {
     if (!loaded) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      AsyncStorage.setItem(storageKey, JSON.stringify({ ...state, _savedAt: Date.now() }));
+    saveTimerRef.current = setTimeout(async () => {
+      // Never overwrite an existing meaningful save with a default/empty state.
+      if (!isMeaningfulSave(state)) {
+        const existingRaw = await AsyncStorage.getItem(storageKey);
+        if (existingRaw) {
+          try {
+            const existing = JSON.parse(existingRaw) as Partial<GameState>;
+            if (isMeaningfulSave(existing)) return;
+          } catch {
+            return;
+          }
+        }
+      }
+      await AsyncStorage.setItem(storageKey, JSON.stringify({ ...state, _savedAt: Date.now() }));
     }, 2000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [state, loaded, storageKey]);
+  }, [state, loaded, storageKey, isMeaningfulSave]);
 
 
   const addToCollection = useCallback((characterId: string) => {
@@ -1607,6 +1639,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const { saveData, isAdmin, isDede, updatedAt } = payload;
       if (!saveData) return;
 
+      // A blank/default cloud record must never replace meaningful local progress.
+      const localBeforeCloudRaw = await AsyncStorage.getItem(storageKey);
+      if (!isMeaningfulSave(saveData) && localBeforeCloudRaw) {
+        try {
+          const localBeforeCloud = JSON.parse(localBeforeCloudRaw) as Partial<GameState>;
+          if (isMeaningfulSave(localBeforeCloud)) return;
+        } catch {
+          return;
+        }
+      }
+
       // Compare timestamps: if local save is newer, keep local but still merge new server messages
       const localRaw = await AsyncStorage.getItem(storageKey);
       if (localRaw) {
@@ -1699,7 +1742,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Garante que erros de rede não deixam o app travado na tela de carregamento
       setCustomCharsReady(true);
     }
-  }, [storageKey]);
+  }, [storageKey, isMeaningfulSave]);
 
   const resetGame = useCallback(async () => {
     await AsyncStorage.removeItem(storageKey);
