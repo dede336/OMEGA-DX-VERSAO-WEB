@@ -46,7 +46,6 @@ const RARITY_SLOTS: { key: GachaPoolEntry['raridade']; label: string; color: str
 ];
 
 function normalizeGachaPoolEntry(entry: GachaPoolEntry): GachaPoolEntry {
-  const configuredName = entry.nome?.replace(/^✨\s*/, '');
   const knownName = getKnownCharacterName(entry.characterId ?? entry.id);
   if (entry.tipo !== 'DIGIMON' || !knownName) return entry;
   return {
