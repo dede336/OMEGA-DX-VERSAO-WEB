@@ -114,10 +114,8 @@ export const CHARACTERS: Record<string, Character> = {
     element: 'WIND',
     baseStats: { hp: 188, mp: 174, atk: 126, def: 108, spt: 102, spd: 114, apt: 35 },
     description: 'Digimon Champion que domina correntes de vento e lâminas de energia. Sua velocidade abre caminho através das defesas inimigas.',
-    attackName: 'Arest Blade',
-    spiritName: 'Chain Hurricane',
-    attackElement: 'WIND',
-    spiritElement: 'WIND',
+    attackName: 'Flog Shot ⚔️',
+    spiritName: 'Spin Caliber ⚔️',
   },
   agumonHakase: {
     id: 'agumonHakase',
@@ -711,6 +709,10 @@ export const CHARACTERS: Record<string, Character> = {
     attribute: 'VC',
     element: 'FIRE',
     baseStats: { hp: 320, mp: 335, atk: 171, def: 146, spt: 126, spd: 122, apt: 72 },
+    attackName: 'Dramon Killer ⚙️',
+    attackElement: 'STEEL',
+    spiritName: 'Gaia Force 🔥',
+    spiritElement: 'FIRE',
     description: 'O ápice da evolução do Agumon. Guerreiro lendário do tipo Vacina revestido por armadura Dramon Destroyer, capaz de destruir qualquer Dragonoid.',
   },
   silphymon: {
