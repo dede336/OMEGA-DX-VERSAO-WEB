@@ -112,12 +112,18 @@ function SpinningResultBubble({ reward }: { reward: GachaReward | null }) {
   const tX = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, 10, 0, -10, 0] });
   const tY = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [-10, 0, 10, 0, -10] });
 
-  const img = reward ? getGachaImageSource(reward.characterId, reward.nome) : null;
+  const isSpecialDigitama = reward?.characterId === 'custom_1550'
+    || reward?.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+  const img = reward && !isSpecialDigitama ? getGachaImageSource(reward.characterId, reward.nome) : null;
 
   return (
     <Animated.View style={{ transform: [{ translateX: tX }, { translateY: tY }, { rotate }] }}>
       <View style={styles.pullBubbleContainer}>
-        {img && <Image source={img} style={styles.pullBubblePrize} resizeMode="contain" />}
+        {isSpecialDigitama ? (
+          <AnimatedEgg characterId={reward!.characterId} element="SPECIAL" size={70} />
+        ) : img ? (
+          <Image source={img} style={styles.pullBubblePrize} resizeMode="contain" />
+        ) : null}
         <Image source={BUBBLE_IMG} style={styles.pullBubbleImg} resizeMode="contain" />
       </View>
     </Animated.View>
