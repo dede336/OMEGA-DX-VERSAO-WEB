@@ -189,7 +189,7 @@ function DigiCard({
   const colors = useColors();
   const char = getCharacter(charId) ?? CHARACTERS[charId];
   const name = char?.name ?? charId;
-  const rarity = (char?.rarity ?? 'COMMON') as RarityId;
+  const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
   const fusionPartner = FUSIONS[charId]?.partner;
   const fusionName = fusionPartner
@@ -282,7 +282,7 @@ function BranchNavigator({
   const selectedChild = children[selectedIndex];
   const char = getCharacter(selectedChild.id) ?? CHARACTERS[selectedChild.id];
   const name = char?.name ?? selectedChild.id;
-  const rarity = (char?.rarity ?? 'COMMON') as RarityId;
+  const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
 
   return (
@@ -358,7 +358,7 @@ function EvoConditionsModal({
   if (!selected) return null;
 
   const char = getCharacter(selected.charId) ?? CHARACTERS[selected.charId];
-  const rarity = (char?.rarity ?? 'COMMON') as RarityId;
+  const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
   const name = char?.name ?? selected.charId;
   const cond = selected.conditions;
@@ -511,7 +511,7 @@ function FullTreeNodeCard({
   charId: string; isCurrent: boolean; tamerAccent?: string; onPress?: () => void;
 }) {
   const char = getCharacter(charId) ?? CHARACTERS[charId];
-  const rarity = (char?.rarity ?? 'COMMON') as RarityId;
+  const rarity = (char?.rarity ?? 'ROOKIE') as RarityId;
   const stageColor = RARITY_COLORS[rarity] ?? '#888';
 
   return (
