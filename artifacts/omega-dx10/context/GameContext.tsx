@@ -205,7 +205,7 @@ interface GameContextValue extends GameState {
   createFromScan: (characterId: string) => void;
   evolveDigimon: (ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean, selectedItemId?: string) => boolean;
   changeFormDigimon: (ownedId: string) => void;
-  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string) => boolean;
+  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string, selectedItemId?: string) => boolean;
   sacrificeDigimon: (ownedId: string) => SacrificeResult;
   totalPlayerLevel: number;
   setGender: (g: TamerGender) => void;
@@ -692,7 +692,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string): boolean => {
+  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string, selectedItemId?: string): boolean => {
     let success = false;
     setState((prev) => {
       const keep = prev.collection.find((c) => c.ownedId === keepOwnedId);
@@ -719,7 +719,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!fusion || keep.level < fusion.requiredLevel) return prev;
-      if (fusion.requiredItem && !prev.inventory.includes(fusion.requiredItem)) return prev;
+      if (fusion.requiredItem && (!selectedItemId || selectedItemId !== fusion.requiredItem || !prev.inventory.includes(selectedItemId))) return prev;
 
       const sacrificeSet = new Set(sacrifices.map((owned) => owned.ownedId));
       const newSelected = sacrificeSet.has(prev.selectedOwnedId ?? '') ? keepOwnedId : prev.selectedOwnedId;
@@ -727,7 +727,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       let inventory = prev.inventory;
       if (fusion.requiredItem) {
-        const itemIndex = inventory.indexOf(fusion.requiredItem);
+        const itemIndex = inventory.indexOf(selectedItemId!);
         if (itemIndex < 0) return prev;
         inventory = inventory.filter((_, index) => index !== itemIndex);
       }
