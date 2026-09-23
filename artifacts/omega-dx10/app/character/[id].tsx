@@ -101,6 +101,7 @@ export default function CharacterDetailScreen() {
 
   const [confirmFuseVisible, setConfirmFuseVisible] = useState(false);
   const [fuseSacrificeId, setFuseSacrificeId] = useState<string | null>(null);
+  const [selectedFusionResultId, setSelectedFusionResultId] = useState<string | null>(null);
   const [partnerPickerVisible, setPartnerPickerVisible] = useState(false);
 
   const [xpModalVisible, setXpModalVisible] = useState(false);
@@ -194,43 +195,43 @@ export default function CharacterDetailScreen() {
 
   // ── Fusion info ─────────────────────────────────────────────────────────────
   const fusionRecipes = FUSIONS[owned.characterId] ?? [];
-  const singlePartnerRecipes = fusionRecipes.filter((recipe) => !!recipe.partner && !(recipe.partners?.length));
-  const allPartnerCopies = collection.filter((copy) =>
-    singlePartnerRecipes.some((recipe) => recipe.partner === copy.characterId)
-  );
+  const fusionRecipe =
+    fusionRecipes.find((recipe) => recipe.resultId === selectedFusionResultId) ??
+    fusionRecipes.find((recipe) => {
+      const required = recipe.partners ?? (recipe.partner ? [recipe.partner] : []);
+      return required.every((partnerId) =>
+        collection.some((copy) => copy.ownedId !== owned.ownedId && copy.characterId === partnerId)
+      );
+    }) ??
+    fusionRecipes[0] ??
+    null;
+
+  const requiredPartnerIds = fusionRecipe
+    ? (fusionRecipe.partners ?? (fusionRecipe.partner ? [fusionRecipe.partner] : []))
+    : [];
   const selectedFusionSacrifice = fuseSacrificeId
     ? collection.find((copy) => copy.ownedId === fuseSacrificeId) ?? null
     : null;
-  const fusionRecipe = selectedFusionSacrifice
-    ? singlePartnerRecipes.find((recipe) => recipe.partner === selectedFusionSacrifice.characterId) ?? null
-    : singlePartnerRecipes.find((recipe) =>
-        collection.some((copy) => copy.characterId === recipe.partner)
-      ) ?? singlePartnerRecipes[0] ?? null;
-  const partnerOwned = selectedFusionSacrifice ?? allPartnerCopies[0] ?? null;
+  const allPartnerCopies = fusionRecipe?.partner
+    ? collection.filter((copy) => copy.ownedId !== owned.ownedId && copy.characterId === fusionRecipe.partner)
+    : [];
+  const selectedMultiSacrifices = fusionRecipe?.partners
+    ? fusionRecipe.partners.map((partnerId) =>
+        collection.find((copy) => copy.ownedId !== owned.ownedId && copy.characterId === partnerId)
+      ).filter((copy): copy is NonNullable<typeof copy> => !!copy)
+    : [];
   const resultChar = fusionRecipe ? (getCharacter(fusionRecipe.resultId) ?? null) : null;
   const partnerChar = fusionRecipe?.partner ? (getCharacter(fusionRecipe.partner) ?? null) : null;
+  const partnerOwned = selectedFusionSacrifice ?? allPartnerCopies[0] ?? null;
   const meetsLevel = !!(fusionRecipe && owned.level >= fusionRecipe.requiredLevel);
-  const canFuse = !!(fusionRecipe && partnerOwned && meetsLevel);
+  const hasAllPartners = !!fusionRecipe && (
+    fusionRecipe.partners
+      ? selectedMultiSacrifices.length === fusionRecipe.partners.length
+      : !!partnerOwned
+  );
+  const canFuse = !!(fusionRecipe && meetsLevel && hasAllPartners);
 
-  function handleFusePress() {
-    if (allPartnerCopies.length === 0) return;
-    if (allPartnerCopies.length === 1) {
-      setFuseSacrificeId(allPartnerCopies[0].ownedId);
-      setConfirmFuseVisible(true);
-    } else {
-      setPartnerPickerVisible(true);
-    }
-  }
-
-  function handleFuseConfirm() {
-    if (!fuseSacrificeId || !owned || !selectedFusionSacrifice) return;
-    const selectedRecipe = singlePartnerRecipes.find(
-      (recipe) => recipe.partner === selectedFusionSacrifice.characterId
-    );
-    if (!selectedRecipe) return;
-    setConfirmFuseVisible(false);
-    const fused = fuseDigimon(owned.ownedId, fuseSacrificeId, selectedRecipe.resultId);
-    if (!fused) return;
+  function startFusionAnimation(recipe: NonNullable<typeof fusionRecipe>) {
     newFormOpacity.setValue(0);
     titleScale.setValue(0.7);
     fusionCoreOpacity.setValue(0);
@@ -240,7 +241,38 @@ export default function CharacterDetailScreen() {
     rightPosition.setValue(170);
     fusionPairOpacity.setValue(1);
     setFusePhase('playing');
-    setFuseAnim({ fromCharId: owned.characterId, partnerCharId: selectedRecipe.partner!, toCharId: selectedRecipe.resultId });
+    const animationPartner = recipe.partner ?? recipe.partners?.[0] ?? owned.characterId;
+    setFuseAnim({ fromCharId: owned.characterId, partnerCharId: animationPartner, toCharId: recipe.resultId });
+  }
+
+  function handleFusePress() {
+    if (!fusionRecipe || !canFuse) return;
+    setSelectedFusionResultId(fusionRecipe.resultId);
+
+    if (fusionRecipe.partners?.length) {
+      setConfirmFuseVisible(true);
+      return;
+    }
+    if (allPartnerCopies.length === 1) {
+      setFuseSacrificeId(allPartnerCopies[0].ownedId);
+      setConfirmFuseVisible(true);
+    } else if (allPartnerCopies.length > 1) {
+      setPartnerPickerVisible(true);
+    }
+  }
+
+  function handleFuseConfirm() {
+    if (!fusionRecipe || !owned) return;
+
+    const sacrificeIds = fusionRecipe.partners?.length
+      ? selectedMultiSacrifices.map((copy) => copy.ownedId)
+      : (fuseSacrificeId ? [fuseSacrificeId] : []);
+
+    if (sacrificeIds.length !== requiredPartnerIds.length) return;
+    setConfirmFuseVisible(false);
+    const fused = fuseDigimon(owned.ownedId, sacrificeIds, fusionRecipe.resultId);
+    if (!fused) return;
+    startFusionAnimation(fusionRecipe);
   }
 
   // ── Element background pulse ────────────────────────────────────────────────
@@ -402,7 +434,7 @@ export default function CharacterDetailScreen() {
           <StatBar label="SPD" value={scaled.spd} max={250} color="#facc15" />
         </View>
 
-        {fusionRecipe && resultChar && partnerChar && (
+        {fusionRecipe && resultChar && (
           <View style={[styles.fusionCard, {
             backgroundColor: colors.card,
             borderColor: canFuse ? '#ff3c6e88' : colors.border,
@@ -412,40 +444,15 @@ export default function CharacterDetailScreen() {
               <Text style={[styles.fusionTitle, { color: canFuse ? '#ff3c6e' : colors.foreground }]}>
                 {t('char.fusion')} {resultChar.name}
               </Text>
-              <View style={[styles.ultraPill, { backgroundColor: '#ff3c6e22', borderColor: '#ff3c6e66' }]}>
-                <Text style={styles.ultraPillText}>ULTRA</Text>
-              </View>
             </View>
 
-            {/* Diagram */}
-            <View style={styles.fusionRow}>
-              <View style={styles.fusionSide}>
-                <CharacterAvatar characterId={owned.characterId} size={64} />
-                <Text style={[styles.fusionName, { color: colors.foreground }]}>{char.name}</Text>
-                <Text style={[styles.fusionSub, { color: colors.primary }]}>Lv {owned.level}</Text>
-              </View>
-              <View style={styles.fusionCenter}>
-                <Feather name="plus" size={20} color={canFuse ? '#ff3c6e' : colors.mutedForeground} />
-                <Text style={[styles.fusionArrow, { color: canFuse ? '#ff3c6e' : colors.mutedForeground }]}>→</Text>
-              </View>
-              <View style={styles.fusionSide}>
-                <CharacterAvatar characterId={fusionRecipe.partner} size={64} dimmed={!canFuse} />
-                <Text style={[styles.fusionName, { color: canFuse ? colors.foreground : colors.mutedForeground }]}>
-                  {partnerChar.name}
-                </Text>
-                <Text style={[styles.fusionSub, { color: canFuse ? colors.primary : colors.mutedForeground }]}>
-                  {canFuse ? `Lv ${partnerOwned!.level}` : t('char.notObtained')}
-                </Text>
-              </View>
-              <View style={styles.fusionCenter}>
-                <Feather name="chevrons-right" size={20} color={canFuse ? '#ff3c6e' : colors.mutedForeground} />
-              </View>
-              <View style={styles.fusionSide}>
-                <CharacterAvatar characterId={fusionRecipe.resultId} size={64} />
-                <Text style={[styles.fusionName, { color: canFuse ? '#ff3c6e' : colors.mutedForeground }]}>
-                  {resultChar.name}
-                </Text>
-              </View>
+            <View style={{ gap: 8, marginVertical: 12 }}>
+              <Text style={[styles.fusionName, { color: colors.foreground }]}>
+                {char.name} + {requiredPartnerIds.map((partnerId) => (getCharacter(partnerId) ?? CHARACTERS[partnerId])?.name ?? partnerId).join(' + ')}
+              </Text>
+              <Text style={[styles.fusionSub, { color: canFuse ? '#ff3c6e' : colors.mutedForeground }]}>
+                → {resultChar.name} · Lv {fusionRecipe.requiredLevel}
+              </Text>
             </View>
 
             {canFuse ? (
@@ -457,19 +464,13 @@ export default function CharacterDetailScreen() {
                 <Feather name="git-merge" size={18} color="#fff" />
                 <Text style={styles.fuseBtnText}>{t('char.fuseBtn')} {resultChar.name}</Text>
               </TouchableOpacity>
-            ) : !meetsLevel ? (
-              <View style={[styles.fuseLocked, { backgroundColor: colors.background, borderColor: '#f59e0b66' }, pixelStyle]}>
-                <Feather name="trending-up" size={14} color="#f59e0b" />
-                <Text style={[styles.fuseLockedText, { color: '#f59e0b' }]}>
-                  {t('char.fuseLevelReq')} {fusionRecipe.requiredLevel} {t('char.fuseLevelReqSub')}
-                  {' '}({t('char.fuseLevelMissing')} {fusionRecipe.requiredLevel - owned.level} {t('char.fuseLevelMissingSub')})
-                </Text>
-              </View>
             ) : (
               <View style={[styles.fuseLocked, { backgroundColor: colors.background, borderColor: colors.border }, pixelStyle]}>
                 <Feather name="lock" size={14} color={colors.mutedForeground} />
                 <Text style={[styles.fuseLockedText, { color: colors.mutedForeground }]}>
-                  {t('char.fuseNeedPartner')} {partnerChar.name} {t('char.fuseNeedPartnerSub')}
+                  {!meetsLevel
+                    ? `Lv ${fusionRecipe.requiredLevel} necessário`
+                    : `Necessário: ${requiredPartnerIds.map((partnerId) => (getCharacter(partnerId) ?? CHARACTERS[partnerId])?.name ?? partnerId).join(', ')}`}
                 </Text>
               </View>
             )}
@@ -698,16 +699,19 @@ export default function CharacterDetailScreen() {
             <Feather name="alert-triangle" size={28} color="#ff3c6e" style={{ alignSelf: 'center' }} />
             <Text style={[styles.confirmTitle, { color: colors.foreground }]}>{t('char.fuseConfirmTitle')}</Text>
             <Text style={[styles.confirmBody, { color: colors.mutedForeground }]}>
-              {partnerChar?.name}{' '}
+              {requiredPartnerIds.map((partnerId) => (getCharacter(partnerId) ?? CHARACTERS[partnerId])?.name ?? partnerId).join(', ')}{' '}
               <Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{t('char.fuseConfirmPermanent')}</Text>
               {' '}<Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{resultChar?.name}</Text>.
               {'\n\n'}{t('char.fuseConfirmUndo')}
             </Text>
             <Text style={{ color: '#facc15', fontSize: 12, lineHeight: 17, textAlign: 'center', marginBottom: 12 }}>
               Na fusão, prevalece a menor quantidade de estrelas.
-              {selectedFusionSacrifice
-                ? `\n${getAscensionStars(owned)}★ + ${getAscensionStars(selectedFusionSacrifice)}★ → ${Math.min(getAscensionStars(owned), getAscensionStars(selectedFusionSacrifice))}★`
-                : ''}
+              {(() => {
+                const sacrifices = fusionRecipe?.partners?.length ? selectedMultiSacrifices : (selectedFusionSacrifice ? [selectedFusionSacrifice] : []);
+                if (sacrifices.length === 0) return '';
+                const stars = [getAscensionStars(owned), ...sacrifices.map(getAscensionStars)];
+                return `\n${stars.map((star) => `${star}★`).join(' + ')} → ${Math.min(...stars)}★`;
+              })()}
             </Text>
             <View style={styles.confirmBtnRow}>
               <TouchableOpacity
