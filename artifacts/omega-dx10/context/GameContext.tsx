@@ -144,12 +144,21 @@ export interface GachaReward {
   tipo?: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
 }
 
+export type GachaRarity = 'COMUM' | 'RARO' | 'ULTRA_RARO' | 'EPICO';
+
+export interface GachaReward {
+  characterId: string;
+  raridade: GachaRarity;
+  nome?: string;
+  tipo?: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
+}
+
 export interface GachaPoolEntry {
   id: string;
   nome: string;
   tipo: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
   characterId?: string;
-  raridade: 'Rookie' | 'Especial' | 'Champion';
+  raridade: GachaRarity;
 }
 
 interface GameState {
