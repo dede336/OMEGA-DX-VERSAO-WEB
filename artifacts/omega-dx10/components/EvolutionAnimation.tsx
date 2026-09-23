@@ -313,13 +313,13 @@ const styles = StyleSheet.create({
    * 220 x 220
    *
    * Agora:
-   * 154 x 154
+   * 108 x 108
    *
    * 220 × 0,70 = 154
    */
   digimon: {
-    width: 154,
-    height: 154,
+    width: 108,
+    height: 108,
   },
 
 
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
    *
    * Portanto:
    *
-   * Digimon = 154 x 154
+   * Digimon = 108 x 108
    * GIF      = 320 x 320
    *
    * O efeito fica claramente maior
