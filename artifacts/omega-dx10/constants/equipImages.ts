@@ -31,7 +31,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   piece_black_digitron: require('../assets/images/items/black_digitron.webp'),
   x_antibody:           require('../assets/images/items/x_antibody.webp'),
   piece_x_antibody:     require('../assets/images/items/x_antibody.webp'),
-  piece_golden_ascension_star: require('../assets/images/items/golden_star_fragment.png'),
+  piece_golden_ascension_star: require('../assets/images/items/golden_star_fragment.gif'),
 };
 
 export default EQUIP_ITEM_IMAGES;
