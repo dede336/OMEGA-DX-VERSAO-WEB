@@ -56,6 +56,12 @@ export const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
   custom_356: 'dorulumon',
 };
 
+// The special Digitama keeps its player-facing name, but uses the bundled
+// Digitamamon artwork when the custom API image is unavailable.
+const CUSTOM_CHARACTER_IMAGE_ALIASES: Record<string, string> = {
+  custom_1550: 'Digitamamon',
+};
+
 // Spirit sacrifice drops: when a Frontier Warrior custom digimon is sacrificed,
 // it drops its corresponding Spirit piece (used for crafting / Susanoomon evolution).
 const SPIRIT_SACRIFICE_DROPS_BY_NAME: Record<string, { itemId: string; chance: number }[]> = {
@@ -536,7 +542,7 @@ export function getCharacterImageSource(id: string): any {
 
   // The Gacha stores these legacy custom IDs. Prefer the bundled image so a
   // missing or stale API image cannot leave Ryudamon or Dorulumon blank.
-  const aliasedName = CUSTOM_CHARACTER_NAME_ALIASES[id];
+  const aliasedName = CUSTOM_CHARACTER_IMAGE_ALIASES[id] ?? CUSTOM_CHARACTER_NAME_ALIASES[id];
   if (aliasedName) {
     const aliasedImage = getCharacterImageSourceByName(aliasedName);
     if (aliasedImage) return aliasedImage;
