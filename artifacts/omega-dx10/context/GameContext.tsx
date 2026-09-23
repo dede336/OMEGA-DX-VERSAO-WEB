@@ -205,7 +205,7 @@ interface GameContextValue extends GameState {
   createFromScan: (characterId: string) => void;
   evolveDigimon: (ownedId: string, alternate?: boolean, sacrificeOwnedId?: string, alternate2?: boolean) => void;
   changeFormDigimon: (ownedId: string) => void;
-  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string) => boolean;
+  fuseDigimon: (keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string) => boolean;
   sacrificeDigimon: (ownedId: string) => SacrificeResult;
   totalPlayerLevel: number;
   setGender: (g: TamerGender) => void;
@@ -744,23 +744,53 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string): boolean => {
+  const fuseDigimon = useCallback((keepOwnedId: string, sacrificeOwnedId: string | string[], resultId?: string): boolean => {
     let success = false;
     setState((prev) => {
       const keep = prev.collection.find((c) => c.ownedId === keepOwnedId);
-      const sacrifice = prev.collection.find((c) => c.ownedId === sacrificeOwnedId);
-      if (!keep || !sacrifice) return prev;
-      const fusion = FUSIONS[keep.characterId];
-      if (!fusion || fusion.partner !== sacrifice.characterId) return prev;
-      if (keep.level < fusion.requiredLevel) return prev;
+      if (!keep) return prev;
+
+      const sacrificeIds = Array.isArray(sacrificeOwnedId) ? sacrificeOwnedId : [sacrificeOwnedId];
+      const sacrifices = sacrificeIds
+        .map((id) => prev.collection.find((c) => c.ownedId === id))
+        .filter((c): c is OwnedCharacter => !!c && c.ownedId !== keepOwnedId);
+      if (sacrifices.length !== sacrificeIds.length) return prev;
+
+      const recipes = FUSIONS[keep.characterId] ?? [];
+      const fusion = recipes.find((recipe) => {
+        if (resultId && recipe.resultId !== resultId) return false;
+        const requiredPartners = recipe.partners ?? (recipe.partner ? [recipe.partner] : []);
+        if (requiredPartners.length !== sacrifices.length) return false;
+        const remaining = [...sacrifices];
+        return requiredPartners.every((partnerId) => {
+          const index = remaining.findIndex((owned) => owned.characterId === partnerId);
+          if (index < 0) return false;
+          remaining.splice(index, 1);
+          return true;
+        });
+      });
+
+      if (!fusion || keep.level < fusion.requiredLevel) return prev;
+      if (fusion.requiredItem && !prev.inventory.includes(fusion.requiredItem)) return prev;
+
+      const sacrificeSet = new Set(sacrifices.map((owned) => owned.ownedId));
+      const newSelected = sacrificeSet.has(prev.selectedOwnedId ?? '') ? keepOwnedId : prev.selectedOwnedId;
+      const fusionStars = resolveMailGiftFusionStars(keep, sacrifices);
+
+      let inventory = prev.inventory;
+      if (fusion.requiredItem) {
+        const itemIndex = inventory.indexOf(fusion.requiredItem);
+        if (itemIndex < 0) return prev;
+        inventory = inventory.filter((_, index) => index !== itemIndex);
+      }
+
       success = true;
-      const newSelected = prev.selectedOwnedId === sacrificeOwnedId ? keepOwnedId : prev.selectedOwnedId;
-      const fusionStars = resolveMailGiftFusionStars(keep, [sacrifice]);
       return {
         ...prev,
+        inventory,
         selectedOwnedId: newSelected,
         collection: prev.collection
-          .filter((c) => c.ownedId !== sacrificeOwnedId)
+          .filter((c) => !sacrificeSet.has(c.ownedId))
           .map((c) => c.ownedId === keepOwnedId
             ? { ...c, characterId: fusion.resultId, level: 1, exp: 0, acquisitionMethod: 'fusion' as const, ...fusionStars }
             : c),
