@@ -46,6 +46,7 @@ export default function MochilaScreen() {
   const [energyPillQty, setEnergyPillQty] = useState(1);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [cardMessage, setCardMessage] = useState('');
+  const [cardActivationVisible, setCardActivationVisible] = useState(false);
 
   const topPad = 0;
   const botPad = insets.bottom + 20;
@@ -389,7 +390,11 @@ export default function MochilaScreen() {
                     if (!selectedCardId) return;
                     const result = applyCardToDigivice(selectedCardId, digiviceId);
                     setCardMessage(result.message);
-                    if (result.success) setSelectedCardId(null);
+                    if (result.success) {
+                      setSelectedCardId(null);
+                      setCardActivationVisible(true);
+                      setTimeout(() => setCardActivationVisible(false), 1800);
+                    }
                   }}
                 >
                   <Image source={getEquipItemImage(digiviceId, game.tamerId)} style={styles.pickerItemImg} resizeMode="contain" />
@@ -406,6 +411,16 @@ export default function MochilaScreen() {
             </TouchableOpacity>
           </Pressable>
         </Pressable>
+      </Modal>
+
+      <Modal visible={cardActivationVisible} transparent animationType="fade">
+        <View style={styles.cardActivationOverlay} pointerEvents="none">
+          <Image
+            source={require('../../assets/images/animação_card.gif')}
+            style={styles.cardActivationGif}
+            resizeMode="contain"
+          />
+        </View>
       </Modal>
 
       {/* ── Materiais e fragmentos obtidos ── */}
@@ -792,6 +807,16 @@ const styles = StyleSheet.create({
     width: '47%', minHeight: 118, borderRadius: 14, borderWidth: 1.5,
     padding: 12, alignItems: 'center', justifyContent: 'center', gap: 7,
     position: 'relative',
+  },
+  cardActivationOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardActivationGif: {
+    width: '86%',
+    height: '62%',
   },
   inventoryImage: { width: 52, height: 52 },
   inventoryName: { fontSize: 11, fontWeight: '800' as const, textAlign: 'center' as const },
