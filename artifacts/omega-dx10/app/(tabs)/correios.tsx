@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Image,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -22,7 +21,6 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 
 const CHARACTER_IMAGES = new Proxy({} as Record<string, any>, { get: (_t, p) => _getCharImg(String(p)) });
-const SAVE_KEY = 'omega_dx10_save_v3';
 
 function formatDate(ts: number): string {
   const d = new Date(ts);
@@ -33,7 +31,7 @@ export default function CorreiosScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const game = useGame();
-  const { messages, tamerLevel, readMessage, claimReward, loadFromCloud } = game;
+  const { messages, tamerLevel, readMessage, loadFromCloud } = game;
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
 
@@ -49,9 +47,15 @@ export default function CorreiosScreen() {
 
     if (reward?.bits) newBits += reward.bits;
     if (reward?.items) {
-      for (const itemId of reward.items) {
-        const migratedItemId = migrateEvolutionItemId(itemId);
-        if (!newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
+      for (const entry of reward.items) {
+        const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
+        const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
+        const migratedItemId = migrateEvolutionItemId(rawItemId);
+        if (migratedItemId === 'pilula_energetica') {
+          for (let i = 0; i < amount; i += 1) newInventory.push(migratedItemId);
+        } else if (!newInventory.includes(migratedItemId)) {
+          newInventory.push(migratedItemId);
+        }
       }
     }
     const newPieces = { ...(game.pieces ?? {}) };
@@ -103,19 +107,23 @@ export default function CorreiosScreen() {
       m.id === msgId ? { ...m, isRead: true, rewardClaimed: true } : m
     );
 
-    claimReward(msgId);
+    // Do not call claimReward here: handleClaim already computed the exact
+    // post-claim state and persists that same snapshot to the authenticated save.
+    // Applying the reward twice in parallel can race with autosave.
 
     try {
-      const raw = await AsyncStorage.getItem(SAVE_KEY);
-      const baseSave = raw ? JSON.parse(raw) : {};
+      // Build the cloud payload from the CURRENT account state, never from the
+      // old global AsyncStorage key. Reading omega_dx10_save_v3 here could replace
+      // the player's account with stale/default data while claiming mail.
       const saveData = {
-        ...baseSave,
+        ...game,
         bits: newBits,
         inventory: newInventory,
         collection: newCollection,
         pieces: newPieces,
         farmDecorInventory: newDecorInventory,
         messages: updatedMessages,
+        _savedAt: Date.now(),
       };
       await fetch(`${getApiUrl()}/saves`, {
         method: 'PUT',
@@ -123,7 +131,7 @@ export default function CorreiosScreen() {
         body: JSON.stringify({ saveData }),
       });
     } catch {}
-  }, [claimReward, game, messages, getApiUrl, token]);
+  }, [game, messages, getApiUrl, token]);
 
   useFocusEffect(useCallback(() => {
     loadFromCloud(getApiUrl());
@@ -248,11 +256,18 @@ export default function CorreiosScreen() {
                         </Text>
                       </View>
                     )}
-                    {msg.reward.items?.map((itemId) => (
-                      <View key={itemId} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
-                        <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>{t(`item.${itemId}`) || itemId}</Text>
-                      </View>
-                    ))}
+                    {msg.reward.items?.map((entry, index) => {
+                      const itemId = typeof entry === 'string' ? entry : entry.itemId;
+                      const amount = typeof entry === 'string' ? 1 : Math.max(1, Number(entry.amount) || 1);
+                      const label = ITEM_NAMES[itemId] ?? t(`item.${itemId}`) ?? itemId;
+                      return (
+                        <View key={`${itemId}_${index}`} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
+                          <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>
+                            {amount > 1 ? `${amount}× ` : ''}{label}
+                          </Text>
+                        </View>
+                      );
+                    })}
                     {msg.reward.pieces && Object.entries(msg.reward.pieces).map(([pieceId, amount]) => (
                       <View key={pieceId} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
                         <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>

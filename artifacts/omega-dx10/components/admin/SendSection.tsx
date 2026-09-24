@@ -261,7 +261,7 @@ export default function SendSection() {
     } else if (tab === 'item') {
       if (!itemId) { Alert.alert('Erro', 'Selecione um Item'); return; }
       const qty = Math.max(1, Math.min(999, Number(itemAmt) || 1));
-      doSend({ items: Array(qty).fill(itemId), itemNames: Array(qty).fill(itemName) });
+      doSend({ items: [{ itemId, amount: qty }], itemNames: [itemName] });
     } else if (tab === 'fragmento') {
       if (!fragId) { Alert.alert('Erro', 'Selecione um Fragmento'); return; }
       doSend({ fragments: [{ pieceId: fragId, amount: Number(fragAmt) || 1 }], fragmentNames: [fragName] });

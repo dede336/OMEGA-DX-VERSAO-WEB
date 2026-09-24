@@ -32,7 +32,7 @@ export default function MochilaScreen() {
   const insets = useSafeAreaInsets();
   const game = useGame();
   const {
-    inventory, equippedItems, pieces, bits, collection,
+    inventory, equippedItems, pieces, bits, collection, tamerLevel, tamerExp,
     equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem,
   } = game;
 
@@ -562,7 +562,11 @@ export default function MochilaScreen() {
             availableLabel={`Disponível: ${energyPillStock}`}
           />
 
-          <Text style={[styles.batteryTotalXp, { color: colors.primary }]}>+{(500 * energyPillQty).toLocaleString()} EXP Tamer</Text>
+          <View style={{ alignItems: 'center', gap: 4 }}>
+            <Text style={[styles.batteryModalTitle, { color: colors.foreground }]}>Tamer Lv {tamerLevel}</Text>
+            <Text style={[styles.batteryModalSubtitle, { color: colors.mutedForeground }]}>EXP atual: {tamerExp.toLocaleString()}</Text>
+            <Text style={[styles.batteryTotalXp, { color: colors.primary }]}>+{(500 * energyPillQty).toLocaleString()} EXP Tamer</Text>
+          </View>
 
           <TouchableOpacity
             style={[styles.batteryUseButton, { backgroundColor: colors.primary, opacity: energyPillStock > 0 ? 1 : 0.45 }]}
