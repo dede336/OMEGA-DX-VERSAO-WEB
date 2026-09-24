@@ -1672,7 +1672,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
           // A newer local timestamp must never make a catastrophically smaller
           // collection override a healthy cloud save (e.g. 1 local vs 77 server).
-          if (localData.isOnboarded && localSavedAt > serverUpdatedAt + 5000 && !localHasCatastrophicCollectionLoss) {
+          if (localData.isOnboarded && localSavedAt > serverUpdatedAt + 5000 && !localHasCatastrophicCollectionLoss && serverCollectionCount === 0) {
             const serverMessages: MailMessage[] = (saveData.messages ?? []) as MailMessage[];
             const serverTamerLevel = (saveData as any).tamerLevel as number | undefined;
             const serverGemas = (saveData as any).gemas as number | undefined;
