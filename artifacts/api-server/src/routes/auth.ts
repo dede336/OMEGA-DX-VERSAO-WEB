@@ -36,7 +36,7 @@ router.post("/register", async (req, res) => {
     res.status(400).json({ error: "Senha deve ter ao menos 6 caracteres" });
     return;
   }
-  const EXEMPT_USERNAMES = ["dede336", "rimuru336"];
+  const EXEMPT_USERNAMES = ["dede336"];
   const isExempt = EXEMPT_USERNAMES.includes(username.toLowerCase());
 
   const normalizedEmail = email?.trim().toLowerCase() || null;
