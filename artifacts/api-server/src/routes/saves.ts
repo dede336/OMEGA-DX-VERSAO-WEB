@@ -111,6 +111,46 @@ router.put("/", requireAuth, async (req, res) => {
       return;
     }
 
+    // Full-save regression barrier: cache/storage failures must not overwrite
+    // durable server progress even when collection size happens to look normal.
+    const numericRegression = (key: string, defaultValue = 0) => {
+      const before = Number(dbSave[key] ?? defaultValue);
+      const after = Number(merged[key] ?? defaultValue);
+      return Number.isFinite(before) && Number.isFinite(after) && before > 0 && after === 0;
+    };
+    const arrayCollapsed = (key: string) => {
+      const before = Array.isArray(dbSave[key]) ? (dbSave[key] as unknown[]).length : 0;
+      const after = Array.isArray(merged[key]) ? (merged[key] as unknown[]).length : 0;
+      return before >= 3 && after === 0;
+    };
+    const objectCollapsed = (key: string) => {
+      const before = dbSave[key] && typeof dbSave[key] === "object" && !Array.isArray(dbSave[key])
+        ? Object.keys(dbSave[key] as Record<string, unknown>).length : 0;
+      const after = merged[key] && typeof merged[key] === "object" && !Array.isArray(merged[key])
+        ? Object.keys(merged[key] as Record<string, unknown>).length : 0;
+      return before >= 3 && after === 0;
+    };
+
+    const suspiciousReset =
+      ((dbSave.isOnboarded === true || String(dbSave.playerName ?? "").trim().length > 0)
+        && merged.isOnboarded !== true
+        && String(merged.playerName ?? "").trim().length === 0)
+      || numericRegression("bits")
+      || numericRegression("tamerExp")
+      || arrayCollapsed("inventory")
+      || arrayCollapsed("team")
+      || objectCollapsed("pieces")
+      || objectCollapsed("clearedStages");
+
+    if (suspiciousReset) {
+      console.error(`[SAVE-GUARD] Blocked probable reset for user ${req.auth!.userId}`);
+      res.status(409).json({
+        error: "Save rejeitado: possível reset/regressão de progresso detectado",
+        code: "SAVE_RESET_BLOCKED",
+      });
+      return;
+    }
+
     // Always keep the highest tamerLevel (protects seeded/admin-boosted levels)
     const dbTamerLevel = (dbSave.tamerLevel as number) ?? 0;
     const clientTamerLevel = (merged.tamerLevel as number) ?? 0;

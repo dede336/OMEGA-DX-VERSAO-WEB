@@ -1691,11 +1691,26 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.status === 404) {
-        // Brand-new account: no cloud save exists yet. It MUST start clean and
-        // must never inherit the previous account's in-memory state.
+        // Brand-new account: no cloud save exists yet.
+        // IMPORTANT: never delete this account's local backup here. A cache clear,
+        // transient server mismatch or temporary 404 must not destroy recoverable progress.
+        const localRaw = await AsyncStorage.getItem(storageKey);
+        if (localRaw) {
+          try {
+            const localData = JSON.parse(localRaw) as Partial<GameState>;
+            if (isMeaningfulSave(localData)) {
+              const restoredState = { ...defaultState, ...localData } as GameState;
+              stateRef.current = restoredState;
+              setState(restoredState);
+              setLoaded(true);
+              return;
+            }
+          } catch {
+            // Keep the local bytes untouched for manual/cloud recovery.
+          }
+        }
         stateRef.current = defaultState;
         setState(defaultState);
-        await AsyncStorage.removeItem(storageKey);
         setLoaded(true);
         return;
       }
