@@ -7,7 +7,7 @@ import {
   CRAFT_RECIPES, CraftRecipe,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT,
   PRE_ROOKIE_STAGE_RARITIES,
-  EquipItem, GameMap,
+  EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS, TEMPORARY_CARD_IDS,
 } from '@/constants/gameData';
 import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
@@ -71,6 +71,16 @@ export interface OwnedCharacter {
 export interface AscensionResult {
   success: boolean;
   message: string;
+}
+
+export interface CardUseResult {
+  success: boolean;
+  message: string;
+}
+
+export interface DigiviceTemporaryCardBuff {
+  cardId: string;
+  expiresAt: number;
 }
 
 type EquippedItems = Record<EquipSlot, string | null>;
@@ -197,6 +207,8 @@ interface GameState {
   farmDecorInventory: Record<string, number>;
   bossCooldowns: Record<string, number>;
   starryNightClaimCycle: string;
+  digiviceCards: Record<string, string[]>;
+  digiviceTemporaryCards: Record<string, { ascension?: DigiviceTemporaryCardBuff; fusion?: DigiviceTemporaryCardBuff }>;
 }
 
 interface GameContextValue extends GameState {
@@ -225,6 +237,7 @@ interface GameContextValue extends GameState {
   totalEquipBonus: () => Partial<Record<string, number>>;
   gainPiece: (pieceId: string, amount?: number) => void;
   craftItem: (recipe: CraftRecipe) => boolean;
+  applyCardToDigivice: (cardId: string, digiviceId: string) => CardUseResult;
   gainBits: (amount: number) => void;
   gainTamerExp: (amount: number) => void;
   useTamerXpItem: (itemId: string, quantity: number) => void;
@@ -417,6 +430,8 @@ const defaultState: GameState = {
   farmDecorInventory: { ...DEFAULT_FARM_DECOR_INVENTORY },
   bossCooldowns: {},
   starryNightClaimCycle: '',
+  digiviceCards: {},
+  digiviceTemporaryCards: {},
 };
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -646,7 +661,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (currentStars === 3 && !current.inventory.includes(GOLDEN_STAR_ITEM_ID)) return { success: false, message: 'A 4ª ascensão exige uma Estrela de Ascensão Dourada.' };
 
     const targetStars = currentStars + 1;
-    const successChance = getAscensionSuccessChance(targetStars);
+    const equippedDigivice = current.equippedItems.digivice;
+    const ascensionBuff = equippedDigivice ? current.digiviceTemporaryCards?.[equippedDigivice]?.ascension : undefined;
+    const ascensionCard = ascensionBuff && ascensionBuff.expiresAt > Date.now()
+      ? CARD_DEFINITIONS.find((card) => card.id === ascensionBuff.cardId)
+      : undefined;
+    const successChance = getAscensionSuccessChance(targetStars, new Date(), ascensionCard?.temporaryBonus ?? 0);
     const succeeded = Math.random() < successChance;
 
     if (!succeeded) {
@@ -807,7 +827,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (fusion.requiredItem && (!selectedItemId || selectedItemId !== fusion.requiredItem || !snapshot.inventory.includes(selectedItemId))) return false;
 
     const fusionResultChar = getCharacter(fusion.resultId) ?? CHARACTERS[fusion.resultId];
-    const fusionSuccessChance = getFusionSuccessChance(fusionResultChar?.rarity ?? '');
+    const equippedDigivice = snapshot.equippedItems.digivice;
+    const fusionBuff = equippedDigivice ? snapshot.digiviceTemporaryCards?.[equippedDigivice]?.fusion : undefined;
+    const fusionCard = fusionBuff && fusionBuff.expiresAt > Date.now()
+      ? CARD_DEFINITIONS.find((card) => card.id === fusionBuff.cardId)
+      : undefined;
+    const fusionSuccessChance = getFusionSuccessChance(fusionResultChar?.rarity ?? '', new Date(), fusionCard?.temporaryBonus ?? 0);
     if (Math.random() >= fusionSuccessChance) {
       return false;
     }
@@ -1364,7 +1389,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const craftItem = useCallback((recipe: CraftRecipe): boolean => {
     let success = false;
     setState((prev) => {
-      if (prev.inventory.includes(recipe.resultItemId)) return prev;
+      if (!CARD_IDS.has(recipe.resultItemId) && prev.inventory.includes(recipe.resultItemId)) return prev;
       if ((recipe.bitsCost ?? 0) > 0 && prev.bits < (recipe.bitsCost ?? 0)) return prev;
 
       const newPieces = { ...prev.pieces };
@@ -1391,6 +1416,59 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       };
     });
     return success;
+  }, []);
+
+  const applyCardToDigivice = useCallback((cardId: string, digiviceId: string): CardUseResult => {
+    const card = CARD_DEFINITIONS.find((entry) => entry.id === cardId);
+    if (!card) return { success: false, message: 'Card inválido.' };
+    if (!digiviceId.startsWith('digivice_')) return { success: false, message: 'Selecione um Digivice válido.' };
+
+    let result: CardUseResult = { success: false, message: 'Não foi possível aplicar o Card.' };
+    setState((prev) => {
+      const cardIndex = prev.inventory.indexOf(cardId);
+      const ownsDigivice = prev.inventory.includes(digiviceId) || prev.equippedItems.digivice === digiviceId;
+      if (cardIndex < 0 || !ownsDigivice) return prev;
+
+      const nextInventory = [...prev.inventory];
+      nextInventory.splice(cardIndex, 1);
+
+      if (card.temporaryType) {
+        const expiresAt = Date.now() + (card.durationMs ?? 3 * 60 * 60 * 1000);
+        result = { success: true, message: `${card.name} ativado por 3 horas neste Digivice.` };
+        return {
+          ...prev,
+          inventory: nextInventory,
+          digiviceTemporaryCards: {
+            ...(prev.digiviceTemporaryCards ?? {}),
+            [digiviceId]: {
+              ...((prev.digiviceTemporaryCards ?? {})[digiviceId] ?? {}),
+              [card.temporaryType]: { cardId, expiresAt },
+            },
+          },
+        };
+      }
+
+      const currentCards = (prev.digiviceCards ?? {})[digiviceId] ?? [];
+      if (currentCards.includes(cardId)) {
+        result = { success: false, message: 'Este Card já foi aplicado neste Digivice.' };
+        return prev;
+      }
+      if (currentCards.length >= 10) {
+        result = { success: false, message: 'Este Digivice já possui o limite de 10 Cards permanentes.' };
+        return prev;
+      }
+
+      result = { success: true, message: `${card.name} aplicado permanentemente ao Digivice.` };
+      return {
+        ...prev,
+        inventory: nextInventory,
+        digiviceCards: {
+          ...(prev.digiviceCards ?? {}),
+          [digiviceId]: [...currentCards, cardId],
+        },
+      };
+    });
+    return result;
   }, []);
 
   const sacrificeDigimon = useCallback((ownedId: string): SacrificeResult => {
@@ -1679,8 +1757,18 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         result[k] = (result[k] ?? 0) + (v as number);
       });
     });
+    const digiviceId = state.equippedItems.digivice;
+    if (digiviceId) {
+      const appliedCards = (state.digiviceCards ?? {})[digiviceId] ?? [];
+      appliedCards.forEach((cardId) => {
+        const card = CARD_DEFINITIONS.find((entry) => entry.id === cardId);
+        Object.entries((card?.bonuses ?? {}) as Record<string, number>).forEach(([k, v]) => {
+          result[k] = (result[k] ?? 0) + v;
+        });
+      });
+    }
     return result;
-  }, [state.equippedItems]);
+  }, [state.equippedItems, state.digiviceCards]);
 
   const totalPlayerLevel = state.tamerLevel;
   const unreadMailCount = state.messages.filter(
@@ -1908,6 +1996,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         craftGoldenAscensionStar,
         claimStarryNightReward,
         craftItem,
+        applyCardToDigivice,
         gainBits,
         gainTamerExp,
         useTamerXpItem,
