@@ -2134,6 +2134,7 @@ const styles = StyleSheet.create({
   dropChip: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 10, borderRadius: 12, borderWidth: 1.5, paddingHorizontal: 14, paddingVertical: 8 },
   dropChipImg: { width: 32, height: 32 },
   dropChipText: { fontSize: 13, fontWeight: '700' as const, flex: 1 },
+  dropAmount: { fontSize: 14, fontWeight: '900' as const },
   resultCenter: { alignItems: 'center', justifyContent: 'center' },
   resultCard: { width: '80%', borderRadius: 20, borderWidth: 2, padding: 32, alignItems: 'center', gap: 16 },
   resultTitle: { fontSize: 18, fontWeight: '900' as const },
