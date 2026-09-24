@@ -187,6 +187,8 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_brasao_luz:       { name: 'Fragmento Brasão Luz',       color: '#ec4899' },
   piece_brasao_amor:      { name: 'Fragmento Brasão Amor',      color: '#ef4444' },
   piece_brasao_bondade:   { name: 'Fragmento Brasão Bondade',   color: '#d946ef' },
+  piece_brasao_milagre:   { name: 'Fragmento Brasão Milagre',   color: '#facc15' },
+  piece_brasao_destino:   { name: 'Fragmento Brasão Destino',   color: '#a78bfa' },
   piece_digivice_d3:          { name: 'Fragmento D-3',          color: '#3b82f6' },
   piece_digivice_d_ark:       { name: 'Fragmento D-Ark',       color: '#22c55e' },
   piece_digivice_xros_loader: { name: 'Fragmento Xros Loader', color: '#f59e0b' },
