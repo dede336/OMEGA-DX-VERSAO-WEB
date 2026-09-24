@@ -264,7 +264,6 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
 function YggdrasilBlessingAnnouncement() {
   const [visible, setVisible] = useState(() => isYggdrasilBlessingActive());
-  const [imageAvailable, setImageAvailable] = useState(true);
 
   useEffect(() => {
     setVisible(isYggdrasilBlessingActive());
@@ -279,20 +278,11 @@ function YggdrasilBlessingAnnouncement() {
         style={yggdrasilStyles.overlay}
         onPress={() => setVisible(false)}
       >
-        {imageAvailable ? (
-          <Image
-            source={{ uri: '/assets/images/bencao-benevolente-yggdrasil.png' }}
-            style={yggdrasilStyles.image}
-            resizeMode="contain"
-            onError={() => setImageAvailable(false)}
-          />
-        ) : (
-          <View style={yggdrasilStyles.fallback}>
-            <Text style={yggdrasilStyles.title}>BÊNÇÃO BENEVOLENTE DE YGGDRASIL</Text>
-            <Text style={yggdrasilStyles.bonus}>+15% de chance de Fusão e Ascensão</Text>
-            <Text style={yggdrasilStyles.hint}>Toque para fechar</Text>
-          </View>
-        )}
+        <Image
+          source={require('../assets/images/benção benevolente de yggdrasil.png')}
+          style={yggdrasilStyles.image}
+          resizeMode="contain"
+        />
       </TouchableOpacity>
     </Modal>
   );
