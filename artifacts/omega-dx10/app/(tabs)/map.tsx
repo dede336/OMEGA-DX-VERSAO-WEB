@@ -374,6 +374,7 @@ export default function MapScreen() {
                     {isDungeon && stage.drops && (() => {
                       const bitsDrops  = stage.drops.filter((d: StageDrop) => d.type === 'bits');
                       const pieceDrops = stage.drops.filter((d: StageDrop) => d.type === 'piece');
+                      const allDigivicePieces = pieceDrops.length > 0 && pieceDrops.every((d: StageDrop) => d.id?.startsWith('piece_digivice_'));
                       const PIECE_KEY_MAP: Record<string, string> = {
                         piece_brasao_coragem:      'map.piece.coragem',
                         piece_brasao_esperanca:    'map.piece.esperanca',
@@ -403,7 +404,9 @@ export default function MapScreen() {
                               <Text style={[styles.rewardText, { color: '#f59e0b' }]}>
                                 {pieceDrops.length === 1
                                   ? (PIECE_KEY_MAP[(pieceDrops[0] as any).id]?.startsWith('map.') ? t(PIECE_KEY_MAP[(pieceDrops[0] as any).id]) : (PIECE_KEY_MAP[(pieceDrops[0] as any).id] ?? t('map.brasaoFragment')))
-                                  : `${t('map.brasaoFragment')} (${pieceDrops.length} ${t('map.brasaoFragmentTypes')})`}
+                                  : allDigivicePieces
+                                    ? `Fragmentos de Digivice (${pieceDrops.length} tipos · 10% cada)`
+                                    : `${t('map.brasaoFragment')} (${pieceDrops.length} ${t('map.brasaoFragmentTypes')})`}
                               </Text>
                             </View>
                           )}
