@@ -1407,6 +1407,7 @@ export const SACRIFICE_SCAN_PCT: Partial<Record<RarityId, number>> = {
 };
 
 export const ITEM_NAMES: Record<string, string> = {
+  pilula_energetica:       'Pílula Energética',
   golden_ascension_star:       'Estrela de Ascensão Dourada ⭐',
   piece_golden_ascension_star: 'Fragmento de Estrela Dourada',
   anel_sagrado:           'Anel Sagrado ✨',
