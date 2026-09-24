@@ -1663,7 +1663,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           const serverUpdatedAt = serverSavedAt ?? (updatedAt ? new Date(updatedAt).getTime() : 0);
           // If local has meaningful data and is newer than server, keep local state
           // but still merge any new messages the admin may have sent
-          if (localData.isOnboarded && localSavedAt > serverUpdatedAt + 5000) {
+          const localCollectionCount = Array.isArray((localData as any).collection) ? (localData as any).collection.length : 0;
+          const serverCollectionCount = Array.isArray((saveData as any).collection) ? (saveData as any).collection.length : 0;
+          const localHasCatastrophicCollectionLoss =
+            serverCollectionCount >= 10
+            && localCollectionCount <= Math.floor(serverCollectionCount / 2)
+            && (serverCollectionCount - localCollectionCount) >= 10;
+
+          // A newer local timestamp must never make a catastrophically smaller
+          // collection override a healthy cloud save (e.g. 1 local vs 77 server).
+          if (localData.isOnboarded && localSavedAt > serverUpdatedAt + 5000 && !localHasCatastrophicCollectionLoss) {
             const serverMessages: MailMessage[] = (saveData.messages ?? []) as MailMessage[];
             const serverTamerLevel = (saveData as any).tamerLevel as number | undefined;
             const serverGemas = (saveData as any).gemas as number | undefined;
