@@ -172,6 +172,7 @@ export default function SendSection() {
   // Item send state
   const [itemId, setItemId]   = useState('');
   const [itemName, setItemName] = useState('');
+  const [itemAmt, setItemAmt] = useState('1');
 
   // Fragment send state
   const [fragId, setFragId]   = useState('');
@@ -243,7 +244,7 @@ export default function SendSection() {
       Alert.alert('✅ Enviado!', data.message ?? `Enviado com sucesso para ${username}`);
       // Reset selection
       setDigimonId(''); setDigimonName(''); setDigimonLevel('1');
-      setItemId(''); setItemName('');
+      setItemId(''); setItemName(''); setItemAmt('1');
       setFragId(''); setFragName(''); setFragAmt('1');
       setGemasAmt('');
       setDecoSelections({});
@@ -259,7 +260,8 @@ export default function SendSection() {
       doSend({ characterId: digimonId, characterName: digimonName, level: Number(digimonLevel) || 1 });
     } else if (tab === 'item') {
       if (!itemId) { Alert.alert('Erro', 'Selecione um Item'); return; }
-      doSend({ items: [itemId], itemNames: [itemName] });
+      const qty = Math.max(1, Math.min(999, Number(itemAmt) || 1));
+      doSend({ items: Array(qty).fill(itemId), itemNames: Array(qty).fill(itemName) });
     } else if (tab === 'fragmento') {
       if (!fragId) { Alert.alert('Erro', 'Selecione um Fragmento'); return; }
       doSend({ fragments: [{ pieceId: fragId, amount: Number(fragAmt) || 1 }], fragmentNames: [fragName] });
@@ -378,6 +380,15 @@ export default function SendSection() {
               selected={itemId}
               onSelect={(id, name) => { setItemId(id); setItemName(name); }}
               placeholder="Buscar item..."
+            />
+            <Text style={[ss.label, { color: colors.mutedForeground, marginTop: 8 }]}>Quantidade</Text>
+            <TextInput
+              style={[pk.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.foreground }, pixelStyle]}
+              value={itemAmt}
+              onChangeText={setItemAmt}
+              keyboardType="numeric"
+              placeholder="1"
+              placeholderTextColor={colors.mutedForeground}
             />
           </>
         )}
