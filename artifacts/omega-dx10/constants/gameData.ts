@@ -1947,7 +1947,7 @@ export const GAME_MAPS: GameMap[] = [
   {
     id: 'dungeon_gulus_digivice',
     name: 'Covil do Gulus — Fragmentos de Digivice',
-    description: 'Enfrente Regulusmon e dois GulusGammamon para obter fragmentos dos Digivices D-3, D-Ark e Xros Loader.',
+    description: 'Enfrente Regulusmon, Arcturiusmon e GulusGammamon para obter fragmentos dos Digivices D-3, D-Ark e Xros Loader.',
     isDungeon: true,
     requiredTamerLevel: 15,
     availableDays: [2, 4, 6],
@@ -1956,12 +1956,12 @@ export const GAME_MAPS: GameMap[] = [
     stages: [
       {
         index: 0,
-        name: 'Trio Sombrio — Regulusmon & GulusGammamon',
+        name: 'Trio Sombrio — Regulusmon, Arcturiusmon & GulusGammamon',
         enemyCharacterId: 'name:Regulusmon',
-        enemyCharacterIds: ['name:Regulusmon', 'gulusGammamon', 'gulusGammamon'],
+        enemyCharacterIds: ['name:Regulusmon', 'custom_1330', 'gulusGammamon'],
         enemyLevel: 40,
-        enemyLevels: [40, 35, 35],
-        enemyAscensionStarsByIndex: [0, 1, 1],
+        enemyLevels: [40, 60, 35],
+        enemyAscensionStarsByIndex: [1, 0, 1],
         expReward: 0,
         drops: [
           { type: 'piece', id: 'piece_digivice_d3', amount: 1, chance: 0.10 },
