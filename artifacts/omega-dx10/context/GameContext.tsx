@@ -1120,9 +1120,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       let newPieces = { ...prev.pieces };
       if (msg.reward?.bits) newBits += msg.reward.bits;
       if (msg.reward?.items) {
-        for (const itemId of msg.reward.items) {
-          const migratedItemId = migrateEvolutionItemId(itemId);
-          if (migratedItemId === 'pilula_energetica' || !newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
+        for (const entry of msg.reward.items) {
+          const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
+          const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
+          const migratedItemId = migrateEvolutionItemId(rawItemId);
+          if (migratedItemId === 'pilula_energetica') {
+            for (let i = 0; i < amount; i += 1) newInventory.push(migratedItemId);
+          } else if (!newInventory.includes(migratedItemId)) {
+            newInventory.push(migratedItemId);
+          }
         }
       }
       if (msg.reward?.pieces) {
