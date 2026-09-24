@@ -272,7 +272,7 @@ router.post("/send", requireAuth, async (req, res) => {
 
   const { username, characterId, level, items, fragments, gemas, decorations } = req.body as {
     username?: string; characterId?: string; level?: number;
-    items?: string[]; fragments?: { pieceId: string; amount: number }[];
+    items?: Array<string | { itemId: string; amount: number }>; fragments?: { pieceId: string; amount: number }[];
     gemas?: number; decorations?: { type: string; qty: number; name: string }[];
   };
   if (!username) { res.status(400).json({ error: "username é obrigatório" }); return; }
@@ -308,9 +308,14 @@ router.post("/send", requireAuth, async (req, res) => {
   } = {};
 
   if (items && items.length > 0) {
-    mailReward.items = items.map(String);
+    const normalizedItems = items.map((entry) =>
+      typeof entry === 'string'
+        ? { itemId: String(entry), amount: 1 }
+        : { itemId: String(entry.itemId), amount: Math.max(1, Math.min(9999, Number(entry.amount) || 1)) }
+    );
+    mailReward.items = normalizedItems as any;
     const names = (req.body as any).itemNames as string[] | undefined;
-    const label = names && names.length > 0 ? names.join(', ') : items.join(', ');
+    const label = normalizedItems.map((entry, i) => `${names?.[i] ?? entry.itemId} ×${entry.amount}`).join(', ');
     notifLines.push(`⚔️ Itens: ${label}`);
   }
 
