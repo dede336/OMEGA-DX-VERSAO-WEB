@@ -197,7 +197,7 @@ export default function MochilaScreen() {
               if ((item as any).tamerXpBonusPercent) specialBonuses.push(`⭐ +${Math.round((item as any).tamerXpBonusPercent * 100)}% ${t('mochila.xpTamer')}`);
               const bonusStr = [flatBonusStr, pctBonusStr, ...specialBonuses].filter(Boolean).join('  ');
 
-              const itemImg = EQUIP_ITEM_IMAGES[item.id];
+              const itemImg = getEquipItemImage(item.id, game.tamerId);
               const elemBonus = item.elementBonus;
               const elemLabel = elemBonus ? elemBonus.elements.map((e: ElementId) => ELEMENTS[e]?.label).join(' & ') : null;
               const elemColor = elemBonus ? ELEMENTS[elemBonus.elements[0] as ElementId]?.color : null;
