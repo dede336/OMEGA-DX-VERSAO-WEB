@@ -239,7 +239,7 @@ export const CHARACTERS: Record<string, Character> = {
     description: 'A forma transcendente do Gallantmon fundido com o poder do Seraphimon. Seu Shining Laser purifica todos os inimigos simultaneamente com luz divina absoluta.',
     attackName: 'Mach Rush ○',
     spiritName: 'Shining Laser ✨',
-    spiritHitsAll: true,
+    spiritHitsAll: false,
   },
   lucemon: {
     id: 'lucemon',
