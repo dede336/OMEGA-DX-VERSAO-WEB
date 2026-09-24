@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { CRAFT_RECIPES, EQUIPMENT_ITEMS, CraftRecipe } from '@/constants/gameData';
-import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
+import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -16,17 +16,17 @@ const isWeb = Platform.OS === 'web';
 
 // ─── Fragment display metadata ──────────────────────────────────────────────
 const PIECE_META: Record<string, { label: string; icon: string; color: string; image?: any }> = {
-  piece_brasao_coragem:      { label: 'Fragmento da Coragem',      icon: 'sun',     color: '#f97316', image: require('../../assets/images/brasao_coragem.webp') },
-  piece_brasao_esperanca:    { label: 'Fragmento da Esperança',    icon: 'sun',     color: '#eab308', image: require('../../assets/images/brasao_esperanca.webp') },
-  piece_brasao_amizade:      { label: 'Fragmento da Amizade',      icon: 'users',   color: '#3b82f6', image: require('../../assets/images/brasao_amizade.webp') },
-  piece_brasao_confianca:    { label: 'Fragmento da Confiança',    icon: 'shield',  color: '#94a3b8', image: require('../../assets/images/brasao_confianca.webp') },
-  piece_brasao_pureza:       { label: 'Fragmento da Pureza',       icon: 'droplet', color: '#22c55e', image: require('../../assets/images/brasao_pureza.webp') },
-  piece_brasao_amor:         { label: 'Fragmento do Amor',         icon: 'heart',   color: '#f43f5e', image: require('../../assets/images/brasao_amor.webp') },
-  piece_brasao_luz:          { label: 'Fragmento da Luz',          icon: 'star',    color: '#c084fc', image: require('../../assets/images/brasao_luz.webp') },
-  piece_brasao_conhecimento: { label: 'Fragmento do Conhecimento', icon: 'book',    color: '#a855f7', image: require('../../assets/images/brasao_conhecimento.webp') },
-  piece_brasao_bondade:      { label: 'Fragmento da Bondade',      icon: 'heart',   color: '#d946ef', image: require('../../assets/images/brasao_bondade.png') },
-  piece_brasao_milagre:      { label: 'Fragmento do Milagre',      icon: 'star',    color: '#facc15' },
-  piece_brasao_destino:      { label: 'Fragmento do Destino',      icon: 'compass', color: '#a78bfa' },
+  piece_brasao_coragem:      { label: 'Fragmento da Coragem',      icon: 'sun',     color: '#f97316', image: require('../../assets/images/coragem piece.png') },
+  piece_brasao_esperanca:    { label: 'Fragmento da Esperança',    icon: 'sun',     color: '#eab308', image: require('../../assets/images/esperança piece.png') },
+  piece_brasao_amizade:      { label: 'Fragmento da Amizade',      icon: 'users',   color: '#3b82f6', image: require('../../assets/images/amizade piece.png') },
+  piece_brasao_confianca:    { label: 'Fragmento da Confiança',    icon: 'shield',  color: '#94a3b8', image: require('../../assets/images/confiança piece.png') },
+  piece_brasao_pureza:       { label: 'Fragmento da Pureza',       icon: 'droplet', color: '#22c55e', image: require('../../assets/images/sinceridade piece.png') },
+  piece_brasao_amor:         { label: 'Fragmento do Amor',         icon: 'heart',   color: '#f43f5e', image: require('../../assets/images/amor piece.png') },
+  piece_brasao_luz:          { label: 'Fragmento da Luz',          icon: 'star',    color: '#c084fc', image: require('../../assets/images/luz piece.png') },
+  piece_brasao_conhecimento: { label: 'Fragmento do Conhecimento', icon: 'book',    color: '#a855f7', image: require('../../assets/images/conhecimento.png') },
+  piece_brasao_bondade:      { label: 'Fragmento da Bondade',      icon: 'heart',   color: '#d946ef', image: require('../../assets/images/bondade piece.png') },
+  piece_brasao_milagre:      { label: 'Fragmento do Milagre',      icon: 'star',    color: '#facc15' , image: require('../../assets/images/milagre piece.png') },
+  piece_brasao_destino:      { label: 'Fragmento do Destino',      icon: 'compass', color: '#a78bfa' , image: require('../../assets/images/destino piece.png') },
   piece_agulha:              { label: 'Agulha Média',              icon: 'edit-2',  color: '#8b5cf6', image: require('../../assets/images/agulha-media.webp') },
   piece_tecido:              { label: 'Tecido Colorido',           icon: 'layers',  color: '#ec4899', image: require('../../assets/images/tecido-arco-iris.webp') },
   piece_linha:               { label: 'Linha Colorida',            icon: 'wind',    color: '#06b6d4', image: require('../../assets/images/linha-arco-iris.webp') },
