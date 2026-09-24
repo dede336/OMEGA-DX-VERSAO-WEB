@@ -107,7 +107,9 @@ export default function CorreiosScreen() {
       m.id === msgId ? { ...m, isRead: true, rewardClaimed: true } : m
     );
 
-    claimReward(msgId);
+    // Do not call claimReward here: handleClaim already computed the exact
+    // post-claim state and persists that same snapshot to the authenticated save.
+    // Applying the reward twice in parallel can race with autosave.
 
     try {
       // Build the cloud payload from the CURRENT account state, never from the
