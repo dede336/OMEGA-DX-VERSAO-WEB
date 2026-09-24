@@ -31,7 +31,7 @@ export default function CorreiosScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const game = useGame();
-  const { messages, tamerLevel, readMessage, loadFromCloud } = game;
+  const { messages, tamerLevel, readMessage, claimReward, loadFromCloud } = game;
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
 
@@ -107,9 +107,10 @@ export default function CorreiosScreen() {
       m.id === msgId ? { ...m, isRead: true, rewardClaimed: true } : m
     );
 
-    // Do not call claimReward here: handleClaim already computed the exact
-    // post-claim state and persists that same snapshot to the authenticated save.
-    // Applying the reward twice in parallel can race with autosave.
+    // Update the in-memory state immediately so the reward is visible and the
+    // message becomes claimed. The cloud payload below is still built only from
+    // this authenticated account; it no longer reads the legacy global save key.
+    claimReward(msgId);
 
     try {
       // Build the cloud payload from the CURRENT account state, never from the
@@ -131,7 +132,7 @@ export default function CorreiosScreen() {
         body: JSON.stringify({ saveData }),
       });
     } catch {}
-  }, [game, messages, getApiUrl, token]);
+  }, [claimReward, game, messages, getApiUrl, token]);
 
   useFocusEffect(useCallback(() => {
     loadFromCloud(getApiUrl());
