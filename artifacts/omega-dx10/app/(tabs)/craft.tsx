@@ -24,6 +24,7 @@ const PIECE_META: Record<string, { label: string; icon: string; color: string; i
   piece_brasao_amor:         { label: 'Fragmento do Amor',         icon: 'heart',   color: '#f43f5e' },
   piece_brasao_luz:          { label: 'Fragmento da Luz',          icon: 'star',    color: '#c084fc' },
   piece_brasao_conhecimento: { label: 'Fragmento do Conhecimento', icon: 'book',    color: '#a855f7' },
+  piece_brasao_bondade:      { label: 'Fragmento da Bondade',      icon: 'heart',   color: '#d946ef' },
   piece_agulha:              { label: 'Agulha Média',              icon: 'edit-2',  color: '#8b5cf6', image: require('../../assets/images/agulha-media.webp') },
   piece_tecido:              { label: 'Tecido Colorido',           icon: 'layers',  color: '#ec4899', image: require('../../assets/images/tecido-arco-iris.webp') },
   piece_linha:               { label: 'Linha Colorida',            icon: 'wind',    color: '#06b6d4', image: require('../../assets/images/linha-arco-iris.webp') },

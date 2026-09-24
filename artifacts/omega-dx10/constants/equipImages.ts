@@ -14,6 +14,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   digivice_xros_loader:    require('../assets/images/digivice_xros_loader.png'),
   oculos_escuro_fitado:    require('../assets/images/oculos_escuro_fitado.webp'),
   brasao_conhecimento:  require('../assets/images/brasao_conhecimento.webp'),
+  brasao_bondade:       require('../assets/images/brasao_bondade.png'),
   pulseira_ouro:        require('../assets/images/pulseira_ouro.webp'),
   anel_sagrado:         require('../assets/images/anel_sagrado.webp'),
   piece_anel_sagrado:   require('../assets/images/anel_sagrado.webp'),
