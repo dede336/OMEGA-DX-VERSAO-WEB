@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { CRAFT_RECIPES, EQUIPMENT_ITEMS, CraftRecipe } from '@/constants/gameData';
-import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
+import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 
