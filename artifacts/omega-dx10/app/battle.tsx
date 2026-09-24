@@ -301,6 +301,7 @@ export default function BattleScreen() {
   const targetIdxRef = useRef(0);
   // One-turn guard: the selected fighter takes 50% damage from the next enemy hit.
   const defendingPlayerIdxRef = useRef<number | null>(null);
+  const dArkRoundsRemainingRef = useRef(0);
   useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
   useEffect(() => { targetIdxRef.current = targetIdx; }, [targetIdx]);
 
@@ -695,6 +696,26 @@ export default function BattleScreen() {
     }
     if (fighters.length === 0) return;
 
+    // ── Digivice battle effects ──────────────────────────────────────────────
+    const activeDigiviceId = equippedItems.digivice;
+    dArkRoundsRemainingRef.current = 0;
+    if (activeDigiviceId === 'digivice_d_ark') {
+      for (const f of fighters) {
+        f.stats = {
+          ...f.stats,
+          atk: Math.floor(f.stats.atk * 1.10),
+          def: Math.floor(f.stats.def * 1.10),
+          spt: Math.floor(f.stats.spt * 1.10),
+        };
+      }
+      dArkRoundsRemainingRef.current = 3;
+      addLog('🃏 D-Ark — Carta de Aprimoramento: ATK, DEF e SPT +10% por 3 turnos!', '#60a5fa');
+    } else if (activeDigiviceId === 'digivice_d3') {
+      addLog('🧬 D-3 — Impulso de DNA: ATK e SPD +10% para toda a equipe!', '#22c55e');
+    } else if (activeDigiviceId === 'digivice_xros_loader') {
+      addLog('✖️ Xros Loader — DigiXros: +15% de dano com 2 ou mais Digimon vivos!', '#f59e0b');
+    }
+
     // ── Dádiva Divina: compute passive buffs from team composition ────────────
     const dvBonus = computeDadivaDivina(
       fighters.map((f) => f.name),
@@ -797,6 +818,25 @@ export default function BattleScreen() {
 
       const dvBonus = dadivaDivinaRef.current;
       let eorFighters = fighters;
+
+      // D-Ark: Carta de Aprimoramento lasts exactly 3 complete battle rounds.
+      if (dArkRoundsRemainingRef.current > 0) {
+        dArkRoundsRemainingRef.current -= 1;
+        if (dArkRoundsRemainingRef.current === 0) {
+          eorFighters = eorFighters.map((f) => ({
+            ...f,
+            stats: {
+              ...f.stats,
+              atk: Math.max(1, Math.round(f.stats.atk / 1.10)),
+              def: Math.max(1, Math.round(f.stats.def / 1.10)),
+              spt: Math.max(1, Math.round(f.stats.spt / 1.10)),
+            },
+          }));
+          setTeamFighters(eorFighters);
+          teamFightersRef.current = eorFighters;
+          addLog('🃏 D-Ark: Carta de Aprimoramento terminou.', '#60a5fa');
+        }
+      }
       let eorEnems = enems;
 
       // Anel Sagrado team HP regen
@@ -1040,7 +1080,12 @@ export default function BattleScreen() {
     // ── Multi-target spirit ───────────────────────────────────────────────────
     if (action === 'SPIRIT' && currentPF.spiritHitsAll) {
       const spiritNewMP = Math.max(0, currentPF.currentMP - SPIRIT_MP_COST);
-      const spiritAttacker = { ...currentPF, currentMP: SPIRIT_MP_COST };
+      const xrosActive = equippedItemsRef.current.digivice === 'digivice_xros_loader' && teamFightersRef.current.filter((f) => f.currentHP > 0).length >= 2;
+      const spiritAttacker = {
+        ...currentPF,
+        currentMP: SPIRIT_MP_COST,
+        stats: xrosActive ? { ...currentPF.stats, spt: Math.floor(currentPF.stats.spt * 1.15) } : currentPF.stats,
+      };
       const liveIndices = enemiesRef.current.map((e, i) => ({ e, i })).filter(({ e }) => e.currentHP > 0);
       const updatedEnemiesAll = [...enemiesRef.current];
       const attackResults = liveIndices.map(({ e: enemy, i: idx }) => {
@@ -1112,7 +1157,11 @@ export default function BattleScreen() {
 
     // ── Single-target attack ──────────────────────────────────────────────────
     const target = enemiesRef.current[tIdx];
-    const pResult = executeTurn(currentPF, target, action);
+    const xrosActive = equippedItemsRef.current.digivice === 'digivice_xros_loader' && teamFightersRef.current.filter((f) => f.currentHP > 0).length >= 2;
+    const xrosAttacker = xrosActive
+      ? { ...currentPF, stats: { ...currentPF.stats, atk: Math.floor(currentPF.stats.atk * 1.15), spt: Math.floor(currentPF.stats.spt * 1.15) } }
+      : currentPF;
+    const pResult = executeTurn(xrosAttacker, target, action);
     const newPlayerMP = pResult.attackerResult.newMP;
     const newTargetHP = pResult.defenderResult.newHP;
     const lc = pResult.defenderResult.attrMult > 1 || pResult.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
