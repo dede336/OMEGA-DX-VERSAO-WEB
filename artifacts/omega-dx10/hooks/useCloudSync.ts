@@ -40,7 +40,7 @@ async function pushSaveToServer(apiUrl: string, token: string, saveKey: string):
 export function useCloudSync() {
   const { token, user, getApiUrl } = useAuth();
   const saveKey = getSaveKey(user?.id);
-  const { collection, tamerLevel, tamerExp, playerName, team, tamerId, messages, clearedStages, loadFromCloud } = useGame();
+  const { collection, tamerLevel, tamerExp, playerName, team, tamerId, messages, clearedStages, loadFromCloud, isLoaded } = useGame();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokenRef = useRef(token);
   const getApiUrlRef = useRef(getApiUrl);
@@ -66,22 +66,27 @@ export function useCloudSync() {
 
   useEffect(() => {
     const tok = tokenRef.current;
-    if (!tok) return;
+    if (!tok || !user?.id || !isLoaded) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
       const currentTok = tokenRef.current;
-      if (!currentTok) return;
+      if (!currentTok || !user?.id || !isLoaded) return;
+      // Never let a timer created for one account upload after the active account changed.
+      const expectedSaveKey = getSaveKey(user.id);
+      if (saveKey !== expectedSaveKey) return;
       try {
-        await pushSaveToServer(getApiUrlRef.current(), currentTok, saveKey);
+        await pushSaveToServer(getApiUrlRef.current(), currentTok, expectedSaveKey);
       } catch {}
     }, SYNC_DEBOUNCE);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, saveKey, claimedCount, clearedCount]);
+  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, user?.id, isLoaded, saveKey, claimedCount, clearedCount]);
 
   return { saveNow: () => {
     const tok = tokenRef.current;
-    if (!tok) return;
-    pushSaveToServer(getApiUrlRef.current(), tok, saveKey).catch(() => {});
+    if (!tok || !user?.id || !isLoaded) return;
+    const expectedSaveKey = getSaveKey(user.id);
+    if (saveKey !== expectedSaveKey) return;
+    pushSaveToServer(getApiUrlRef.current(), tok, expectedSaveKey).catch(() => {});
   }};
 }
