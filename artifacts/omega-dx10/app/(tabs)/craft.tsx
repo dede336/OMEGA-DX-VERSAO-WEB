@@ -37,6 +37,7 @@ const PIECE_META: Record<string, { label: string; icon: string; color: string; i
   piece_digivice_d3:          { label: 'Fragmento D-3', icon: 'cpu', color: '#3b82f6', image: require('../../assets/images/piece_digivice_d3.png') },
   piece_digivice_d_ark:       { label: 'Fragmento D-Ark', icon: 'cpu', color: '#22c55e', image: require('../../assets/images/piece_digivice_d_ark.png') },
   piece_digivice_xros_loader: { label: 'Fragmento Xros Loader', icon: 'cpu', color: '#f59e0b', image: require('../../assets/images/piece_digivice_xros_loader.png') },
+  piece_x_antibody:           { label: 'Fragmento do X-Antibody', icon: 'activity', color: '#38bdf8', image: require('../../assets/images/piece_x_antibody.gif') },
 };
 
 // ─── Category definitions ────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ const CATEGORIES: { id: CraftCategory; label: string; icon: string; color: strin
   { id: 'digivice', label: 'Digivice', icon: 'cpu',          color: '#3b82f6' },
 ];
 
-const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'fragmento_corrompido']);
+const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'x_antibody', 'fragmento_corrompido']);
 const ROUPA_ITEM_IDS = new Set(['blusa_social', 'bermuda_poliester', 'tenis_corrida', 'pulseira_ouro']);
 
 function getCategoryForRecipe(recipe: CraftRecipe): CraftCategory {
