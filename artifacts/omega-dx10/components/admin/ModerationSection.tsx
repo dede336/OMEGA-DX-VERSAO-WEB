@@ -62,7 +62,7 @@ export default function ModerationSection() {
     <View style={{ gap: 12 }}>
       <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '800' }}>🛡️ Moderação sigilosa</Text>
       <Text style={{ color: colors.mutedForeground, lineHeight: 19 }}>
-        O jogador denunciado nunca vê quem denunciou. {user?.isAdmin ? 'Como Admin, você pode revisar decisões do Assistente.' : 'Decisões do Admin não podem ser alteradas pelo Assistente.'}
+        O jogador denunciado nunca vê quem denunciou. A moderação é exclusiva do Admin.
       </Text>
       <View style={{ gap: 6 }}>
         <Text style={{ color: colors.foreground, fontWeight: '700' }}>Prazo em minutos</Text>
@@ -94,7 +94,7 @@ export default function ModerationSection() {
         <View key={ban.id} style={{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12, gap: 6 }}>
           <Text style={{ color: colors.foreground, fontWeight: '800' }}>{ban.username}</Text>
           <Text style={{ color: colors.mutedForeground }}>{ban.reason}</Text>
-          <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>Até {new Date(ban.expiresAt).toLocaleString('pt-BR')} · aplicado por {ban.createdByRole === 'admin' ? 'Admin' : 'Assistente'}</Text>
+          <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>Até {new Date(ban.expiresAt).toLocaleString('pt-BR')} · aplicado por Admin</Text>
           {(user?.isAdmin || ban.createdByRole !== 'admin') && (
             <TouchableOpacity onPress={() => action(`/moderation/bans/${ban.id}/revoke`)} style={{ alignSelf: 'flex-start', backgroundColor: '#2563eb', padding: 9, borderRadius: 9 }}>
               <Text style={{ color: '#fff', fontWeight: '700' }}>Desfazer banimento</Text>
