@@ -118,7 +118,7 @@ const chipStyles = StyleSheet.create({
 
 // ─── Detail Modal ─────────────────────────────────────────────────────────────
 function DetailModal({
-  recipe, visible, onClose, pieces, bits, inventory, craftItem, colors,
+  recipe, visible, onClose, pieces, bits, inventory, craftItem, colors, tamerId,
 }: {
   recipe: CraftRecipe | null;
   visible: boolean;
@@ -277,13 +277,14 @@ const modal = StyleSheet.create({
 
 // ─── Item card in category list ───────────────────────────────────────────────
 function RecipeCard({
-  recipe, onPress, pieces, inventory, colors,
+  recipe, onPress, pieces, inventory, colors, tamerId,
 }: {
   recipe: CraftRecipe;
   onPress: () => void;
   pieces: Record<string, number>;
   inventory: string[];
   colors: ReturnType<typeof import('@/hooks/useColors').useColors>;
+  tamerId?: string | null;
 }) {
   const progress = computeProgress(recipe, pieces);
   const crafted = inventory.includes(recipe.resultItemId);
@@ -433,6 +434,7 @@ export default function CraftScreen() {
         inventory={inventory}
         craftItem={craftItem}
         colors={colors}
+        tamerId={tamerId}
       />
     </>
   );
