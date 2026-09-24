@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
-import { CRAFT_RECIPES, EQUIPMENT_ITEMS, CraftRecipe } from '@/constants/gameData';
+import { CRAFT_RECIPES, EQUIPMENT_ITEMS, CraftRecipe, CARD_IDS } from '@/constants/gameData';
 import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
@@ -41,19 +41,21 @@ const PIECE_META: Record<string, { label: string; icon: string; color: string; i
 };
 
 // ─── Category definitions ────────────────────────────────────────────────────
-type CraftCategory = 'evolucao' | 'roupa' | 'brasao' | 'digivice';
+type CraftCategory = 'evolucao' | 'roupa' | 'brasao' | 'digivice' | 'cards';
 
 const CATEGORIES: { id: CraftCategory; label: string; icon: string; color: string }[] = [
   { id: 'evolucao', label: 'Evolução', icon: 'zap',          color: '#f59e0b' },
   { id: 'roupa',    label: 'Roupa',    icon: 'shopping-bag', color: '#ec4899' },
   { id: 'brasao',   label: 'Brasão',   icon: 'shield',       color: '#8b5cf6' },
   { id: 'digivice', label: 'Digivice', icon: 'cpu',          color: '#3b82f6' },
+  { id: 'cards',    label: 'Cards',    icon: 'layers',       color: '#06b6d4' },
 ];
 
 const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'x_antibody', 'fragmento_corrompido']);
 const ROUPA_ITEM_IDS = new Set(['blusa_social', 'bermuda_poliester', 'tenis_corrida', 'pulseira_ouro']);
 
 function getCategoryForRecipe(recipe: CraftRecipe): CraftCategory {
+  if (CARD_IDS.has(recipe.resultItemId)) return 'cards';
   if (recipe.resultItemId.startsWith('digivice_')) return 'digivice';
   if (recipe.resultItemId.startsWith('brasao_')) return 'brasao';
   if (EVOLUTION_ITEM_IDS.has(recipe.resultItemId)) return 'evolucao';
@@ -133,7 +135,7 @@ function DetailModal({
   if (!recipe) return null;
 
   const isMulti = !!(recipe.pieceRequirements?.length);
-  const alreadyCrafted = inventory.includes(recipe.resultItemId);
+  const alreadyCrafted = !CARD_IDS.has(recipe.resultItemId) && inventory.includes(recipe.resultItemId);
   const hasEnoughBits = bits >= (recipe.bitsCost ?? 0);
   const hasEnoughPieces = isMulti
     ? recipe.pieceRequirements!.every(r => (pieces[r.pieceId] ?? 0) >= r.count)
