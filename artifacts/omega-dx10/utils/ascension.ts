@@ -8,6 +8,45 @@ export const GOLDEN_STAR_FRAGMENT_ID = 'piece_golden_ascension_star';
 export const GOLDEN_STAR_ITEM_ID = 'golden_ascension_star';
 export const GOLDEN_STAR_FRAGMENTS_REQUIRED = 15;
 
+export const ASCENSION_SUCCESS_CHANCE_BY_TARGET_STAR: Record<number, number> = {
+  1: 0.70,
+  2: 0.45,
+  3: 0.25,
+  4: 0.25,
+};
+
+export const FUSION_SUCCESS_CHANCE_BY_RARITY: Record<string, number> = {
+  ULTIMATE: 0.70,
+  MEGA: 0.60,
+  ULTRA: 0.40,
+};
+
+export const YGGDRASIL_BLESSING_BONUS = 0.15;
+
+export function isYggdrasilBlessingActive(date = new Date()): boolean {
+  const day = date.getDay();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+  const minutes = hour * 60 + minute;
+  const fridayStart = 18 * 60;
+  const sundayEnd = 18 * 60;
+  return (day === 5 && minutes >= fridayStart) || day === 6 || (day === 0 && minutes < sundayEnd);
+}
+
+export function getYggdrasilBlessingBonus(date = new Date()): number {
+  return isYggdrasilBlessingActive(date) ? YGGDRASIL_BLESSING_BONUS : 0;
+}
+
+export function getAscensionSuccessChance(targetStars: number, date = new Date()): number {
+  return Math.min(1, (ASCENSION_SUCCESS_CHANCE_BY_TARGET_STAR[targetStars] ?? 0) + getYggdrasilBlessingBonus(date));
+}
+
+export function getFusionSuccessChance(resultRarity: string, date = new Date()): number {
+  const base = FUSION_SUCCESS_CHANCE_BY_RARITY[resultRarity];
+  return base === undefined ? 1 : Math.min(1, base + getYggdrasilBlessingBonus(date));
+}
+
+
 // O evento abre durante 48 horas a cada 14 dias. A data é UTC para que todos
 // os jogadores vejam exatamente o mesmo calendário, independentemente do fuso.
 export const STARRY_NIGHT_CYCLE_MS = 14 * 24 * 60 * 60 * 1000;
