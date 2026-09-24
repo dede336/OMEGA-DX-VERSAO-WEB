@@ -1946,8 +1946,8 @@ export const GAME_MAPS: GameMap[] = [
   },
   {
     id: 'dungeon_gulus_digivice',
-    name: 'Covil do Gulus — Fragmentos de Digivice',
-    description: 'Enfrente Regulusmon, Arcturiusmon e GulusGammamon para obter fragmentos dos Digivices D-3, D-Ark e Xros Loader.',
+    name: 'Covil de Arcturiusmon',
+    description: 'Enfrente Arcturiusmon, Omegamon X e Lucemon X para obter recompensas raras, incluindo Fragmentos do X-Antibody.',
     isDungeon: true,
     requiredTamerLevel: 15,
     availableDays: [2, 4, 6],
@@ -1956,12 +1956,12 @@ export const GAME_MAPS: GameMap[] = [
     stages: [
       {
         index: 0,
-        name: 'Trio Sombrio — Regulusmon, Arcturiusmon & GulusGammamon',
-        enemyCharacterId: 'name:Regulusmon',
-        enemyCharacterIds: ['name:Regulusmon', 'custom_1330', 'gulusGammamon'],
-        enemyLevel: 40,
-        enemyLevels: [40, 60, 35],
-        enemyAscensionStarsByIndex: [1, 0, 1],
+        name: 'Covil de Arcturiusmon',
+        enemyCharacterId: 'custom_1330',
+        enemyCharacterIds: ['custom_1330', 'name:Omegamon X', 'name:Lucemon X'],
+        enemyLevel: 60,
+        enemyLevels: [60, 60, 60],
+        enemyAscensionStarsByIndex: [0, 0, 0],
         expReward: 0,
         drops: [
           { type: 'piece', id: 'piece_digivice_d3', amount: 1, chance: 0.10 },
@@ -1969,6 +1969,7 @@ export const GAME_MAPS: GameMap[] = [
           { type: 'piece', id: 'piece_digivice_xros_loader', amount: 1, chance: 0.10 },
           { type: 'piece', id: 'piece_brasao_milagre', amount: 1, chance: 0.05 },
           { type: 'piece', id: 'piece_brasao_destino', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_x_antibody', amount: 1, chance: 0.05 },
         ],
       },
     ],
