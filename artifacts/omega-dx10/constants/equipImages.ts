@@ -1,4 +1,6 @@
+import ENERGY_PILL_IMAGE from './energyPillImage';
 const EQUIP_ITEM_IMAGES: Record<string, any> = {
+  pilula_energetica: ENERGY_PILL_IMAGE,
   brasao_coragem:   require('../assets/images/brasao_coragem.webp'),
   brasao_esperanca: require('../assets/images/brasao_esperanca_v4.webp'),
   brasao_amizade:   require('../assets/images/brasao_amizade.webp'),
