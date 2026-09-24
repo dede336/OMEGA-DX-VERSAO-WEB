@@ -11,7 +11,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import {
   EQUIP_SLOT_ICONS, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER,
   RARITY_COLORS, ELEMENTS, EquipSlot, RarityId, ElementId,
-  CRAFT_RECIPES, ITEM_NAMES,
+  CRAFT_RECIPES, ITEM_NAMES, CARD_DEFINITIONS, CARD_IDS,
 } from '@/constants/gameData';
 import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,7 +33,7 @@ export default function MochilaScreen() {
   const game = useGame();
   const {
     inventory, equippedItems, pieces, bits, collection, tamerLevel, tamerExp,
-    equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem,
+    equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem, applyCardToDigivice,
   } = game;
 
   const { t } = useLanguage();
@@ -44,6 +44,8 @@ export default function MochilaScreen() {
   const [batteryQty, setBatteryQty] = useState(1);
   const [energyPillModalVisible, setEnergyPillModalVisible] = useState(false);
   const [energyPillQty, setEnergyPillQty] = useState(1);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [cardMessage, setCardMessage] = useState('');
 
   const topPad = 0;
   const botPad = insets.bottom + 20;
@@ -85,6 +87,10 @@ export default function MochilaScreen() {
   }, {});
   const energyPillStock = inventoryCounts.pilula_energetica ?? 0;
   const visibleInventoryItems = Object.entries(inventoryCounts).filter(([itemId]) => itemId !== 'pilula_energetica');
+  const ownedDigivices = Array.from(new Set([
+    ...inventory.filter((itemId) => itemId.startsWith('digivice_')),
+    ...(equippedItems.digivice ? [equippedItems.digivice] : []),
+  ]));
   const batteryIds = new Set(XP_BATTERIES.map((battery) => battery.id));
   const visibleMaterials = Object.entries(pieces).filter(
     ([itemId, quantity]) => quantity > 0 && !batteryIds.has(itemId as any),
@@ -332,22 +338,75 @@ export default function MochilaScreen() {
               const itemName = ITEM_NAMES[itemId] ?? equipment?.name ?? itemId;
               const itemImg = getEquipItemImage(itemId, game.tamerId);
               return (
-                <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+                <TouchableOpacity
+                  key={itemId}
+                  style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: CARD_IDS.has(itemId) ? '#06b6d4' : colors.border }, pixelStyle]}
+                  onPress={() => {
+                    if (!CARD_IDS.has(itemId)) return;
+                    setCardMessage('');
+                    setSelectedCardId(itemId);
+                  }}
+                  activeOpacity={CARD_IDS.has(itemId) ? 0.75 : 1}
+                >
                   {itemImg ? (
                     <Image source={itemImg} style={styles.inventoryImage} resizeMode="contain" />
                   ) : (
-                    <Feather name="package" size={30} color={colors.primary} />
+                    <Feather name={CARD_IDS.has(itemId) ? 'layers' : 'package'} size={30} color={CARD_IDS.has(itemId) ? '#06b6d4' : colors.primary} />
                   )}
                   <Text style={[styles.inventoryName, { color: colors.foreground }]} numberOfLines={2}>{itemName}</Text>
-                  <View style={[styles.inventoryQuantity, { backgroundColor: colors.primary }]}> 
+                  {CARD_IDS.has(itemId) && <Text style={{ color: '#06b6d4', fontSize: 10, fontWeight: '700' }}>USAR NO DIGIVICE</Text>}
+                  <View style={[styles.inventoryQuantity, { backgroundColor: CARD_IDS.has(itemId) ? '#06b6d4' : colors.primary }]}> 
                     <Text style={styles.inventoryQuantityText}>×{quantity}</Text>
                   </View>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
         </>
       )}
+
+
+      <Modal visible={!!selectedCardId} transparent animationType="slide" onRequestClose={() => setSelectedCardId(null)}>
+        <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.65)' }} onPress={() => setSelectedCardId(null)}>
+          <Pressable style={{ backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 32 }} onPress={(e) => e.stopPropagation()}>
+            <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '800', marginBottom: 6 }}>
+              {CARD_DEFINITIONS.find((card) => card.id === selectedCardId)?.name ?? 'Card'}
+            </Text>
+            <Text style={{ color: colors.mutedForeground, fontSize: 12, marginBottom: 16 }}>
+              {CARD_DEFINITIONS.find((card) => card.id === selectedCardId)?.description}
+            </Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700', marginBottom: 10 }}>Escolha o Digivice</Text>
+            {ownedDigivices.length === 0 ? (
+              <Text style={{ color: colors.mutedForeground, marginBottom: 12 }}>Você não possui um Digivice disponível.</Text>
+            ) : ownedDigivices.map((digiviceId) => {
+              const digivice = EQUIPMENT_ITEMS.find((item) => item.id === digiviceId);
+              const permanentCount = game.digiviceCards?.[digiviceId]?.length ?? 0;
+              return (
+                <TouchableOpacity
+                  key={digiviceId}
+                  style={[styles.pickerItem, { backgroundColor: colors.background, borderColor: colors.border, marginBottom: 8 }, pixelStyle]}
+                  onPress={() => {
+                    if (!selectedCardId) return;
+                    const result = applyCardToDigivice(selectedCardId, digiviceId);
+                    setCardMessage(result.message);
+                    if (result.success) setSelectedCardId(null);
+                  }}
+                >
+                  <Image source={getEquipItemImage(digiviceId, game.tamerId)} style={styles.pickerItemImg} resizeMode="contain" />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: colors.foreground, fontWeight: '700' }}>{digivice?.name ?? ITEM_NAMES[digiviceId] ?? digiviceId}</Text>
+                    <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{permanentCount}/10 Cards permanentes</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+            {!!cardMessage && <Text style={{ color: '#ef4444', fontWeight: '700', marginTop: 8 }}>{cardMessage}</Text>}
+            <TouchableOpacity onPress={() => setSelectedCardId(null)} style={{ padding: 12, alignItems: 'center', marginTop: 8 }}>
+              <Text style={{ color: colors.mutedForeground, fontWeight: '700' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── Materiais e fragmentos obtidos ── */}
       {visibleMaterials.length > 0 && (
