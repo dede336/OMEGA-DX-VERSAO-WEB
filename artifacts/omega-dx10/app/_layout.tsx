@@ -114,11 +114,11 @@ const offlineStyles = StyleSheet.create({
 
 function NavigationGuard() {
   const { isLoaded, customCharsReady } = useGame();
-  const { isAuthLoaded, user } = useAuth();
+  const { isAuthLoaded, user, serverOffline } = useAuth();
   const { isLanguageLoaded, isLanguageSelected } = useLanguage();
   const fired = useRef(false);
   useEffect(() => {
-    if (!isLoaded || !isAuthLoaded || !isLanguageLoaded || fired.current) return;
+    if (!isLoaded || !isAuthLoaded || serverOffline || !isLanguageLoaded || fired.current) return;
     // Se há usuário logado, aguarda os custom chars carregarem antes de navegar
     if (user && !customCharsReady) return;
     fired.current = true;
@@ -129,7 +129,7 @@ function NavigationGuard() {
     } else {
       router.replace('/intro' as never);
     }
-  }, [isLoaded, isAuthLoaded, isLanguageLoaded, isLanguageSelected, user, customCharsReady]);
+  }, [isLoaded, isAuthLoaded, serverOffline, isLanguageLoaded, isLanguageSelected, user, customCharsReady]);
   return null;
 }
 
@@ -261,6 +261,9 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayoutNav() {
+  const { serverOffline } = useAuth();
+  if (serverOffline) return <ServerOfflineScreen />;
+
   return (
     <>
       <TamerThemeSyncer />
