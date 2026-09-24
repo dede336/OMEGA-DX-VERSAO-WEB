@@ -33,7 +33,7 @@ export default function MochilaScreen() {
   const game = useGame();
   const {
     inventory, equippedItems, pieces, bits, collection,
-    equipItem, unequipItem, craftItem, useXpItem,
+    equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem,
   } = game;
 
   const { t } = useLanguage();
@@ -42,6 +42,8 @@ export default function MochilaScreen() {
   const [selectedBatteryId, setSelectedBatteryId] = useState<string>('piece_battery_green');
   const [selectedDigimonId, setSelectedDigimonId] = useState<string | null>(null);
   const [batteryQty, setBatteryQty] = useState(1);
+  const [energyPillModalVisible, setEnergyPillModalVisible] = useState(false);
+  const [energyPillQty, setEnergyPillQty] = useState(1);
 
   const topPad = 0;
   const botPad = insets.bottom + 20;
@@ -81,7 +83,8 @@ export default function MochilaScreen() {
     counts[itemId] = (counts[itemId] ?? 0) + 1;
     return counts;
   }, {});
-  const visibleInventoryItems = Object.entries(inventoryCounts);
+  const energyPillStock = inventoryCounts.pilula_energetica ?? 0;
+  const visibleInventoryItems = Object.entries(inventoryCounts).filter(([itemId]) => itemId !== 'pilula_energetica');
   const batteryIds = new Set(XP_BATTERIES.map((battery) => battery.id));
   const visibleMaterials = Object.entries(pieces).filter(
     ([itemId, quantity]) => quantity > 0 && !batteryIds.has(itemId as any),
@@ -300,6 +303,25 @@ export default function MochilaScreen() {
         })}
       </View>
 
+      {/* ── Pílula Energética — EXP de Tamer ── */}
+      {energyPillStock > 0 && (
+        <>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>EXP do Tamer</Text>
+          <TouchableOpacity
+            style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.primary }, pixelStyle]}
+            onPress={() => { setEnergyPillQty(1); setEnergyPillModalVisible(true); }}
+            activeOpacity={0.8}
+          >
+            <Image source={EQUIP_ITEM_IMAGES.pilula_energetica} style={styles.inventoryImage} resizeMode="contain" />
+            <Text style={[styles.inventoryName, { color: colors.foreground }]}>Pílula Energética</Text>
+            <Text style={[styles.batteryXp, { color: colors.mutedForeground }]}>+500 EXP Tamer</Text>
+            <View style={[styles.inventoryQuantity, { backgroundColor: colors.primary }]}>
+              <Text style={styles.inventoryQuantityText}>×{energyPillStock}</Text>
+            </View>
+          </TouchableOpacity>
+        </>
+      )}
+
       {/* ── Itens obtidos ── */}
       {visibleInventoryItems.length > 0 && (
         <>
@@ -506,6 +528,57 @@ export default function MochilaScreen() {
         );
       })}
     </ScrollView>
+
+    <Modal
+      visible={energyPillModalVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setEnergyPillModalVisible(false)}
+    >
+      <Pressable style={styles.batteryModalOverlay} onPress={() => setEnergyPillModalVisible(false)}>
+        <Pressable
+          style={[styles.batteryModalBox, { backgroundColor: colors.card, borderColor: colors.primary }, pixelStyle]}
+          onPress={(event) => event.stopPropagation()}
+        >
+          <View style={styles.batteryModalHeader}>
+            <Image source={EQUIP_ITEM_IMAGES.pilula_energetica} style={styles.batteryModalImage} resizeMode="contain" />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.batteryModalTitle, { color: colors.primary }]}>Pílula Energética</Text>
+              <Text style={[styles.batteryModalSubtitle, { color: colors.mutedForeground }]}>+500 EXP de Tamer por pílula</Text>
+            </View>
+            <TouchableOpacity onPress={() => setEnergyPillModalVisible(false)} style={styles.batteryCloseButton}>
+              <Feather name="x" size={20} color={colors.foreground} />
+            </TouchableOpacity>
+          </View>
+
+          <BatteryQuantityPicker
+            value={energyPillQty}
+            max={energyPillStock}
+            onChange={setEnergyPillQty}
+            color={colors.primary}
+            borderColor={colors.border}
+            textColor={colors.foreground}
+            mutedColor={colors.mutedForeground}
+            availableLabel={`Disponível: ${energyPillStock}`}
+          />
+
+          <Text style={[styles.batteryTotalXp, { color: colors.primary }]}>+{(500 * energyPillQty).toLocaleString()} EXP Tamer</Text>
+
+          <TouchableOpacity
+            style={[styles.batteryUseButton, { backgroundColor: colors.primary, opacity: energyPillStock > 0 ? 1 : 0.45 }]}
+            disabled={energyPillStock <= 0}
+            onPress={() => {
+              if (energyPillStock <= 0) return;
+              useTamerXpItem('pilula_energetica', energyPillQty);
+              setEnergyPillModalVisible(false);
+            }}
+          >
+            <Image source={EQUIP_ITEM_IMAGES.pilula_energetica} style={styles.batteryUseImage} resizeMode="contain" />
+            <Text style={styles.batteryUseText}>Usar no Tamer</Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
 
     <Modal
       visible={batteryModalVisible}

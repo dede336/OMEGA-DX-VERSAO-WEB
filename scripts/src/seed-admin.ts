@@ -1,17 +1,13 @@
-import { db, usersTable, gameSavesTable } from "@workspace/db";
+import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const ADMIN_USERNAME = "dede336";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Lucas336";
-
-const ASSISTANT_USERNAME = "rimuru336";
-const ASSISTANT_PASSWORD = process.env.ASSISTANT_PASSWORD ?? "Lucas336";
-const ASSISTANT_ROLE = "digimon_creator";
-const ASSISTANT_TAMER_LEVEL = 15;
 
 async function seedAdmin() {
-  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH ?? await bcrypt.hash(ADMIN_PASSWORD, 10);
+  const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
+    ?? (process.env.ADMIN_PASSWORD ? await bcrypt.hash(process.env.ADMIN_PASSWORD, 10) : null);
+
   const [existing] = await db
     .select({ id: usersTable.id, isAdmin: usersTable.isAdmin })
     .from(usersTable)
@@ -19,79 +15,25 @@ async function seedAdmin() {
     .limit(1);
 
   if (existing) {
-    await db
-      .update(usersTable)
-      .set({ isAdmin: true, role: "admin", passwordHash: adminPasswordHash })
-      .where(eq(usersTable.id, existing.id));
-    console.log(`Conta '${ADMIN_USERNAME}' atualizada — admin, role e senha redefinidos.`);
-  } else {
-    await db.insert(usersTable).values({
-      username: ADMIN_USERNAME,
-      passwordHash: adminPasswordHash,
-      isAdmin: true,
-      role: "admin",
-    });
-    console.log(`Conta admin '${ADMIN_USERNAME}' criada com sucesso.`);
-  }
-}
-
-async function seedAssistant() {
-  const assistantPasswordHash = await bcrypt.hash(ASSISTANT_PASSWORD, 10);
-  const [existing] = await db
-    .select({ id: usersTable.id, role: usersTable.role })
-    .from(usersTable)
-    .where(eq(usersTable.username, ASSISTANT_USERNAME))
-    .limit(1);
-
-  if (existing) {
-    await db
-      .update(usersTable)
-      .set({ role: ASSISTANT_ROLE, passwordHash: assistantPasswordHash })
-      .where(eq(usersTable.id, existing.id));
-    console.log(`Conta '${ASSISTANT_USERNAME}' já existe — role atualizada para ${ASSISTANT_ROLE}.`);
-
-    const [existSave] = await db
-      .select({ id: gameSavesTable.id })
-      .from(gameSavesTable)
-      .where(eq(gameSavesTable.userId, existing.id))
-      .limit(1);
-
-    if (!existSave) {
-      await db.insert(gameSavesTable).values({
-        userId: existing.id,
-        saveData: { tamerLevel: ASSISTANT_TAMER_LEVEL, tamerExp: 0 },
-      });
-      console.log(`Save inicial criado para '${ASSISTANT_USERNAME}' no rank ${ASSISTANT_TAMER_LEVEL}.`);
-    } else {
-      const saveData = existSave as any;
-      if (!saveData.saveData?.tamerLevel) {
-        await db.update(gameSavesTable)
-          .set({ saveData: { ...(saveData.saveData ?? {}), tamerLevel: ASSISTANT_TAMER_LEVEL, tamerExp: 0 } })
-          .where(eq(gameSavesTable.userId, existing.id));
-      }
-    }
+    const update: Record<string, unknown> = { isAdmin: true, role: "admin" };
+    if (adminPasswordHash) update.passwordHash = adminPasswordHash;
+    await db.update(usersTable).set(update).where(eq(usersTable.id, existing.id));
+    console.log(`Conta admin '${ADMIN_USERNAME}' preservada e atualizada.`);
     return;
   }
 
-  const passwordHash = await bcrypt.hash(ASSISTANT_PASSWORD, 10);
-  const [user] = await db.insert(usersTable).values({
-    username: ASSISTANT_USERNAME,
-    passwordHash,
-    isAdmin: false,
-    role: ASSISTANT_ROLE,
-  }).returning();
-
-  await db.insert(gameSavesTable).values({
-    userId: user.id,
-    saveData: { tamerLevel: ASSISTANT_TAMER_LEVEL, tamerExp: 0 },
+  if (!adminPasswordHash) throw new Error("ADMIN_PASSWORD ou ADMIN_PASSWORD_HASH é obrigatório para criar o admin");
+  await db.insert(usersTable).values({
+    username: ADMIN_USERNAME,
+    passwordHash: adminPasswordHash,
+    isAdmin: true,
+    role: "admin",
   });
-
-  console.log(`Conta assistente '${ASSISTANT_USERNAME}' criada com role=${ASSISTANT_ROLE}, rank=${ASSISTANT_TAMER_LEVEL}.`);
+  console.log(`Conta admin '${ADMIN_USERNAME}' criada com sucesso.`);
 }
 
 async function main() {
   await seedAdmin();
-  await seedAssistant();
   process.exit(0);
 }
 
