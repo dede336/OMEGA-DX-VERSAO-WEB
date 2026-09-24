@@ -104,6 +104,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (autoRetryRef.current) clearTimeout(autoRetryRef.current);
 
+    const scheduleRetry = () => {
+      setServerOffline(true);
+      setIsAuthLoaded(true);
+      autoRetryRef.current = setTimeout(() => {
+        setRetryCount((c) => c + 1);
+      }, AUTO_RETRY_INTERVAL_MS);
+    };
+
     (async () => {
       setIsAuthLoaded(false);
       setServerOffline(false);
@@ -126,19 +134,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               role: data.role ?? 'user',
               createdAt: data.createdAt,
             });
-          } else {
+          } else if (me.status === 401 || me.status === 403) {
             await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+            setToken(null);
+            setUser(null);
+          } else {
+            // A temporary 5xx/proxy response must not be treated as a bad
+            // session. Keeping the token allows the account to recover after
+            // a hard refresh when the API becomes available again.
+            scheduleRetry();
+            return;
           }
         }
       } catch (err: any) {
-        if (err?.name === 'AbortError' || err?.message?.includes('Network') || err?.message?.includes('fetch') || err?.message?.includes('abort')) {
-          setServerOffline(true);
-          setIsAuthLoaded(true);
-          autoRetryRef.current = setTimeout(() => {
-            setRetryCount((c) => c + 1);
-          }, AUTO_RETRY_INTERVAL_MS);
-          return;
-        }
+        scheduleRetry();
+        return;
       }
       setIsAuthLoaded(true);
     })();
