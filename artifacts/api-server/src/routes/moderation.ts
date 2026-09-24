@@ -11,11 +11,11 @@ import { disconnectUserForBan } from "../lib/socket.js";
 const router = Router();
 
 function isModerator(auth: { isAdmin: boolean; role: string }): boolean {
-  return auth.isAdmin || auth.role === "digimon_creator";
+  return auth.isAdmin;
 }
 
-function moderatorRole(auth: { isAdmin: boolean }): "admin" | "assistant" {
-  return auth.isAdmin ? "admin" : "assistant";
+function moderatorRole(_auth: { isAdmin: boolean }): "admin" {
+  return "admin";
 }
 
 router.use(requireAuth);
@@ -93,10 +93,6 @@ router.post("/reports/:id/ban", async (req, res) => {
   const [target] = await db.select().from(usersTable).where(eq(usersTable.id, report.reportedUserId)).limit(1);
   if (!target) { res.status(404).json({ error: "Jogador não encontrado." }); return; }
   if (target.isAdmin) { res.status(403).json({ error: "Uma conta Admin não pode ser banida por este painel." }); return; }
-  if (!req.auth!.isAdmin && target.role === "digimon_creator") {
-    res.status(403).json({ error: "Assistentes não podem punir outro Assistente." });
-    return;
-  }
   const createdByRole = moderatorRole(req.auth!);
   const expiresAt = new Date(Date.now() + durationMinutes * 60_000);
   await db.update(accountBansTable).set({ active: false, revokedAt: new Date(), revokedByUserId: req.auth!.userId })
@@ -143,10 +139,6 @@ router.post("/bans/:id/revoke", async (req, res) => {
   const id = Number(req.params.id);
   const [ban] = await db.select().from(accountBansTable).where(eq(accountBansTable.id, id)).limit(1);
   if (!ban) { res.status(404).json({ error: "Banimento não encontrado." }); return; }
-  if (!req.auth!.isAdmin && ban.createdByRole === "admin") {
-    res.status(403).json({ error: "Assistentes não podem desfazer uma decisão do Admin." });
-    return;
-  }
   await db.update(accountBansTable).set({ active: false, revokedAt: new Date(), revokedByUserId: req.auth!.userId })
     .where(eq(accountBansTable.id, id));
   res.json({ ok: true });
