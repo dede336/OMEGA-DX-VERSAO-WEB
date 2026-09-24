@@ -1446,6 +1446,37 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_paper_venusmon: 'Venusmon Paper',
   piece_paper_vulcanusmon: 'Vulcanusmon Paper',
   piece_paper_plutomon: 'Plutomon Paper',
+  card_aero_wing: 'Aero Wing',
+  card_asas_brancas: 'Asas Brancas',
+  card_battle_tomahawk: 'Battle Tomahawk',
+  card_boost_chip: 'Boost Chip',
+  card_broca_aco: 'Broca de Aço',
+  card_devil_chip: 'Devil Chip',
+  card_heavy_metal: 'Heavy Metal',
+  card_king_device: 'King Device',
+  card_knight_device: 'Knight Device',
+  card_alta_velocidade_d: 'Plug-In de Alta Velocidade D',
+  card_alta_velocidade_h: 'Plug-In de Alta Velocidade H',
+  card_alta_velocidade_t: 'Plug-In de Alta Velocidade T',
+  card_ataque_a: 'Plug-In de Ataque A',
+  card_defesa_g: 'Plug-In de Defesa G',
+  card_forca_o: 'Plug-In de Força O',
+  card_forca_w: 'Plug-In de Força W',
+  card_invalidacao_p: 'Plug-In de Invalidação P',
+  card_recarregamento_q: 'Plug-In de Recarregamento Q',
+  card_super_evolucao_s: 'Plug-In de Super Evolução S',
+  card_power_charger: 'Power Charger',
+  card_queen_device: 'Queen Device',
+  card_semente_durabilidade: 'Semente da Durabilidade',
+  card_st_51: 'ST-51',
+  card_st_382: 'ST-382',
+  card_st_384: 'ST-384',
+  card_thor_hammer: 'Thor Hammer',
+  card_training_grips: 'Training Grips',
+  card_universo_expansao: 'Universo em Expansão!',
+  card_blue_caseira: 'Blue Card Caseira',
+  card_blue: 'Blue Card',
+  card_red: 'Red Card',
   // ── Espíritos Lendários do Frontier ──────────────────────────────────────────
   spirit_humano_fogo:       'Spirit Humano do Fogo 🔥',
   spirit_besta_fogo:        'Spirit Besta do Fogo 🔥',
@@ -2248,6 +2279,54 @@ export const TAMERS: TamerOption[] = [
   },
 ];
 
+
+export interface CardDefinition {
+  id: string;
+  name: string;
+  description: string;
+  bonuses?: Partial<BaseStats>;
+  temporaryType?: 'ascension' | 'fusion';
+  temporaryBonus?: number;
+  durationMs?: number;
+}
+
+export const CARD_DEFINITIONS: CardDefinition[] = [
+  { id: 'card_aero_wing', name: 'Aero Wing', description: '+10 SPD permanente no Digivice selecionado.', bonuses: { spd: 10 } },
+  { id: 'card_asas_brancas', name: 'Asas Brancas', description: '+10 SPT permanente no Digivice selecionado.', bonuses: { spt: 10 } },
+  { id: 'card_battle_tomahawk', name: 'Battle Tomahawk', description: '+10 ATK permanente no Digivice selecionado.', bonuses: { atk: 10 } },
+  { id: 'card_boost_chip', name: 'Boost Chip', description: '+5 ATK e +5 SPD permanentes.', bonuses: { atk: 5, spd: 5 } },
+  { id: 'card_broca_aco', name: 'Broca de Aço', description: '+10 DEF permanente.', bonuses: { def: 10 } },
+  { id: 'card_devil_chip', name: 'Devil Chip', description: '+15 ATK e -5 DEF permanentes.', bonuses: { atk: 15, def: -5 } },
+  { id: 'card_heavy_metal', name: 'Heavy Metal', description: '+15 DEF e -5 SPD permanentes.', bonuses: { def: 15, spd: -5 } },
+  { id: 'card_king_device', name: 'King Device', description: '+5 ATK, +5 DEF e +5 SPT permanentes.', bonuses: { atk: 5, def: 5, spt: 5 } },
+  { id: 'card_knight_device', name: 'Knight Device', description: '+10 DEF e +5 ATK permanentes.', bonuses: { def: 10, atk: 5 } },
+  { id: 'card_alta_velocidade_d', name: 'Plug-In de Alta Velocidade D', description: '+10 SPD permanente.', bonuses: { spd: 10 } },
+  { id: 'card_alta_velocidade_h', name: 'Plug-In de Alta Velocidade H', description: '+15 SPD permanente.', bonuses: { spd: 15 } },
+  { id: 'card_alta_velocidade_t', name: 'Plug-In de Alta Velocidade T', description: '+20 SPD permanente.', bonuses: { spd: 20 } },
+  { id: 'card_ataque_a', name: 'Plug-In de Ataque A', description: '+10 ATK permanente.', bonuses: { atk: 10 } },
+  { id: 'card_defesa_g', name: 'Plug-In de Defesa G', description: '+10 DEF permanente.', bonuses: { def: 10 } },
+  { id: 'card_forca_o', name: 'Plug-In de Força O', description: '+15 ATK permanente.', bonuses: { atk: 15 } },
+  { id: 'card_forca_w', name: 'Plug-In de Força W', description: '+20 ATK permanente.', bonuses: { atk: 20 } },
+  { id: 'card_invalidacao_p', name: 'Plug-In de Invalidação P', description: '+10 DEF e +10 SPT permanentes.', bonuses: { def: 10, spt: 10 } },
+  { id: 'card_recarregamento_q', name: 'Plug-In de Recarregamento Q', description: '+10 SPT permanente.', bonuses: { spt: 10 } },
+  { id: 'card_super_evolucao_s', name: 'Plug-In de Super Evolução S', description: '+5 em todos os atributos principais.', bonuses: { hp: 5, mp: 5, atk: 5, def: 5, spt: 5, spd: 5 } },
+  { id: 'card_power_charger', name: 'Power Charger', description: '+10 ATK e +10 SPT permanentes.', bonuses: { atk: 10, spt: 10 } },
+  { id: 'card_queen_device', name: 'Queen Device', description: '+5 DEF, +5 SPT e +5 SPD permanentes.', bonuses: { def: 5, spt: 5, spd: 5 } },
+  { id: 'card_semente_durabilidade', name: 'Semente da Durabilidade', description: '+100 HP permanente.', bonuses: { hp: 100 } },
+  { id: 'card_st_51', name: 'ST-51', description: '+10 ATK permanente.', bonuses: { atk: 10 } },
+  { id: 'card_st_382', name: 'ST-382', description: '+10 DEF permanente.', bonuses: { def: 10 } },
+  { id: 'card_st_384', name: 'ST-384', description: '+10 SPT permanente.', bonuses: { spt: 10 } },
+  { id: 'card_thor_hammer', name: 'Thor Hammer', description: '+20 ATK permanente.', bonuses: { atk: 20 } },
+  { id: 'card_training_grips', name: 'Training Grips', description: '+5 ATK e +5 DEF permanentes.', bonuses: { atk: 5, def: 5 } },
+  { id: 'card_universo_expansao', name: 'Universo em Expansão!', description: '+150 HP e +5 SPT permanentes.', bonuses: { hp: 150, spt: 5 } },
+  { id: 'card_blue_caseira', name: 'Blue Card Caseira', description: '+2 pontos percentuais na Ascensão por 3 horas.', temporaryType: 'ascension', temporaryBonus: 0.02, durationMs: 3 * 60 * 60 * 1000 },
+  { id: 'card_blue', name: 'Blue Card', description: '+5 pontos percentuais na Ascensão por 3 horas.', temporaryType: 'ascension', temporaryBonus: 0.05, durationMs: 3 * 60 * 60 * 1000 },
+  { id: 'card_red', name: 'Red Card', description: '+5 pontos percentuais na Fusão por 3 horas.', temporaryType: 'fusion', temporaryBonus: 0.05, durationMs: 3 * 60 * 60 * 1000 },
+];
+
+export const CARD_IDS = new Set(CARD_DEFINITIONS.map((card) => card.id));
+export const TEMPORARY_CARD_IDS = new Set(CARD_DEFINITIONS.filter((card) => card.temporaryType).map((card) => card.id));
+
 export const CRAFT_RECIPES: CraftRecipe[] = [
   // ── Anel Sagrado: sacrifice drops ─────────────────────────────────────────
   {
@@ -2574,6 +2653,163 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     resultItemName: 'Black Digitron 🖤',
     resultRarity: 'MEGA',
   },
+  // ── Cards ───────────────────────────────────────────────────────────────
+  {
+    pieceId: 'piece_paper_dianamon', pieceName: 'Dianamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_aero_wing', resultItemName: 'Aero Wing', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_venusmon', pieceName: 'Venusmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_asas_brancas', resultItemName: 'Asas Brancas', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_vulcanusmon', pieceName: 'Vulcanusmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_battle_tomahawk', resultItemName: 'Battle Tomahawk', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_mercurymon', pieceName: 'Mercurymon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_boost_chip', resultItemName: 'Boost Chip', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_vulcanusmon', pieceName: 'Vulcanusmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_broca_aco', resultItemName: 'Broca de Aço', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_plutomon', pieceName: 'Plutomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 8, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 8, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 8, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 8, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_devil_chip', resultItemName: 'Devil Chip', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_vulcanusmon', pieceName: 'Vulcanusmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_heavy_metal', resultItemName: 'Heavy Metal', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_jupitermon', pieceName: 'Jupitermon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_jupitermon', count: 8, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 8, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 8, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 8, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_king_device', resultItemName: 'King Device', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_jupitermon', pieceName: 'Jupitermon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_knight_device', resultItemName: 'Knight Device', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_dianamon', pieceName: 'Dianamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_alta_velocidade_d', resultItemName: 'Plug-In de Alta Velocidade D', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_mercurymon', pieceName: 'Mercurymon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_alta_velocidade_h', resultItemName: 'Plug-In de Alta Velocidade H', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_mercurymon', pieceName: 'Mercurymon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_alta_velocidade_t', resultItemName: 'Plug-In de Alta Velocidade T', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_apollomon', pieceName: 'Apollomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_ataque_a', resultItemName: 'Plug-In de Ataque A', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_ceresmon', pieceName: 'Ceresmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_defesa_g', resultItemName: 'Plug-In de Defesa G', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_apollomon', pieceName: 'Apollomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_forca_o', resultItemName: 'Plug-In de Força O', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_apollomon', pieceName: 'Apollomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_forca_w', resultItemName: 'Plug-In de Força W', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_jupitermon', pieceName: 'Jupitermon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_jupitermon', count: 8, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 8, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 8, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 8, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_invalidacao_p', resultItemName: 'Plug-In de Invalidação P', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_bacchusmon', pieceName: 'Bacchusmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_recarregamento_q', resultItemName: 'Plug-In de Recarregamento Q', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_jupitermon', pieceName: 'Jupitermon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_jupitermon', count: 8, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 8, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 8, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 8, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_super_evolucao_s', resultItemName: 'Plug-In de Super Evolução S', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_apollomon', pieceName: 'Apollomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_power_charger', resultItemName: 'Power Charger', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_junomon', pieceName: 'Junomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_junomon', count: 8, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 8, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 8, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 8, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 8, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_queen_device', resultItemName: 'Queen Device', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_ceresmon', pieceName: 'Ceresmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_semente_durabilidade', resultItemName: 'Semente da Durabilidade', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_mercurymon', pieceName: 'Mercurymon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_st_51', resultItemName: 'ST-51', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_neptunemon', pieceName: 'Neptunemon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_neptunemon', count: 10, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_st_382', resultItemName: 'ST-382', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_ceresmon', pieceName: 'Ceresmon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_st_384', resultItemName: 'ST-384', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_jupitermon', pieceName: 'Jupitermon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_jupitermon', count: 8, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 8, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 8, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 8, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_thor_hammer', resultItemName: 'Thor Hammer', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_minervamon', pieceName: 'Minervamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_training_grips', resultItemName: 'Training Grips', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_dianamon', pieceName: 'Dianamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 8, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_dianamon', count: 8, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_neptunemon', count: 8, pieceName: 'Neptunemon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 8, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 8, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 8, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_universo_expansao', resultItemName: 'Universo em Expansão!', resultRarity: 'CHAMPION',
+  },
+  {
+    pieceId: 'piece_paper_dianamon', pieceName: 'Dianamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_ceresmon', count: 10, pieceName: 'Ceresmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_blue_caseira', resultItemName: 'Blue Card Caseira', resultRarity: 'ULTIMATE',
+  },
+  {
+    pieceId: 'piece_paper_dianamon', pieceName: 'Dianamon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_dianamon', count: 10, pieceName: 'Dianamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_junomon', count: 10, pieceName: 'Junomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_mercurymon', count: 10, pieceName: 'Mercurymon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_venusmon', count: 10, pieceName: 'Venusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 10, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_blue', resultItemName: 'Blue Card', resultRarity: 'MEGA',
+  },
+  {
+    pieceId: 'piece_paper_apollomon', pieceName: 'Apollomon Paper', pieceDescription: 'Papers do Oásis do Olimpo.', pieceIcon: 'layers', pieceColor: '#60a5fa', requiredCount: 10, bitsCost: 0,
+    pieceRequirements: [{ pieceId: 'piece_paper_apollomon', count: 10, pieceName: 'Apollomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_minervamon', count: 10, pieceName: 'Minervamon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_vulcanusmon', count: 10, pieceName: 'Vulcanusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_jupitermon', count: 10, pieceName: 'Jupitermon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_bacchusmon', count: 10, pieceName: 'Bacchusmon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }, { pieceId: 'piece_paper_plutomon', count: 10, pieceName: 'Plutomon Paper', pieceIcon: 'file-text', pieceColor: '#60a5fa' }],
+    resultItemId: 'card_red', resultItemName: 'Red Card', resultRarity: 'MEGA',
+  }
+
 ];
 
 export function expToNextLevel(level: number): number {
