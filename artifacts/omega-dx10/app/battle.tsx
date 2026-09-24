@@ -187,6 +187,8 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_brasao_luz:       { name: 'Fragmento Brasão Luz',       color: '#ec4899' },
   piece_brasao_amor:      { name: 'Fragmento Brasão Amor',      color: '#ef4444' },
   piece_brasao_bondade:   { name: 'Fragmento Brasão Bondade',   color: '#d946ef' },
+  piece_brasao_milagre:   { name: 'Fragmento Brasão Milagre',   color: '#facc15' },
+  piece_brasao_destino:   { name: 'Fragmento Brasão Destino',   color: '#a78bfa' },
   piece_digivice_d3:          { name: 'Fragmento D-3',          color: '#3b82f6' },
   piece_digivice_d_ark:       { name: 'Fragmento D-Ark',       color: '#22c55e' },
   piece_digivice_xros_loader: { name: 'Fragmento Xros Loader', color: '#f59e0b' },
@@ -307,6 +309,7 @@ export default function BattleScreen() {
   const defendingPlayerIdxRef = useRef<number | null>(null);
   const dArkRoundsRemainingRef = useRef(0);
   const kindnessHealUsedRef = useRef(false);
+  const miracleSaveUsedRef = useRef(false);
   const [kindnessHealIdx, setKindnessHealIdx] = useState<number | null>(null);
   const kindnessFx = useRef(new Animated.Value(0)).current;
   useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
@@ -728,6 +731,7 @@ export default function BattleScreen() {
     const activeDigiviceId = equippedItems.digivice;
     dArkRoundsRemainingRef.current = 0;
     kindnessHealUsedRef.current = false;
+    miracleSaveUsedRef.current = false;
     setKindnessHealIdx(null);
     if (activeDigiviceId === 'digivice_d_ark') {
       for (const f of fighters) {
@@ -1007,6 +1011,12 @@ export default function BattleScreen() {
         addLog(`💜 Coração Protetor: ${target.name} recuperou ${healAmount} HP!`, '#d946ef');
       }
     }
+    const miracleEquipped = equippedItemsRef.current.brasao === 'brasao_milagre';
+    if (miracleEquipped && !miracleSaveUsedRef.current && newTargetHP <= 0 && target.currentHP > 0) {
+      newTargetHP = Math.max(1, Math.floor(target.stats.hp * 0.20));
+      miracleSaveUsedRef.current = true;
+      addLog(`✨ Poder do Milagre: ${target.name} evitou a derrota e recuperou 20% do HP!`, '#facc15');
+    }
     const lc = result.defenderResult.attrMult > 1 || result.defenderResult.elemMult > 1
       ? '#ef4444' : colors.foreground;
     addLog(result.defenderResult.log, lc);
@@ -1041,6 +1051,21 @@ export default function BattleScreen() {
     }
 
     setTimeout(() => processNextTurn(queue, nextQIdx, updatedFighters, updatedEnems), 450);
+  }
+
+  function applyDestinyOffense(fighter: TeamFighter): TeamFighter {
+    if (equippedItemsRef.current.brasao !== 'brasao_destino' || fighter.currentHP <= 0) return fighter;
+    const hpRatio = fighter.currentHP / Math.max(1, fighter.stats.hp);
+    const bonus = hpRatio < 0.25 ? 0.10 : hpRatio < 0.50 ? 0.05 : 0;
+    if (bonus <= 0) return fighter;
+    return {
+      ...fighter,
+      stats: {
+        ...fighter.stats,
+        atk: Math.floor(fighter.stats.atk * (1 + bonus)),
+        spt: Math.floor(fighter.stats.spt * (1 + bonus)),
+      },
+    };
   }
 
   // ── Player action ──────────────────────────────────────────────────────────
@@ -1126,10 +1151,11 @@ export default function BattleScreen() {
     if (action === 'SPIRIT' && currentPF.spiritHitsAll) {
       const spiritNewMP = Math.max(0, currentPF.currentMP - SPIRIT_MP_COST);
       const xrosActive = equippedItemsRef.current.digivice === 'digivice_xros_loader' && teamFightersRef.current.filter((f) => f.currentHP > 0).length >= 2;
+      const destinyPF = applyDestinyOffense(currentPF);
       const spiritAttacker = {
-        ...currentPF,
+        ...destinyPF,
         currentMP: SPIRIT_MP_COST,
-        stats: xrosActive ? { ...currentPF.stats, spt: Math.floor(currentPF.stats.spt * 1.15) } : currentPF.stats,
+        stats: xrosActive ? { ...destinyPF.stats, spt: Math.floor(destinyPF.stats.spt * 1.15) } : destinyPF.stats,
       };
       const liveIndices = enemiesRef.current.map((e, i) => ({ e, i })).filter(({ e }) => e.currentHP > 0);
       const updatedEnemiesAll = [...enemiesRef.current];
@@ -1203,9 +1229,10 @@ export default function BattleScreen() {
     // ── Single-target attack ──────────────────────────────────────────────────
     const target = enemiesRef.current[tIdx];
     const xrosActive = equippedItemsRef.current.digivice === 'digivice_xros_loader' && teamFightersRef.current.filter((f) => f.currentHP > 0).length >= 2;
+    const destinyPF = applyDestinyOffense(currentPF);
     const xrosAttacker = xrosActive
-      ? { ...currentPF, stats: { ...currentPF.stats, atk: Math.floor(currentPF.stats.atk * 1.15), spt: Math.floor(currentPF.stats.spt * 1.15) } }
-      : currentPF;
+      ? { ...destinyPF, stats: { ...destinyPF.stats, atk: Math.floor(destinyPF.stats.atk * 1.15), spt: Math.floor(destinyPF.stats.spt * 1.15) } }
+      : destinyPF;
     const pResult = executeTurn(xrosAttacker, target, action);
     const newPlayerMP = pResult.attackerResult.newMP;
     const newTargetHP = pResult.defenderResult.newHP;
