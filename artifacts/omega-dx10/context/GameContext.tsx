@@ -515,7 +515,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return Boolean(
       candidate.isOnboarded
       || (candidate.playerName && candidate.playerName.trim().length > 0)
-      || (candidate.collection && candidate.collection.length > 0)
+      // A single starter Digimon is the default/reset state, not durable progress.
+      || (candidate.collection && candidate.collection.length > 1)
       || (candidate.team && candidate.team.length > 0)
       || ((candidate.tamerLevel ?? 1) > 1)
       || ((candidate.tamerExp ?? 0) > 0)
@@ -1764,11 +1765,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       void customContentPromise;
       setLoaded(true);
     } catch {
-      // Network failure must not fabricate/reset authenticated progress.
+      // CRITICAL: authenticated accounts are cloud-authoritative.
+      // Never mark the game as loaded with defaultState after a network/API error.
+      // Doing so sends the player through onboarding with the 1-Digimon starter
+      // state and creates the visible "account keeps resetting" loop.
       setCustomCharsReady(true);
-      setLoaded(true);
+      if (!user?.id) setLoaded(true);
     }
-  }, [storageKey, isMeaningfulSave]);
+  }, [storageKey, isMeaningfulSave, user?.id]);
 
   const resetGame = useCallback(async () => {
     await AsyncStorage.removeItem(storageKey);
