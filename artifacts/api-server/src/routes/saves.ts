@@ -87,6 +87,29 @@ router.put("/", requireAuth, async (req, res) => {
   if (existing) {
     const dbSave = (existing.saveData ?? {}) as Record<string, unknown>;
 
+    // Server-side regression barrier: a stale/corrupt client must never replace
+    // an established collection with an almost-empty one. Normal gameplay can
+    // remove a few Digimon (fusion/sacrifice), so only catastrophic drops are blocked.
+    const dbCollection = Array.isArray(dbSave.collection) ? dbSave.collection : [];
+    const incomingCollection = Array.isArray(merged.collection) ? merged.collection : [];
+    const catastrophicCollectionDrop =
+      dbCollection.length >= 10
+      && incomingCollection.length <= Math.floor(dbCollection.length / 2)
+      && (dbCollection.length - incomingCollection.length) >= 10;
+
+    if (catastrophicCollectionDrop) {
+      console.error(
+        `[SAVE-GUARD] Blocked collection regression for user ${req.auth!.userId}: ${dbCollection.length} -> ${incomingCollection.length}`
+      );
+      res.status(409).json({
+        error: "Save rejeitado: regressão anormal da coleção detectada",
+        code: "SAVE_REGRESSION_BLOCKED",
+        serverCollectionCount: dbCollection.length,
+        incomingCollectionCount: incomingCollection.length,
+      });
+      return;
+    }
+
     // Always keep the highest tamerLevel (protects seeded/admin-boosted levels)
     const dbTamerLevel = (dbSave.tamerLevel as number) ?? 0;
     const clientTamerLevel = (merged.tamerLevel as number) ?? 0;
