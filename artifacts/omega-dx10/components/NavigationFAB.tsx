@@ -233,7 +233,6 @@ export default function NavigationFAB() {
     unreadMailCount,
     isAdmin,
     tamerLevel,
-    resetGame,
   } = useGame();
 
   const { logout, user } = useAuth();
@@ -387,7 +386,6 @@ export default function NavigationFAB() {
             style: 'destructive',
             onPress: async () => {
               setOpen(false);
-              await resetGame();
               await logout();
               router.replace('/login' as any);
             },
@@ -401,7 +399,6 @@ export default function NavigationFAB() {
     setConfirmLogout(false);
     setOpen(false);
 
-    await resetGame();
     await logout();
 
     router.replace('/login' as any);
