@@ -1939,6 +1939,7 @@ export const GAME_MAPS: GameMap[] = [
     requiredTamerLevel: 20,
     availableDays: [3],
     availableHours: [{ start: 18, end: 21 }],
+    backgroundImage: require('../assets/images/oases_do_olimpo.gif'),
     bitsReward: 0,
     tamerExpReward: 0,
     stages: [
