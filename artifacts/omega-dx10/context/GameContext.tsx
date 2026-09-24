@@ -19,6 +19,8 @@ import {
   GOLDEN_STAR_FRAGMENTS_REQUIRED,
   GOLDEN_STAR_ITEM_ID,
   getAscensionStars,
+  getAscensionSuccessChance,
+  getFusionSuccessChance,
   getStarryNightAvailability,
 } from '@/utils/ascension';
 
@@ -643,15 +645,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (getAscensionStars(sacrifice) !== currentStars) return { success: false, message: `O sacrifício precisa ter ${currentStars} estrela(s), igual à base.` };
     if (currentStars === 3 && !current.inventory.includes(GOLDEN_STAR_ITEM_ID)) return { success: false, message: 'A 4ª ascensão exige uma Estrela de Ascensão Dourada.' };
 
+    const targetStars = currentStars + 1;
+    const successChance = getAscensionSuccessChance(targetStars);
+    const succeeded = Math.random() < successChance;
+
+    if (!succeeded) {
+      setState((prev) => ({
+        ...prev,
+        collection: prev.collection.map((c) =>
+          c.ownedId === baseOwnedId ? { ...c, level: Math.max(1, c.level - 10), exp: 0 } : c
+        ),
+      }));
+      return {
+        success: false,
+        message: `Ascensão falhou (${Math.round(successChance * 100)}%). Nenhum Digimon ou item foi perdido. ${baseChar.name} perdeu 10 níveis.`,
+      };
+    }
+
     setState((prev) => {
       const inventory = currentStars === 3 ? [...prev.inventory] : prev.inventory;
       if (currentStars === 3) inventory.splice(inventory.indexOf(GOLDEN_STAR_ITEM_ID), 1);
       const collection = prev.collection
         .filter((c) => c.ownedId !== sacrificeOwnedId)
-        .map((c) => c.ownedId === baseOwnedId ? { ...c, ascensionStars: currentStars + 1 } : c);
+        .map((c) => c.ownedId === baseOwnedId ? { ...c, ascensionStars: targetStars } : c);
       return { ...prev, collection, inventory, team: prev.team.filter((id) => id !== sacrificeOwnedId) };
     });
-    return { success: true, message: `Ascensão concluída! ${baseChar.name} agora possui ${currentStars + 1} estrela(s).` };
+    return { success: true, message: `Ascensão concluída (${Math.round(successChance * 100)}%)! ${baseChar.name} agora possui ${targetStars} estrela(s).` };
   }, []);
 
   const craftGoldenAscensionStar = useCallback((): boolean => {
@@ -786,6 +805,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     if (!fusion || keep.level < fusion.requiredLevel) return false;
     if (fusion.requiredItem && (!selectedItemId || selectedItemId !== fusion.requiredItem || !snapshot.inventory.includes(selectedItemId))) return false;
+
+    const fusionResultChar = getCharacter(fusion.resultId) ?? CHARACTERS[fusion.resultId];
+    const fusionSuccessChance = getFusionSuccessChance(fusionResultChar?.rarity ?? '');
+    if (Math.random() >= fusionSuccessChance) {
+      return false;
+    }
 
     setState((prev) => {
       const currentKeep = prev.collection.find((c) => c.ownedId === keepOwnedId);
