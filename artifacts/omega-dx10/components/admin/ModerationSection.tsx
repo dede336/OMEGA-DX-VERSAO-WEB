@@ -9,7 +9,7 @@ type Report = {
   createdAt: string; message?: { content: string; deletedAt?: string | null } | null;
 };
 type ContextMessage = { id: number; content: string; from?: string; createdAt: string };
-type Ban = { id: number; username: string; reason: string; createdByRole: 'admin' | 'assistant'; expiresAt: string; active: boolean };
+type Ban = { id: number; username: string; reason: string; createdByRole: 'admin'; expiresAt: string; active: boolean };
 
 export default function ModerationSection() {
   const { token, getApiUrl, user } = useAuth();
