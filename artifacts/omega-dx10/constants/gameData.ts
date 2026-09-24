@@ -2489,6 +2489,19 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     resultItemName: 'Xros Loader — DigiXros',
     resultRarity: 'ULTIMATE',
   },
+  // ── X-Antibody: Covil de Arcturiusmon ────────────────────────────────────
+  {
+    pieceId: 'piece_x_antibody',
+    pieceName: 'Fragmento do X-Antibody',
+    pieceDescription: 'Drop raro (5%) do Covil de Arcturiusmon. Junte 10 fragmentos para criar o X-Antibody, usado nas evoluções X.',
+    pieceIcon: 'activity',
+    pieceColor: '#38bdf8',
+    requiredCount: 10,
+    bitsCost: 0,
+    resultItemId: 'x_antibody',
+    resultItemName: 'X-Antibody 🧬',
+    resultRarity: 'MEGA',
+  },
   // ── Black Digitron: Dungeon Gulus drop ────────────────────────────────────
   {
     pieceId: 'piece_black_digitron',
