@@ -37,13 +37,13 @@ export function getYggdrasilBlessingBonus(date = new Date()): number {
   return isYggdrasilBlessingActive(date) ? YGGDRASIL_BLESSING_BONUS : 0;
 }
 
-export function getAscensionSuccessChance(targetStars: number, date = new Date()): number {
-  return Math.min(1, (ASCENSION_SUCCESS_CHANCE_BY_TARGET_STAR[targetStars] ?? 0) + getYggdrasilBlessingBonus(date));
+export function getAscensionSuccessChance(targetStars: number, date = new Date(), cardBonus = 0): number {
+  return Math.min(1, (ASCENSION_SUCCESS_CHANCE_BY_TARGET_STAR[targetStars] ?? 0) + getYggdrasilBlessingBonus(date) + cardBonus);
 }
 
-export function getFusionSuccessChance(resultRarity: string, date = new Date()): number {
+export function getFusionSuccessChance(resultRarity: string, date = new Date(), cardBonus = 0): number {
   const base = FUSION_SUCCESS_CHANCE_BY_RARITY[resultRarity];
-  return base === undefined ? 1 : Math.min(1, base + getYggdrasilBlessingBonus(date));
+  return base === undefined ? 1 : Math.min(1, base + getYggdrasilBlessingBonus(date) + cardBonus);
 }
 
 
