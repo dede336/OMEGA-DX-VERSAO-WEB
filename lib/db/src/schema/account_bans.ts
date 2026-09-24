@@ -6,7 +6,7 @@ export const accountBansTable = pgTable("account_bans", {
   userId: integer("user_id").notNull().references(() => usersTable.id),
   reason: text("reason").notNull(),
   createdByUserId: integer("created_by_user_id").notNull().references(() => usersTable.id),
-  createdByRole: text("created_by_role").notNull(), // admin | assistant
+  createdByRole: text("created_by_role").notNull(), // admin
   expiresAt: timestamp("expires_at").notNull(),
   active: boolean("active").notNull().default(true),
   revokedByUserId: integer("revoked_by_user_id").references(() => usersTable.id),
