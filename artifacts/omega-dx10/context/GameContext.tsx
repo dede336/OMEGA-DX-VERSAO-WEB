@@ -29,7 +29,7 @@ export interface SacrificeResult {
 
 export interface MailReward {
   bits?: number;
-  items?: string[];
+  items?: Array<string | { itemId: string; amount: number }>;
   digimon?: string[];
   digimonWithLevel?: { characterId: string; level: number }[];
   pieces?: Record<string, number>;
