@@ -42,6 +42,8 @@ export interface MapStage {
   randomEnemyCount?: number;
   enemyLevel: number;
   enemyAscensionStars?: number;
+  enemyLevels?: number[];
+  enemyAscensionStarsByIndex?: number[];
   expReward: number;
   drops?: StageDrop[];
   bossMultipliers?: { hp?: number; def?: number };
@@ -60,6 +62,7 @@ export interface GameMap {
   isDungeon?: boolean;
   isDaily?: boolean;
   availableDays?: number[];
+  availableHours?: Array<{ start: number; end: number }>;
   isBiweeklyEvent?: boolean;
   backgroundImage?: number;
   bitsReward?: number;
@@ -1423,6 +1426,9 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_fragmento_corrompido: 'Fragmento Corrompido',
   black_digitron:         'Black Digitron 🖤',
   piece_black_digitron:   'Fragmento do Black Digitron',
+  piece_digivice_d3:      'Fragmento D-3',
+  piece_digivice_d_ark:   'Fragmento D-Ark',
+  piece_digivice_xros_loader: 'Fragmento Xros Loader',
   x_antibody:             'X-Antibody 🧬',
   piece_x_antibody:       'Fragmento do X-Antibody',
   // ── Espíritos Lendários do Frontier ──────────────────────────────────────────
@@ -1909,6 +1915,7 @@ export const GAME_MAPS: GameMap[] = [
     isDungeon: true,
     requiredTamerLevel: 15,
     availableDays: [0, 1, 4],
+    availableHours: [{ start: 6, end: 9 }, { start: 12, end: 15 }, { start: 18, end: 21 }],
     backgroundImage: require('../assets/images/maps/dungeon_gulus.webp'),
     stages: [
       {
@@ -1931,6 +1938,33 @@ export const GAME_MAPS: GameMap[] = [
           { type: 'piece', id: 'piece_brasao_amor',         amount: 1, chance: 0.10 },
           { type: 'piece', id: 'piece_brasao_bondade',      amount: 1, chance: 0.10 },
           { type: 'piece', id: 'piece_black_digitron',       amount: 1, chance: 0.05 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dungeon_gulus_digivice',
+    name: 'Covil do Gulus — Fragmentos de Digivice',
+    description: 'Enfrente Regulusmon e dois GulusGammamon para obter fragmentos dos Digivices D-3, D-Ark e Xros Loader.',
+    isDungeon: true,
+    requiredTamerLevel: 15,
+    availableDays: [2, 4, 6],
+    availableHours: [{ start: 6, end: 9 }, { start: 12, end: 15 }, { start: 18, end: 21 }],
+    backgroundImage: require('../assets/images/maps/dungeon_gulus.webp'),
+    stages: [
+      {
+        index: 0,
+        name: 'Trio Sombrio — Regulusmon & GulusGammamon',
+        enemyCharacterId: 'name:Regulusmon',
+        enemyCharacterIds: ['name:Regulusmon', 'gulusGammamon', 'gulusGammamon'],
+        enemyLevel: 40,
+        enemyLevels: [40, 35, 35],
+        enemyAscensionStarsByIndex: [0, 1, 1],
+        expReward: 0,
+        drops: [
+          { type: 'piece', id: 'piece_digivice_d3', amount: 1, chance: 0.10 },
+          { type: 'piece', id: 'piece_digivice_d_ark', amount: 1, chance: 0.10 },
+          { type: 'piece', id: 'piece_digivice_xros_loader', amount: 1, chance: 0.10 },
         ],
       },
     ],
@@ -2386,6 +2420,43 @@ export const CRAFT_RECIPES: CraftRecipe[] = [
     resultItemId: 'pulseira_ouro',
     resultItemName: 'Pulseira Dourada',
     resultRarity: 'CHAMPION',
+  },
+  // ── Fragmentos de Digivice: Covil do Gulus ───────────────────────────────
+  {
+    pieceId: 'piece_digivice_d3',
+    pieceName: 'Fragmento D-3',
+    pieceDescription: 'Fragmento obtido no Covil do Gulus. Junte 50 e pague 100.000 Bits para criar o D-3.',
+    pieceIcon: 'cpu',
+    pieceColor: '#3b82f6',
+    requiredCount: 50,
+    bitsCost: 100000,
+    resultItemId: 'digivice_d3',
+    resultItemName: 'D-3 — Impulso de DNA',
+    resultRarity: 'ULTIMATE',
+  },
+  {
+    pieceId: 'piece_digivice_d_ark',
+    pieceName: 'Fragmento D-Ark',
+    pieceDescription: 'Fragmento obtido no Covil do Gulus. Junte 50 e pague 100.000 Bits para criar o D-Ark.',
+    pieceIcon: 'cpu',
+    pieceColor: '#22c55e',
+    requiredCount: 50,
+    bitsCost: 100000,
+    resultItemId: 'digivice_d_ark',
+    resultItemName: 'D-Ark — Carta de Aprimoramento',
+    resultRarity: 'ULTIMATE',
+  },
+  {
+    pieceId: 'piece_digivice_xros_loader',
+    pieceName: 'Fragmento Xros Loader',
+    pieceDescription: 'Fragmento obtido no Covil do Gulus. Junte 50 e pague 100.000 Bits para criar o Xros Loader.',
+    pieceIcon: 'cpu',
+    pieceColor: '#f59e0b',
+    requiredCount: 50,
+    bitsCost: 100000,
+    resultItemId: 'digivice_xros_loader',
+    resultItemName: 'Xros Loader — DigiXros',
+    resultRarity: 'ULTIMATE',
   },
   // ── Black Digitron: Dungeon Gulus drop ────────────────────────────────────
   {
