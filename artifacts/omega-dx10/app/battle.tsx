@@ -511,12 +511,14 @@ export default function BattleScreen() {
   }
 
   // ── Build single enemy ─────────────────────────────────────────────────────
-  function buildEnemy(charId: string): BattleFighter {
+  function buildEnemy(charId: string, enemyIndex = 0): BattleFighter {
     const resolvedId = resolveEnemyId(charId);
     const eChar = getCharacter(resolvedId);
     if (!eChar) throw new Error(`Digimon inimigo não encontrado: ${charId}`);
+    const enemyStars = stage!.enemyAscensionStarsByIndex?.[enemyIndex] ?? stage!.enemyAscensionStars ?? 0;
+    const enemyLevel = stage!.enemyLevels?.[enemyIndex] ?? effectiveEnemyLevel;
     let f = buildFighter(
-      eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, stage!.enemyAscensionStars ?? 0), effectiveEnemyLevel,
+      eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, enemyStars), enemyLevel,
       undefined, { attackName: eChar.attackName, spiritName: eChar.spiritName },
     );
     if (stage!.bossMultipliers) {
@@ -693,6 +695,14 @@ export default function BattleScreen() {
   // ── Start battle ───────────────────────────────────────────────────────────
   function startBattle(teamIds: string[]) {
     if (!stage || teamIds.length === 0) return;
+    const availableDays = (map as any)?.availableDays as number[] | undefined;
+    const availableHours = (map as any)?.availableHours as Array<{ start: number; end: number }> | undefined;
+    const now = new Date();
+    if (availableDays?.length && !availableDays.includes(now.getDay())) return;
+    if (availableHours?.length) {
+      const minutes = now.getHours() * 60 + now.getMinutes();
+      if (!availableHours.some(({ start, end }) => minutes >= start * 60 && minutes < end * 60)) return;
+    }
     const eqBonuses = buildEquipBonuses();
 
     const fighters: TeamFighter[] = [];
@@ -765,7 +775,7 @@ export default function BattleScreen() {
     } else {
       charIds = pool;
     }
-    const allEnemies = charIds.map((id) => buildEnemy(id));
+    const allEnemies = charIds.map((id, index) => buildEnemy(id, index));
 
     teamFightersRef.current = fighters;
     activeTeamIdxRef.current = 0;
@@ -1555,8 +1565,8 @@ export default function BattleScreen() {
                 const isTarget = i === targetIdx;
                 const isDead = enemy.currentHP <= 0;
                 const maxHP = getScaledStats(
-                  eChar ? applyAscensionBonus(eChar.baseStats, stage.enemyAscensionStars ?? 0) : enemy.stats,
-                  effectiveEnemyLevel,
+                  eChar ? applyAscensionBonus(eChar.baseStats, stage.enemyAscensionStarsByIndex?.[i] ?? stage.enemyAscensionStars ?? 0) : enemy.stats,
+                  stage.enemyLevels?.[i] ?? effectiveEnemyLevel,
                 ).hp;
                 const hasBg = !!map.backgroundImage;
                 return (
@@ -1589,7 +1599,7 @@ export default function BattleScreen() {
                     </Animated.View>
                     <View style={[styles.arenaEnemyInfo, { backgroundColor: hasBg ? 'rgba(0,0,0,0.6)' : colors.card }]}>
                       <Text style={[styles.arenaEnemyName, !hasBg && { color: colors.foreground }]} numberOfLines={1}>{enemy.name}</Text>
-                      <AscensionStars stars={stage.enemyAscensionStars} size="small" />
+                      <AscensionStars stars={stage.enemyAscensionStarsByIndex?.[i] ?? stage.enemyAscensionStars} size="small" />
                       <View style={[styles.arenaEnemyHpTrack, { backgroundColor: hasBg ? 'rgba(255,255,255,0.2)' : colors.border }]}>
                         <View style={[
                           styles.arenaEnemyHpFill,
