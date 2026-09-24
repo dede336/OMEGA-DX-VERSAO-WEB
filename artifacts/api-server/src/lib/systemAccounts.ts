@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 // 1. INTERFACES DE CONTROLE DE ACESSO
 // ==========================================
 
-export type CargoUsuario = "ADMIN" | "ASSISTENTE" | "JOGADOR";
+export type CargoUsuario = "ADMIN" | "JOGADOR";
 
 export interface ContaEspecial {
   username: string;
@@ -36,18 +36,6 @@ export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
       "alternar_rede_global",
     ],
   },
-  {
-    username: "rimuru336",
-    senhaHash: process.env.SEED_CREATOR_PASSWORD ?? "Lucas336",
-    cargo: "ASSISTENTE",
-    isAdmin: false,
-    role: "digimon_creator",
-    permissoes: [
-      "enviar_correio_global",
-      "enviar_digimon_recompensa",
-      "visualizar_logs",
-    ],
-  },
 ];
 
 // ==========================================
@@ -56,7 +44,7 @@ export const CONTAS_SISTEMA_FIXAS: ContaEspecial[] = [
 
 export class InicializadorSistema {
   /**
-   * Garante que as contas Admin e Assistente existam no banco de dados.
+   * Garante que a conta Admin exista no banco de dados.
    * Roda durante a inicialização do servidor.
    */
   public async garantirContasEspeciais(): Promise<void> {
