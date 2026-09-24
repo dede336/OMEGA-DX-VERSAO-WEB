@@ -83,9 +83,9 @@ export default function MapScreen() {
     })),
   ];
 
-  const worldMaps = allMaps.filter((m) => !m.isDungeon && !(m as any).expiresAt && !m.isBiweeklyEvent);
+  const worldMaps = allMaps.filter((m) => !m.isDungeon && !(m as any).expiresAt && !m.isBiweeklyEvent && !(m as any).isWeeklyEvent);
   const dungeonMaps = allMaps.filter((m) => m.isDungeon === true);
-  const eventMaps = allMaps.filter((m) => !m.isDungeon && ((m as any).expiresAt || m.isBiweeklyEvent));
+  const eventMaps = allMaps.filter((m) => !m.isDungeon && ((m as any).expiresAt || m.isBiweeklyEvent || (m as any).isWeeklyEvent));
 
   const [activeTab, setActiveTab] = useState<TabId>('digimundo');
   const [expandedMap, setExpandedMap] = useState<string>('map_forest');
