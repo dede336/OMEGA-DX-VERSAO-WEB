@@ -64,6 +64,7 @@ export interface GameMap {
   availableDays?: number[];
   availableHours?: Array<{ start: number; end: number }>;
   isBiweeklyEvent?: boolean;
+  isWeeklyEvent?: boolean;
   backgroundImage?: number;
   bitsReward?: number;
   tamerExpReward?: number;
@@ -1433,6 +1434,18 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_brasao_destino:   'Fragmento do Destino',
   x_antibody:             'X-Antibody 🧬',
   piece_x_antibody:       'Fragmento do X-Antibody',
+  piece_paper_apollomon: 'Apollomon Paper',
+  piece_paper_bacchusmon: 'Bacchusmon Paper',
+  piece_paper_ceresmon: 'Ceresmon Paper',
+  piece_paper_dianamon: 'Dianamon Paper',
+  piece_paper_junomon: 'Junomon Paper',
+  piece_paper_jupitermon: 'Jupitermon Paper',
+  piece_paper_mercurymon: 'Mercurymon Paper',
+  piece_paper_minervamon: 'Minervamon Paper',
+  piece_paper_neptunemon: 'Neptunemon Paper',
+  piece_paper_venusmon: 'Venusmon Paper',
+  piece_paper_vulcanusmon: 'Vulcanusmon Paper',
+  piece_paper_plutomon: 'Plutomon Paper',
   // ── Espíritos Lendários do Frontier ──────────────────────────────────────────
   spirit_humano_fogo:       'Spirit Humano do Fogo 🔥',
   spirit_besta_fogo:        'Spirit Besta do Fogo 🔥',
@@ -1884,6 +1897,52 @@ export const GAME_MAPS: GameMap[] = [
         expReward: 12000,
         bossMultipliers: { hp: 1.2, def: 1.1 },
         isBoss: true,
+      },
+    ],
+  },
+  {
+    id: 'event_oasis_olimpo',
+    name: 'Oásis do Olimpo',
+    description: 'Evento semanal do Olimpo. Disponível toda quarta-feira, das 18:00 às 21:00. Derrote as duas levas de Digimon olímpicos.',
+    isWeeklyEvent: true,
+    requiredTamerLevel: 20,
+    availableDays: [3],
+    availableHours: [{ start: 18, end: 21 }],
+    bitsReward: 0,
+    tamerExpReward: 0,
+    stages: [
+      {
+        index: 0,
+        name: '1ª Leva — Deuses do Olimpo',
+        enemyCharacterId: 'name:Junomon',
+        enemyCharacterIds: ['name:Junomon', 'name:Dianamon', 'name:Apollomon'],
+        enemyLevel: 60,
+        enemyLevels: [60, 60, 60],
+        expReward: 0,
+      },
+      {
+        index: 1,
+        name: '2ª Leva — GraceNovamon',
+        enemyCharacterId: 'name:Dianamon',
+        enemyCharacterIds: ['name:Dianamon', 'name:Apollomon', 'name:GraceNovamon'],
+        enemyLevel: 80,
+        enemyLevels: [80, 80, 70],
+        expReward: 0,
+        isBoss: true,
+        drops: [
+          { type: 'piece', id: 'piece_paper_apollomon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_bacchusmon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_ceresmon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_dianamon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_junomon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_jupitermon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_mercurymon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_minervamon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_neptunemon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_venusmon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_vulcanusmon', amount: 1, chance: 0.05 },
+          { type: 'piece', id: 'piece_paper_plutomon', amount: 1, chance: 0.03 },
+        ],
       },
     ],
   },
