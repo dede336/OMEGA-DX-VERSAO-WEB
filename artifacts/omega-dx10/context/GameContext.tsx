@@ -7,7 +7,7 @@ import {
   CRAFT_RECIPES, CraftRecipe,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT,
   PRE_ROOKIE_STAGE_RARITIES,
-  EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS, TEMPORARY_CARD_IDS,
+  EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
 } from '@/constants/gameData';
 import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
