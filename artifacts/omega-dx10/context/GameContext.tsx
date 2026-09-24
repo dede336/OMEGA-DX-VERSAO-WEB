@@ -236,6 +236,7 @@ interface GameContextValue extends GameState {
   craftGoldenAscensionStar: () => boolean;
   claimStarryNightReward: () => boolean;
   setTeam: (ownedIds: string[]) => void;
+  getSaveSnapshot: () => GameState;
   loadFromCloud: (apiUrl: string) => Promise<void>;
   refreshCustomData: (apiUrl: string) => Promise<void>;
   isDailyDungeonAvailable: boolean;
@@ -521,6 +522,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [gachaAdminPool]);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cloud sync and page-hide handlers must read the latest state directly.
+  // Reading AsyncStorage there can return the previous snapshot while the
+  // debounced local-save effect is still waiting to run.
+  const getSaveSnapshot = useCallback(() => stateRef.current, []);
 
   const isMeaningfulSave = useCallback((candidate: Partial<GameState> | null | undefined): boolean => {
     if (!candidate) return false;
@@ -1889,6 +1895,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         claimReward,
         useXpItem,
         setTeam,
+        getSaveSnapshot,
         loadFromCloud,
         refreshCustomData: loadFromCloud,
         isDailyDungeonAvailable,
