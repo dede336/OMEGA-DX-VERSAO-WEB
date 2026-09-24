@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image, Easing,
+  Platform, Modal, Pressable, Animated, Image, Easing, Alert,
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -280,7 +280,10 @@ export default function CharacterDetailScreen() {
     setConfirmFuseVisible(false);
     if (fusionRecipe.requiredItem && selectedFusionItemId !== fusionRecipe.requiredItem) return;
     const fused = fuseDigimon(owned.ownedId, sacrificeIds, fusionRecipe.resultId, selectedFusionItemId ?? undefined);
-    if (!fused) return;
+    if (!fused) {
+      Alert.alert('Fusão falhou', 'A tentativa de fusão falhou. Nenhum Digimon ou item foi perdido.');
+      return;
+    }
     startFusionAnimation(fusionRecipe);
   }
 
