@@ -32,21 +32,26 @@ const PIECE_META: Record<string, { label: string; icon: string; color: string; i
   piece_gehenna:             { label: 'Fragmento do Gehenna',      icon: 'moon',    color: '#6366f1' },
   piece_caos:                { label: 'Fragmento do Caos',         icon: 'cpu',     color: '#a855f7' },
   piece_black_digitron:      { label: 'Fragmento do Black Digitron', icon: 'zap',   color: '#6366f1', image: require('../../assets/images/items/black_digitron.webp') },
+  piece_digivice_d3:          { label: 'Fragmento D-3', icon: 'cpu', color: '#3b82f6', image: require('../../assets/images/piece_digivice_d3.png') },
+  piece_digivice_d_ark:       { label: 'Fragmento D-Ark', icon: 'cpu', color: '#22c55e', image: require('../../assets/images/piece_digivice_d_ark.png') },
+  piece_digivice_xros_loader: { label: 'Fragmento Xros Loader', icon: 'cpu', color: '#f59e0b', image: require('../../assets/images/piece_digivice_xros_loader.png') },
 };
 
 // ─── Category definitions ────────────────────────────────────────────────────
-type CraftCategory = 'evolucao' | 'roupa' | 'brasao';
+type CraftCategory = 'evolucao' | 'roupa' | 'brasao' | 'digivice';
 
 const CATEGORIES: { id: CraftCategory; label: string; icon: string; color: string }[] = [
   { id: 'evolucao', label: 'Evolução', icon: 'zap',          color: '#f59e0b' },
   { id: 'roupa',    label: 'Roupa',    icon: 'shopping-bag', color: '#ec4899' },
   { id: 'brasao',   label: 'Brasão',   icon: 'shield',       color: '#8b5cf6' },
+  { id: 'digivice', label: 'Digivice', icon: 'cpu',          color: '#3b82f6' },
 ];
 
 const EVOLUTION_ITEM_IDS = new Set(['anel_sagrado', 'gehenna', 'black_digitron', 'fragmento_corrompido']);
 const ROUPA_ITEM_IDS = new Set(['blusa_social', 'bermuda_poliester', 'tenis_corrida', 'pulseira_ouro']);
 
 function getCategoryForRecipe(recipe: CraftRecipe): CraftCategory {
+  if (recipe.resultItemId.startsWith('digivice_')) return 'digivice';
   if (recipe.resultItemId.startsWith('brasao_')) return 'brasao';
   if (EVOLUTION_ITEM_IDS.has(recipe.resultItemId)) return 'evolucao';
   return 'roupa';
