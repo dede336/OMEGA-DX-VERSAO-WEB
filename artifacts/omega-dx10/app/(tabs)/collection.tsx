@@ -755,7 +755,7 @@ export default function CollectionScreen() {
                           </Text>
                           {modalAscensionStars === 3 && !hasGoldenAscensionStar && (
                             <View style={styles.fragmentRow}>
-                              <Image source={require('../../assets/images/items/golden_star_fragment.png')} style={styles.goldenStarThumb} resizeMode="contain" />
+                              <Image source={require('../../assets/images/items/fragmento_de_estrela_dourada.gif')} style={styles.goldenStarThumb} resizeMode="contain" />
                               <Text style={styles.fragmentText}>
                                 Fragmentos: {pieces[GOLDEN_STAR_FRAGMENT_ID] ?? 0}/{GOLDEN_STAR_FRAGMENTS_REQUIRED}
                               </Text>
