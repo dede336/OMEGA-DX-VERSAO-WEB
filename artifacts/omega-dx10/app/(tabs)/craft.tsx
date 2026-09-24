@@ -8,7 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { CRAFT_RECIPES, EQUIPMENT_ITEMS, CraftRecipe } from '@/constants/gameData';
-import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
+import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -127,6 +127,7 @@ function DetailModal({
   inventory: string[];
   craftItem: (r: CraftRecipe) => void;
   colors: ReturnType<typeof import('@/hooks/useColors').useColors>;
+  tamerId?: string | null;
 }) {
   if (!recipe) return null;
 
@@ -141,7 +142,7 @@ function DetailModal({
   const progress = computeProgress(recipe, pieces);
   const catObj = CATEGORIES.find(c => c.id === getCategoryForRecipe(recipe))!;
   const description = getItemDescription(recipe.resultItemId);
-  const itemImg = EQUIP_ITEM_IMAGES[recipe.resultItemId];
+  const itemImg = getEquipItemImage(recipe.resultItemId, tamerId);
 
   const allReqs: { pieceId: string; count: number }[] = isMulti
     ? recipe.pieceRequirements!.map(r => ({ pieceId: r.pieceId, count: r.count }))
@@ -285,7 +286,7 @@ function RecipeCard({
 }) {
   const progress = computeProgress(recipe, pieces);
   const crafted = inventory.includes(recipe.resultItemId);
-  const itemImg = EQUIP_ITEM_IMAGES[recipe.resultItemId];
+  const itemImg = getEquipItemImage(recipe.resultItemId, tamerId);
   const pct = Math.round(progress * 100);
 
   return (
@@ -350,7 +351,7 @@ const card = StyleSheet.create({
 export default function CraftScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { pieces, bits, inventory, craftItem } = useGame();
+  const { pieces, bits, inventory, craftItem, tamerId } = useGame();
   const { t } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<CraftCategory>('evolucao');
   const [selectedRecipe, setSelectedRecipe] = useState<CraftRecipe | null>(null);
@@ -415,6 +416,7 @@ export default function CraftScreen() {
               pieces={pieces}
               inventory={inventory}
               colors={colors}
+              tamerId={tamerId}
             />
           ))
         )}
