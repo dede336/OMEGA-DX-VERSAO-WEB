@@ -433,6 +433,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+
+    // Authenticated accounts are cloud-authoritative. Do not hydrate a stale
+    // browser save before /saves finishes, otherwise onboarding/default state
+    // can render and autosave before the recovered cloud state arrives.
+    if (user?.id) {
+      return () => { cancelled = true; };
+    }
     // IMPORTANT: do not clear the current in-memory state before the persisted
     // save has been read. A transient auth/storage delay must never create a
     // default save that can later be synchronized over real player progress.
@@ -1747,9 +1754,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       };
       setState(newState);
       await AsyncStorage.setItem(storageKey, JSON.stringify({ ...newState, _savedAt: Date.now() }));
+      setLoaded(true);
     } catch {
-      // Garante que erros de rede não deixam o app travado na tela de carregamento
+      // Network failure must not fabricate/reset authenticated progress.
       setCustomCharsReady(true);
+      setLoaded(true);
     }
   }, [storageKey, isMeaningfulSave]);
 
