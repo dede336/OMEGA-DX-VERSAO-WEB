@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { db, gameSavesTable, usersTable, customDigimonsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth.js";
+import { RIMURU336_RECOVERED_SAVE } from "../data/rimuru336RecoveredSave.js";
 
 const router = Router();
 
@@ -47,11 +48,23 @@ async function injectAdminDigimon(saveData: Record<string, unknown>): Promise<Re
 
 // GET /saves
 router.get("/", requireAuth, async (req, res) => {
-  const [save] = await db.select().from(gameSavesTable).where(eq(gameSavesTable.userId, req.auth!.userId)).limit(1);
+  let [save] = await db.select().from(gameSavesTable).where(eq(gameSavesTable.userId, req.auth!.userId)).limit(1);
   if (!save) {
     res.status(404).json({ error: "Nenhum save encontrado" });
     return;
   }
+
+  // One-time recovery: keep the complete recovered account in source control.
+  // The marker prevents this snapshot from ever being reapplied after recovery.
+  const [currentUser] = await db.select({ username: usersTable.username }).from(usersTable).where(eq(usersTable.id, req.auth!.userId)).limit(1);
+  const currentSaveData = (save.saveData ?? {}) as Record<string, unknown>;
+  if (currentUser?.username === "rimuru336" && currentSaveData._recoveryVersion !== "rimuru336-2026-09-24-v1") {
+    await db.update(gameSavesTable)
+      .set({ saveData: RIMURU336_RECOVERED_SAVE, updatedAt: new Date() })
+      .where(eq(gameSavesTable.userId, req.auth!.userId));
+    [save] = await db.select().from(gameSavesTable).where(eq(gameSavesTable.userId, req.auth!.userId)).limit(1);
+  }
+
   const isAdmin = req.auth!.isAdmin;
   const role = req.auth!.role ?? "user";
   const isDigimonCreator = role === "digimon_creator";
