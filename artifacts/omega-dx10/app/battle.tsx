@@ -302,6 +302,9 @@ export default function BattleScreen() {
   // One-turn guard: the selected fighter takes 50% damage from the next enemy hit.
   const defendingPlayerIdxRef = useRef<number | null>(null);
   const dArkRoundsRemainingRef = useRef(0);
+  const kindnessHealUsedRef = useRef(false);
+  const [kindnessHealIdx, setKindnessHealIdx] = useState<number | null>(null);
+  const kindnessFx = useRef(new Animated.Value(0)).current;
   useEffect(() => { enemiesRef.current = enemies; }, [enemies]);
   useEffect(() => { targetIdxRef.current = targetIdx; }, [targetIdx]);
 
@@ -466,6 +469,17 @@ export default function BattleScreen() {
   function addLog(text: string, color: string = colors.foreground) {
     setLog((prev) => [...prev, { text, color }]);
     setTimeout(() => logRef.current?.scrollToEnd({ animated: true }), 100);
+  }
+
+  function triggerKindnessHealFx(fighterIdx: number) {
+    setKindnessHealIdx(fighterIdx);
+    kindnessFx.setValue(0);
+    Animated.sequence([
+      Animated.timing(kindnessFx, { toValue: 1, duration: 220, useNativeDriver: true }),
+      Animated.timing(kindnessFx, { toValue: 0.55, duration: 280, useNativeDriver: true }),
+      Animated.timing(kindnessFx, { toValue: 1, duration: 220, useNativeDriver: true }),
+      Animated.timing(kindnessFx, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start(() => setKindnessHealIdx(null));
   }
 
   // ── Build equip bonuses ────────────────────────────────────────────────────
@@ -699,6 +713,8 @@ export default function BattleScreen() {
     // ── Digivice battle effects ──────────────────────────────────────────────
     const activeDigiviceId = equippedItems.digivice;
     dArkRoundsRemainingRef.current = 0;
+    kindnessHealUsedRef.current = false;
+    setKindnessHealIdx(null);
     if (activeDigiviceId === 'digivice_d_ark') {
       for (const f of fighters) {
         f.stats = {
@@ -961,6 +977,21 @@ export default function BattleScreen() {
       newTargetHP = Math.max(0, target.currentHP - guardedDamage);
       defendingPlayerIdxRef.current = null;
       addLog(`🛡️ ${target.name} defendeu e reduziu o dano para ${guardedDamage}!`, '#60a5fa');
+    }
+    const kindnessEquipped = equippedItemsRef.current.brasao === 'brasao_bondade';
+    if (kindnessEquipped) {
+      const incomingDamage = Math.max(0, target.currentHP - newTargetHP);
+      if (incomingDamage > 0) {
+        const protectedDamage = Math.max(1, Math.floor(incomingDamage * 0.90));
+        newTargetHP = Math.max(0, target.currentHP - protectedDamage);
+      }
+      if (!kindnessHealUsedRef.current && newTargetHP > 0 && newTargetHP <= Math.floor(target.stats.hp * 0.30)) {
+        const healAmount = Math.floor(target.stats.hp * 0.30);
+        newTargetHP = Math.min(target.stats.hp, newTargetHP + healAmount);
+        kindnessHealUsedRef.current = true;
+        triggerKindnessHealFx(targetPlayerIdx);
+        addLog(`💜 Coração Protetor: ${target.name} recuperou ${healAmount} HP!`, '#d946ef');
+      }
     }
     const lc = result.defenderResult.attrMult > 1 || result.defenderResult.elemMult > 1
       ? '#ef4444' : colors.foreground;
@@ -1612,6 +1643,17 @@ export default function BattleScreen() {
             </View>
             <Animated.View style={{ transform: [{ translateX: playerShake }] }}>
               <View style={{ position: 'relative' }}>
+                {kindnessHealIdx === activeTeamIdx && (
+                  <Animated.Image
+                    source={EQUIP_ITEM_IMAGES.brasao_bondade}
+                    resizeMode="contain"
+                    style={{
+                      position: 'absolute', width: 82, height: 82, left: -9, top: -9,
+                      opacity: kindnessFx,
+                      transform: [{ scale: kindnessFx.interpolate({ inputRange: [0, 1], outputRange: [0.75, 1.15] }) }],
+                    }}
+                  />
+                )}
                 <CharacterAvatar characterId={pOwned?.characterId ?? ''} size={64} ascensionStars={pOwned?.ascensionStars} />
                 {playerHitFlash && (
                   <ElementAttackEffect key={playerHitFlash.key} element={playerHitFlash.element} />
@@ -1648,7 +1690,20 @@ export default function BattleScreen() {
                     {isActive && (
                       <View style={[styles.teamChipActiveDot, { backgroundColor: colors.primary }]} />
                     )}
-                    <CharacterAvatar characterId={tfOwned?.characterId ?? ''} size={28} ascensionStars={tfOwned?.ascensionStars} />
+                    <View style={{ width: 28, height: 28, position: 'relative' }}>
+                      {kindnessHealIdx === i && (
+                        <Animated.Image
+                          source={EQUIP_ITEM_IMAGES.brasao_bondade}
+                          resizeMode="contain"
+                          style={{
+                            position: 'absolute', width: 38, height: 38, left: -5, top: -5,
+                            opacity: kindnessFx,
+                            transform: [{ scale: kindnessFx.interpolate({ inputRange: [0, 1], outputRange: [0.75, 1.15] }) }],
+                          }}
+                        />
+                      )}
+                      <CharacterAvatar characterId={tfOwned?.characterId ?? ''} size={28} ascensionStars={tfOwned?.ascensionStars} />
+                    </View>
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={[styles.teamChipName, { color: isActive ? colors.primary : colors.mutedForeground }]} numberOfLines={1}>
                         {tfChar?.name ?? '—'}
