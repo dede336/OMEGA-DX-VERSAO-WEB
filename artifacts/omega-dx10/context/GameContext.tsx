@@ -225,6 +225,7 @@ interface GameContextValue extends GameState {
   craftItem: (recipe: CraftRecipe) => boolean;
   gainBits: (amount: number) => void;
   gainTamerExp: (amount: number) => void;
+  useTamerXpItem: (itemId: string, quantity: number) => void;
   gainGemas: (amount: number) => void;
   addToInventory: (itemId: string) => void;
   unreadMailCount: number;
@@ -1058,6 +1059,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const useTamerXpItem = useCallback((itemId: string, quantity: number) => {
+    if (itemId !== 'pilula_energetica') return;
+    setState((prev) => {
+      const available = prev.inventory.filter((id) => id === itemId).length;
+      const qty = Math.max(0, Math.min(Math.floor(quantity), available));
+      if (qty <= 0) return prev;
+
+      let remaining = qty;
+      const inventory = prev.inventory.filter((id) => {
+        if (id === itemId && remaining > 0) {
+          remaining -= 1;
+          return false;
+        }
+        return true;
+      });
+
+      let tamerExp = prev.tamerExp + (500 * qty);
+      let tamerLevel = prev.tamerLevel;
+      while (tamerExp >= tamerExpToNextLevel(tamerLevel)) {
+        tamerExp -= tamerExpToNextLevel(tamerLevel);
+        tamerLevel += 1;
+      }
+      return { ...prev, inventory, tamerExp, tamerLevel };
+    });
+  }, []);
+
   const addToInventory = useCallback((itemId: string) => {
     setState((prev) => {
       if (prev.inventory.includes(itemId)) return prev;
@@ -1084,7 +1111,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (msg.reward?.items) {
         for (const itemId of msg.reward.items) {
           const migratedItemId = migrateEvolutionItemId(itemId);
-          if (!newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
+          if (migratedItemId === 'pilula_energetica' || !newInventory.includes(migratedItemId)) newInventory.push(migratedItemId);
         }
       }
       if (msg.reward?.pieces) {
@@ -1811,6 +1838,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         craftItem,
         gainBits,
         gainTamerExp,
+        useTamerXpItem,
         gainGemas,
         addToInventory,
         isLoaded: loaded,
