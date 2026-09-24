@@ -52,6 +52,14 @@ function isMapAvailableToday(availableDays?: number[]): boolean {
   return availableDays.includes(today);
 }
 
+function isMapAvailableNow(availableDays?: number[], availableHours?: Array<{ start: number; end: number }>): boolean {
+  if (!isMapAvailableToday(availableDays)) return false;
+  if (!availableHours || availableHours.length === 0) return true;
+  const now = new Date();
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  return availableHours.some(({ start, end }) => minutes >= start * 60 && minutes < end * 60);
+}
+
 function getNextAvailableDay(availableDays: number[]): string {
   const today = new Date().getDay();
   for (let i = 1; i <= 7; i++) {
@@ -94,10 +102,10 @@ export default function MapScreen() {
 
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
-  function handleStagePress(mapId: string, stageIndex: number, isDaily?: boolean, availableDays?: number[]) {
+  function handleStagePress(mapId: string, stageIndex: number, isDaily?: boolean, availableDays?: number[], availableHours?: Array<{ start: number; end: number }>) {
     if (!selectedCharacter) return;
     if (isDaily && !isDailyDungeonAvailable) return;
-    if (!isMapAvailableToday(availableDays)) return;
+    if (!isMapAvailableNow(availableDays, availableHours)) return;
     const selectedMap = allMaps.find((candidate) => candidate.id === mapId);
     if (selectedMap?.isBiweeklyEvent && !getStarryNightAvailability().isOpen) return;
     router.push(`/battle?mapId=${mapId}&stageIndex=${stageIndex}`);
@@ -123,11 +131,13 @@ export default function MapScreen() {
     const isDaily  = map.isDaily === true;
     const dailyDone = isDaily && !isDailyDungeonAvailable;
     const availableDays = (map as any).availableDays as number[] | undefined;
+    const availableHours = (map as any).availableHours as Array<{ start: number; end: number }> | undefined;
     const hasAvailableDays = availableDays && availableDays.length > 0;
     const availableToday = isMapAvailableToday(availableDays);
+    const availableNow = isMapAvailableNow(availableDays, availableHours);
     const eventAvailability = map.isBiweeklyEvent ? getStarryNightAvailability(now) : null;
     const eventLocked = !!eventAvailability && !eventAvailability.isOpen;
-    const dayLocked = (hasAvailableDays && !availableToday) || eventLocked;
+    const dayLocked = (hasAvailableDays && !availableToday) || (!!availableHours?.length && !availableNow) || eventLocked;
 
     const dungeonBorderColor = isDaily
       ? (isDailyDungeonAvailable ? '#f59e0b' : '#6b7280')
@@ -178,6 +188,15 @@ export default function MapScreen() {
                 })}
               </View>
             </View>
+          </View>
+        )}
+
+        {!!availableHours?.length && (
+          <View style={[styles.dungeonBanner, { backgroundColor: availableNow ? '#22c55e22' : '#6b728022', borderBottomColor: availableNow ? '#22c55e55' : '#6b728055' }]}>
+            <Feather name={availableNow ? 'clock' : 'lock'} size={12} color={availableNow ? '#22c55e' : '#9ca3af'} />
+            <Text style={[styles.dungeonBannerText, { color: availableNow ? '#22c55e' : '#9ca3af' }]}>
+              {availableNow ? 'ABERTO AGORA' : 'FECHADO'} · 06:00–09:00 · 12:00–15:00 · 18:00–21:00
+            </Text>
           </View>
         )}
 
@@ -305,7 +324,7 @@ export default function MapScreen() {
                 <TouchableOpacity
                   key={stage.index}
                   activeOpacity={canPlay ? 0.8 : 1}
-                  onPress={() => canPlay && handleStagePress(map.id, stage.index, isDaily, availableDays)}
+                  onPress={() => canPlay && handleStagePress(map.id, stage.index, isDaily, availableDays, availableHours)}
                   style={[
                     styles.stageRow,
                     isBossStage && { backgroundColor: '#3b000011', borderLeftWidth: 3, borderLeftColor: '#ef4444' },
@@ -364,6 +383,9 @@ export default function MapScreen() {
                         piece_brasao_conhecimento: 'map.piece.conhecimento',
                         piece_brasao_luz:          'map.piece.luz',
                         piece_brasao_amor:         'map.piece.amor',
+                        piece_digivice_d3:          'Fragmento D-3',
+                        piece_digivice_d_ark:       'Fragmento D-Ark',
+                        piece_digivice_xros_loader: 'Fragmento Xros Loader',
                       };
                       return (
                         <>
@@ -380,7 +402,7 @@ export default function MapScreen() {
                               <Feather name="gift" size={11} color="#f59e0b" />
                               <Text style={[styles.rewardText, { color: '#f59e0b' }]}>
                                 {pieceDrops.length === 1
-                                  ? t(PIECE_KEY_MAP[(pieceDrops[0] as any).id] ?? 'map.brasaoFragment')
+                                  ? (PIECE_KEY_MAP[(pieceDrops[0] as any).id]?.startsWith('map.') ? t(PIECE_KEY_MAP[(pieceDrops[0] as any).id]) : (PIECE_KEY_MAP[(pieceDrops[0] as any).id] ?? t('map.brasaoFragment')))
                                   : `${t('map.brasaoFragment')} (${pieceDrops.length} ${t('map.brasaoFragmentTypes')})`}
                               </Text>
                             </View>
