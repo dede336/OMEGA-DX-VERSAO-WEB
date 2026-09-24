@@ -135,8 +135,8 @@ export default function MochilaScreen() {
               activeOpacity={0.8}
             >
               <View style={[styles.slotIconWrap, { backgroundColor: (rarityCol ?? colors.primary) + '22' }]}>
-                {equippedItem && EQUIP_ITEM_IMAGES[equippedItem.id] ? (
-                  <Image source={EQUIP_ITEM_IMAGES[equippedItem.id]} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                {equippedItem && getEquipItemImage(equippedItem.id, game.tamerId) ? (
+                  <Image source={getEquipItemImage(equippedItem.id, game.tamerId)} style={{ width: 28, height: 28 }} resizeMode="contain" />
                 ) : (
                   <Feather
                     name={EQUIP_SLOT_ICONS[slot] as any}
