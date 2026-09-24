@@ -13,7 +13,7 @@ import {
   RARITY_COLORS, ELEMENTS, EquipSlot, RarityId, ElementId,
   CRAFT_RECIPES, ITEM_NAMES,
 } from '@/constants/gameData';
-import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
+import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 import SaveManagerSection from '@/components/SaveManagerSection';
 import { getCharacter } from '@/constants/extendedCharacters';
@@ -330,7 +330,7 @@ export default function MochilaScreen() {
             {visibleInventoryItems.map(([itemId, quantity]) => {
               const equipment = allEquipmentItems.find((item) => item.id === itemId);
               const itemName = ITEM_NAMES[itemId] ?? equipment?.name ?? itemId;
-              const itemImg = EQUIP_ITEM_IMAGES[itemId];
+              const itemImg = getEquipItemImage(itemId, game.tamerId);
               return (
                 <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
                   {itemImg ? (
@@ -355,7 +355,7 @@ export default function MochilaScreen() {
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Materiais e Fragmentos</Text>
           <View style={styles.inventoryGrid}>
             {visibleMaterials.map(([itemId, quantity]) => {
-              const itemImg = EQUIP_ITEM_IMAGES[itemId];
+              const itemImg = getEquipItemImage(itemId, game.tamerId);
               return (
                 <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
                   {itemImg ? (
