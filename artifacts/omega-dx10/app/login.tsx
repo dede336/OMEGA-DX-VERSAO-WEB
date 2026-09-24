@@ -18,8 +18,7 @@ const logoSource = require('../assets/images/logo.webp');
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { login, register, getApiUrl } = useAuth();
-  const { loadFromCloud } = useGame();
+  const { login, register } = useAuth();
   const { t } = useLanguage();
   const [mode, setMode]         = useState<Mode>('login');
   const [username, setUsername] = useState('');
@@ -38,8 +37,10 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       if (mode === 'login') {
+        // AuthProvider updates the authenticated user/token first.
+        // useCloudSync then loads the correct per-user cloud save using that session.
+        // Calling loadFromCloud here races with the previous user's storageKey.
         await login(username.trim(), password);
-        await loadFromCloud(getApiUrl());
       } else {
         await register(username.trim(), password, email.trim() || undefined);
       }
