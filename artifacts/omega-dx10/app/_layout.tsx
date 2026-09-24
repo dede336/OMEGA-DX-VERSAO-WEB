@@ -3,7 +3,7 @@ import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from 'expo-font';
 import React, { useEffect, useRef, useState } from "react";
-import { Platform, View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { Platform, View, Modal, Text, TouchableOpacity, StyleSheet, TextInput, ActivityIndicator, Image } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ import { useColors } from "@/hooks/useColors";
 import { useCloudSync } from "@/hooks/useCloudSync";
 import { TAMERS, CHARACTERS } from "@/constants/gameData";
 import { CharacterAvatar } from "@/components/GameComponents";
+import { isYggdrasilBlessingActive } from "@/utils/ascension";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -260,6 +261,52 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+
+function YggdrasilBlessingAnnouncement() {
+  const [visible, setVisible] = useState(() => isYggdrasilBlessingActive());
+  const [imageAvailable, setImageAvailable] = useState(true);
+
+  useEffect(() => {
+    setVisible(isYggdrasilBlessingActive());
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={() => setVisible(false)}>
+      <TouchableOpacity
+        activeOpacity={1}
+        style={yggdrasilStyles.overlay}
+        onPress={() => setVisible(false)}
+      >
+        {imageAvailable ? (
+          <Image
+            source={{ uri: '/assets/images/bencao-benevolente-yggdrasil.png' }}
+            style={yggdrasilStyles.image}
+            resizeMode="contain"
+            onError={() => setImageAvailable(false)}
+          />
+        ) : (
+          <View style={yggdrasilStyles.fallback}>
+            <Text style={yggdrasilStyles.title}>BÊNÇÃO BENEVOLENTE DE YGGDRASIL</Text>
+            <Text style={yggdrasilStyles.bonus}>+15% de chance de Fusão e Ascensão</Text>
+            <Text style={yggdrasilStyles.hint}>Toque para fechar</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </Modal>
+  );
+}
+
+const yggdrasilStyles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: '#000000dd', alignItems: 'center', justifyContent: 'center' },
+  image: { width: '100%', height: '100%' },
+  fallback: { width: '88%', padding: 24, borderRadius: 18, backgroundColor: '#0f172a', borderWidth: 2, borderColor: '#67e8f9', alignItems: 'center', gap: 14 },
+  title: { color: '#fff', fontSize: 18, fontWeight: '900', textAlign: 'center' },
+  bonus: { color: '#facc15', fontSize: 14, fontWeight: '900', textAlign: 'center' },
+  hint: { color: '#94a3b8', fontSize: 10, textAlign: 'center' },
+});
+
 function RootLayoutNav() {
   const { serverOffline } = useAuth();
   if (serverOffline) return <ServerOfflineScreen />;
@@ -270,6 +317,7 @@ function RootLayoutNav() {
       <NavigationGuard />
       <CloudSyncManager />
       <BattleInviteModal />
+      <YggdrasilBlessingAnnouncement />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="intro" options={{ headerShown: false, gestureEnabled: false, animation: 'none' }} />
