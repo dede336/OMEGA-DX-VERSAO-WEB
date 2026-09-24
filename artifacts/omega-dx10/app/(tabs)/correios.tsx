@@ -31,7 +31,7 @@ export default function CorreiosScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const game = useGame();
-  const { messages, tamerLevel, readMessage, claimReward, loadFromCloud } = game;
+  const { messages, tamerLevel, readMessage, loadFromCloud } = game;
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
 
@@ -131,7 +131,7 @@ export default function CorreiosScreen() {
         body: JSON.stringify({ saveData }),
       });
     } catch {}
-  }, [claimReward, game, messages, getApiUrl, token]);
+  }, [game, messages, getApiUrl, token]);
 
   useFocusEffect(useCallback(() => {
     loadFromCloud(getApiUrl());
