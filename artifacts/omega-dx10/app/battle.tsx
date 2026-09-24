@@ -186,6 +186,10 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_brasao_conhecimento: { name: 'Fragmento Brasão Conhecimento', color: '#8b5cf6' },
   piece_brasao_luz:       { name: 'Fragmento Brasão Luz',       color: '#ec4899' },
   piece_brasao_amor:      { name: 'Fragmento Brasão Amor',      color: '#ef4444' },
+  piece_brasao_bondade:   { name: 'Fragmento Brasão Bondade',   color: '#d946ef' },
+  piece_digivice_d3:          { name: 'Fragmento D-3',          color: '#3b82f6' },
+  piece_digivice_d_ark:       { name: 'Fragmento D-Ark',       color: '#22c55e' },
+  piece_digivice_xros_loader: { name: 'Fragmento Xros Loader', color: '#f59e0b' },
   piece_battery_green:    { name: 'Bateria Verde',   color: '#22c55e' },
   piece_battery_blue:     { name: 'Bateria Azul',    color: '#3b82f6' },
   piece_battery_purple:   { name: 'Bateria Roxa',    color: '#a855f7' },
@@ -1894,7 +1898,7 @@ export default function BattleScreen() {
                     ) : (
                       <Feather name="package" size={22} color={drop.color} />
                     )}
-                    <Text style={[styles.dropChipText, { color: drop.color }]}>+{drop.amount} {drop.name}</Text>
+                    <Text style={[styles.dropAmount, { color: drop.color }]}>×{drop.amount}</Text>
                   </View>
                 );
               })}
