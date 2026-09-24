@@ -1618,16 +1618,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const token = await AsyncStorage.getItem('omega_dx10_auth_token');
       if (!token) return;
 
-      // Aguarda custom chars + overrides em paralelo antes de continuar,
-      // eliminando o carregamento em duas etapas (89 → 1790).
-      const [customData, overridesData] = await Promise.all([
+      // The player save is the first priority. Custom content must never block
+      // account hydration: a slow /digimons/custom or /overrides request used to
+      // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
+      const customContentPromise = Promise.all([
         fetch(`${apiUrl}/digimons/custom`).then((r) => r.ok ? r.json() : null).catch(() => null),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
-      ]);
-      if (customData?.digimons) loadCustomCharacters(customData.digimons, apiUrl);
-      if (overridesData?.overrides) loadCharacterOverrides(overridesData.overrides, apiUrl);
-      if (customData?.digimons || overridesData?.overrides) setCustomCharsRevision((v) => v + 1);
-      setCustomCharsReady(true);
+      ]).then(([customData, overridesData]) => {
+        if (customData?.digimons) loadCustomCharacters(customData.digimons, apiUrl);
+        if (overridesData?.overrides) loadCharacterOverrides(overridesData.overrides, apiUrl);
+        if (customData?.digimons || overridesData?.overrides) setCustomCharsRevision((v) => v + 1);
+        setCustomCharsReady(true);
+      }).catch(() => {
+        setCustomCharsReady(true);
+      });
 
       // Items e mapas podem carregar em background (não afetam lista de personagens)
       fetch(`${apiUrl}/items`)
@@ -1754,6 +1758,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       };
       setState(newState);
       await AsyncStorage.setItem(storageKey, JSON.stringify({ ...newState, _savedAt: Date.now() }));
+      // Authenticated GameProvider intentionally stays unloaded until cloud hydration.
+      // Mark it loaded only after the authoritative server save has been applied.
+      setLoaded(true);
+      void customContentPromise;
       setLoaded(true);
     } catch {
       // Network failure must not fabricate/reset authenticated progress.
