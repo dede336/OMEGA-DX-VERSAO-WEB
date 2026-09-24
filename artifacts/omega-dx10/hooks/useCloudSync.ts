@@ -1,46 +1,40 @@
 import { useEffect, useRef } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 
-const SYNC_DEBOUNCE = 10_000;
-const SAVE_KEY_PREFIX = 'omega_dx10_save_v3';
+const SYNC_DEBOUNCE = 1_500;
 
-function getSaveKey(userId: number | null | undefined): string {
-  return `${SAVE_KEY_PREFIX}:${userId ?? 'guest'}`;
+function isMeaningfulSave(saveData: Record<string, any> | null | undefined): boolean {
+  if (!saveData) return false;
+  return Boolean(
+    saveData.isOnboarded
+    || (typeof saveData.playerName === 'string' && saveData.playerName.trim().length > 0)
+    || (Array.isArray(saveData.collection) && saveData.collection.length > 0)
+    || (Array.isArray(saveData.team) && saveData.team.length > 0)
+    || ((saveData.tamerLevel ?? 1) > 1)
+    || ((saveData.tamerExp ?? 0) > 0)
+    || ((saveData.bits ?? 0) > 0)
+    || ((saveData.gemas ?? 1000) !== 1000)
+    || (saveData.clearedStages && Object.keys(saveData.clearedStages).length > 0)
+  );
 }
 
-async function pushSaveToServer(apiUrl: string, token: string, saveKey: string): Promise<void> {
-  const raw = await AsyncStorage.getItem(saveKey);
-  if (!raw) return;
-  const saveData = JSON.parse(raw);
+async function pushSaveToServer(apiUrl: string, token: string, saveData: Record<string, any>, keepalive = false): Promise<void> {
+  if (!isMeaningfulSave(saveData)) return;
 
   // Safety barrier: never upload a blank/default state over a real cloud save.
   // A legitimate player save has at least one durable progress marker.
-  const meaningful = Boolean(
-    saveData?.isOnboarded
-    || (typeof saveData?.playerName === 'string' && saveData.playerName.trim().length > 0)
-    || (Array.isArray(saveData?.collection) && saveData.collection.length > 0)
-    || (Array.isArray(saveData?.team) && saveData.team.length > 0)
-    || ((saveData?.tamerLevel ?? 1) > 1)
-    || ((saveData?.tamerExp ?? 0) > 0)
-    || ((saveData?.bits ?? 0) > 0)
-    || ((saveData?.gemas ?? 1000) !== 1000)
-    || (saveData?.clearedStages && Object.keys(saveData.clearedStages).length > 0)
-  );
-  if (!meaningful) return;
-
   await fetch(`${apiUrl}/saves`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ saveData }),
+    body: JSON.stringify({ saveData: { ...saveData, _savedAt: Date.now() } }),
+    ...(keepalive ? { keepalive: true } : {}),
   });
 }
 
 export function useCloudSync() {
   const { token, user, getApiUrl } = useAuth();
-  const saveKey = getSaveKey(user?.id);
-  const { collection, tamerLevel, tamerExp, playerName, team, tamerId, messages, clearedStages, loadFromCloud, isLoaded } = useGame();
+  const { collection, tamerLevel, tamerExp, playerName, team, tamerId, messages, clearedStages, loadFromCloud, isLoaded, getSaveSnapshot } = useGame();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokenRef = useRef(token);
   const getApiUrlRef = useRef(getApiUrl);
@@ -59,7 +53,7 @@ export function useCloudSync() {
     lastLoadedTokenRef.current = token;
     loadFromCloud(getApiUrl());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, saveKey]);
+  }, [token]);
 
   const claimedCount = messages.filter((m) => m.rewardClaimed).length;
   const clearedCount = Object.keys(clearedStages).length;
@@ -71,22 +65,35 @@ export function useCloudSync() {
     timerRef.current = setTimeout(async () => {
       const currentTok = tokenRef.current;
       if (!currentTok || !user?.id || !isLoaded) return;
-      // Never let a timer created for one account upload after the active account changed.
-      const expectedSaveKey = getSaveKey(user.id);
-      if (saveKey !== expectedSaveKey) return;
       try {
-        await pushSaveToServer(getApiUrlRef.current(), currentTok, expectedSaveKey);
+        await pushSaveToServer(getApiUrlRef.current(), currentTok, getSaveSnapshot());
       } catch {}
     }, SYNC_DEBOUNCE);
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, user?.id, isLoaded, saveKey, claimedCount, clearedCount]);
+  }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, user?.id, isLoaded, claimedCount, clearedCount, getSaveSnapshot]);
+
+  // A hard reload can happen before the debounce expires. On the web, flush
+  // the current in-memory account state while the page is being discarded so
+  // clearing browser cache cannot erase a save that was never uploaded.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const flushBeforePageHide = () => {
+      const currentTok = tokenRef.current;
+      if (!currentTok || !user?.id || !isLoaded) return;
+      const snapshot = getSaveSnapshot();
+      if (!isMeaningfulSave(snapshot)) return;
+      void pushSaveToServer(getApiUrlRef.current(), currentTok, snapshot, true).catch(() => {});
+    };
+
+    window.addEventListener('pagehide', flushBeforePageHide);
+    return () => window.removeEventListener('pagehide', flushBeforePageHide);
+  }, [user?.id, isLoaded, getSaveSnapshot]);
 
   return { saveNow: () => {
     const tok = tokenRef.current;
     if (!tok || !user?.id || !isLoaded) return;
-    const expectedSaveKey = getSaveKey(user.id);
-    if (saveKey !== expectedSaveKey) return;
-    pushSaveToServer(getApiUrlRef.current(), tok, expectedSaveKey).catch(() => {});
+    pushSaveToServer(getApiUrlRef.current(), tok, getSaveSnapshot()).catch(() => {});
   }};
 }
