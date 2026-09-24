@@ -424,6 +424,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<GameState>(defaultState);
   const stateRef = useRef<GameState>(defaultState);
   const [loaded, setLoaded] = useState(false);
+  const activeUserIdRef = useRef<number | null>(user?.id ?? null);
   const [customEquipItems, setCustomEquipItems] = useState<EquipItem[]>([]);
   const [customGameMaps, setCustomGameMaps] = useState<(GameMap & { backgroundImageUri?: string })[]>([]);
   const [gachaAdminPool, setGachaAdminPool] = useState<GachaPoolEntry[] | null>(null);
@@ -434,6 +435,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+
+    // Account isolation: when authentication changes, immediately discard the
+    // previous account's in-memory game state. Without this, a newly logged-in
+    // account can temporarily render another player's Tamer/save while /saves loads.
+    const nextUserId = user?.id ?? null;
+    if (activeUserIdRef.current !== nextUserId) {
+      activeUserIdRef.current = nextUserId;
+      stateRef.current = defaultState;
+      setState(defaultState);
+    }
 
     // Authenticated accounts are cloud-authoritative. Do not hydrate a stale
     // browser save before /saves finishes, otherwise onboarding/default state
@@ -1673,6 +1684,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${apiUrl}/saves`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 404) {
+        // Brand-new account: no cloud save exists yet. It MUST start clean and
+        // must never inherit the previous account's in-memory state.
+        stateRef.current = defaultState;
+        setState(defaultState);
+        await AsyncStorage.removeItem(storageKey);
+        setLoaded(true);
+        return;
+      }
       if (!res.ok) return;
       const payload = await res.json() as { saveData: Partial<GameState & { playerName?: string; _savedAt?: number }>; isAdmin?: boolean; isDede?: boolean; updatedAt?: string };
       const { saveData, isAdmin, isDede, updatedAt } = payload;
