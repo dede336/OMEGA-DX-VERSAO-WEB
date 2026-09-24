@@ -1429,6 +1429,8 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_digivice_d3:      'Fragmento D-3',
   piece_digivice_d_ark:   'Fragmento D-Ark',
   piece_digivice_xros_loader: 'Fragmento Xros Loader',
+  piece_brasao_milagre:   'Fragmento do Milagre',
+  piece_brasao_destino:   'Fragmento do Destino',
   x_antibody:             'X-Antibody 🧬',
   piece_x_antibody:       'Fragmento do X-Antibody',
   // ── Espíritos Lendários do Frontier ──────────────────────────────────────────
