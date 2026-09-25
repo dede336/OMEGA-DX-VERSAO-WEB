@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
+import { useAuth } from '@/context/AuthContext';
 import { GAME_MAPS, MapStage, StageDrop } from '@/constants/gameData';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatLongCountdown, getStarryNightAvailability } from '@/utils/ascension';
@@ -73,6 +74,8 @@ export default function MapScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const isAdmin = user?.isAdmin ?? false;
   const { isStageCleared, isMapUnlocked, selectedCharacter, collection, totalPlayerLevel, isDailyDungeonAvailable, customGameMaps } = useGame();
 
   const allMaps = [
@@ -104,10 +107,10 @@ export default function MapScreen() {
 
   function handleStagePress(mapId: string, stageIndex: number, isDaily?: boolean, availableDays?: number[], availableHours?: Array<{ start: number; end: number }>) {
     if (!selectedCharacter) return;
-    if (isDaily && !isDailyDungeonAvailable) return;
-    if (!isMapAvailableNow(availableDays, availableHours)) return;
+    if (!isAdmin && isDaily && !isDailyDungeonAvailable) return;
+    if (!isAdmin && !isMapAvailableNow(availableDays, availableHours)) return;
     const selectedMap = allMaps.find((candidate) => candidate.id === mapId);
-    if (selectedMap?.isBiweeklyEvent && !getStarryNightAvailability().isOpen) return;
+    if (!isAdmin && selectedMap?.isBiweeklyEvent && !getStarryNightAvailability().isOpen) return;
     router.push(`/battle?mapId=${mapId}&stageIndex=${stageIndex}`);
   }
 
@@ -123,20 +126,20 @@ export default function MapScreen() {
     eventMaps;
 
   function renderMap(map: typeof allMaps[0]) {
-    const unlocked = isMapUnlocked(map.id);
+    const unlocked = isAdmin || isMapUnlocked(map.id);
     const expanded = expandedMap === map.id;
     const clearedInMap = map.stages.filter((s: MapStage) => isStageCleared(map.id, s.index)).length;
     const allCleared = clearedInMap === map.stages.length;
     const isDungeon = map.isDungeon === true;
     const isDaily  = map.isDaily === true;
-    const dailyDone = isDaily && !isDailyDungeonAvailable;
+    const dailyDone = !isAdmin && isDaily && !isDailyDungeonAvailable;
     const availableDays = (map as any).availableDays as number[] | undefined;
     const availableHours = (map as any).availableHours as Array<{ start: number; end: number }> | undefined;
     const hasAvailableDays = availableDays && availableDays.length > 0;
-    const availableToday = isMapAvailableToday(availableDays);
-    const availableNow = isMapAvailableNow(availableDays, availableHours);
+    const availableToday = isAdmin || isMapAvailableToday(availableDays);
+    const availableNow = isAdmin || isMapAvailableNow(availableDays, availableHours);
     const eventAvailability = map.isBiweeklyEvent ? getStarryNightAvailability(now) : null;
-    const eventLocked = !!eventAvailability && !eventAvailability.isOpen;
+    const eventLocked = !isAdmin && !!eventAvailability && !eventAvailability.isOpen;
     const dayLocked = (hasAvailableDays && !availableToday) || (!!availableHours?.length && !availableNow) || eventLocked;
 
     const dungeonBorderColor = isDaily
@@ -313,11 +316,11 @@ export default function MapScreen() {
           <View style={[styles.stagesContainer, { borderTopColor: colors.border }]}>
             {map.stages.map((stage: MapStage) => {
               const cleared = isStageCleared(map.id, stage.index);
-              const stageDailyLocked = isDaily && !isDailyDungeonAvailable;
+              const stageDailyLocked = !isAdmin && isDaily && !isDailyDungeonAvailable;
               const isBossStage = stage.isBoss === true;
               const regularStagesCleared = !isBossStage ? true :
                 map.stages.filter((s: MapStage) => !s.isBoss).every((s: MapStage) => isStageCleared(map.id, s.index));
-              const bossLocked = isBossStage && !regularStagesCleared;
+              const bossLocked = !isAdmin && isBossStage && !regularStagesCleared;
               const canPlay = !!selectedCharacter && !stageDailyLocked && !bossLocked;
 
               return (
