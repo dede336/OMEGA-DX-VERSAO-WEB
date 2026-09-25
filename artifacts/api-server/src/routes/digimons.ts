@@ -303,7 +303,7 @@ router.post("/send", requireAuth, async (req, res) => {
   }
   const notifLines: string[] = [];
   const mailReward: {
-    items?: Array<string | { itemId: string; amount: number }>;
+    items?: string[];
     pieces?: Record<string, number>;
   } = {};
 
@@ -313,7 +313,7 @@ router.post("/send", requireAuth, async (req, res) => {
         ? { itemId: String(entry), amount: 1 }
         : { itemId: String(entry.itemId), amount: Math.max(1, Math.min(9999, Number(entry.amount) || 1)) }
     );
-    mailReward.items = normalizedItems;
+    mailReward.items = normalizedItems as any;
     const names = (req.body as any).itemNames as string[] | undefined;
     const label = normalizedItems.map((entry, i) => `${names?.[i] ?? entry.itemId} ×${entry.amount}`).join(', ');
     notifLines.push(`⚔️ Itens: ${label}`);
