@@ -44,6 +44,7 @@ export interface MapStage {
   enemyAscensionStars?: number;
   enemyLevels?: number[];
   enemyAscensionStarsByIndex?: number[];
+  waves?: Array<{ enemyCharacterIds: string[]; enemyLevels?: number[]; enemyAscensionStarsByIndex?: number[] }>;
   expReward: number;
   drops?: StageDrop[];
   bossMultipliers?: { hp?: number; def?: number };
@@ -1945,20 +1946,15 @@ export const GAME_MAPS: GameMap[] = [
     stages: [
       {
         index: 0,
-        name: '1ª Leva — Deuses do Olimpo',
+        name: 'Deuses do Olimpo',
         enemyCharacterId: 'name:Junomon',
         enemyCharacterIds: ['name:Junomon', 'name:Dianamon', 'name:Apollomon'],
         enemyLevel: 60,
         enemyLevels: [60, 60, 60],
-        expReward: 0,
-      },
-      {
-        index: 1,
-        name: '2ª Leva — GraceNovamon',
-        enemyCharacterId: 'name:Dianamon',
-        enemyCharacterIds: ['name:Dianamon', 'name:Apollomon', 'name:GraceNovamon'],
-        enemyLevel: 80,
-        enemyLevels: [80, 80, 70],
+        waves: [
+          { enemyCharacterIds: ['name:Junomon', 'name:Dianamon', 'name:Apollomon'], enemyLevels: [60, 60, 60] },
+          { enemyCharacterIds: ['name:Dianamon', 'name:Apollomon', 'name:GraceNovamon'], enemyLevels: [80, 80, 70] },
+        ],
         expReward: 0,
         isBoss: true,
         drops: [
