@@ -41,9 +41,9 @@ const BASE_CODEX_ORDER = [
 type OwnedEntry = { ownedId: string; characterId: string; level: number; exp: number };
 
 async function buildFullCodexOrder(): Promise<string[]> {
-  const custom = await db.select({ id: customDigimonsTable.id }).from(customDigimonsTable).orderBy(customDigimonsTable.name);
-  const customIds = custom.map((r) => `custom_${r.id}`);
-  return [...BASE_CODEX_ORDER, ...customIds];
+  const catalogue = await db.select({ name: customDigimonsTable.name }).from(customDigimonsTable).orderBy(customDigimonsTable.name);
+  const catalogueIds = catalogue.map((r) => `name:${r.name}`);
+  return [...BASE_CODEX_ORDER, ...catalogueIds];
 }
 
 async function injectAdminDigimon(saveData: Record<string, unknown>): Promise<Record<string, unknown>> {
