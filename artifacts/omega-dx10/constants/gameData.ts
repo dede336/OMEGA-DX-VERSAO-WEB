@@ -1240,12 +1240,12 @@ export const FUSIONS: Record<string, FusionRecipe[]> = {
   kimeramon: [{ partner: 'machinedramon', resultId: 'millenniummon', resultName: 'Millenniummon', requiredLevel: 60 }],
   millenniummon: [{ partner: 'gigaSeadramon', resultId: 'moonMillenniummon', resultName: 'MoonMillenniummon', requiredLevel: 70 }],
   moonMillenniummon: [{ partner: 'millenniummon', resultId: 'zeedMillenniummon', resultName: 'ZeedMillenniummon', requiredLevel: 80 }],
-  custom_327: [{ partners: ['custom_328','custom_1560','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  custom_328: [{ partners: ['custom_327','custom_1560','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  custom_1560: [{ partners: ['custom_327','custom_328','custom_329'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  custom_329: [{ partners: ['custom_327','custom_328','custom_1560'], resultId: 'custom_331', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  custom_1330: [{ partner: 'custom_1581', resultId: 'custom_1584', resultName: 'Proximamon', requiredLevel: 70 }],
-  custom_1581: [{ partner: 'custom_1330', resultId: 'custom_1584', resultName: 'Proximamon', requiredLevel: 70 }],
+  name:Zhuqiaomon: [{ partners: ['name:Baihumon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  name:Baihumon: [{ partners: ['name:Zhuqiaomon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  name:Azulongmon: [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  name:Ebonwumon: [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Azulongmon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  name:Arcturiusmon: [{ partner: 'name:Siriusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
+  name:Siriusmon: [{ partner: 'name:Arcturiusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
 };
 
 export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string }> = {
@@ -1327,23 +1327,23 @@ export const SACRIFICE_DROPS: Record<string, { itemId: string; chance: number }[
   belphemon:  [{ itemId: 'piece_gehenna', chance: 1.0 }],
   demon:      [{ itemId: 'piece_gehenna', chance: 1.0 }],
   // ── Estilhaços Corrompidos (4 Guardiões Celestiais + Huanglongmon) ──
-  'custom_327':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
-  'custom_328':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
-  'custom_329':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
-  'custom_1560': [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
-  'custom_331':  [{ itemId: 'piece_fragmento_corrompido', chance: 0.5 }],
+  'name:Zhuqiaomon':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'name:Baihumon':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'name:Ebonwumon':  [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'name:Azulongmon': [{ itemId: 'piece_fragmento_corrompido', chance: 1.0 }],
+  'name:Huanglongmon':  [{ itemId: 'piece_fragmento_corrompido', chance: 0.5 }],
 };
 
-// ─── 4 Celestial Beasts → Huanglongmon (hardcoded, survive loadCustomCharacters clears) ──
-// IDs: Zhuqiaomon=custom_327, Baihumon=custom_328, Ebonwumon=custom_329, Azulongmon=custom_1560
-// Huanglongmon=custom_331, HuanglongmonRuinMode=custom_1677
+// ─── 4 Celestial Beasts → Huanglongmon (hardcoded, survive catalogue reloads) ──
+// IDs: Zhuqiaomon=name:Zhuqiaomon, Baihumon=name:Baihumon, Ebonwumon=name:Ebonwumon, Azulongmon=name:Azulongmon
+// Huanglongmon=name:Huanglongmon, HuanglongmonRuinMode=name:HuanglongmonRuinMode
 // ─── Arcturiusmon + Siriusmon → Proximamon ──
-// IDs: Arcturiusmon=custom_1330, Siriusmon=custom_1581, Proximamon=custom_1584
-export const HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS: Record<string, {
+// IDs: Arcturiusmon=name:Arcturiusmon, Siriusmon=name:Siriusmon, Proximamon=name:Proximamon
+export const HARDCODED_ALTERNATE_EVOLUTIONS: Record<string, {
   evolvesTo: string; requiredLevel: number; label: string;
   requiredItem?: string; requiredSacrificeCharacters?: string[];
 }> = {
-  'custom_331': { evolvesTo: 'custom_1677', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'fragmento_corrompido' },
+  'name:Huanglongmon': { evolvesTo: 'name:HuanglongmonRuinMode', requiredLevel: 70, label: 'Huanglongmon: Ruin Mode', requiredItem: 'fragmento_corrompido' },
 };
 
 export const EXTRA_ALTERNATE_EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string; requiredSacrificeCharacter?: string }> = {
@@ -2065,8 +2065,8 @@ export const GAME_MAPS: GameMap[] = [
       {
         index: 0,
         name: 'Covil de Arcturiusmon',
-        enemyCharacterId: 'custom_1330',
-        enemyCharacterIds: ['custom_1330', 'name:Omegamon X', 'name:Lucemon X'],
+        enemyCharacterId: 'name:Arcturiusmon',
+        enemyCharacterIds: ['name:Arcturiusmon', 'name:Omegamon X', 'name:Lucemon X'],
         enemyLevel: 60,
         enemyLevels: [60, 60, 60],
         enemyAscensionStarsByIndex: [0, 0, 0],
