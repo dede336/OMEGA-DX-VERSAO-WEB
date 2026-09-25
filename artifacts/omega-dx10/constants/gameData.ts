@@ -1413,6 +1413,18 @@ export const SACRIFICE_SCAN_PCT: Partial<Record<RarityId, number>> = {
 
 export const ITEM_NAMES: Record<string, string> = {
   pilula_energetica:       'Pílula Energética',
+  brasao_coragem:       'Brasão da Coragem',
+  brasao_esperanca:     'Brasão da Esperança',
+  brasao_amizade:       'Brasão da Amizade',
+  brasao_confianca:     'Brasão da Confiança',
+  brasao_pureza:        'Brasão da Pureza',
+  brasao_amor:          'Brasão do Amor',
+  brasao_luz:           'Brasão da Luz',
+  brasao_conhecimento:  'Brasão do Conhecimento',
+  brasao_bondade:       'Brasão da Bondade',
+  brasao_milagre:       'Brasão do Milagre',
+  brasao_destino:       'Brasão do Destino',
+
   golden_ascension_star:       'Estrela de Ascensão Dourada ⭐',
   piece_golden_ascension_star: 'Fragmento de Estrela Dourada',
   anel_sagrado:           'Anel Sagrado ✨',
