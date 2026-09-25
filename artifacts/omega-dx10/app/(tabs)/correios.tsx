@@ -190,9 +190,10 @@ export default function CorreiosScreen() {
                       </View>
                     )}
                     {msg.reward.items?.map((entry, index) => {
-                      const itemId = typeof entry === 'string' ? entry : entry.itemId;
-                      const amount = typeof entry === 'string' ? 1 : Math.max(1, Number(entry.amount) || 1);
-                      const label = ITEM_NAMES[itemId] ?? t(`item.${itemId}`) ?? itemId;
+                      const itemId = migrateEvolutionItemId(entry);
+                      const amount = typeof entry === 'string' ? 1 : Math.max(1, Number((entry as any)?.amount) || 1);
+                      const translated = t(`item.${itemId}`);
+                      const label = ITEM_NAMES[itemId] ?? (translated !== `item.${itemId}` ? translated : itemId);
                       return (
                         <View key={`${itemId}_${index}`} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
                           <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>
