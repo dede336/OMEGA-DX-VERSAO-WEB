@@ -156,7 +156,10 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   const stableIdByLegacyId = new Map<string, string>();
   for (const entry of chars) {
     const baseId = entry.name ? BASE_NAME_MAP[entry.name.toLowerCase()] : undefined;
-    stableIdByLegacyId.set(entry.id, baseId ?? `name:${entry.name}`);
+    const canonicalId = baseId ?? `name:${entry.name}`;
+    stableIdByLegacyId.set(entry.id, canonicalId);
+    // One-way compatibility for old DB relations/saves created before stable IDs.
+    stableIdByLegacyId.set(`custom_${entry.dbId}`, canonicalId);
   }
   const stableId = (value?: string): string | undefined => {
     if (!value) return undefined;
