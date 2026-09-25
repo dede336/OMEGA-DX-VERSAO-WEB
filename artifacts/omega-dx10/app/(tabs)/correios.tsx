@@ -51,9 +51,7 @@ export default function CorreiosScreen() {
         const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
         const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
         const migratedItemId = migrateEvolutionItemId(rawItemId);
-        if (migratedItemId === 'pilula_energetica') {
-          for (let i = 0; i < amount; i += 1) newInventory.push(migratedItemId);
-        } else if (!newInventory.includes(migratedItemId)) {
+        for (let i = 0; i < amount; i += 1) {
           newInventory.push(migratedItemId);
         }
       }
