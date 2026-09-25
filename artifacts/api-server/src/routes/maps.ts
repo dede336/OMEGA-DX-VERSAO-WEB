@@ -14,7 +14,7 @@ async function assertAdmin(userId: number, res: any): Promise<boolean> {
 
 function rowToMap(r: typeof customMapsTable.$inferSelect) {
   return {
-    id: `custom_map_${r.id}`, dbId: r.id,
+    id: `map:${r.name}`, dbId: r.id,
     name: r.name, description: r.description,
     type: r.type, isActive: r.isActive,
     isPermanent: r.isPermanent,
