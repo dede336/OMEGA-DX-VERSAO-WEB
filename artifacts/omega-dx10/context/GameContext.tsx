@@ -7,7 +7,7 @@ import {
   CRAFT_RECIPES, CraftRecipe,
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT,
   PRE_ROOKIE_STAGE_RARITIES,
-  EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
+  EquipItem, GameMap,
 } from '@/constants/gameData';
 import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
@@ -19,8 +19,6 @@ import {
   GOLDEN_STAR_FRAGMENTS_REQUIRED,
   GOLDEN_STAR_ITEM_ID,
   getAscensionStars,
-  getAscensionSuccessChance,
-  getFusionSuccessChance,
   getStarryNightAvailability,
 } from '@/utils/ascension';
 
@@ -71,16 +69,6 @@ export interface OwnedCharacter {
 export interface AscensionResult {
   success: boolean;
   message: string;
-}
-
-export interface CardUseResult {
-  success: boolean;
-  message: string;
-}
-
-export interface DigiviceTemporaryCardBuff {
-  cardId: string;
-  expiresAt: number;
 }
 
 type EquippedItems = Record<EquipSlot, string | null>;
@@ -207,8 +195,6 @@ interface GameState {
   farmDecorInventory: Record<string, number>;
   bossCooldowns: Record<string, number>;
   starryNightClaimCycle: string;
-  digiviceCards: Record<string, string[]>;
-  digiviceTemporaryCards: Record<string, { ascension?: DigiviceTemporaryCardBuff; fusion?: DigiviceTemporaryCardBuff }>;
 }
 
 interface GameContextValue extends GameState {
@@ -237,7 +223,6 @@ interface GameContextValue extends GameState {
   totalEquipBonus: () => Partial<Record<string, number>>;
   gainPiece: (pieceId: string, amount?: number) => void;
   craftItem: (recipe: CraftRecipe) => boolean;
-  applyCardToDigivice: (cardId: string, digiviceId: string) => CardUseResult;
   gainBits: (amount: number) => void;
   gainTamerExp: (amount: number) => void;
   useTamerXpItem: (itemId: string, quantity: number) => void;
@@ -317,23 +302,55 @@ function migrateOwnedCharacter(owned: OwnedCharacter): OwnedCharacter {
   return owned;
 }
 
-export function migrateEvolutionItemId(item: unknown): string {
-  if (typeof item === 'string') return item;
-  if (item && typeof item === 'object') {
-    const value = item as Record<string, unknown>;
-    const candidate = value.itemId ?? value.id ?? value.resultItemId;
-    if (typeof candidate === 'string') return candidate;
-    if (candidate && typeof candidate === 'object') return migrateEvolutionItemId(candidate);
-  }
-  return String(item ?? '');
+export function migrateEvolutionItemId(itemId: string): string {
+  return itemId;
 }
 
 export function migrateEvolutionPieceId(pieceId: string): string {
   return pieceId;
 }
 
-function migrateEvolutionInventory(inventory: unknown[]): string[] {
-  return inventory.map(migrateEvolutionItemId).filter((id) => id.length > 0 && id !== '[object Object]');
+function resolveInventoryItemId(entry: unknown): string | null {
+  if (typeof entry === 'string') {
+    return entry.trim() || null;
+  }
+  if (!entry || typeof entry !== 'object') return null;
+
+  const record = entry as Record<string, unknown>;
+  const nestedId = record.itemId ?? record.id;
+  if (typeof nestedId === 'string') return nestedId.trim() || null;
+  if (nestedId && typeof nestedId === 'object') return resolveInventoryItemId(nestedId);
+
+  // Recover static equipment accidentally serialized as a full item object.
+  const itemName = typeof record.name === 'string' ? record.name : '';
+  if (itemName) {
+    const knownItem = EQUIPMENT_ITEMS.find((item) => item.name === itemName);
+    if (knownItem) return knownItem.id;
+  }
+  return null;
+}
+
+export function normalizeInventory(inventory: unknown): string[] {
+  if (!Array.isArray(inventory)) return [];
+  const normalized: string[] = [];
+  for (const entry of inventory) {
+    const itemId = resolveInventoryItemId(entry);
+    if (!itemId || itemId === '[object Object]') continue;
+    const amount = entry && typeof entry === 'object'
+      ? Math.max(1, Math.floor(Number((entry as Record<string, unknown>).amount) || 1))
+      : 1;
+    const migratedItemId = migrateEvolutionItemId(itemId);
+    if (migratedItemId === 'pilula_energetica') {
+      for (let i = 0; i < amount; i += 1) normalized.push(migratedItemId);
+    } else if (!normalized.includes(migratedItemId)) {
+      normalized.push(migratedItemId);
+    }
+  }
+  return normalized;
+}
+
+function migrateEvolutionInventory(inventory: unknown): string[] {
+  return normalizeInventory(inventory);
 }
 
 function migrateEvolutionPieces(pieces: Record<string, number>): Record<string, number> {
@@ -437,8 +454,6 @@ const defaultState: GameState = {
   farmDecorInventory: { ...DEFAULT_FARM_DECOR_INVENTORY },
   bossCooldowns: {},
   starryNightClaimCycle: '',
-  digiviceCards: {},
-  digiviceTemporaryCards: {},
 };
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -667,37 +682,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (getAscensionStars(sacrifice) !== currentStars) return { success: false, message: `O sacrifício precisa ter ${currentStars} estrela(s), igual à base.` };
     if (currentStars === 3 && !current.inventory.includes(GOLDEN_STAR_ITEM_ID)) return { success: false, message: 'A 4ª ascensão exige uma Estrela de Ascensão Dourada.' };
 
-    const targetStars = currentStars + 1;
-    const equippedDigivice = current.equippedItems.digivice;
-    const ascensionBuff = equippedDigivice ? current.digiviceTemporaryCards?.[equippedDigivice]?.ascension : undefined;
-    const ascensionCard = ascensionBuff && ascensionBuff.expiresAt > Date.now()
-      ? CARD_DEFINITIONS.find((card) => card.id === ascensionBuff.cardId)
-      : undefined;
-    const successChance = getAscensionSuccessChance(targetStars, new Date(), ascensionCard?.temporaryBonus ?? 0);
-    const succeeded = Math.random() < successChance;
-
-    if (!succeeded) {
-      setState((prev) => ({
-        ...prev,
-        collection: prev.collection.map((c) =>
-          c.ownedId === baseOwnedId ? { ...c, level: Math.max(1, c.level - 10), exp: 0 } : c
-        ),
-      }));
-      return {
-        success: false,
-        message: `Ascensão falhou (${Math.round(successChance * 100)}%). Nenhum Digimon ou item foi perdido. ${baseChar.name} perdeu 10 níveis.`,
-      };
-    }
-
     setState((prev) => {
       const inventory = currentStars === 3 ? [...prev.inventory] : prev.inventory;
       if (currentStars === 3) inventory.splice(inventory.indexOf(GOLDEN_STAR_ITEM_ID), 1);
       const collection = prev.collection
         .filter((c) => c.ownedId !== sacrificeOwnedId)
-        .map((c) => c.ownedId === baseOwnedId ? { ...c, ascensionStars: targetStars } : c);
+        .map((c) => c.ownedId === baseOwnedId ? { ...c, ascensionStars: currentStars + 1 } : c);
       return { ...prev, collection, inventory, team: prev.team.filter((id) => id !== sacrificeOwnedId) };
     });
-    return { success: true, message: `Ascensão concluída (${Math.round(successChance * 100)}%)! ${baseChar.name} agora possui ${targetStars} estrela(s).` };
+    return { success: true, message: `Ascensão concluída! ${baseChar.name} agora possui ${currentStars + 1} estrela(s).` };
   }, []);
 
   const craftGoldenAscensionStar = useCallback((): boolean => {
@@ -832,17 +825,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     if (!fusion || keep.level < fusion.requiredLevel) return false;
     if (fusion.requiredItem && (!selectedItemId || selectedItemId !== fusion.requiredItem || !snapshot.inventory.includes(selectedItemId))) return false;
-
-    const fusionResultChar = getCharacter(fusion.resultId) ?? CHARACTERS[fusion.resultId];
-    const equippedDigivice = snapshot.equippedItems.digivice;
-    const fusionBuff = equippedDigivice ? snapshot.digiviceTemporaryCards?.[equippedDigivice]?.fusion : undefined;
-    const fusionCard = fusionBuff && fusionBuff.expiresAt > Date.now()
-      ? CARD_DEFINITIONS.find((card) => card.id === fusionBuff.cardId)
-      : undefined;
-    const fusionSuccessChance = getFusionSuccessChance(fusionResultChar?.rarity ?? '', new Date(), fusionCard?.temporaryBonus ?? 0);
-    if (Math.random() >= fusionSuccessChance) {
-      return false;
-    }
 
     setState((prev) => {
       const currentKeep = prev.collection.find((c) => c.ownedId === keepOwnedId);
@@ -1178,13 +1160,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const msg = prev.messages.find((m) => m.id === id);
       if (!msg || msg.rewardClaimed) return prev;
       let newBits = prev.bits;
-      let newInventory = [...prev.inventory];
+      let newInventory = normalizeInventory(prev.inventory);
       let newCollection = [...prev.collection];
       let newPieces = { ...prev.pieces };
       if (msg.reward?.bits) newBits += msg.reward.bits;
       if (msg.reward?.items) {
         for (const entry of msg.reward.items) {
-          const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
+          const rawItemId = resolveInventoryItemId(entry);
+          if (!rawItemId) continue;
           const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
           const migratedItemId = migrateEvolutionItemId(rawItemId);
           if (migratedItemId === 'pilula_energetica') {
@@ -1396,7 +1379,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const craftItem = useCallback((recipe: CraftRecipe): boolean => {
     let success = false;
     setState((prev) => {
-      if (!CARD_IDS.has(recipe.resultItemId) && prev.inventory.includes(recipe.resultItemId)) return prev;
+      if (prev.inventory.includes(recipe.resultItemId)) return prev;
       if ((recipe.bitsCost ?? 0) > 0 && prev.bits < (recipe.bitsCost ?? 0)) return prev;
 
       const newPieces = { ...prev.pieces };
@@ -1423,59 +1406,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       };
     });
     return success;
-  }, []);
-
-  const applyCardToDigivice = useCallback((cardId: string, digiviceId: string): CardUseResult => {
-    const card = CARD_DEFINITIONS.find((entry) => entry.id === cardId);
-    if (!card) return { success: false, message: 'Card inválido.' };
-    if (!digiviceId.startsWith('digivice_')) return { success: false, message: 'Selecione um Digivice válido.' };
-
-    let result: CardUseResult = { success: false, message: 'Não foi possível aplicar o Card.' };
-    setState((prev) => {
-      const cardIndex = prev.inventory.indexOf(cardId);
-      const ownsDigivice = prev.inventory.includes(digiviceId) || prev.equippedItems.digivice === digiviceId;
-      if (cardIndex < 0 || !ownsDigivice) return prev;
-
-      const nextInventory = [...prev.inventory];
-      nextInventory.splice(cardIndex, 1);
-
-      if (card.temporaryType) {
-        const expiresAt = Date.now() + (card.durationMs ?? 3 * 60 * 60 * 1000);
-        result = { success: true, message: `${card.name} ativado por 3 horas neste Digivice.` };
-        return {
-          ...prev,
-          inventory: nextInventory,
-          digiviceTemporaryCards: {
-            ...(prev.digiviceTemporaryCards ?? {}),
-            [digiviceId]: {
-              ...((prev.digiviceTemporaryCards ?? {})[digiviceId] ?? {}),
-              [card.temporaryType]: { cardId, expiresAt },
-            },
-          },
-        };
-      }
-
-      const currentCards = (prev.digiviceCards ?? {})[digiviceId] ?? [];
-      if (currentCards.includes(cardId)) {
-        result = { success: false, message: 'Este Card já foi aplicado neste Digivice.' };
-        return prev;
-      }
-      if (currentCards.length >= 10) {
-        result = { success: false, message: 'Este Digivice já possui o limite de 10 Cards permanentes.' };
-        return prev;
-      }
-
-      result = { success: true, message: `${card.name} aplicado permanentemente ao Digivice.` };
-      return {
-        ...prev,
-        inventory: nextInventory,
-        digiviceCards: {
-          ...(prev.digiviceCards ?? {}),
-          [digiviceId]: [...currentCards, cardId],
-        },
-      };
-    });
-    return result;
   }, []);
 
   const sacrificeDigimon = useCallback((ownedId: string): SacrificeResult => {
@@ -1764,18 +1694,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         result[k] = (result[k] ?? 0) + (v as number);
       });
     });
-    const digiviceId = state.equippedItems.digivice;
-    if (digiviceId) {
-      const appliedCards = (state.digiviceCards ?? {})[digiviceId] ?? [];
-      appliedCards.forEach((cardId) => {
-        const card = CARD_DEFINITIONS.find((entry) => entry.id === cardId);
-        Object.entries((card?.bonuses ?? {}) as Record<string, number>).forEach(([k, v]) => {
-          result[k] = (result[k] ?? 0) + v;
-        });
-      });
-    }
     return result;
-  }, [state.equippedItems, state.digiviceCards]);
+  }, [state.equippedItems]);
 
   const totalPlayerLevel = state.tamerLevel;
   const unreadMailCount = state.messages.filter(
@@ -2003,7 +1923,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         craftGoldenAscensionStar,
         claimStarryNightReward,
         craftItem,
-        applyCardToDigivice,
         gainBits,
         gainTamerExp,
         useTamerXpItem,
