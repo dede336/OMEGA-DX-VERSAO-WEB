@@ -48,7 +48,7 @@ export default function CorreiosScreen() {
     if (reward?.bits) newBits += reward.bits;
     if (reward?.items) {
       for (const entry of reward.items) {
-        const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
+        const rawItemId = typeof entry === 'string' ? entry : (entry as any).itemId ?? (entry as any).id ?? entry;
         const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
         const migratedItemId = migrateEvolutionItemId(rawItemId);
         for (let i = 0; i < amount; i += 1) {
