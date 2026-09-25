@@ -7,7 +7,7 @@ import { broadcastUpdateMail } from "../lib/broadcastMail.js";
 
 
 const router = Router();
-const MAX_CUSTOM_DIGIMONS = 2000;
+const MAX_CATALOGUE_DIGIMONS = 2000;
 
 function canCreateDigimon(auth: { isAdmin: boolean; role: string }): boolean {
   return auth.isAdmin || auth.role === "digimon_creator";
@@ -150,7 +150,7 @@ router.post("/", requireAuth, async (req, res) => {
   }
 
   const count = await db.$count(customDigimonsTable);
-  if (count >= MAX_CUSTOM_DIGIMONS) { res.status(400).json({ error: "Limite máximo de Digimons atingido" }); return; }
+  if (count >= MAX_CATALOGUE_DIGIMONS) { res.status(400).json({ error: "Limite máximo de Digimons atingido" }); return; }
 
   const {
     name, attribute, rarity, element,
