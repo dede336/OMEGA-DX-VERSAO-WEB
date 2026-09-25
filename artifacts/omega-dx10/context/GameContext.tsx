@@ -777,6 +777,11 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     if (!evo || target.level < evo.requiredLevel) return false;
     if (alternate && target.characterId === 'lucemonChaosMode' && target.acquisitionMethod === 'fusion') return false;
 
+    // Hard safety: a relationship that requires another Digimon must NEVER pass
+    // through the direct-evolution path, even if a stale map/UI entry exists.
+    const sacrificeRecipe = (FUSIONS[target.characterId] ?? []).find((recipe) => recipe.resultId === evo.evolvesTo);
+    if (sacrificeRecipe) return false;
+
     // Evoluções que exigem item só continuam depois que a interface envia
     // explicitamente o item escolhido pelo jogador.
     if (evo.requiredItem) {
