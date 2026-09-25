@@ -21,6 +21,11 @@ let _rawCustomDigimons: CustomDigimonRaw[] = [];
 let _overrides: Record<string, OverrideEntry> = {};
 let _apiUrl = '';
 let _baseCharImageUrls: Record<string, string> = {};
+let _legacyCharacterIds = new Map<string, string>();
+
+export function migrateLegacyCharacterId(id: string): string {
+  return _legacyCharacterIds.get(id) ?? id;
+}
 // farmEvoMap: fromCharId → targetCharId  (for BABY/TRAINING pre-rookie chain)
 let _farmEvoMap: Record<string, string> = {};
 // element → list of BABY char IDs (for random egg hatching; only babies with a training target)
@@ -161,6 +166,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     // One-way compatibility for old DB relations/saves created before stable IDs.
     stableIdByLegacyId.set(`custom_${entry.dbId}`, canonicalId);
   }
+  _legacyCharacterIds = stableIdByLegacyId;
   const stableId = (value?: string): string | undefined => {
     if (!value) return undefined;
     return stableIdByLegacyId.get(value) ?? value;
