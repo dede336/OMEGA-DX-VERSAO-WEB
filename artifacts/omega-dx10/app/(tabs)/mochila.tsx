@@ -6,7 +6,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
-import { useGame } from '@/context/GameContext';
+import { useGame, migrateEvolutionItemId } from '@/context/GameContext';
 import { pixelStyle } from '@/constants/pixelStyle';
 import {
   EQUIP_SLOT_ICONS, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER,
