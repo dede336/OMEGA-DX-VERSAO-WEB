@@ -6,6 +6,22 @@ import { requireAuth } from "../middlewares/requireAuth.js";
 
 const router = Router();
 
+function normalizeInventoryItem(entry: unknown): string | null {
+  if (typeof entry === "string") return entry && entry !== "[object Object]" ? entry : null;
+  if (!entry || typeof entry !== "object") return null;
+  const value = entry as Record<string, unknown>;
+  const candidate = value.itemId ?? value.id ?? value.resultItemId;
+  if (typeof candidate === "string") return candidate && candidate !== "[object Object]" ? candidate : null;
+  return candidate ? normalizeInventoryItem(candidate) : null;
+}
+
+function normalizeSaveInventory(saveData: Record<string, unknown>): Record<string, unknown> {
+  const raw = Array.isArray(saveData.inventory) ? saveData.inventory : [];
+  const inventory = raw.map(normalizeInventoryItem).filter((id): id is string => !!id);
+  return { ...saveData, inventory };
+}
+
+
 const BASE_CODEX_ORDER = [
   'agumon','agumonSaver','geoGreymon','rizeGreymon','shineGreymon','shineGreymonBurstMode',
   'veemon','exVeemon','paildramon','imperialDramonFM','imperialDramonRM','imperialDramonPM',
@@ -56,9 +72,10 @@ router.get("/", requireAuth, async (req, res) => {
   const isAdmin = req.auth!.isAdmin;
   const role = req.auth!.role ?? "user";
   const isDigimonCreator = role === "digimon_creator";
-  const saveData = isAdmin
+  const rawSaveData = isAdmin
     ? await injectAdminDigimon(save.saveData as Record<string, unknown>)
-    : save.saveData;
+    : save.saveData as Record<string, unknown>;
+  const saveData = normalizeSaveInventory(rawSaveData);
   res.json({ saveData, updatedAt: save.updatedAt, isAdmin, isDede: isAdmin, role, isDigimonCreator });
 });
 
@@ -70,7 +87,7 @@ router.put("/", requireAuth, async (req, res) => {
     return;
   }
 
-  let merged = saveData as Record<string, unknown>;
+  let merged = normalizeSaveInventory(saveData as Record<string, unknown>);
 
   // Strip admin-injected entries (admin_ prefix) — these must never be persisted
   const rawCollection = (merged.collection ?? []) as { ownedId?: string }[];
