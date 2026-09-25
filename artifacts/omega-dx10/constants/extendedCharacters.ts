@@ -151,6 +151,25 @@ export function getRawCustomDigimons(): CustomDigimonRaw[] {
 }
 
 export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) {
+  // Runtime identity is name-based and stable. Database row numbers are metadata only.
+  // Convert every legacy custom_<number> relation before it can reach gameplay/save data.
+  const stableIdByLegacyId = new Map<string, string>();
+  for (const entry of chars) {
+    const baseId = entry.name ? BASE_NAME_MAP[entry.name.toLowerCase()] : undefined;
+    stableIdByLegacyId.set(entry.id, baseId ?? `name:${entry.name}`);
+  }
+  const stableId = (value?: string): string | undefined => {
+    if (!value) return undefined;
+    return stableIdByLegacyId.get(value) ?? value;
+  };
+  chars = chars.map((entry) => ({
+    ...entry,
+    id: stableIdByLegacyId.get(entry.id) ?? `name:${entry.name}`,
+    evolvesFromId: stableId(entry.evolvesFromId),
+    requiredSacrificeCharacter: stableId(entry.requiredSacrificeCharacter),
+    fusionPartner: stableId(entry.fusionPartner),
+  }));
+
   // The API can still contain the old Lucemon stages/parents. Normalize them
   // before building either the farm chain or the regular evolution tree.
   const puttimonId = chars.find((c) => _normKey(c.name ?? '') === 'puttimon')?.id;
@@ -219,7 +238,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     const baseId = BASE_NAME_MAP[c.name.toLowerCase()];
     if (baseId) {
       if (c.hasImage) {
-        _baseCharImageUrls[baseId] = `${apiUrl}/digimons/custom/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}`;
+        _baseCharImageUrls[baseId] = `${apiUrl}/digimons/catalog/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}`;
       }
       continue;
     }
@@ -233,7 +252,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
       attackName: c.attackName, attackElement: c.attackElement as Character['attackElement'],
       spiritName: c.spiritName, spiritElement: c.spiritElement as Character['spiritElement'],
       scannable: c.scannable, imageScale: c.imageScale ?? 0.8,
-      imageApiUrl: c.hasImage ? `${apiUrl}/digimons/custom/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}` : undefined,
+      imageApiUrl: c.hasImage ? `${apiUrl}/digimons/catalog/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}` : undefined,
     };
 
   }
