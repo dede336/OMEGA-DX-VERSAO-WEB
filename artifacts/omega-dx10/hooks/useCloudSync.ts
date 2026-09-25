@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 
 const SYNC_DEBOUNCE = 1_500;
+const SAFETY_SYNC_INTERVAL = 10_000;
 
 function isMeaningfulSave(saveData: Record<string, any> | null | undefined): boolean {
   if (!saveData) return false;
@@ -80,6 +81,21 @@ export function useCloudSync() {
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collection.length, tamerLevel, tamerExp, playerName, team.length, tamerId, token, user?.id, isLoaded, claimedCount, clearedCount, getSaveSnapshot]);
+
+  // Safety sync: the old dependency list did not cover every mutable save field
+  // (inventory quantities, bits, gems, pieces, cards, farm data, cooldowns, etc.).
+  // Persist the latest complete snapshot periodically so progress cannot remain
+  // only in browser memory just because one of those fields changed alone.
+  useEffect(() => {
+    if (!token || !user?.id || !isLoaded) return;
+    const sessionToken = token;
+    const interval = setInterval(() => {
+      const snapshot = getSaveSnapshot();
+      if (!isMeaningfulSave(snapshot)) return;
+      void pushSaveToServer(getApiUrlRef.current(), sessionToken, snapshot).catch(() => {});
+    }, SAFETY_SYNC_INTERVAL);
+    return () => clearInterval(interval);
+  }, [token, user?.id, isLoaded, getSaveSnapshot]);
 
   // A hard reload can happen before the debounce expires. On the web, flush
   // the current in-memory account state while the page is being discarded so
