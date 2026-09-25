@@ -294,13 +294,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (err?.name === 'AbortError') throw new Error('O servidor demorou para responder. Tente novamente.');
       throw new Error('Não foi possível conectar ao servidor para alterar a senha.');
     }
-    const data = await readApiResponse<{ error?: string }>(res);
+    const data = await readApiResponse<{ error?: string; token?: string; user?: AuthUser }>(res);
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) {
         throw new Error(data.error ?? 'Sessão inválida. Entre novamente e tente alterar a senha.');
       }
       throw new Error(data.error ?? 'Erro ao alterar a senha');
     }
+    if (!data.token || !data.user) throw new Error('Senha alterada, mas o servidor não renovou a sessão.');
+    await AsyncStorage.setItem(AUTH_TOKEN_KEY, data.token);
+    setToken(data.token);
+    setUser({
+      id: data.user.id,
+      username: data.user.username,
+      email: data.user.email ?? null,
+      isAdmin: data.user.isAdmin ?? false,
+      role: data.user.role ?? 'user',
+      createdAt: data.user.createdAt,
+    });
   }
 
   async function logout() {
