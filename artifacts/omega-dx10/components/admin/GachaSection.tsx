@@ -804,7 +804,7 @@ export default function GachaSection() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#f0c04015', borderRadius: 10, padding: 10 }}>
-          <AnimatedEgg characterId="custom_1550" element="SPECIAL" size={40} />
+          <AnimatedEgg characterId="specialDigitama" element="SPECIAL" size={40} />
           <View style={{ flex: 1 }}>
             <Text style={{ color: '#f0c040', fontWeight: '800', fontSize: 12 }}>Digitama Especial</Text>
             <Text style={{ color: '#f0c04099', fontSize: 12 }}>Pode chocar qualquer forma bebê do Mundo Digital</Text>
