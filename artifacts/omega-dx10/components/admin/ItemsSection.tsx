@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { EQUIPMENT_ITEMS, CRAFT_RECIPES } from '@/constants/gameData';
+import { EQUIPMENT_ITEMS, CRAFT_RECIPES, ITEM_NAMES } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import {
   RarityKey, RARITIES, PickerRow, ToggleRow, FieldInput,
@@ -146,8 +146,35 @@ export default function ItemsSection() {
   }
 
   // All item IDs for the send picker (base + custom)
-  const allItemIds = [...EQUIPMENT_ITEMS.map((i) => ({ id: i.id, name: i.name })), ...customItems.map((i) => ({ id: i.id, name: i.name }))];
-  const allFragIds = CRAFT_RECIPES.map((r) => ({ id: r.pieceId, name: r.pieceName })).filter((f, i, a) => a.findIndex((x) => x.id === f.id) === i);
+  const materialIds = new Set<string>();
+  for (const [id] of Object.entries(ITEM_NAMES)) {
+    if (id.startsWith('piece_') || id.startsWith('spirit_humano_') || id.startsWith('spirit_besta_')) materialIds.add(id);
+  }
+  for (const recipe of CRAFT_RECIPES) {
+    materialIds.add(recipe.pieceId);
+    for (const requirement of recipe.pieceRequirements ?? []) materialIds.add(requirement.pieceId);
+  }
+
+  const allItemIds = Array.from(new Map([
+    ...EQUIPMENT_ITEMS.map((i) => [i.id, { id: i.id, name: i.name }] as const),
+    ...Object.entries(ITEM_NAMES)
+      .filter(([id]) => !materialIds.has(id))
+      .map(([id, name]) => [id, { id, name }] as const),
+    ...CRAFT_RECIPES
+      .filter((r) => r.resultItemId)
+      .map((r) => [r.resultItemId!, { id: r.resultItemId!, name: r.resultItemName ?? r.resultItemId! }] as const),
+    ...customItems.map((i) => [i.id, { id: i.id, name: i.name }] as const),
+  ]).values()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  const recipeFragmentNames = new Map<string, string>();
+  for (const recipe of CRAFT_RECIPES) {
+    recipeFragmentNames.set(recipe.pieceId, recipe.pieceName);
+    for (const requirement of recipe.pieceRequirements ?? []) recipeFragmentNames.set(requirement.pieceId, requirement.pieceName);
+  }
+  const allFragIds = Array.from(new Map([
+    ...Array.from(materialIds).map((id) => [id, { id, name: ITEM_NAMES[id] ?? recipeFragmentNames.get(id) ?? id }] as const),
+    ...customItems.filter((i) => i.type === 'fragment').map((i) => [i.id, { id: i.id, name: i.name }] as const),
+  ]).values()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   const ItemFormUI = () => (
     <>
