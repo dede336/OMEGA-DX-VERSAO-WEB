@@ -11,9 +11,10 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import {
   EQUIP_SLOT_ICONS, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER,
   RARITY_COLORS, ELEMENTS, EquipSlot, RarityId, ElementId,
-  CRAFT_RECIPES, ITEM_NAMES, CARD_DEFINITIONS, CARD_IDS,
+  CRAFT_RECIPES, ITEM_NAMES,
 } from '@/constants/gameData';
-import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
+import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
+import { getItemImageSource } from '@/constants/extendedItems';
 import { useLanguage } from '@/context/LanguageContext';
 import SaveManagerSection from '@/components/SaveManagerSection';
 import { getCharacter } from '@/constants/extendedCharacters';
@@ -33,7 +34,7 @@ export default function MochilaScreen() {
   const game = useGame();
   const {
     inventory, equippedItems, pieces, bits, collection, tamerLevel, tamerExp,
-    equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem, applyCardToDigivice,
+    equipItem, unequipItem, craftItem, useXpItem, useTamerXpItem,
   } = game;
 
   const { t } = useLanguage();
@@ -44,9 +45,6 @@ export default function MochilaScreen() {
   const [batteryQty, setBatteryQty] = useState(1);
   const [energyPillModalVisible, setEnergyPillModalVisible] = useState(false);
   const [energyPillQty, setEnergyPillQty] = useState(1);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  const [cardMessage, setCardMessage] = useState('');
-  const [cardActivationVisible, setCardActivationVisible] = useState(false);
 
   const topPad = 0;
   const botPad = insets.bottom + 20;
@@ -88,10 +86,6 @@ export default function MochilaScreen() {
   }, {});
   const energyPillStock = inventoryCounts.pilula_energetica ?? 0;
   const visibleInventoryItems = Object.entries(inventoryCounts).filter(([itemId]) => itemId !== 'pilula_energetica');
-  const ownedDigivices = Array.from(new Set([
-    ...inventory.filter((itemId) => itemId.startsWith('digivice_')),
-    ...(equippedItems.digivice ? [equippedItems.digivice] : []),
-  ]));
   const batteryIds = new Set(XP_BATTERIES.map((battery) => battery.id));
   const visibleMaterials = Object.entries(pieces).filter(
     ([itemId, quantity]) => quantity > 0 && !batteryIds.has(itemId as any),
@@ -135,8 +129,8 @@ export default function MochilaScreen() {
               activeOpacity={0.8}
             >
               <View style={[styles.slotIconWrap, { backgroundColor: (rarityCol ?? colors.primary) + '22' }]}>
-                {equippedItem && getEquipItemImage(equippedItem.id, game.tamerId) ? (
-                  <Image source={getEquipItemImage(equippedItem.id, game.tamerId)} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                {equippedItem && EQUIP_ITEM_IMAGES[equippedItem.id] ? (
+                  <Image source={EQUIP_ITEM_IMAGES[equippedItem.id]} style={{ width: 28, height: 28 }} resizeMode="contain" />
                 ) : (
                   <Feather
                     name={EQUIP_SLOT_ICONS[slot] as any}
@@ -197,7 +191,7 @@ export default function MochilaScreen() {
               if ((item as any).tamerXpBonusPercent) specialBonuses.push(`⭐ +${Math.round((item as any).tamerXpBonusPercent * 100)}% ${t('mochila.xpTamer')}`);
               const bonusStr = [flatBonusStr, pctBonusStr, ...specialBonuses].filter(Boolean).join('  ');
 
-              const itemImg = getEquipItemImage(item.id, game.tamerId);
+              const itemImg = EQUIP_ITEM_IMAGES[item.id];
               const elemBonus = item.elementBonus;
               const elemLabel = elemBonus ? elemBonus.elements.map((e: ElementId) => ELEMENTS[e]?.label).join(' & ') : null;
               const elemColor = elemBonus ? ELEMENTS[elemBonus.elements[0] as ElementId]?.color : null;
@@ -336,94 +330,25 @@ export default function MochilaScreen() {
           <View style={styles.inventoryGrid}>
             {visibleInventoryItems.map(([itemId, quantity]) => {
               const equipment = allEquipmentItems.find((item) => item.id === itemId);
-              const recipe = CRAFT_RECIPES.find((r) => r.resultItemId === itemId);
-              const rawItemName = ITEM_NAMES[itemId] ?? equipment?.name ?? recipe?.resultItemName ?? itemId;
-              const itemName = typeof rawItemName === 'string' ? rawItemName : String((rawItemName as any)?.name ?? itemId);
-              const itemImg = getEquipItemImage(itemId, game.tamerId);
+              const itemName = ITEM_NAMES[itemId] ?? equipment?.name ?? itemId;
+              const itemImg = EQUIP_ITEM_IMAGES[itemId] ?? getItemImageSource(itemId);
               return (
-                <TouchableOpacity
-                  key={itemId}
-                  style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: CARD_IDS.has(itemId) ? '#06b6d4' : colors.border }, pixelStyle]}
-                  onPress={() => {
-                    if (!CARD_IDS.has(itemId)) return;
-                    setCardMessage('');
-                    setSelectedCardId(itemId);
-                  }}
-                  activeOpacity={CARD_IDS.has(itemId) ? 0.75 : 1}
-                >
+                <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
                   {itemImg ? (
                     <Image source={itemImg} style={styles.inventoryImage} resizeMode="contain" />
                   ) : (
-                    <Feather name={CARD_IDS.has(itemId) ? 'layers' : 'package'} size={30} color={CARD_IDS.has(itemId) ? '#06b6d4' : colors.primary} />
+                    <Feather name="package" size={30} color={colors.primary} />
                   )}
                   <Text style={[styles.inventoryName, { color: colors.foreground }]} numberOfLines={2}>{itemName}</Text>
-                  {CARD_IDS.has(itemId) && <Text style={{ color: '#06b6d4', fontSize: 10, fontWeight: '700' }}>USAR NO DIGIVICE</Text>}
-                  <View style={[styles.inventoryQuantity, { backgroundColor: CARD_IDS.has(itemId) ? '#06b6d4' : colors.primary }]}> 
+                  <View style={[styles.inventoryQuantity, { backgroundColor: colors.primary }]}> 
                     <Text style={styles.inventoryQuantityText}>×{quantity}</Text>
                   </View>
-                </TouchableOpacity>
+                </View>
               );
             })}
           </View>
         </>
       )}
-
-
-      <Modal visible={!!selectedCardId} transparent animationType="slide" onRequestClose={() => setSelectedCardId(null)}>
-        <Pressable style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.65)' }} onPress={() => setSelectedCardId(null)}>
-          <Pressable style={{ backgroundColor: colors.card, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 32 }} onPress={(e) => e.stopPropagation()}>
-            <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '800', marginBottom: 6 }}>
-              {CARD_DEFINITIONS.find((card) => card.id === selectedCardId)?.name ?? 'Card'}
-            </Text>
-            <Text style={{ color: colors.mutedForeground, fontSize: 12, marginBottom: 16 }}>
-              {CARD_DEFINITIONS.find((card) => card.id === selectedCardId)?.description}
-            </Text>
-            <Text style={{ color: colors.foreground, fontWeight: '700', marginBottom: 10 }}>Escolha o Digivice</Text>
-            {ownedDigivices.length === 0 ? (
-              <Text style={{ color: colors.mutedForeground, marginBottom: 12 }}>Você não possui um Digivice disponível.</Text>
-            ) : ownedDigivices.map((digiviceId) => {
-              const digivice = EQUIPMENT_ITEMS.find((item) => item.id === digiviceId);
-              const permanentCount = game.digiviceCards?.[digiviceId]?.length ?? 0;
-              return (
-                <TouchableOpacity
-                  key={digiviceId}
-                  style={[styles.pickerItem, { backgroundColor: colors.background, borderColor: colors.border, marginBottom: 8 }, pixelStyle]}
-                  onPress={() => {
-                    if (!selectedCardId) return;
-                    const result = applyCardToDigivice(selectedCardId, digiviceId);
-                    setCardMessage(result.message);
-                    if (result.success) {
-                      setSelectedCardId(null);
-                      setCardActivationVisible(true);
-                      setTimeout(() => setCardActivationVisible(false), 1800);
-                    }
-                  }}
-                >
-                  <Image source={getEquipItemImage(digiviceId, game.tamerId)} style={styles.pickerItemImg} resizeMode="contain" />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: colors.foreground, fontWeight: '700' }}>{digivice?.name ?? ITEM_NAMES[digiviceId] ?? digiviceId}</Text>
-                    <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{permanentCount}/10 Cards permanentes</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-            {!!cardMessage && <Text style={{ color: '#ef4444', fontWeight: '700', marginTop: 8 }}>{cardMessage}</Text>}
-            <TouchableOpacity onPress={() => setSelectedCardId(null)} style={{ padding: 12, alignItems: 'center', marginTop: 8 }}>
-              <Text style={{ color: colors.mutedForeground, fontWeight: '700' }}>Cancelar</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      <Modal visible={cardActivationVisible} transparent animationType="fade">
-        <View style={styles.cardActivationOverlay} pointerEvents="none">
-          <Image
-            source={require('../../assets/images/animação_card.gif')}
-            style={styles.cardActivationGif}
-            resizeMode="contain"
-          />
-        </View>
-      </Modal>
 
       {/* ── Materiais e fragmentos obtidos ── */}
       {visibleMaterials.length > 0 && (
@@ -431,7 +356,7 @@ export default function MochilaScreen() {
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Materiais e Fragmentos</Text>
           <View style={styles.inventoryGrid}>
             {visibleMaterials.map(([itemId, quantity]) => {
-              const itemImg = getEquipItemImage(itemId, game.tamerId);
+              const itemImg = EQUIP_ITEM_IMAGES[itemId] ?? getItemImageSource(itemId);
               return (
                 <View key={itemId} style={[styles.inventoryCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
                   {itemImg ? (
@@ -809,16 +734,6 @@ const styles = StyleSheet.create({
     width: '47%', minHeight: 118, borderRadius: 14, borderWidth: 1.5,
     padding: 12, alignItems: 'center', justifyContent: 'center', gap: 7,
     position: 'relative',
-  },
-  cardActivationOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.72)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardActivationGif: {
-    width: '86%',
-    height: '62%',
   },
   inventoryImage: { width: 52, height: 52 },
   inventoryName: { fontSize: 11, fontWeight: '800' as const, textAlign: 'center' as const },
