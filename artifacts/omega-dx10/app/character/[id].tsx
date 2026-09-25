@@ -244,6 +244,7 @@ export default function CharacterDetailScreen() {
     rightPosition.setValue(170);
     fusionPairOpacity.setValue(1);
     setFusePhase('playing');
+    if (!owned) return;
     const animationPartner = recipe.partner ?? recipe.partners?.[0] ?? owned.characterId;
     setFuseAnim({ fromCharId: owned.characterId, partnerCharId: animationPartner, toCharId: recipe.resultId });
   }
