@@ -93,7 +93,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Beowolfmon": require("../assets/images/digimons/Beowolfmon.gif"),
   "Betamon": require("../assets/images/digimons/Betamon.webp"),
   "Betamon_X": require("../assets/images/digimons/Betamon_X.gif"),
-  "BetelGammamon": require("../assets/images/digimons/BetelGammamon.png"),
+  "BetelGammamon": require("../assets/images/digimons/BetelGammamon.gif"),
   "Bibimon": require("../assets/images/digimons/Bibimon.gif"),
   "BigMamemon": require("../assets/images/digimons/BigMamemon.webp"),
   "BigSnowmon": require("../assets/images/digimons/BigSnowmon.png"),
