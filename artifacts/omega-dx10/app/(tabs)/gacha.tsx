@@ -53,8 +53,7 @@ function getGachaDisplayName(characterId: string, configuredName?: string, fallb
 function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(0.25)).current;
-  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.characterId === 'custom_1550'
-    || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
 
   useEffect(() => {
     const rotateLoop = Animated.loop(
@@ -231,8 +230,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
   const img = getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
   const cardSize = big ? 150 : 110;
   const imgSize = big ? 90 : 64;
-  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.characterId === 'custom_1550'
-    || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
   const isEgg = char?.rarity === 'EGG' || isSpecialDigitama;
   const displayName = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
   const tipoEmoji = reward.tipo ? TIPO_EMOJI[reward.tipo] : '🦖';
