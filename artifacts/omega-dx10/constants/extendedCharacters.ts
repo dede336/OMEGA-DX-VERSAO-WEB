@@ -94,10 +94,6 @@ const BASE_NAME_MAP = buildBaseNameMap();
 // so "BlackWarGreymon" → "blackwargreymon" matches key "blackWarGreymon"
 const _normKey = (s: string): string => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
-  custom_313: 'ryudamon',
-  custom_356: 'dorulumon',
-};
 const VARIANT_LEVEL_BY_RARITY: Partial<Record<Character['rarity'], number>> = {
   ROOKIE: 15, CHAMPION: 25, ULTIMATE: 45, MEGA: 60, ULTRA: 70, BURST: 70,
 };
@@ -286,16 +282,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     }
   }
 
-  // Clear previous custom evolution registrations before re-registering
-  for (const key of Object.keys(EVOLUTIONS)) {
-    if (key.startsWith('custom_')) delete (EVOLUTIONS as Record<string, unknown>)[key];
-  }
-  for (const key of Object.keys(ALTERNATE_EVOLUTIONS)) {
-    if (key.startsWith('custom_')) delete (ALTERNATE_EVOLUTIONS as Record<string, unknown>)[key];
-  }
-  for (const key of Object.keys(EXTRA_ALTERNATE_EVOLUTIONS)) {
-    if (key.startsWith('custom_')) delete (EXTRA_ALTERNATE_EVOLUTIONS as Record<string, unknown>)[key];
-  }
+  // Clear evolution registrations created by the previous catalogue load.
   // Also clear base char keys that were registered by a previous custom run
   for (const key of _registeredBaseCharKeys) {
     delete (EVOLUTIONS as Record<string, unknown>)[key];
@@ -303,12 +290,12 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     delete (EXTRA_ALTERNATE_EVOLUTIONS as Record<string, unknown>)[key];
   }
   _registeredBaseCharKeys = new Set();
-  // Clear fusion recipes generated from custom sacrifice relationships so stale
+  // Clear fusion recipes generated from catalogue sacrifice relationships so stale
   // definitions cannot survive a reload and bypass the current sacrifice rules.
   for (const key of _registeredFusionKeys) delete FUSIONS[key];
   _registeredFusionKeys = new Set();
 
-  // Register custom evolutions into EVOLUTIONS / ALTERNATE_EVOLUTIONS maps.
+  // Register catalogue evolutions into EVOLUTIONS / ALTERNATE_EVOLUTIONS maps.
   // Sort Vaccine (VC) chars first so they always win the main EVOLUTIONS slot
   // when multiple Digimons evolve from the same parent (e.g. BetelGammamon vs GulusGammamon).
   const ATTR_ORDER: Record<string, number> = { VC: 0, DA: 1, FR: 2, VR: 3 };
@@ -322,18 +309,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     // Resolve the actual target ID: if this custom char's name matches a base char, use the base char's ID
     const targetId = (c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined) ?? c.id;
 
-    // Resolve the fromId: if evolvesFromId is a custom char whose name matches a base char, use the base ID
-    let fromId = c.evolvesFromId;
-    if (fromId.startsWith('custom_')) {
-      const fromChar = chars.find((x) => x.id === fromId);
-      if (fromChar) {
-        const fromBaseId = fromChar.name ? BASE_NAME_MAP[fromChar.name.toLowerCase()] : undefined;
-        if (fromBaseId) {
-          fromId = fromBaseId;
-          _registeredBaseCharKeys.add(fromBaseId);
-        }
-      }
-    }
+    const fromId = c.evolvesFromId;
 
     const hasSacrifice = !!c.requiredSacrificeCharacter;
     const mainTarget = EVOLUTIONS[fromId]?.evolvesTo;
@@ -361,7 +337,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         label: c.name,
         requiredItem: c.requiredItem,
       };
-      if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
+      _registeredBaseCharKeys.add(fromId);
     } else if (c.requiredItem && !ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId) {
       ALTERNATE_EVOLUTIONS[fromId] = {
         evolvesTo: targetId,
@@ -369,7 +345,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         label: c.name,
         requiredItem: c.requiredItem,
       };
-      if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
+      _registeredBaseCharKeys.add(fromId);
     } else if (c.requiredItem && !EXTRA_ALTERNATE_EVOLUTIONS[fromId] && mainTarget !== targetId && altTarget !== targetId) {
       EXTRA_ALTERNATE_EVOLUTIONS[fromId] = {
         evolvesTo: targetId,
@@ -377,14 +353,14 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
         label: c.name,
         requiredItem: c.requiredItem,
       };
-      if (!fromId.startsWith('custom_')) _registeredBaseCharKeys.add(fromId);
+      _registeredBaseCharKeys.add(fromId);
     }
   }
 
   // Sacrifice relationships are registered only in FUSIONS.
   // ALTERNATE_EVOLUTIONS and EXTRA_ALTERNATE_EVOLUTIONS are item-only.
 
-  // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
+  // Re-inject hardcoded alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
   // These are added AFTER the clearing loop so they always survive reloads.
   for (const [key, val] of Object.entries(HARDCODED_ALTERNATE_EVOLUTIONS)) {
     ALTERNATE_EVOLUTIONS[key] = val;
@@ -438,7 +414,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   // Remove any previously injected spirit drops before re-injecting
   for (const charName of Object.keys(SPIRIT_SACRIFICE_DROPS_BY_NAME)) {
     for (const [id, drops] of Object.entries(SACRIFICE_DROPS)) {
-      if (id.startsWith('custom_') && drops.length > 0 &&
+      if (drops.length > 0 &&
           SPIRIT_SACRIFICE_DROPS_BY_NAME[charName]?.some(d => drops[0]?.itemId === d.itemId)) {
         delete (SACRIFICE_DROPS as Record<string, unknown>)[id];
       }
