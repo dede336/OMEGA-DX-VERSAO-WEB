@@ -53,10 +53,17 @@ export default function SaveManagerSection() {
         const path = FileSystem.documentDirectory + filename;
         await FileSystem.writeAsStringAsync(path, json, { encoding: FileSystem.EncodingType.UTF8 });
         try {
-          await Share.share(
-            { title: filename, message: json },
-            { dialogTitle: 'Salvar arquivo de save' }
-          );
+          const Sharing = await import('expo-sharing');
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(path, {
+              mimeType: 'application/json',
+              dialogTitle: 'Salvar arquivo de save',
+              UTI: 'public.json',
+            });
+          } else {
+            await Share.share({ title: filename, message: json }, { dialogTitle: 'Salvar arquivo de save' });
+          }
+          Alert.alert('✅ Save Exportado!', `Arquivo "${filename}" criado com sucesso.`);
         } catch {
           Alert.alert('✅ Exportado!', `Save salvo em:\n${path}`);
         }
