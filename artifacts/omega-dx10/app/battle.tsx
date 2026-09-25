@@ -302,6 +302,7 @@ export default function BattleScreen() {
 
   // ── Simultaneous enemies ───────────────────────────────────────────────────
   const [enemies, setEnemies] = useState<BattleFighter[]>([]);
+  const currentWaveRef = useRef(0);
   const [battleCharIds, setBattleCharIds] = useState<string[]>([]);
   const [targetIdx, setTargetIdx] = useState(0);
   const enemiesRef = useRef<BattleFighter[]>([]);
@@ -519,12 +520,13 @@ export default function BattleScreen() {
   }
 
   // ── Build single enemy ─────────────────────────────────────────────────────
-  function buildEnemy(charId: string, enemyIndex = 0): BattleFighter {
+  function buildEnemy(charId: string, enemyIndex = 0, waveIndex = 0): BattleFighter {
     const resolvedId = resolveEnemyId(charId);
     const eChar = getCharacter(resolvedId);
     if (!eChar) throw new Error(`Digimon inimigo não encontrado: ${charId}`);
-    const enemyStars = stage!.enemyAscensionStarsByIndex?.[enemyIndex] ?? stage!.enemyAscensionStars ?? 0;
-    const enemyLevel = stage!.enemyLevels?.[enemyIndex] ?? effectiveEnemyLevel;
+    const wave = stage!.waves?.[waveIndex];
+    const enemyStars = wave?.enemyAscensionStarsByIndex?.[enemyIndex] ?? stage!.enemyAscensionStarsByIndex?.[enemyIndex] ?? stage!.enemyAscensionStars ?? 0;
+    const enemyLevel = wave?.enemyLevels?.[enemyIndex] ?? stage!.enemyLevels?.[enemyIndex] ?? effectiveEnemyLevel;
     let f = buildFighter(
       eChar.name, eChar.attribute, eChar.element, applyAscensionBonus(eChar.baseStats, enemyStars), enemyLevel,
       undefined, { attackName: eChar.attackName, spiritName: eChar.spiritName },
@@ -775,8 +777,10 @@ export default function BattleScreen() {
     if (dvBonus.alphamonPresent) dvParts.push('Alphamon: cura aliado');
     if (dvParts.length > 0) addLog(`✨ Dádiva Divina: ${dvParts.join(' | ')}`, '#f59e0b');
 
-    // Build enemies — random subset if randomEnemyCount is set
-    const pool = (stage.enemyCharacterIds ?? [stage.enemyCharacterId]).map(resolveEnemyId);
+    // Build enemies — first wave (or the stage's normal enemy list)
+    currentWaveRef.current = 0;
+    const firstWave = stage.waves?.[0];
+    const pool = (firstWave?.enemyCharacterIds ?? stage.enemyCharacterIds ?? [stage.enemyCharacterId]).map(resolveEnemyId);
     let charIds: string[];
     if (stage.randomEnemyCount && stage.randomEnemyCount < pool.length) {
       const shuffled = [...pool].sort(() => Math.random() - 0.5);
@@ -784,7 +788,7 @@ export default function BattleScreen() {
     } else {
       charIds = pool;
     }
-    const allEnemies = charIds.map((id, index) => buildEnemy(id, index));
+    const allEnemies = charIds.map((id, index) => buildEnemy(id, index, 0));
 
     teamFightersRef.current = fighters;
     activeTeamIdxRef.current = 0;
@@ -815,6 +819,30 @@ export default function BattleScreen() {
     setPhase('battle');
 
     setTimeout(() => processNextTurn(firstQueue, 0, fighters, allEnemies), 400);
+  }
+
+  function startNextWaveIfAvailable(fighters: TeamFighter[]): boolean {
+    if (!stage?.waves || currentWaveRef.current >= stage.waves.length - 1) return false;
+    const nextWaveIndex = currentWaveRef.current + 1;
+    const wave = stage.waves[nextWaveIndex];
+    const charIds = wave.enemyCharacterIds.map(resolveEnemyId);
+    const nextEnemies = charIds.map((id, index) => buildEnemy(id, index, nextWaveIndex));
+    currentWaveRef.current = nextWaveIndex;
+    enemiesRef.current = nextEnemies;
+    setEnemies(nextEnemies);
+    setBattleCharIds(charIds);
+    targetIdxRef.current = -1;
+    setTargetIdx(-1);
+    setTargetSelected(false);
+    addLog(`⚔️ ${nextWaveIndex + 1}ª leva chegou!`, '#f59e0b');
+    const nextQueue = buildTurnOrder(fighters, nextEnemies);
+    turnQueueRef.current = nextQueue;
+    setTurnQueue(nextQueue);
+    turnQueueIdxRef.current = 0;
+    setTurnQueueIdx(0);
+    setBusy(false);
+    setTimeout(() => processNextTurn(nextQueue, 0, fighters, nextEnemies), 500);
+    return true;
   }
 
   // ── Build turn order by SPD ────────────────────────────────────────────────
@@ -900,6 +928,7 @@ export default function BattleScreen() {
           setTimeout(() => {
             addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
             const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
+            if (startNextWaveIfAvailable(teamFightersRef.current)) return;
             if (activeId) grantRewards(activeId);
             setWinner('player'); setPhase('result'); setBusy(false);
           }, 400);
@@ -1206,6 +1235,7 @@ export default function BattleScreen() {
                 setTimeout(() => {
                   addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
                   const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
+                  if (startNextWaveIfAvailable(teamFightersRef.current)) return;
                   if (activeId) grantRewards(activeId);
                   setWinner('player'); setPhase('result'); setBusy(false);
                 }, 450);
@@ -1268,6 +1298,7 @@ export default function BattleScreen() {
                 setTimeout(() => {
                   addLog('Todos os inimigos derrotados! Vitória!', '#22c55e');
                   const activeId = teamFightersRef.current.find((f) => f.currentHP > 0)?.ownedId;
+                  if (startNextWaveIfAvailable(teamFightersRef.current)) return;
                   if (activeId) grantRewards(activeId);
                   setWinner('player'); setPhase('result'); setBusy(false);
                 }, 450);
