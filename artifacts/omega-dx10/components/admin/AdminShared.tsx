@@ -13,7 +13,7 @@ import ImageCropEditor from './ImageCropEditor';
 import { pixelStyle } from '@/constants/pixelStyle';
 
 export type AttrKey = 'VC' | 'VR' | 'DA' | 'NO' | 'UN' | 'FR';
-export type RarityKey = 'EGG' | 'BABY' | 'TRAINING' | 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'BURST';
+export type RarityKey = 'EGG' | 'BABY' | 'TRAINING' | 'ROOKIE' | 'CHAMPION' | 'ULTIMATE' | 'MEGA' | 'ULTRA' | 'BURST' | 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
 export type ElemKey = 'FIRE' | 'PLANT' | 'WATER' | 'WIND' | 'EARTH' | 'LIGHTNING' | 'LIGHT' | 'DARK' | 'NULL' | 'ICE' | 'METAL';
 
 export const ATTRS: { key: AttrKey; label: string }[] = [
