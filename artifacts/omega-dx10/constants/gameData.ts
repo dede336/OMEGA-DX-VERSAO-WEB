@@ -100,6 +100,19 @@ export const ELEMENTS: Record<ElementId, { label: string; color: string; beats: 
 
 // ─── Characters ───────────────────────────────────────────────────────────────
 export const CHARACTERS: Record<string, Character> = {
+  slashAngemon: {
+    id: 'name:SlashAngemon',
+    name: 'SlashAngemon',
+    rarity: 'MEGA',
+    attribute: 'VC',
+    element: 'LIGHT',
+    baseStats: { hp: 272, mp: 233, atk: 155, def: 134, spt: 119, spd: 141, apt: 72 },
+    description: 'SlashAngemon, Digimon do atributo Vacina e elemento Luz.',
+    attackName: 'Sonic Counter',
+    attackElement: 'NULL',
+    spiritName: 'Shine Slash',
+    spiritElement: 'LIGHT',
+  },
   specialDigitama: {
     id: 'specialDigitama',
     name: 'Digitama Especial',
