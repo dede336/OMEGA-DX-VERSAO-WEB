@@ -303,7 +303,7 @@ router.post("/send", requireAuth, async (req, res) => {
   }
   const notifLines: string[] = [];
   const mailReward: {
-    items?: Array<string | { itemId: string; amount: number }>;
+    items?: string[];
     pieces?: Record<string, number>;
   } = {};
 
@@ -322,8 +322,11 @@ router.post("/send", requireAuth, async (req, res) => {
           : 1,
       }))
       .filter((entry) => entry.itemId && entry.itemId !== '[object Object]');
-    // Keep the mail payload explicit and JSON-safe. Never place UI/catalog objects in rewards.
-    mailReward.items = normalizedItems.map(({ itemId, amount }) => ({ itemId, amount }));
+    // Mail inventory rewards are persisted as primitive IDs only.
+    // This prevents React/catalog objects from ever becoming "[object Object]" in player saves.
+    mailReward.items = normalizedItems.flatMap(({ itemId, amount }) =>
+      Array.from({ length: amount }, () => itemId)
+    );
     const names = (req.body as any).itemNames as string[] | undefined;
     const label = normalizedItems.map((entry, i) => `${names?.[i] ?? entry.itemId} ×${entry.amount}`).join(', ');
     notifLines.push(`⚔️ Itens: ${label}`);
