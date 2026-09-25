@@ -53,11 +53,13 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
-const ATTACK_EFFECT_TIME = 1000;
-const DAMAGE_START_TIME = 800;
-const HP_STEP_TIME = 100;
+const BATTLE_SPEED = 2;
+const speedMs = (ms: number) => Math.max(1, Math.round(ms / BATTLE_SPEED));
+const ATTACK_EFFECT_TIME = speedMs(1000);
+const DAMAGE_START_TIME = speedMs(800);
+const HP_STEP_TIME = speedMs(100);
 const HP_STEP_COUNT = 10;
-const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
+const AUTO_BATTLE_LIMIT_SECONDS = 10 * 60;
 const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
 
 type AutoBattleQuota = { hour: number; usedSeconds: number };
@@ -647,37 +649,37 @@ export default function BattleScreen() {
 
     // ── Battery drops ────────────────────────────────────────────────────────
     if (map?.isDaily) {
-      gainPiece('piece_battery_gold',   10); recordDrop('piece_battery_gold',   10);
-      gainPiece('piece_battery_purple', 20); recordDrop('piece_battery_purple', 20);
-      gainPiece('piece_battery_blue',   30); recordDrop('piece_battery_blue',   30);
-      gainPiece('piece_battery_green',  40); recordDrop('piece_battery_green',  40);
-      addLog('🔋 10× Bateria Dourada!', '#f59e0b');
-      addLog('🔋 20× Bateria Roxa!',    '#a855f7');
-      addLog('🔋 30× Bateria Azul!',    '#3b82f6');
-      addLog('🔋 40× Bateria Verde!',   '#22c55e');
+      gainPiece('piece_battery_gold',   20); recordDrop('piece_battery_gold',   20);
+      gainPiece('piece_battery_purple', 40); recordDrop('piece_battery_purple', 40);
+      gainPiece('piece_battery_blue',   60); recordDrop('piece_battery_blue',   60);
+      gainPiece('piece_battery_green',  80); recordDrop('piece_battery_green',  80);
+      addLog('🔋 20× Bateria Dourada!', '#f59e0b');
+      addLog('🔋 40× Bateria Roxa!',    '#a855f7');
+      addLog('🔋 60× Bateria Azul!',    '#3b82f6');
+      addLog('🔋 80× Bateria Verde!',   '#22c55e');
     } else {
       const regularMaps = GAME_MAPS.filter((m) => !(m as any).isDungeon && !m.isDaily);
       const mapNum = regularMaps.findIndex((m) => m.id === mapId) + 1;
       const isBoss = !!(stage as any).isBoss;
       if (mapNum > 0) {
         if (mapNum <= 2) {
-          const amt = isBoss ? 3 : 1;
+          const amt = isBoss ? 6 : 2;
           gainPiece('piece_battery_green', amt); recordDrop('piece_battery_green', amt);
           addLog(`🔋 ${amt}× Bateria Verde!`, '#22c55e');
         } else if (mapNum <= 5) {
           if (isBoss) {
-            gainPiece('piece_battery_blue', 3); recordDrop('piece_battery_blue', 3);
-            addLog('🔋 3× Bateria Azul!', '#3b82f6');
+            gainPiece('piece_battery_blue', 6); recordDrop('piece_battery_blue', 6);
+            addLog('🔋 6× Bateria Azul!', '#3b82f6');
           } else {
-            gainPiece('piece_battery_green', 2); recordDrop('piece_battery_green', 2);
-            gainPiece('piece_battery_blue',  1); recordDrop('piece_battery_blue',  1);
-            addLog('🔋 2× Bateria Verde!', '#22c55e');
-            addLog('🔋 1× Bateria Azul!', '#3b82f6');
+            gainPiece('piece_battery_green', 4); recordDrop('piece_battery_green', 4);
+            gainPiece('piece_battery_blue',  2); recordDrop('piece_battery_blue',  2);
+            addLog('🔋 4× Bateria Verde!', '#22c55e');
+            addLog('🔋 2× Bateria Azul!', '#3b82f6');
           }
         } else {
           const tier = Math.floor((mapNum - 6) / 3);
-          const purpleAmt = 1 + tier;
-          const blueAmt   = 2 + tier;
+          const purpleAmt = (1 + tier) * 2;
+          const blueAmt   = (2 + tier) * 2;
           gainPiece('piece_battery_purple', purpleAmt); recordDrop('piece_battery_purple', purpleAmt);
           gainPiece('piece_battery_blue',   blueAmt);   recordDrop('piece_battery_blue',   blueAmt);
           addLog(`🔋 ${purpleAmt}× Bateria Roxa!`, '#a855f7');
@@ -818,7 +820,7 @@ export default function BattleScreen() {
     setTurnQueueIdx(0);
     setPhase('battle');
 
-    setTimeout(() => processNextTurn(firstQueue, 0, fighters, allEnemies), 400);
+    setTimeout(() => processNextTurn(firstQueue, 0, fighters, allEnemies), speedMs(400));
   }
 
   function startNextWaveIfAvailable(fighters: TeamFighter[]): boolean {
@@ -841,7 +843,7 @@ export default function BattleScreen() {
     turnQueueIdxRef.current = 0;
     setTurnQueueIdx(0);
     setBusy(false);
-    setTimeout(() => processNextTurn(nextQueue, 0, fighters, nextEnemies), 500);
+    setTimeout(() => processNextTurn(nextQueue, 0, fighters, nextEnemies), speedMs(500));
     return true;
   }
 
@@ -942,7 +944,7 @@ export default function BattleScreen() {
       turnQueueIdxRef.current = 0;
       setTurnQueueIdx(0);
       addLog('── Novo turno ──', '#6b7280');
-      setTimeout(() => processNextTurn(newQueue, 0, eorFighters, eorEnems), 300);
+      setTimeout(() => processNextTurn(newQueue, 0, eorFighters, eorEnems), speedMs(300));
       return;
     }
 
@@ -984,7 +986,7 @@ export default function BattleScreen() {
       setBusy(false);
     } else {
       setBusy(true);
-      setTimeout(() => doEnemyAttackTurn(entry.idx, queue, next + 1, fighters, enems), 700);
+      setTimeout(() => doEnemyAttackTurn(entry.idx, queue, next + 1, fighters, enems), speedMs(700));
     }
   }
 
@@ -1080,7 +1082,7 @@ export default function BattleScreen() {
       }
     }
 
-    setTimeout(() => processNextTurn(queue, nextQIdx, updatedFighters, updatedEnems), 450);
+    setTimeout(() => processNextTurn(queue, nextQIdx, updatedFighters, updatedEnems), speedMs(450));
   }
 
   function applyDestinyOffense(fighter: TeamFighter): TeamFighter {
@@ -1128,7 +1130,7 @@ export default function BattleScreen() {
       if (Math.random() < 0.30) {
         addLog('Fugiu com sucesso!', '#f59e0b');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        setTimeout(() => router.back(), 600);
+        setTimeout(() => router.back(), speedMs(600));
       } else {
         addLog('Tentativa de fuga falhou!', '#ef4444');
         setTimeout(() => processNextTurn(
@@ -1136,7 +1138,7 @@ export default function BattleScreen() {
           turnQueueIdxRef.current + 1,
           teamFightersRef.current,
           enemiesRef.current,
-        ), 500);
+        ), speedMs(500));
       }
       return;
     }
@@ -1249,7 +1251,7 @@ export default function BattleScreen() {
                 turnQueueIdxRef.current + 1,
                 updatedTeamAll,
                 enemiesAtStep,
-              ), 400);
+              ), speedMs(400));
             }, 250);
           }, HP_STEP_TIME * step);
         }
@@ -1314,7 +1316,7 @@ export default function BattleScreen() {
                 turnQueueIdxRef.current + 1,
                 updatedTeam,
                 enemiesAtStep,
-              ), 400);
+              ), speedMs(400));
             }, 250);
             return;
           }
