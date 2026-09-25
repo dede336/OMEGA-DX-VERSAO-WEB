@@ -104,7 +104,7 @@ function AddItemModal({
     setLoadingData(true);
     Promise.all([
       fetch(`${apiUrl}/items`).then((r) => r.json()).catch(() => ({ items: [] })),
-      fetch(`${apiUrl}/digimons/custom`).then((r) => r.json()).catch(() => ({ digimons: [] })),
+      fetch(`${apiUrl}/digimons/catalog`).then((r) => r.json()).catch(() => ({ digimons: [] })),
     ]).then(([itemsData, digimonsData]) => {
       setApiItems(Array.isArray(itemsData.items) ? itemsData.items : []);
       setApiDigimons(Array.isArray(digimonsData.digimons) ? digimonsData.digimons : []);
@@ -268,7 +268,7 @@ function AddItemModal({
                       {selectedDigimonImage ? (
                         <Image source={selectedDigimonImage} style={{ width: 32, height: 32 }} resizeMode="contain" />
                       ) : selectedDigimon.isCustom && (selectedDigimon as any).dbId ? (
-                        <Image source={{ uri: `${apiUrl}/digimons/custom/${(selectedDigimon as any).dbId}/image` }} style={{ width: 32, height: 32 }} resizeMode="contain" />
+                        <Image source={{ uri: `${apiUrl}/digimons/catalog/${(selectedDigimon as any).dbId}/image` }} style={{ width: 32, height: 32 }} resizeMode="contain" />
                       ) : (
                         <View style={[styles.fallbackIcon, { backgroundColor: getDigimonRarityColor(selectedDigimon.rarity) + '33' }]}>
                           <Text style={{ fontSize: 14 }}>🦖</Text>
@@ -300,7 +300,7 @@ function AddItemModal({
                             {img ? (
                               <Image source={img} style={{ width: 28, height: 28 }} resizeMode="contain" />
                             ) : c.isCustom && customDbId ? (
-                              <Image source={{ uri: `${apiUrl}/digimons/custom/${customDbId}/image` }} style={{ width: 28, height: 28 }} resizeMode="contain" />
+                              <Image source={{ uri: `${apiUrl}/digimons/catalog/${customDbId}/image` }} style={{ width: 28, height: 28 }} resizeMode="contain" />
                             ) : (
                               <View style={[styles.fallbackIcon, { width: 28, height: 28, backgroundColor: getDigimonRarityColor(c.rarity) + '33' }]}>
                                 <Text style={{ fontSize: 12 }}>🦖</Text>
@@ -471,7 +471,7 @@ function SlotSection({
               <Image source={img} style={{ width: 34, height: 34 }} resizeMode="contain" />
             ) : isCustomDigimon ? (
               <Image
-                source={{ uri: `${apiUrl}/digimons/custom/${entry.characterId!.replace('custom_', '')}/image` }}
+                source={{ uri: `${apiUrl}/digimons/catalog/${entry.characterId!.replace('custom_', '')}/image` }}
                 style={{ width: 34, height: 34 }}
                 resizeMode="contain"
               />
