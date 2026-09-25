@@ -166,6 +166,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [token, expireIdleSession]);
 
+  // A conta só pode permanecer aberta em uma tela/dispositivo.
+  // O backend já invalida a sessão anterior ao criar um novo sessionId; este
+  // verificador fecha rapidamente a tela antiga sem esperar outra ação do jogador.
+  useEffect(() => {
+    if (!token) return;
+    let stopped = false;
+    const verifySession = async () => {
+      const currentToken = tokenRef.current;
+      if (!currentToken || stopped) return;
+      try {
+        const response = await fetchWithTimeout(
+          `${apiUrl.current}/auth/me`,
+          { method: 'GET', headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` } },
+          8000,
+        );
+        if ((response.status === 401 || response.status === 403) && !stopped) {
+          await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+          tokenRef.current = null;
+          setToken(null);
+          setUser(null);
+        }
+      } catch {
+        // Falha de rede não encerra a conta: só uma rejeição real do servidor.
+      }
+    };
+    void verifySession();
+    const interval = setInterval(() => { void verifySession(); }, 5000);
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
+  }, [token]);
+
   useEffect(() => {
     if (autoRetryRef.current) clearTimeout(autoRetryRef.current);
 
