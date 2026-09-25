@@ -3,14 +3,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db, usersTable } from "@workspace/db";
 import { eq, or } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { requireAuth } from "../middlewares/requireAuth.js";
 import { getActiveAccountBan } from "../lib/chatPolicy.js";
 
 const router = Router();
 
-function signToken(userId: number, username: string, isAdmin: boolean, role: string) {
+function signToken(userId: number, username: string, isAdmin: boolean, role: string, sessionId: string) {
   const secret = process.env["SESSION_SECRET"]!;
-  return jwt.sign({ userId, username, isAdmin, role }, secret, { expiresIn: "30d" });
+  return jwt.sign({ userId, username, isAdmin, role, sessionId }, secret, { expiresIn: "24h" });
 }
 
 function isEmailFormat(value: string) {
@@ -66,7 +67,9 @@ router.post("/register", async (req, res) => {
     .insert(usersTable)
     .values({ username, email: normalizedEmail, passwordHash, role: "user", isAdmin: isAdminAccount })
     .returning();
-  const token = signToken(user.id, user.username, user.isAdmin, user.role);
+  const sessionId = randomUUID();
+  await db.update(usersTable).set({ activeSessionId: sessionId, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+  const token = signToken(user.id, user.username, user.isAdmin, user.role, sessionId);
   res.status(201).json({ token, user: { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin, role: user.role, createdAt: user.createdAt } });
 });
 
@@ -102,7 +105,9 @@ router.post("/login", async (req, res) => {
     });
     return;
   }
-  const token = signToken(user.id, user.username, user.isAdmin, user.role);
+  const sessionId = randomUUID();
+  await db.update(usersTable).set({ activeSessionId: sessionId, updatedAt: new Date() }).where(eq(usersTable.id, user.id));
+  const token = signToken(user.id, user.username, user.isAdmin, user.role, sessionId);
   res.json({ token, user: { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin, role: user.role, createdAt: user.createdAt } });
 });
 
@@ -144,6 +149,14 @@ router.post("/change-password", requireAuth, async (req, res) => {
     .where(eq(usersTable.id, user.id));
 
   res.json({ message: "Senha alterada com sucesso" });
+});
+
+// POST /auth/logout — invalidates the current server-side session immediately
+router.post("/logout", requireAuth, async (req, res) => {
+  await db.update(usersTable)
+    .set({ activeSessionId: null, updatedAt: new Date() })
+    .where(eq(usersTable.id, req.auth!.userId));
+  res.json({ success: true });
 });
 
 // GET /auth/me
