@@ -1961,18 +1961,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...DEFAULT_MESSAGES.filter((m) => !savedIds.has(m.id)),
         ...savedMessages,
       ].sort((a, b) => b.createdAt - a.createdAt);
+      await customContentPromise;
+      const migratedCollection = (saveData.collection ?? defaultState.collection)
+        .map((owned: OwnedCharacter) => ({ ...owned, characterId: migrateLegacyCharacterId(owned.characterId) }));
       const collection: OwnedCharacter[] = migrateClaimedMailGiftStars(
-        parsed.collection ?? [],
+        migratedCollection,
         merged,
       );
-      await customContentPromise;
-      const migratedCollection = (saveData.collection ?? defaultState.collection).map((owned: OwnedCharacter) => ({ ...owned, characterId: migrateLegacyCharacterId(owned.characterId) }));
       const migratedScanData = Object.fromEntries(Object.entries(saveData.scanData ?? defaultState.scanData).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]));
 
       const newState: GameState = {
         ...defaultState,
         ...parsed,
         collection,
+        scanData: migratedScanData,
         scanProgress: parsed.scanProgress ?? {},
         gender: parsed.gender ?? 'M',
         inventory: migrateEvolutionInventory(parsed.inventory ?? DEFAULT_INVENTORY),
