@@ -37,6 +37,7 @@ const SLOT_LIMITS: Record<GachaPoolEntry['raridade'], number | null> = {
   Rookie:   10,
   Especial: 6,
   Champion: null, // dynamic — 1-5 chosen by admin
+  EGG:      null, // Digitama Especial
 };
 
 const RARITY_SLOTS: { key: GachaPoolEntry['raridade']; label: string; color: string; emoji: string }[] = [
