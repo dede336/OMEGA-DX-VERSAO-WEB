@@ -10,7 +10,7 @@ import { useColors } from '@/hooks/useColors';
 import {
   CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS,
   FUSIONS, RARITY_COLORS, RARITY_LABELS, RarityId, TAMERS, ITEM_NAMES,
-  HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS,
+  HARDCODED_ALTERNATE_EVOLUTIONS,
 } from '@/constants/gameData';
 import { getCharacter } from '@/constants/extendedCharacters';
 import { CharacterAvatar } from '@/components/GameComponents';
@@ -51,7 +51,7 @@ function buildReverseMap(): Record<string, string[]> {
   for (const [fromId, evolution] of Object.entries(EXTRA_ALTERNATE_EVOLUTIONS)) {
     addConnection(fromId, evolution.evolvesTo);
   }
-  for (const [fromId, evolution] of Object.entries(HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS)) {
+  for (const [fromId, evolution] of Object.entries(HARDCODED_ALTERNATE_EVOLUTIONS)) {
     addConnection(fromId, evolution.evolvesTo);
   }
   for (const [fromId, recipes] of Object.entries(FUSIONS)) {
@@ -82,7 +82,7 @@ function getConditionsForChild(parentId: string, childId: string): EvoConditions
   if (ext?.evolvesTo === childId) {
     return { fromId: parentId, requiredLevel: ext.requiredLevel, requiredItem: ext.requiredItem, requiredSacrificeCharacter: (ext as any).requiredSacrificeCharacter };
   }
-  const hc = HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS[parentId];
+  const hc = HARDCODED_ALTERNATE_EVOLUTIONS[parentId];
   if (hc?.evolvesTo === childId) {
     return { fromId: parentId, requiredLevel: hc.requiredLevel, requiredItem: hc.requiredItem, requiredSacrificeCharacters: hc.requiredSacrificeCharacters };
   }
@@ -103,7 +103,7 @@ function buildTreeNode(charId: string, visited: Set<string>, parentId?: string):
   const mainNext  = EVOLUTIONS[charId]?.evolvesTo;
   const altNext   = ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
   const alt2Next  = EXTRA_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
-  const fixedNext = HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
+  const fixedNext = HARDCODED_ALTERNATE_EVOLUTIONS[charId]?.evolvesTo;
   const fusionNext = (FUSIONS[charId] ?? []).map((recipe) => recipe.resultId);
 
   const targets: string[] = [];
