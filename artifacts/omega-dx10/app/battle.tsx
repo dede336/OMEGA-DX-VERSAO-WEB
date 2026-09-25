@@ -53,13 +53,11 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
-const BATTLE_SPEED = 2;
-const speedMs = (ms: number) => Math.max(1, Math.round(ms / BATTLE_SPEED));
-const ATTACK_EFFECT_TIME = speedMs(1000);
-const DAMAGE_START_TIME = speedMs(800);
-const HP_STEP_TIME = speedMs(100);
+const BASE_speedMs(BASE_ATTACK_EFFECT_TIME) = 1000;
+const BASE_speedMs(BASE_DAMAGE_START_TIME) = 800;
+const BASE_speedMs(BASE_HP_STEP_TIME) = 100;
 const HP_STEP_COUNT = 10;
-const AUTO_BATTLE_LIMIT_SECONDS = 10 * 60;
+const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
 const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
 
 type AutoBattleQuota = { hour: number; usedSeconds: number };
@@ -332,6 +330,10 @@ export default function BattleScreen() {
 
   // ── Auto battle ────────────────────────────────────────────────────────────
   const [autoMode, setAutoMode] = useState(false);
+  const [battleSpeed, setBattleSpeed] = useState<1 | 2>(1);
+  const battleSpeedRef = useRef<1 | 2>(1);
+  useEffect(() => { battleSpeedRef.current = battleSpeed; }, [battleSpeed]);
+  const speedMs = useCallback((ms: number) => Math.max(1, Math.round(ms / battleSpeedRef.current)), []);
   const [autoQuotaReady, setAutoQuotaReady] = useState(false);
   const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_LIMIT_SECONDS);
   const autoModeRef = useRef(false);
@@ -423,13 +425,13 @@ export default function BattleScreen() {
   const [hitFlash, setHitFlash] = useState<{ element: ElementId; idx: number; key: number } | null>(null);
   const flashElementHit = useCallback((element: ElementId, idx: number) => {
     setHitFlash({ element, idx, key: Date.now() });
-    setTimeout(() => setHitFlash(null), ATTACK_EFFECT_TIME);
+    setTimeout(() => setHitFlash(null), speedMs(BASE_ATTACK_EFFECT_TIME));
   }, []);
 
   const [playerHitFlash, setPlayerHitFlash] = useState<{ element: ElementId; key: number } | null>(null);
   const flashPlayerHit = useCallback((element: ElementId) => {
     setPlayerHitFlash({ element, key: Date.now() });
-    setTimeout(() => setPlayerHitFlash(null), ATTACK_EFFECT_TIME);
+    setTimeout(() => setPlayerHitFlash(null), speedMs(BASE_ATTACK_EFFECT_TIME));
   }, []);
 
   // ── Background pan animation ───────────────────────────────────────────────
@@ -1253,9 +1255,9 @@ export default function BattleScreen() {
                 enemiesAtStep,
               ), speedMs(400));
             }, 250);
-          }, HP_STEP_TIME * step);
+          }, speedMs(BASE_HP_STEP_TIME) * step);
         }
-      }, DAMAGE_START_TIME);
+      }, speedMs(BASE_DAMAGE_START_TIME));
       return;
     }
 
@@ -1327,9 +1329,9 @@ export default function BattleScreen() {
             updatedTeam,
             enemiesAtStep,
           ), 350);
-        }, HP_STEP_TIME * step);
+        }, speedMs(BASE_HP_STEP_TIME) * step);
       }
-    }, DAMAGE_START_TIME);
+    }, speedMs(BASE_DAMAGE_START_TIME));
   }
 
   // ── Alphamon Dádiva Divina: heal an ally before attacking ─────────────────
@@ -1420,7 +1422,14 @@ export default function BattleScreen() {
             <Feather name="arrow-left" size={22} color={colors.primary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>{stage.name}</Text>
-          <View style={{ width: 32 }} />
+          <TouchableOpacity
+            onPress={() => setBattleSpeed((speed) => speed === 1 ? 2 : 1)}
+            style={[styles.speedBtn, { backgroundColor: battleSpeed === 2 ? '#f59e0b22' : colors.card, borderColor: battleSpeed === 2 ? '#f59e0b' : colors.border }, pixelStyle]}
+          >
+            <Text style={[styles.speedBtnText, { color: battleSpeed === 2 ? '#f59e0b' : colors.mutedForeground }]}>
+              {battleSpeed}x
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Enemy preview — compact row */}
@@ -2079,7 +2088,9 @@ const styles = StyleSheet.create({
 
   // ── Header ──
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1 },
-  headerTitle: { fontSize: 14, fontWeight: '700' as const },
+  headerTitle: { fontSize: 14, fontWeight: '700' as const, flex: 1, textAlign: 'center' as const },
+  speedBtn: { minWidth: 44, height: 32, paddingHorizontal: 9, borderWidth: 1, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  speedBtnText: { fontSize: 13, fontWeight: '900' as const },
   battleHeader: { paddingHorizontal: 20, paddingBottom: 8, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   battleTitle: { fontSize: 14, fontWeight: '700' as const },
   enemyCountBadge: { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 3 },
