@@ -53,9 +53,9 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
-const BASE_speedMs(BASE_ATTACK_EFFECT_TIME) = 1000;
-const BASE_speedMs(BASE_DAMAGE_START_TIME) = 800;
-const BASE_speedMs(BASE_HP_STEP_TIME) = 100;
+const BASE_ATTACK_EFFECT_TIME = 1000;
+const BASE_DAMAGE_START_TIME = 800;
+const BASE_HP_STEP_TIME = 100;
 const HP_STEP_COUNT = 10;
 const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
 const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
