@@ -19,7 +19,7 @@ interface MensagemCorreio {
   createdAt: number;
   reward?: {
     bits?: number;
-    items?: Array<string | { itemId: string; amount?: number }>;
+    items?: string[];
     pieces?: Record<string, number>;
     digimon?: string[];
     digimonWithLevel?: DigimonRecompensa[];
@@ -30,7 +30,7 @@ interface SaveData {
   messages?: MensagemCorreio[];
   collection?: { ownedId: string; characterId: string; level: number; exp: number }[];
   bits?: number;
-  inventory?: unknown[];
+  inventory?: string[];
   pieces?: Record<string, number>;
   [key: string]: unknown;
 }
@@ -82,9 +82,8 @@ export async function resgatarRecompensaCorreio(
   }
 
   if (reward?.items) {
-    for (const entry of reward.items) {
-      const itemId = typeof entry === "string" ? entry : entry.itemId;
-      if (itemId && !newInventory.includes(itemId)) newInventory.push(itemId);
+    for (const itemId of reward.items) {
+      if (!newInventory.includes(itemId)) newInventory.push(itemId);
     }
   }
 
