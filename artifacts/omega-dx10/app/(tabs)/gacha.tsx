@@ -53,7 +53,7 @@ function getGachaDisplayName(characterId: string, configuredName?: string, fallb
 function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(0.25)).current;
-  const isSpecialDigitama = reward.characterId === 'custom_1550'
+  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.characterId === 'custom_1550'
     || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
 
   useEffect(() => {
@@ -163,7 +163,7 @@ function SpinningResultBubble({ reward }: { reward: GachaReward | null }) {
   const tX = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, 10, 0, -10, 0] });
   const tY = spiralAnim.interpolate({ inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [-10, 0, 10, 0, -10] });
 
-  const isSpecialDigitama = reward?.characterId === 'custom_1550'
+  const isSpecialDigitama = reward?.characterId === 'specialDigitama' || reward?.characterId === 'custom_1550'
     || reward?.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
   const img = reward && !isSpecialDigitama
     ? getGachaImageSource(reward.characterId, reward.nome, reward.tipo)
@@ -231,7 +231,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
   const img = getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
   const cardSize = big ? 150 : 110;
   const imgSize = big ? 90 : 64;
-  const isSpecialDigitama = reward.characterId === 'custom_1550'
+  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.characterId === 'custom_1550'
     || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
   const isEgg = char?.rarity === 'EGG' || isSpecialDigitama;
   const displayName = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
