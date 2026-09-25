@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
@@ -100,6 +101,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [retryCount, setRetryCount] = useState(0);
   const apiUrl = useRef(buildApiUrl());
   const autoRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastActivityRef = useRef(Date.now());
+  const tokenRef = useRef<string | null>(null);
+  const IDLE_TIMEOUT_MS = 20 * 60 * 1000;
+
+  useEffect(() => { tokenRef.current = token; }, [token]);
+
+  const expireIdleSession = useCallback(async () => {
+    const currentToken = tokenRef.current;
+    if (!currentToken) return;
+    await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
+    setToken(null);
+    setUser(null);
+    try {
+      await fetchWithTimeout(
+        `${apiUrl.current}/auth/logout`,
+        { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` } },
+        5000,
+      );
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      return;
+    }
+
+    const armIdleTimer = () => {
+      lastActivityRef.current = Date.now();
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = setTimeout(() => { void expireIdleSession(); }, IDLE_TIMEOUT_MS);
+    };
+
+    armIdleTimer();
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const events = ['pointerdown', 'keydown', 'touchstart', 'wheel'] as const;
+      events.forEach((event) => window.addEventListener(event, armIdleTimer, { passive: true }));
+      const onVisibility = () => {
+        if (document.visibilityState === 'visible') {
+          if (Date.now() - lastActivityRef.current >= IDLE_TIMEOUT_MS) void expireIdleSession();
+          else armIdleTimer();
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      return () => {
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        events.forEach((event) => window.removeEventListener(event, armIdleTimer));
+        document.removeEventListener('visibilitychange', onVisibility);
+      };
+    }
+
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        if (Date.now() - lastActivityRef.current >= IDLE_TIMEOUT_MS) void expireIdleSession();
+        else armIdleTimer();
+      }
+    });
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      subscription.remove();
+    };
+  }, [token, expireIdleSession]);
 
   useEffect(() => {
     if (autoRetryRef.current) clearTimeout(autoRetryRef.current);
