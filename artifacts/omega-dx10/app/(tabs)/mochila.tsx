@@ -82,14 +82,17 @@ export default function MochilaScreen() {
 
   const selectedBattery = XP_BATTERIES.find((battery) => battery.id === selectedBatteryId) ?? XP_BATTERIES[0];
   const selectedBatteryStock = pieces[selectedBattery.id] ?? 0;
-  const inventoryCounts = inventory.reduce<Record<string, number>>((counts, itemId) => {
+  const canonicalInventory = inventory
+    .map((entry) => migrateEvolutionItemId(entry as unknown))
+    .filter((itemId) => itemId && itemId !== '[object Object]');
+  const inventoryCounts = canonicalInventory.reduce<Record<string, number>>((counts, itemId) => {
     counts[itemId] = (counts[itemId] ?? 0) + 1;
     return counts;
   }, {});
   const energyPillStock = inventoryCounts.pilula_energetica ?? 0;
   const visibleInventoryItems = Object.entries(inventoryCounts).filter(([itemId]) => itemId !== 'pilula_energetica');
   const ownedDigivices = Array.from(new Set([
-    ...inventory.filter((itemId) => itemId.startsWith('digivice_')),
+    ...canonicalInventory.filter((itemId) => itemId.startsWith('digivice_')),
     ...(equippedItems.digivice ? [equippedItems.digivice] : []),
   ]));
   const batteryIds = new Set(XP_BATTERIES.map((battery) => battery.id));
