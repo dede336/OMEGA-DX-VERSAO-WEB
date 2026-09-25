@@ -1240,12 +1240,12 @@ export const FUSIONS: Record<string, FusionRecipe[]> = {
   kimeramon: [{ partner: 'machinedramon', resultId: 'millenniummon', resultName: 'Millenniummon', requiredLevel: 60 }],
   millenniummon: [{ partner: 'gigaSeadramon', resultId: 'moonMillenniummon', resultName: 'MoonMillenniummon', requiredLevel: 70 }],
   moonMillenniummon: [{ partner: 'millenniummon', resultId: 'zeedMillenniummon', resultName: 'ZeedMillenniummon', requiredLevel: 80 }],
-  name:Zhuqiaomon: [{ partners: ['name:Baihumon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  name:Baihumon: [{ partners: ['name:Zhuqiaomon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  name:Azulongmon: [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  name:Ebonwumon: [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Azulongmon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
-  name:Arcturiusmon: [{ partner: 'name:Siriusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
-  name:Siriusmon: [{ partner: 'name:Arcturiusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
+  'name:Zhuqiaomon': [{ partners: ['name:Baihumon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  'name:Baihumon': [{ partners: ['name:Zhuqiaomon','name:Azulongmon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  'name:Azulongmon': [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Ebonwumon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  'name:Ebonwumon': [{ partners: ['name:Zhuqiaomon','name:Baihumon','name:Azulongmon'], resultId: 'name:Huanglongmon', resultName: 'Huanglongmon', requiredLevel: 60 }],
+  'name:Arcturiusmon': [{ partner: 'name:Siriusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
+  'name:Siriusmon': [{ partner: 'name:Arcturiusmon', resultId: 'name:Proximamon', resultName: 'Proximamon', requiredLevel: 70 }],
 };
 
 export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string }> = {
