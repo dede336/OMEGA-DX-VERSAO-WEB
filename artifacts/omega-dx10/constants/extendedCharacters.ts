@@ -410,6 +410,44 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
+  // Gammamon dark line — fixed game rule. Keep this authoritative even when
+  // catalogue evolution metadata is incomplete or stale.
+  const gammamon = chars.find((char) => _normKey(char.name ?? '') === 'gammamon');
+  const gulus = chars.find((char) => _normKey(char.name ?? '') === 'gulusgammamon') ?? CHARACTERS.gulusGammamon;
+  const regulus = chars.find((char) => _normKey(char.name ?? '') === 'regulusmon');
+  const arcturius = chars.find((char) => _normKey(char.name ?? '') === 'arcturiusmon');
+  const gammamonId = gammamon?.id ?? findCharacterIdByName('Gammamon');
+  const gulusId = gulus?.id ?? 'gulusGammamon';
+  const regulusId = regulus?.id ?? findCharacterIdByName('Regulusmon');
+  const arcturiusId = arcturius?.id ?? findCharacterIdByName('Arcturiusmon');
+
+  if (gammamonId && gulusId) {
+    ALTERNATE_EVOLUTIONS[gammamonId] = {
+      evolvesTo: gulusId,
+      requiredLevel: 20,
+      label: 'GulusGammamon',
+      requiredItem: 'black_digitron',
+    };
+    _farmEvoMap[gammamonId] = gulusId;
+  }
+  if (gulusId && regulusId) {
+    EVOLUTIONS[gulusId] = {
+      evolvesTo: regulusId,
+      requiredLevel: 40,
+      label: 'Regulusmon',
+    };
+    _farmEvoMap[gulusId] = regulusId;
+  }
+  if (regulusId && arcturiusId) {
+    EVOLUTIONS[regulusId] = {
+      evolvesTo: arcturiusId,
+      requiredLevel: 70,
+      label: 'Arcturiusmon',
+      requiredItem: 'black_digitron',
+    };
+    _farmEvoMap[regulusId] = arcturiusId;
+  }
+
   // Inject spirit sacrifice drops for Frontier Warriors by name
   // Remove any previously injected spirit drops before re-injecting
   for (const charName of Object.keys(SPIRIT_SACRIFICE_DROPS_BY_NAME)) {
