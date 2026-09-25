@@ -221,11 +221,13 @@ export default function CollectionScreen() {
   });
   const digimons = resolvedCollection.filter(({ owned, char }) =>
     char.rarity !== 'EGG'
+    && owned.characterId !== 'specialDigitama'
     && owned.characterId !== 'custom_1550'
     && char.name?.toLowerCase() !== 'digitama especial'
   );
   const eggs = resolvedCollection.filter(({ owned, char }) =>
     char.rarity === 'EGG'
+    || owned.characterId === 'specialDigitama'
     || owned.characterId === 'custom_1550'
     || char.name?.toLowerCase() === 'digitama especial'
   );
