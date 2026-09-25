@@ -39,97 +39,31 @@ export default function CorreiosScreen() {
     const msg = messages.find((m) => m.id === msgId);
     if (!msg || msg.rewardClaimed || !token) return;
 
-    const reward = msg.reward;
-    const base = Date.now();
-    let newBits = game.bits;
-    let newInventory = [...game.inventory];
-    let newCollection = [...game.collection];
-
-    if (reward?.bits) newBits += reward.bits;
-    if (reward?.items) {
-      for (const entry of reward.items) {
-        const rawItemId = typeof entry === 'string' ? entry : (entry as any).itemId ?? (entry as any).id ?? entry;
-        const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
-        const migratedItemId = migrateEvolutionItemId(rawItemId);
-        for (let i = 0; i < amount; i += 1) {
-          newInventory.push(migratedItemId);
-        }
-      }
-    }
-    const newPieces = { ...(game.pieces ?? {}) };
-    if (reward?.pieces) {
-      for (const [pieceId, amount] of Object.entries(reward.pieces)) {
-        const migratedPieceId = migrateEvolutionPieceId(pieceId);
-        newPieces[migratedPieceId] = (newPieces[migratedPieceId] ?? 0) + amount;
-      }
-    }
-    if (reward?.digimon) {
-      reward.digimon.forEach((characterId, i) => {
-        if (newCollection.length < 500) {
-          newCollection.push({
-            ownedId: `owned_${characterId}_${base}_${i}`,
-            characterId,
-            level: 1,
-            exp: 0,
-            ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
-            mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
-              ? msg.id as OwnedCharacter['mailGiftId']
-              : undefined,
-          });
-        }
-      });
-    }
-    if (reward?.digimonWithLevel) {
-      reward.digimonWithLevel.forEach(({ characterId, level }, i) => {
-        if (newCollection.length < 500) {
-          newCollection.push({
-            ownedId: `owned_${characterId}_${base}_digi_${i}`,
-            characterId,
-            level,
-            exp: 0,
-            ascensionStars: getMailGiftAscensionStars(msg.id, characterId),
-            mailGiftId: getMailGiftAscensionStars(msg.id, characterId) > 0
-              ? msg.id as OwnedCharacter['mailGiftId']
-              : undefined,
-          });
-        }
-      });
-    }
-    const newDecorInventory = { ...(game.farmDecorInventory ?? {}) };
-    if (reward?.decoration) {
-      for (const decorType of reward.decoration) {
-        newDecorInventory[decorType] = (newDecorInventory[decorType] ?? 0) + 1;
-      }
-    }
-    const updatedMessages = messages.map((m) =>
-      m.id === msgId ? { ...m, isRead: true, rewardClaimed: true } : m
-    );
-
-    // Update the in-memory state immediately so the reward is visible and the
-    // message becomes claimed. The cloud payload below is still built only from
-    // this authenticated account; it no longer reads the legacy global save key.
+    // GameContext is the single authority for applying mail rewards. Previously
+    // Correios calculated a second save from the pre-claim render snapshot and
+    // PUT it immediately, which could overwrite the reward that claimReward had
+    // just added to memory (especially admin-sent equipment/crests).
     claimReward(msgId);
 
+    // Let the state commit, then persist the authoritative post-claim snapshot.
+    await new Promise((resolve) => setTimeout(resolve, 0));
     try {
-      // Build the cloud payload from the CURRENT account state, never from the
-      // old global AsyncStorage key. Reading omega_dx10_save_v3 here could replace
-      // the player's account with stale/default data while claiming mail.
       const saveData = {
-        ...game,
-        bits: newBits,
-        inventory: newInventory,
-        collection: newCollection,
-        pieces: newPieces,
-        farmDecorInventory: newDecorInventory,
-        messages: updatedMessages,
+        ...game.getSaveSnapshot(),
         _savedAt: Date.now(),
       };
-      await fetch(`${getApiUrl()}/saves`, {
+      const res = await fetch(`${getApiUrl()}/saves`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ saveData }),
       });
-    } catch {}
+      if (!res.ok) {
+        // Keep the local claimed reward; the normal save sync can retry later.
+        return;
+      }
+    } catch {
+      // Keep the local claimed reward; never roll it back because cloud sync failed.
+    }
   }, [claimReward, game, messages, getApiUrl, token]);
 
   useFocusEffect(useCallback(() => {
