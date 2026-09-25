@@ -100,6 +100,15 @@ export const ELEMENTS: Record<ElementId, { label: string; color: string; beats: 
 
 // ─── Characters ───────────────────────────────────────────────────────────────
 export const CHARACTERS: Record<string, Character> = {
+  specialDigitama: {
+    id: 'specialDigitama',
+    name: 'Digitama Especial',
+    rarity: 'EGG',
+    attribute: 'DA',
+    element: 'NULL',
+    baseStats: { hp: 1, mp: 1, atk: 1, def: 1, spt: 1, spd: 1, apt: 0 },
+    description: 'Digitama Especial. Pode chocar uma forma bebê aleatória do Mundo Digital.',
+  },
   agumon: {
     id: 'agumon',
     name: 'Agumon',
