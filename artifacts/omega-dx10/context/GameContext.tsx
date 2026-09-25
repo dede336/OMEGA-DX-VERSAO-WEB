@@ -317,16 +317,23 @@ function migrateOwnedCharacter(owned: OwnedCharacter): OwnedCharacter {
   return owned;
 }
 
-export function migrateEvolutionItemId(itemId: string): string {
-  return itemId;
+export function migrateEvolutionItemId(item: unknown): string {
+  if (typeof item === 'string') return item;
+  if (item && typeof item === 'object') {
+    const value = item as Record<string, unknown>;
+    const candidate = value.itemId ?? value.id ?? value.resultItemId;
+    if (typeof candidate === 'string') return candidate;
+    if (candidate && typeof candidate === 'object') return migrateEvolutionItemId(candidate);
+  }
+  return String(item ?? '');
 }
 
 export function migrateEvolutionPieceId(pieceId: string): string {
   return pieceId;
 }
 
-function migrateEvolutionInventory(inventory: string[]): string[] {
-  return inventory.map(migrateEvolutionItemId);
+function migrateEvolutionInventory(inventory: unknown[]): string[] {
+  return inventory.map(migrateEvolutionItemId).filter((id) => id.length > 0 && id !== '[object Object]');
 }
 
 function migrateEvolutionPieces(pieces: Record<string, number>): Record<string, number> {
