@@ -461,7 +461,7 @@ function SlotSection({
             ?? getCharacterImageSourceByName(getKnownCharacterName(entry.characterId!) ?? entry.nome)
           : null;
         const tipoEmoji = entry.tipo === 'DIGIMON' ? '🦖' : entry.tipo === 'ITEM' ? '⚔️' : '🔮';
-        const isCustomDigimon = isDigimon && !char;
+        const isUnresolvedDigimon = isDigimon && !char;
 
         return (
           <View key={`${entry.id}_${idx}`} style={[styles.entryRow, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
@@ -469,12 +469,6 @@ function SlotSection({
               <AnimatedEgg characterId={entry.characterId!} element={char?.element ?? 'NULL'} size={34} />
             ) : img ? (
               <Image source={img} style={{ width: 34, height: 34 }} resizeMode="contain" />
-            ) : isCustomDigimon ? (
-              <Image
-                source={{ uri: `${apiUrl}/digimons/catalog/${entry.characterId!.replace('custom_', '')}/image` }}
-                style={{ width: 34, height: 34 }}
-                resizeMode="contain"
-              />
             ) : (
               <View style={[styles.tipoIcon, { backgroundColor: slot.color + '22' }]}>
                 <Text style={{ fontSize: 14 }}>{tipoEmoji}</Text>
