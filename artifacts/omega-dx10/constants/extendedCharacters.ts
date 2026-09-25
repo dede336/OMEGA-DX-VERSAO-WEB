@@ -275,6 +275,10 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
     delete (EXTRA_ALTERNATE_EVOLUTIONS as Record<string, unknown>)[key];
   }
   _registeredBaseCharKeys = new Set();
+  // Clear fusion recipes generated from custom sacrifice relationships so stale
+  // definitions cannot survive a reload and bypass the current sacrifice rules.
+  for (const key of _registeredFusionKeys) delete FUSIONS[key];
+  _registeredFusionKeys = new Set();
 
   // Register custom evolutions into EVOLUTIONS / ALTERNATE_EVOLUTIONS maps.
   // Sort Vaccine (VC) chars first so they always win the main EVOLUTIONS slot
@@ -311,6 +315,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
       const sacrificeId = resolveEvolutionCharacterId(c.requiredSacrificeCharacter!);
       if (sacrificeId) {
         const recipes = FUSIONS[fromId] ?? (FUSIONS[fromId] = []);
+        _registeredFusionKeys.add(fromId);
         if (!recipes.some((recipe) => recipe.resultId === targetId && recipe.partner === sacrificeId)) {
           recipes.push({
             partner: sacrificeId,
