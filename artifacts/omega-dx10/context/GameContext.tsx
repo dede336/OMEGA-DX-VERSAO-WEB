@@ -1960,6 +1960,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         parsed.collection ?? [],
         merged,
       );
+      await customContentPromise;
+      const migratedCollection = (saveData.collection ?? defaultState.collection).map((owned: OwnedCharacter) => ({ ...owned, characterId: migrateLegacyCharacterId(owned.characterId) }));
+      const migratedScanData = Object.fromEntries(Object.entries(saveData.scanData ?? defaultState.scanData).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]));
+
       const newState: GameState = {
         ...defaultState,
         ...parsed,
