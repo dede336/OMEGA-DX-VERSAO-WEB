@@ -13,10 +13,9 @@ import {
   getMailGiftAscensionStars,
   migrateEvolutionItemId,
   migrateEvolutionPieceId,
-  normalizeInventory,
 } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
-import { CHARACTERS, EQUIPMENT_ITEMS, ITEM_NAMES } from '@/constants/gameData';
+import { CHARACTERS, ITEM_NAMES } from '@/constants/gameData';
 import { getCharacterImageSource as _getCharImg } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
@@ -43,19 +42,16 @@ export default function CorreiosScreen() {
     const reward = msg.reward;
     const base = Date.now();
     let newBits = game.bits;
-    let newInventory = normalizeInventory(game.inventory);
+    let newInventory = [...game.inventory];
     let newCollection = [...game.collection];
 
     if (reward?.bits) newBits += reward.bits;
     if (reward?.items) {
       for (const entry of reward.items) {
-        const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
-        if (!rawItemId || typeof rawItemId !== 'string') continue;
+        const rawItemId = typeof entry === 'string' ? entry : (entry as any).itemId ?? (entry as any).id ?? entry;
         const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
         const migratedItemId = migrateEvolutionItemId(rawItemId);
-        if (migratedItemId === 'pilula_energetica') {
-          for (let i = 0; i < amount; i += 1) newInventory.push(migratedItemId);
-        } else if (!newInventory.includes(migratedItemId)) {
+        for (let i = 0; i < amount; i += 1) {
           newInventory.push(migratedItemId);
         }
       }
@@ -262,10 +258,7 @@ export default function CorreiosScreen() {
                     {msg.reward.items?.map((entry, index) => {
                       const itemId = typeof entry === 'string' ? entry : entry.itemId;
                       const amount = typeof entry === 'string' ? 1 : Math.max(1, Number(entry.amount) || 1);
-                      const label = ITEM_NAMES[itemId]
-                        ?? EQUIPMENT_ITEMS.find((item) => item.id === itemId)?.name
-                        ?? t(`item.${itemId}`)
-                        ?? itemId;
+                      const label = ITEM_NAMES[itemId] ?? t(`item.${itemId}`) ?? itemId;
                       return (
                         <View key={`${itemId}_${index}`} style={[styles.rewardChip, { backgroundColor: '#8b5cf622', borderColor: '#8b5cf655' }, pixelStyle]}>
                           <Text style={[styles.rewardChipText, { color: '#8b5cf6' }]}>
