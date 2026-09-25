@@ -14,6 +14,8 @@ export const CHARACTER_SPRITE_SHEETS: Record<string, SpriteSheetConfig> = {
 
 const CHARACTER_IMAGES: Record<string, any> = {
   palmon:         require('../assets/images/digimons/Palmon.gif'),
+  beetlemon:      require('../assets/images/digimons/Beetlemon.gif'),
+  merukimon:      require('../assets/images/digimons/merukimon.gif'),
   agumon:         require('../assets/images/digimons/agumon.gif'),
   arestradamon:   require('../assets/images/digimons/arestradamon.png'),
   agumonHakase:   require('../assets/images/digimons/Agumon_Hakase.gif'),
@@ -126,8 +128,8 @@ const CHARACTER_IMAGES: Record<string, any> = {
   chaosGallantmon: require('../assets/images/digimons/ChaosGallantmon.webp'),
   chaosmon: require('../assets/images/digimons/Chaosmon.png'),
   cherrymon: require('../assets/images/digimons/Cherrymon.webp'),
-  cherubimonEvil: require('../assets/images/digimons/Cherubimon.webp'),
-  cherubimon: require('../assets/images/digimons/Cherubimon_29_vg.webp'),
+  cherubimonEvil: require('../assets/images/digimons/CherubimonEvil.webp'),
+  cherubimon: require('../assets/images/digimons/Cherubimon.gif'),
   chibomon: require('../assets/images/digimons/Chibomon.gif'),
   clockmon: require('../assets/images/digimons/Clockmon.webp'),
   coelamon: require('../assets/images/digimons/Coelamon.gif'),
@@ -318,7 +320,7 @@ const CHARACTER_IMAGES: Record<string, any> = {
   queenChessmon: require('../assets/images/digimons/QueenChessmon.webp'),
   rapidmon: require('../assets/images/digimons/Rapidmon.webp'),
   raremon: require('../assets/images/digimons/Raremon.gif'),
-  ravemonBurstMode: require('../assets/images/digimons/Ravemon_Burst_Mode_vg.webp'),
+  ravemonBurstMode: require('../assets/images/digimons/Ravemon Burst Mode.gif'),
   ravemon: require('../assets/images/digimons/Ravemon.webp'),
   redVegiemon: require('../assets/images/digimons/RedVegiemon.png'),
   renamon: require('../assets/images/digimons/Renamon.webp'),
