@@ -226,6 +226,7 @@ export default function BattleScreen() {
     gainFarmDecor,
     customGameMaps,
     claimStarryNightReward,
+    isAdmin,
   } = useGame();
 
   const TAMER_CREST_MAP: Record<string, string> = {
@@ -705,8 +706,8 @@ export default function BattleScreen() {
     const availableDays = (map as any)?.availableDays as number[] | undefined;
     const availableHours = (map as any)?.availableHours as Array<{ start: number; end: number }> | undefined;
     const now = new Date();
-    if (availableDays?.length && !availableDays.includes(now.getDay())) return;
-    if (availableHours?.length) {
+    if (!isAdmin && availableDays?.length && !availableDays.includes(now.getDay())) return;
+    if (!isAdmin && availableHours?.length) {
       const minutes = now.getHours() * 60 + now.getMinutes();
       if (!availableHours.some(({ start, end }) => minutes >= start * 60 && minutes < end * 60)) return;
     }
