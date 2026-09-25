@@ -1,4 +1,4 @@
-import { Character, CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS, FUSIONS, SACRIFICE_DROPS } from './gameData';
+import { Character, CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, HARDCODED_ALTERNATE_EVOLUTIONS, FUSIONS, SACRIFICE_DROPS } from './gameData';
 import CHARACTER_IMAGES from './characterImages';
 
 interface CustomCharacterEntry extends Character {
@@ -358,7 +358,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
 
   // Re-inject hardcoded custom alternate evolutions (4 Celestial Beasts → Huanglongmon, etc.)
   // These are added AFTER the clearing loop so they always survive reloads.
-  for (const [key, val] of Object.entries(HARDCODED_CUSTOM_ALTERNATE_EVOLUTIONS)) {
+  for (const [key, val] of Object.entries(HARDCODED_ALTERNATE_EVOLUTIONS)) {
     ALTERNATE_EVOLUTIONS[key] = val;
   }
 
