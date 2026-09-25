@@ -1,12 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { getActiveAccountBan } from "../lib/chatPolicy.js";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 export interface AuthPayload {
   userId: number;
   username: string;
   isAdmin: boolean;
   role: string;
+  sessionId?: string;
 }
 
 declare global {
@@ -27,6 +30,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   try {
     const secret = process.env["SESSION_SECRET"]!;
     const payload = jwt.verify(token, secret) as AuthPayload;
+    const [user] = await db.select({ activeSessionId: usersTable.activeSessionId })
+      .from(usersTable)
+      .where(eq(usersTable.id, payload.userId))
+      .limit(1);
+    if (!user || !payload.sessionId || !user.activeSessionId || user.activeSessionId !== payload.sessionId) {
+      res.status(401).json({ error: "Sessão encerrada. Entre novamente." });
+      return;
+    }
     const ban = await getActiveAccountBan(payload.userId);
     if (ban) {
       res.status(403).json({
