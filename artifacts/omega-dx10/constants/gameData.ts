@@ -1275,6 +1275,10 @@ export const FUSIONS: Record<string, FusionRecipe[]> = {
 };
 
 export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: number; label: string; requiredItem?: string }> = {
+  // ── Patamon / SlashAngemon Line ───────────────────────────────────────────
+  patamon:     { evolvesTo: 'unimon',       requiredLevel: 18, label: 'Unimon' },
+  unimon:      { evolvesTo: 'piximon',      requiredLevel: 37, label: 'Piximon' },
+  piximon:     { evolvesTo: 'slashAngemon', requiredLevel: 63, label: 'SlashAngemon', requiredItem: 'anel_sagrado' },
   // ── Agumon / WarGreymon / Omegamon Line ──────────────────────────────────
   agumon:       { evolvesTo: 'greymon',       requiredLevel: 16, label: 'Greymon' },
   greymon:      { evolvesTo: 'metalGreymon',  requiredLevel: 34, label: 'MetalGreymon' },
