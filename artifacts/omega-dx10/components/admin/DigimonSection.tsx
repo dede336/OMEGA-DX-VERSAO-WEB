@@ -72,7 +72,7 @@ export default function DigimonSection() {
   const loadCustomList = useCallback(async () => {
     setLoadingEdit(true);
     try {
-      const r = await fetch(`${getApiUrl()}/digimons/custom`);
+      const r = await fetch(`${getApiUrl()}/digimons/catalog`);
       const data = await r.json();
       if (data.digimons) setCustomList(data.digimons);
     } catch {} finally { setLoadingEdit(false); }
@@ -220,7 +220,7 @@ export default function DigimonSection() {
       fusionPartner: d.fusionPartner ?? '',
       fusionPartnerName: resolveDigimonName(d.fusionPartner ?? ''),
       scannable: d.scannable, imageScale: String(d.imageScale ?? 0.8),
-      imageData: { base64: null, mimeType: 'image/gif', previewUri: d.hasImage ? `${getApiUrl()}/digimons/custom/${d.dbId}/image` : null },
+      imageData: { base64: null, mimeType: 'image/gif', previewUri: d.hasImage ? `${getApiUrl()}/digimons/catalog/${d.dbId}/image` : null },
     });
   }
 
