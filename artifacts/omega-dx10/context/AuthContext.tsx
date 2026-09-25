@@ -209,9 +209,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
-    const res = await apiFetch('/auth/change-password', token ?? undefined, { currentPassword, newPassword });
+    if (!token) throw new Error('Sua sessão expirou. Entre novamente para alterar a senha.');
+    let res: Response;
+    try {
+      res = await fetchWithTimeout(
+        `${apiUrl.current}/auth/change-password`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ currentPassword, newPassword }),
+        },
+        AUTH_TIMEOUT_MS,
+      );
+    } catch (err: any) {
+      if (err?.name === 'AbortError') throw new Error('O servidor demorou para responder. Tente novamente.');
+      throw new Error('Não foi possível conectar ao servidor para alterar a senha.');
+    }
     const data = await readApiResponse<{ error?: string }>(res);
-    if (!res.ok) throw new Error(data.error ?? 'Erro ao alterar a senha');
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(data.error ?? 'Sessão inválida. Entre novamente e tente alterar a senha.');
+      }
+      throw new Error(data.error ?? 'Erro ao alterar a senha');
+    }
   }
 
   async function logout() {
