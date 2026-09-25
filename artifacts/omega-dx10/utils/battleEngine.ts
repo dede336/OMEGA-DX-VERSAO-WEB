@@ -178,6 +178,7 @@ export interface DadivaBonus {
   hpRegen?: number;
   enemyDmgPerRound?: number;
   alphamonPresent?: boolean;
+  nullDamage?: number;
 }
 
 export function computeDadivaDivina(
@@ -236,6 +237,10 @@ export function computeDadivaDivina(
   // Sacred angel forms carry this as an innate passive. The evolution item is
   // consumed beforehand and is never checked during battle.
   if (teamDivineGiftPassives.some(Boolean)) regenBonuses.push(0.10);
+
+  // Poder Heroico — SlashAngemon: aumenta passivamente o dano de ataques Nulos.
+  // A Dádiva é desbloqueada pela evolução com Anel Sagrado.
+  if (has('SlashAngemon') && teamDivineGiftPassives.some(Boolean)) bonus.nullDamage = 0.10;
 
   // No stacking — best buff wins per stat
   if (atkBonuses.length > 0) bonus.atk = Math.max(...atkBonuses);
