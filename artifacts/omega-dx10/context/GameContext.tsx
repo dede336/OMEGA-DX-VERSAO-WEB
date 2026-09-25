@@ -333,7 +333,21 @@ export function migrateEvolutionPieceId(pieceId: string): string {
 }
 
 function migrateEvolutionInventory(inventory: unknown[]): string[] {
-  return inventory.map(migrateEvolutionItemId).filter((id) => id.length > 0 && id !== '[object Object]');
+  return inventory
+    .map(migrateEvolutionItemId)
+    .filter((id) => id.length > 0 && id !== '[object Object]');
+}
+
+function normalizeMailItemEntry(entry: unknown): { itemId: string; amount: number } | null {
+  if (typeof entry === 'string') {
+    const itemId = migrateEvolutionItemId(entry);
+    return itemId && itemId !== '[object Object]' ? { itemId, amount: 1 } : null;
+  }
+  if (!entry || typeof entry !== 'object') return null;
+  const value = entry as Record<string, unknown>;
+  const itemId = migrateEvolutionItemId(value.itemId ?? value.id ?? value.resultItemId ?? entry);
+  if (!itemId || itemId === '[object Object]') return null;
+  return { itemId, amount: Math.max(1, Math.floor(Number(value.amount) || 1)) };
 }
 
 function migrateEvolutionPieces(pieces: Record<string, number>): Record<string, number> {
@@ -567,6 +581,17 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       || (candidate.clearedStages && Object.keys(candidate.clearedStages).length > 0)
     );
   }, []);
+  useEffect(() => {
+    if (!loaded) return;
+    // Repair legacy/admin-mail inventory entries that were accidentally persisted as objects.
+    setState((prev) => {
+      const normalized = migrateEvolutionInventory(prev.inventory as unknown[]);
+      const alreadyCanonical = normalized.length === prev.inventory.length
+        && normalized.every((id, index) => id === prev.inventory[index]);
+      return alreadyCanonical ? prev : { ...prev, inventory: normalized };
+    });
+  }, [loaded]);
+
   useEffect(() => {
     if (!loaded) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -1184,13 +1209,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (msg.reward?.bits) newBits += msg.reward.bits;
       if (msg.reward?.items) {
         for (const entry of msg.reward.items) {
-          const rawItemId = typeof entry === 'string' ? entry : entry.itemId;
-          const amount = typeof entry === 'string' ? 1 : Math.max(1, Math.floor(Number(entry.amount) || 1));
-          const migratedItemId = migrateEvolutionItemId(rawItemId);
-          if (migratedItemId === 'pilula_energetica') {
-            for (let i = 0; i < amount; i += 1) newInventory.push(migratedItemId);
-          } else if (!newInventory.includes(migratedItemId)) {
-            newInventory.push(migratedItemId);
+          const normalized = normalizeMailItemEntry(entry);
+          if (!normalized) continue;
+          const { itemId, amount } = normalized;
+          if (itemId === 'pilula_energetica' || CARD_IDS.has(itemId)) {
+            for (let i = 0; i < amount; i += 1) newInventory.push(itemId);
+          } else if (!newInventory.includes(itemId)) {
+            newInventory.push(itemId);
           }
         }
       }
