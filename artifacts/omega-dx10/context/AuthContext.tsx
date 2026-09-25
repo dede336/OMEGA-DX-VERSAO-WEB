@@ -239,9 +239,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout() {
+    const currentToken = token;
+    // Clear the browser/app session first so logout succeeds even if the API is offline.
     await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
     setToken(null);
     setUser(null);
+    if (currentToken) {
+      try {
+        await fetchWithTimeout(
+          `${apiUrl.current}/auth/logout`,
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${currentToken}`,
+            },
+          },
+          5000,
+        );
+      } catch {
+        // Local logout is already complete.
+      }
+    }
   }
 
   const getApiUrl = useCallback(() => apiUrl.current, []);
