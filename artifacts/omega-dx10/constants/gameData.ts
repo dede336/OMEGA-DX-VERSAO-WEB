@@ -1314,7 +1314,6 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
   togemon: { evolvesTo: 'lillymon', requiredLevel: 33, label: 'Lillymon' },
   lillymon:{ evolvesTo: 'rosemon',  requiredLevel: 50, label: 'Rosemon' },
   // ── Patamon / Goldramon (Goddramon) Line ──────────────────────────────────
-  patamon:     { evolvesTo: 'angemon',     requiredLevel: 19, label: 'Angemon' },
   angemon:     { evolvesTo: 'magnaAngemon', requiredLevel: 33, label: 'MagnaAngemon' },
   magnaAngemon:{ evolvesTo: 'goldramon',   requiredLevel: 60, label: 'Goldramon' },
   // ── Veemon / Imperialdramon Line ──────────────────────────────────────────
