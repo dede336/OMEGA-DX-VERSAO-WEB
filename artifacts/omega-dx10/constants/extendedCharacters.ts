@@ -35,6 +35,12 @@ let _elementBabyMap: Record<string, string[]> = {};
 let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon']);
 // Track base char IDs that were registered as evolution targets by custom processing
 let _registeredBaseCharKeys: Set<string> = new Set();
+let _registeredFusionKeys: Set<string> = new Set();
+
+const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
+  custom_313: 'ryudamon',
+  custom_356: 'dorulumon',
+};
 
 export interface CustomDigimonRaw {
   id: string; dbId: number; name: string; attribute: string; rarity: string; element: string;
