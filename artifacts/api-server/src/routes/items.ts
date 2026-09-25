@@ -14,7 +14,7 @@ async function assertAdmin(userId: number, res: any): Promise<boolean> {
 
 function rowToItem(r: typeof customItemsTable.$inferSelect) {
   return {
-    id: `custom_item_${r.id}`, dbId: r.id,
+    id: `item:${r.name}`, dbId: r.id,
     name: r.name, type: r.type, slot: r.slot ?? undefined,
     description: r.description, rarity: r.rarity,
     howToObtain: r.howToObtain, isActive: r.isActive,
