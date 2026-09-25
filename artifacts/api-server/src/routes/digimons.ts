@@ -308,11 +308,20 @@ router.post("/send", requireAuth, async (req, res) => {
   } = {};
 
   if (items && items.length > 0) {
-    const normalizedItems = items.map((entry) =>
-      typeof entry === 'string'
-        ? { itemId: String(entry), amount: 1 }
-        : { itemId: String(entry.itemId), amount: Math.max(1, Math.min(9999, Number(entry.amount) || 1)) }
-    );
+    const extractItemId = (value: unknown): string => {
+      if (typeof value === 'string') return value;
+      if (!value || typeof value !== 'object') return '';
+      const obj = value as Record<string, unknown>;
+      return extractItemId(obj.itemId ?? obj.id ?? obj.resultItemId ?? '');
+    };
+    const normalizedItems = items
+      .map((entry) => ({
+        itemId: extractItemId(entry),
+        amount: typeof entry === 'object' && entry
+          ? Math.max(1, Math.min(9999, Number((entry as any).amount) || 1))
+          : 1,
+      }))
+      .filter((entry) => entry.itemId && entry.itemId !== '[object Object]');
     // Keep the mail payload explicit and JSON-safe. Never place UI/catalog objects in rewards.
     mailReward.items = normalizedItems.map(({ itemId, amount }) => ({ itemId, amount }));
     const names = (req.body as any).itemNames as string[] | undefined;
