@@ -1075,7 +1075,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     // ── Roll rewards synchronously ──
     // Fixed item: Digitama Especial — always 1% chance per pull, only via percentage (never via pity)
-    const DIGITAMA_ESPECIAL_ID = findCharacterIdByName('Digitama Especial') ?? 'custom_1550';
+    const DIGITAMA_ESPECIAL_ID = 'specialDigitama';
     const TAXA_DIGITAMA_ESPECIAL = 0.01;
 
     let pity = prev.gachaContadorPity;
@@ -1084,7 +1084,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     for (let i = 0; i < quantidade; i++) {
       // 1% fixed chance for Digitama Especial (only via percentage, never via pity guarantees)
       if (Math.random() < TAXA_DIGITAMA_ESPECIAL) {
-        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'Champion', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
+        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'EGG', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
         continue;
       }
 
