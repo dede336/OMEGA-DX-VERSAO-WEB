@@ -63,7 +63,7 @@ type ApiResponse = {
   [key: string]: unknown;
 };
 
-async function readApiResponse<T extends ApiResponse>(response: Response): Promise<T> {
+async function readApiResponse<T>(response: Response): Promise<T> {
   const body = await response.text();
   if (!body.trim()) return {} as T;
 
