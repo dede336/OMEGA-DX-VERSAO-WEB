@@ -779,6 +779,7 @@ export default function BattleScreen() {
     if (dvBonus.hpRegen) dvParts.push(`Cura ${Math.round(dvBonus.hpRegen * 100)}%/rodada`);
     if (dvBonus.enemyDmgPerRound) dvParts.push(`Inimigo -${Math.round(dvBonus.enemyDmgPerRound * 100)}%/rodada`);
     if (dvBonus.alphamonPresent) dvParts.push('Alphamon: cura aliado');
+    if (dvBonus.nullDamage) dvParts.push(`Poder Heroico: Nulo +${Math.round(dvBonus.nullDamage * 100)}% dano`);
     if (dvParts.length > 0) addLog(`✨ Dádiva Divina: ${dvParts.join(' | ')}`, '#f59e0b');
 
     // Build enemies — first wave (or the stage's normal enemy list)
@@ -1195,6 +1196,11 @@ export default function BattleScreen() {
       const updatedEnemiesAll = [...enemiesRef.current];
       const attackResults = liveIndices.map(({ e: enemy, i: idx }) => {
         const res = executeTurn(spiritAttacker, enemy, 'SPIRIT');
+        if (dadivaDivinaRef.current.nullDamage && attackElement === 'NULL') {
+          const boostedDamage = Math.max(1, Math.floor(res.defenderResult.damage * (1 + dadivaDivinaRef.current.nullDamage)));
+          res.defenderResult.damage = boostedDamage;
+          res.defenderResult.newHP = Math.max(0, enemy.currentHP - boostedDamage);
+        }
         updatedEnemiesAll[idx] = { ...enemy, currentHP: res.defenderResult.newHP };
         flashElementHit(attackElement, idx);
         return { enemy, idx, res };
@@ -1269,6 +1275,11 @@ export default function BattleScreen() {
       ? { ...destinyPF, stats: { ...destinyPF.stats, atk: Math.floor(destinyPF.stats.atk * 1.15), spt: Math.floor(destinyPF.stats.spt * 1.15) } }
       : destinyPF;
     const pResult = executeTurn(xrosAttacker, target, action);
+    if (dadivaDivinaRef.current.nullDamage && attackElement === 'NULL') {
+      const boostedDamage = Math.max(1, Math.floor(pResult.defenderResult.damage * (1 + dadivaDivinaRef.current.nullDamage)));
+      pResult.defenderResult.damage = boostedDamage;
+      pResult.defenderResult.newHP = Math.max(0, target.currentHP - boostedDamage);
+    }
     const newPlayerMP = pResult.attackerResult.newMP;
     const newTargetHP = pResult.defenderResult.newHP;
     const lc = pResult.defenderResult.attrMult > 1 || pResult.defenderResult.elemMult > 1 ? '#22c55e' : colors.foreground;
