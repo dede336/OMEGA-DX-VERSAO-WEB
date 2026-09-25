@@ -9,7 +9,7 @@ import {
   PRE_ROOKIE_STAGE_RARITIES,
   EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
 } from '@/constants/gameData';
-import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName } from '@/constants/extendedCharacters';
+import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';
@@ -1826,7 +1826,19 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         fetch(`${apiUrl}/digimons/catalog`).then((r) => r.ok ? r.json() : null).catch(() => null),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
       ]).then(([customData, overridesData]) => {
-        if (customData?.digimons) loadCustomCharacters(customData.digimons, apiUrl);
+        if (customData?.digimons) {
+          loadCustomCharacters(customData.digimons, apiUrl);
+          setState((prev) => ({
+            ...prev,
+            collection: prev.collection.map((owned) => ({
+              ...owned,
+              characterId: migrateLegacyCharacterId(owned.characterId),
+            })),
+            scanData: Object.fromEntries(
+              Object.entries(prev.scanData ?? {}).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]),
+            ),
+          }));
+        }
         if (overridesData?.overrides) loadCharacterOverrides(overridesData.overrides, apiUrl);
         if (customData?.digimons || overridesData?.overrides) setCustomCharsRevision((v) => v + 1);
         setCustomCharsReady(true);
