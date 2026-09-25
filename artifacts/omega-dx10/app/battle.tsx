@@ -1424,11 +1424,15 @@ export default function BattleScreen() {
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>{stage.name}</Text>
           <TouchableOpacity
             onPress={() => setBattleSpeed((speed) => speed === 1 ? 2 : 1)}
-            style={[styles.speedBtn, { backgroundColor: battleSpeed === 2 ? '#f59e0b22' : colors.card, borderColor: battleSpeed === 2 ? '#f59e0b' : colors.border }, pixelStyle]}
+            style={[styles.speedBtn, pixelStyle]}
           >
-            <Text style={[styles.speedBtnText, { color: battleSpeed === 2 ? '#f59e0b' : colors.mutedForeground }]}>
-              {battleSpeed}x
-            </Text>
+            <Image
+              source={battleSpeed === 2
+                ? require('../assets/images/2X_ATIVO.gif')
+                : require('../assets/images/2X_INATIVO.png')}
+              style={styles.speedBtnImage}
+              resizeMode="contain"
+            />
           </TouchableOpacity>
         </View>
 
@@ -2089,8 +2093,8 @@ const styles = StyleSheet.create({
   // ── Header ──
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1 },
   headerTitle: { fontSize: 14, fontWeight: '700' as const, flex: 1, textAlign: 'center' as const },
-  speedBtn: { minWidth: 44, height: 32, paddingHorizontal: 9, borderWidth: 1, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
-  speedBtnText: { fontSize: 13, fontWeight: '900' as const },
+  speedBtn: { width: 52, height: 32, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  speedBtnImage: { width: 52, height: 32 },
   battleHeader: { paddingHorizontal: 20, paddingBottom: 8, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
   battleTitle: { fontSize: 14, fontWeight: '700' as const },
   enemyCountBadge: { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 3 },
