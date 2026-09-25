@@ -24,7 +24,7 @@ function rowToDigimon(r: typeof customDigimonsTable.$inferSelect): ReturnType<ty
 
 function shapeDigimon(r: Omit<typeof customDigimonsTable.$inferSelect, 'imageBase64'> & { hasImageFlag?: boolean }) {
   return {
-    id: `custom_${r.id}`,
+    id: `name:${r.name}`,
     dbId: r.id,
     name: r.name,
     attribute: r.attribute,
@@ -52,11 +52,11 @@ function shapeDigimon(r: Omit<typeof customDigimonsTable.$inferSelect, 'imageBas
   };
 }
 
-// GET /digimons/custom
+// GET /digimons/catalog
 // - Players only see active digimons
 // - Admins see all (active + inactive)
 // - Supports ?attribute=VC &rarity=MEGA &element=FIRE filters
-router.get("/custom", optionalAuth, async (req, res) => {
+router.get("/catalog", optionalAuth, async (req, res) => {
   const isAdmin = req.auth?.isAdmin ?? false;
 
   const { attribute, rarity, element } = req.query as Record<string, string | undefined>;
@@ -104,8 +104,8 @@ router.get("/custom", optionalAuth, async (req, res) => {
   res.json({ digimons: rows.map(shapeDigimon) });
 });
 
-// GET /digimons/custom/:id/image
-router.get("/custom/:id/image", async (req, res) => {
+// GET /digimons/catalog/:id/image
+router.get("/catalog/:id/image", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   const [row] = await db.select({ imageBase64: customDigimonsTable.imageBase64, imageMimeType: customDigimonsTable.imageMimeType }).from(customDigimonsTable).where(eq(customDigimonsTable.id, id)).limit(1);
@@ -197,7 +197,7 @@ router.post("/", requireAuth, async (req, res) => {
     `O administrador adicionou o Digimon "${name}" ao jogo! Abra o Banco de Digimons para ver como obtê-lo.`
   ).catch(() => {});
 
-  res.status(201).json({ id: `custom_${inserted.id}`, dbId: inserted.id });
+  res.status(201).json({ id: `name:${name}`, dbId: inserted.id });
 });
 
 // PUT /digimons/:id — edit existing custom Digimon
