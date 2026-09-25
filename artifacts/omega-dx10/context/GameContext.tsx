@@ -377,16 +377,21 @@ function preserveMailGiftStars(owned: OwnedCharacter): Pick<OwnedCharacter, 'asc
   return { ascensionStars: owned.ascensionStars, mailGiftId: owned.mailGiftId };
 }
 
-function resolveMailGiftFusionStars(
+function resolveFusionStars(
   owned: OwnedCharacter,
   sacrifices: OwnedCharacter[],
 ): Pick<OwnedCharacter, 'ascensionStars' | 'mailGiftId'> {
-  if (!owned.mailGiftId) return preserveMailGiftStars(owned);
+  // Fusion never preserves the highest-star component. The resulting Digimon
+  // inherits the LOWEST ascension among every Digimon consumed by the fusion.
+  // Example: 1★ + 0★ => 0★.
   const lowestStars = Math.min(
     getAscensionStars(owned),
     ...sacrifices.map((sacrifice) => getAscensionStars(sacrifice)),
   );
-  return { ascensionStars: lowestStars, mailGiftId: owned.mailGiftId };
+  return {
+    ascensionStars: lowestStars,
+    mailGiftId: owned.mailGiftId && lowestStars > 0 ? owned.mailGiftId : undefined,
+  };
 }
 
 function migrateClaimedMailGiftStars(
@@ -903,7 +908,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
       const sacrificeSet = new Set(currentSacrifices.map((owned) => owned.ownedId));
       const newSelected = sacrificeSet.has(prev.selectedOwnedId ?? '') ? keepOwnedId : prev.selectedOwnedId;
-      const fusionStars = resolveMailGiftFusionStars(currentKeep, currentSacrifices);
+      const fusionStars = resolveFusionStars(currentKeep, currentSacrifices);
 
       return {
         ...prev,
