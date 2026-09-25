@@ -31,6 +31,7 @@ const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: s
   Rookie:   { color: '#6b7280', label: 'Rookie',   glow: '#6b728044' },
   Especial: { color: '#8b5cf6', label: 'Especial', glow: '#8b5cf644' },
   Champion: { color: '#f59e0b', label: 'Champion ✦', glow: '#f59e0b66' },
+  EGG:      { color: '#22d3ee', label: 'Digitama', glow: '#22d3ee55' },
 };
 
 const TIPO_EMOJI: Record<string, string> = { ITEM: '⚔️', FRAGMENTO: '🔮', DIGIMON: '🦖' };
