@@ -1027,7 +1027,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         { characterId: 'demiDevimon',   raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'DemiDevimon' },
         { characterId: 'tokomon',       raridade: 'Rookie',    tipo: 'DIGIMON', nome: 'Tokomon' },
         // Especial (6 slots)
-        { characterId: findCharacterIdByName('Dorulumon') ?? 'custom_356', raridade: 'Especial', tipo: 'DIGIMON', nome: 'Dorulumon' },
+        { characterId: findCharacterIdByName('Dorulumon') ?? 'name:Dorulumon', raridade: 'Especial', tipo: 'DIGIMON', nome: 'Dorulumon' },
         { characterId: 'magnaAngemon',  raridade: 'Especial', tipo: 'DIGIMON', nome: 'MagnaAngemon' },
         { characterId: 'angewomon',     raridade: 'Especial', tipo: 'DIGIMON', nome: 'Angewomon' },
         { characterId: 'metalGreymon',  raridade: 'Especial', tipo: 'DIGIMON', nome: 'MetalGreymon' },
