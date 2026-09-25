@@ -1820,10 +1820,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!token) return;
 
       // The player save is the first priority. Custom content must never block
-      // account hydration: a slow /digimons/custom or /overrides request used to
+      // account hydration: a slow /digimons/catalog or /overrides request used to
       // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
       const customContentPromise = Promise.all([
-        fetch(`${apiUrl}/digimons/custom`).then((r) => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${apiUrl}/digimons/catalog`).then((r) => r.ok ? r.json() : null).catch(() => null),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
       ]).then(([customData, overridesData]) => {
         if (customData?.digimons) loadCustomCharacters(customData.digimons, apiUrl);
