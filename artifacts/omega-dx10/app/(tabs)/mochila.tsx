@@ -336,7 +336,9 @@ export default function MochilaScreen() {
           <View style={styles.inventoryGrid}>
             {visibleInventoryItems.map(([itemId, quantity]) => {
               const equipment = allEquipmentItems.find((item) => item.id === itemId);
-              const itemName = ITEM_NAMES[itemId] ?? equipment?.name ?? itemId;
+              const recipe = CRAFT_RECIPES.find((r) => r.resultItemId === itemId);
+              const rawItemName = ITEM_NAMES[itemId] ?? equipment?.name ?? recipe?.resultItemName ?? itemId;
+              const itemName = typeof rawItemName === 'string' ? rawItemName : String((rawItemName as any)?.name ?? itemId);
               const itemImg = getEquipItemImage(itemId, game.tamerId);
               return (
                 <TouchableOpacity
