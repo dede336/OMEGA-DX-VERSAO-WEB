@@ -149,14 +149,7 @@ function getTodayDateString(): string {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
-export interface GachaReward {
-  characterId: string;
-  raridade: 'Rookie' | 'Especial' | 'Champion';
-  nome?: string;
-  tipo?: 'DIGIMON' | 'ITEM' | 'FRAGMENTO';
-}
-
-export type GachaRarity = 'COMUM' | 'RARO' | 'ULTRA_RARO' | 'EPICO';
+export type GachaRarity = 'Rookie' | 'Especial' | 'Champion' | 'EGG';
 
 export interface GachaReward {
   characterId: string;
@@ -184,6 +177,7 @@ interface GameState {
   selectedOwnedId: string | null;
   team: string[];
   scanProgress: Record<string, number>;
+  scanData: Record<string, number>;
   inventory: string[];
   equippedItems: EquippedItems;
   pieces: Record<string, number>;
