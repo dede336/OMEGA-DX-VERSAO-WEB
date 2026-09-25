@@ -250,7 +250,12 @@ router.post("/export", requireAuth, async (req, res) => {
   const isSystemAccount = user.isAdmin || user.role === "digimon_creator";
   const rawCollection = ((save.saveData as Record<string, unknown>).collection ?? []) as { ownedId?: string }[];
   const cleanCollection = rawCollection.filter((c) => !String(c.ownedId ?? "").startsWith("admin_"));
-  const cleanSaveData = { ...(save.saveData as Record<string, unknown>), collection: cleanCollection };
+  const cleanSaveData = normalizeSaveInventory({ ...(save.saveData as Record<string, unknown>), collection: cleanCollection });
+  const collection = Array.isArray(cleanSaveData.collection) ? cleanSaveData.collection : [];
+  if (collection.length === 0) {
+    res.status(409).json({ error: "O save no servidor está vazio ou incompleto. Jogue/salve novamente antes de exportar." });
+    return;
+  }
 
   const exportData = {
     version: "1.0",
@@ -273,7 +278,10 @@ router.post("/import", async (req, res) => {
     username?: string; email?: string | null; isSystemAccount?: boolean; saveData?: Record<string, unknown>;
   };
 
-  if (!username || !saveData) { res.status(400).json({ error: "Arquivo de save inválido" }); return; }
+  if (!username || !saveData || typeof saveData !== "object") { res.status(400).json({ error: "Arquivo de save inválido" }); return; }
+  if (String((exportData as Record<string, unknown>).version ?? "") !== "1.0") {
+    res.status(400).json({ error: "Versão de save não suportada" }); return;
+  }
 
   let user;
   if (isSystemAccount) {
@@ -291,10 +299,16 @@ router.post("/import", async (req, res) => {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) { res.status(401).json({ error: "Senha incorreta" }); return; }
 
-  const cleanColl = ((saveData.collection ?? []) as { ownedId?: string }[]).filter(
-    (c) => !String(c.ownedId ?? "").startsWith("admin_")
+  const cleanColl = ((saveData.collection ?? []) as { ownedId?: string; characterId?: string }[]).filter(
+    (c) => c && typeof c === "object"
+      && typeof c.ownedId === "string" && c.ownedId.length > 0
+      && typeof c.characterId === "string" && c.characterId.length > 0
+      && !c.ownedId.startsWith("admin_")
   );
-  const cleanData = { ...saveData, collection: cleanColl };
+  if (cleanColl.length === 0) {
+    res.status(400).json({ error: "Arquivo de save sem coleção válida" }); return;
+  }
+  const cleanData = normalizeSaveInventory({ ...saveData, collection: cleanColl });
 
   const [existing] = await db.select().from(gameSavesTable).where(eq(gameSavesTable.userId, user.id)).limit(1);
   if (existing) {
