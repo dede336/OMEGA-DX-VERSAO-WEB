@@ -506,6 +506,19 @@ export const CHARACTERS: Record<string, Character> = {
     baseStats: { hp: 200, mp: 220, atk: 130, def: 115, spt: 80, spd: 100, apt: 30 },
     description: 'A forma Ultimate do Garurumon. Um guerreiro humanoide do gelo com força devastadora e velocidade surpreendente.',
   },
+  merukimon: {
+    id: 'merukimon',
+    name: 'Merukimon',
+    rarity: 'MEGA',
+    attribute: 'VR',
+    element: 'WIND',
+    baseStats: { hp: 290, mp: 265, atk: 172, def: 130, spt: 135, spd: 188, apt: 72 },
+    description: 'Merukimon, Digimon do tipo Vírus que domina o elemento Vento.',
+    attackName: 'Wind Claw',
+    attackElement: 'WIND',
+    spiritName: 'Razor Wind',
+    spiritElement: 'WIND',
+  },
   metalGarurumon: {
     id: 'metalGarurumon',
     name: 'MetalGarurumon',
@@ -1263,6 +1276,7 @@ export const EVOLUTIONS: Record<string, { evolvesTo: string; requiredLevel: numb
   gabumon:      { evolvesTo: 'garurumon',      requiredLevel: 19, label: 'Garurumon' },
   garurumon:    { evolvesTo: 'wereGarurumon',  requiredLevel: 35, label: 'WereGarurumon' },
   wereGarurumon:{ evolvesTo: 'metalGarurumon', requiredLevel: 52, label: 'MetalGarurumon' },
+  blackWereGarurumon: { evolvesTo: 'merukimon', requiredLevel: 65, label: 'Merukimon' },
   // ── Guilmon / Gallantmon (Dukemon) Line ───────────────────────────────────
   guilmon:        { evolvesTo: 'growlmon',       requiredLevel: 16, label: 'Growlmon' },
   growlmon:       { evolvesTo: 'megaloGrowlmon', requiredLevel: 40, label: 'WarGrowlmon' },
