@@ -32,7 +32,7 @@ let _farmEvoMap: Record<string, string> = {};
 let _elementBabyMap: Record<string, string[]> = {};
 // Forms whose innate Divine Gift was unlocked through a Sacred Ring evolution.
 // The item is consumed during evolution; battle checks only the resulting form.
-let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon']);
+let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon', 'slashAngemon']);
 // Track base char IDs that were registered as evolution targets by custom processing
 let _registeredBaseCharKeys: Set<string> = new Set();
 let _registeredFusionKeys: Set<string> = new Set();
