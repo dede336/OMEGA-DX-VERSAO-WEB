@@ -415,7 +415,7 @@ export default function DigimonSection() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ color: colors.foreground, flex: 1 }}>
                   {sendDigimonName}
-                  {!sendDigimonId.startsWith('custom_') && <Text style={{ color: '#6b7280', fontSize: 11 }}> ({sendDigimonId})</Text>}
+                  <Text style={{ color: '#6b7280', fontSize: 11 }}> ({sendDigimonId})</Text>
                 </Text>
                 <TouchableOpacity onPress={() => { setSendDigimonId(''); setSendDigimonName(''); }}
                   style={[ss.pill, { borderColor: colors.border }]}>
