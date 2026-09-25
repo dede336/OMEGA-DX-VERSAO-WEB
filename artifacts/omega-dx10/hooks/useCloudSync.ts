@@ -24,12 +24,20 @@ async function pushSaveToServer(apiUrl: string, token: string, saveData: Record<
 
   // Safety barrier: never upload a blank/default state over a real cloud save.
   // A legitimate player save has at least one durable progress marker.
-  await fetch(`${apiUrl}/saves`, {
+  const response = await fetch(`${apiUrl}/saves`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ saveData: { ...saveData, _savedAt: Date.now() } }),
     ...(keepalive ? { keepalive: true } : {}),
   });
+  if (!response.ok) {
+    let message = `Falha ao salvar progresso (HTTP ${response.status})`;
+    try {
+      const data = await response.json();
+      if (data?.error) message = data.error;
+    } catch {}
+    throw new Error(message);
+  }
 }
 
 export function useCloudSync() {
