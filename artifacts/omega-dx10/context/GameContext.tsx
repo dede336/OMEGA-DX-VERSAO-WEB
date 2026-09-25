@@ -177,7 +177,6 @@ interface GameState {
   selectedOwnedId: string | null;
   team: string[];
   scanProgress: Record<string, number>;
-  scanData: Record<string, number>;
   inventory: string[];
   equippedItems: EquippedItems;
   pieces: Record<string, number>;
@@ -1833,8 +1832,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
               ...owned,
               characterId: migrateLegacyCharacterId(owned.characterId),
             })),
-            scanData: Object.fromEntries(
-              Object.entries(prev.scanData ?? {}).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]),
+            scanProgress: Object.fromEntries(
+              Object.entries(prev.scanProgress ?? {}).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]),
             ),
           }));
         }
@@ -1962,14 +1961,13 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         migratedCollection,
         merged,
       );
-      const migratedScanData = Object.fromEntries(Object.entries(saveData.scanData ?? defaultState.scanData).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]));
+      const migratedScanProgress = Object.fromEntries(Object.entries(saveData.scanProgress ?? defaultState.scanProgress).map(([id, amount]) => [migrateLegacyCharacterId(id), amount]));
 
       const newState: GameState = {
         ...defaultState,
         ...parsed,
         collection,
-        scanData: migratedScanData,
-        scanProgress: parsed.scanProgress ?? {},
+        scanProgress: migratedScanProgress,
         gender: parsed.gender ?? 'M',
         inventory: migrateEvolutionInventory(parsed.inventory ?? DEFAULT_INVENTORY),
         equippedItems: { ...defaultEquipped, ...(parsed.equippedItems ?? {}) },
