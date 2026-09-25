@@ -107,8 +107,6 @@ function getObtainMethods(charId: string): ObtainMethod[] {
 
 function resolveDigimonName(id: string, allChars: Record<string, { name: string }>): string {
   if (allChars[id]) return allChars[id].name;
-  const withPrefix = `custom_${id}`;
-  if (allChars[withPrefix]) return allChars[withPrefix].name;
   return id;
 }
 
