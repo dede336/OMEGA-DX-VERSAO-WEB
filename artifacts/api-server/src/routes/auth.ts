@@ -143,12 +143,19 @@ router.post("/change-password", requireAuth, async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 10);
+  const newSessionId = randomUUID();
   await db
     .update(usersTable)
-    .set({ passwordHash, updatedAt: new Date() })
+    .set({ passwordHash, activeSessionId: newSessionId, updatedAt: new Date() })
     .where(eq(usersTable.id, user.id));
 
-  res.json({ message: "Senha alterada com sucesso" });
+  const [updatedUser] = await db.select().from(usersTable).where(eq(usersTable.id, user.id)).limit(1);
+  const token = signToken(updatedUser.id, updatedUser.username, updatedUser.isAdmin, updatedUser.role, newSessionId);
+  res.json({
+    message: "Senha alterada com sucesso",
+    token,
+    user: { id: updatedUser.id, username: updatedUser.username, email: updatedUser.email, isAdmin: updatedUser.isAdmin, role: updatedUser.role, createdAt: updatedUser.createdAt },
+  });
 });
 
 // POST /auth/logout — invalidates the current server-side session immediately
