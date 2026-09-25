@@ -880,6 +880,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Zubaeagermon": require("../assets/images/digimons/Zubaeagermon.png"),
   "Zudomon": require("../assets/images/digimons/Zudomon.gif"),
   "Zurumon": require("../assets/images/digimons/Zurumon.gif"),
+  "SlashAngemon": require("../assets/images/digimons/slashangemon.gif"),
 };
 
 export default DIGIMON_IMAGE_CATALOG;
