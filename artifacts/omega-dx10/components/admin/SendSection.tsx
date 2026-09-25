@@ -188,7 +188,7 @@ export default function SendSection() {
   const loadData = useCallback(async () => {
     try {
       const [digRes, itemRes] = await Promise.all([
-        fetch(`${apiUrl}/digimons/custom`).then((r) => r.json()).catch(() => ({ digimons: [] })),
+        fetch(`${apiUrl}/digimons/catalog`).then((r) => r.json()).catch(() => ({ digimons: [] })),
         fetch(`${apiUrl}/items`).then((r) => r.json()).catch(() => ({ items: [] })),
       ]);
       setCustomDigimons(Array.isArray(digRes.digimons) ? digRes.digimons.map((d: any) => ({ id: d.id, name: d.name, dbId: d.dbId })) : []);
