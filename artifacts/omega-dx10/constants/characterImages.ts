@@ -404,7 +404,7 @@ const CHARACTER_IMAGES: Record<string, any> = {
   wormon: require('../assets/images/digimons/Wormmon.gif'),
   yanmamon: require('../assets/images/digimons/Yanmamon_vg.webp'),
   zanbamon: require('../assets/images/digimons/Zanbamon.webp'),
-  zeedMillenniummon: require('../assets/images/digimons/ZeedMillenniummon_vg.webp'),
+  zeedMillenniummon: require('../assets/images/digimons/ZeedMillenniumon.gif'),
   blackImperialdramonDragonMode: require('../assets/images/digimons/BlackImperialdramon_Dragon_Mode_vg.webp'),
   blackImperialdramonFM: require('../assets/images/digimons/BlackImperialdramonFM.gif'),
   blackGhoulmon: require('../assets/images/digimons/blackGhoulmon_29_vg.webp'),
