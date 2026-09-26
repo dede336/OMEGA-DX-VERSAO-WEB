@@ -456,7 +456,7 @@ const defaultState: GameState = {
 export const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, token: authToken } = useAuth();
   const storageKey = getStorageKey(user?.id);
   const [state, setState] = useState<GameState>(defaultState);
   const stateRef = useRef<GameState>(defaultState);
@@ -1828,14 +1828,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   const loadFromCloud = useCallback(async (apiUrl: string) => {
     try {
-      const token = await AsyncStorage.getItem('omega_dx10_auth_token');
+      // Prefer the token already validated by AuthContext. AsyncStorage can lag
+      // behind React state during login/refresh on web and was causing the
+      // catalogue request to be skipped, leaving Banco with 0 Digimons.
+      const token = authToken ?? await AsyncStorage.getItem('omega_dx10_auth_token');
       if (!token) return;
 
       // The player save is the first priority. The Digimon catalogue must never block
       // account hydration: a slow /digimons/catalog or /overrides request used to
       // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
       const catalogContentPromise = Promise.all([
-        fetch(`${apiUrl}/digimons/catalog`, { headers: { Authorization: `Bearer ${token}` } }).then(async (r) => {
+        fetch(`${apiUrl}/digimons/catalog`, {
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(async (r) => {
           if (!r.ok) throw new Error(`Digimon catalog HTTP ${r.status}`);
           const data = await r.json();
           if (!Array.isArray(data?.digimons)) throw new Error('Invalid Digimon catalog payload');
@@ -2039,7 +2047,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = useCallback(async () => {
     await AsyncStorage.removeItem(storageKey);
     setState(defaultState);
-  }, [storageKey]);
+  }, [storageKey, authToken]);
 
   return (
     <GameContext.Provider
