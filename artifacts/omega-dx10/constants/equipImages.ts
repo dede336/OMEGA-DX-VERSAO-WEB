@@ -23,7 +23,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   piece_agulha:         require('../assets/images/agulha-media.webp'),
   piece_tecido:         require('../assets/images/tecido-arco-iris.webp'),
   piece_linha:          require('../assets/images/linha-arco-iris.webp'),
-  piece_coragem:        require('../assets/images/brasao-coragem.gif'),
+  piece_coragem:        require('../assets/images/coragem piece.png'),
   piece_brasao_bondade:      require('../assets/images/bondade piece.png'),
   piece_brasao_coragem:      require('../assets/images/coragem piece.png'),
   piece_brasao_esperanca:    require('../assets/images/esperança piece.png'),
