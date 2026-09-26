@@ -26,6 +26,9 @@ const GEM_ICON_IMG      = require('../../assets/images/diamante.gif');
 const GACHA_ANIME_IMG   = require('../../assets/images/gacha-anime.webp');
 const BUBBLE_IMG        = require('../../assets/images/bubble.webp');
 const FUSION_RAINBOW_CORE = require('../../assets/images/fusion_rainbow_core.png');
+const GACHA_GLOW_BLUE   = require('../../assets/images/brilho_azul.png');
+const GACHA_GLOW_PURPLE = require('../../assets/images/brilho_roxo.png');
+const GACHA_GLOW_GOLD   = require('../../assets/images/brilho_dourado.png');
 
 const RARIDADE_CONFIG: Record<GachaReward['raridade'], { color: string; label: string; glow: string }> = {
   Rookie:   { color: '#6b7280', label: 'Rookie',   glow: '#6b728044' },
@@ -404,6 +407,7 @@ export default function GachaScreen() {
   const animeOpacity   = useRef(new Animated.Value(0)).current;
   const animeScale     = useRef(new Animated.Value(0.8)).current;
   const glowOpacity    = useRef(new Animated.Value(0)).current;
+  const [pullGlow, setPullGlow] = useState<GachaReward['raridade'] | 'SPECIAL_DIGITAMA'>('Rookie');
 
   function runPullAnimation(onDone: () => void) {
     setAnimating(true);
@@ -457,6 +461,13 @@ export default function GachaScreen() {
     }
     setMensagem(res.mensagem);
     setResultado(res.recompensas);
+
+    // The animation glow follows the actual first reward. Special Digitama
+    // deliberately keeps the legacy/current special glow instead.
+    const firstReward = res.recompensas[0];
+    const firstIsSpecialDigitama = firstReward?.characterId === 'specialDigitama'
+      || firstReward?.nome?.replace(/^✨\\s*/, '').toLowerCase() === 'digitama especial';
+    setPullGlow(firstIsSpecialDigitama ? 'SPECIAL_DIGITAMA' : firstReward?.raridade ?? 'Rookie');
 
     // Safety timeout: show modal even if animation callback doesn't fire (Expo Go quirk)
     const timer = setTimeout(() => setModalVisible(true), 3200);
@@ -546,7 +557,19 @@ export default function GachaScreen() {
       <View style={styles.machineRow}>
         <GachaBubbleColumn />
         <View style={styles.machineWrap}>
-          <Animated.View style={[styles.machineGlow, { opacity: glowOpacity }]} />
+          {pullGlow === 'SPECIAL_DIGITAMA' ? (
+            <Animated.View style={[styles.machineGlow, { opacity: glowOpacity }]} />
+          ) : (
+            <Animated.Image
+              source={pullGlow === 'Champion'
+                ? GACHA_GLOW_GOLD
+                : pullGlow === 'Especial'
+                  ? GACHA_GLOW_PURPLE
+                  : GACHA_GLOW_BLUE}
+              style={[styles.machineGlowImage, { opacity: glowOpacity }]}
+              resizeMode="contain"
+            />
+          )}
           <Animated.Image
             source={GACHA_MACHINE_IMG}
             style={[styles.machineImg, {
@@ -738,6 +761,14 @@ const styles = StyleSheet.create({
   },
   pullBubbleImg: {
     position: 'absolute', width: 140, height: 140,
+  },
+  machineGlowImage: {
+    position: 'absolute',
+    width: '155%',
+    height: '155%',
+    left: '-27.5%',
+    top: '-27.5%',
+    zIndex: 0,
   },
   machineGlow: {
     position: 'absolute', width: 220, height: 220, borderRadius: 110,
