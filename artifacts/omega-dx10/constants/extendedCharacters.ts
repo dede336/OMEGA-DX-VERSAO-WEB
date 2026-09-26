@@ -1,7 +1,7 @@
 import { Character, CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, HARDCODED_ALTERNATE_EVOLUTIONS, FUSIONS, SACRIFICE_DROPS } from './gameData';
 import CHARACTER_IMAGES from './characterImages';
 
-interface CustomCharacterEntry extends Character {
+interface CatalogCharacterEntry extends Character {
   dbId: number;
   scannable: boolean;
   imageScale: number;
@@ -16,8 +16,8 @@ interface OverrideEntry {
   imageScale?: number; scannable?: boolean; overrideImageUrl?: string;
 }
 
-let _customChars: Record<string, CustomCharacterEntry> = {};
-let _rawCustomDigimons: CustomDigimonRaw[] = [];
+let _catalogChars: Record<string, CatalogCharacterEntry> = {};
+let _rawCatalogDigimons: CatalogDigimonRaw[] = [];
 let _overrides: Record<string, OverrideEntry> = {};
 let _apiUrl = '';
 let _baseCharImageUrls: Record<string, string> = {};
@@ -33,7 +33,7 @@ let _elementBabyMap: Record<string, string[]> = {};
 // Forms whose innate Divine Gift was unlocked through a Sacred Ring evolution.
 // The item is consumed during evolution; battle checks only the resulting form.
 let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon', 'slashAngemon']);
-// Track base char IDs that were registered as evolution targets by custom processing
+// Track base char IDs that were registered as evolution targets by catalogue processing
 let _registeredBaseCharKeys: Set<string> = new Set();
 let _registeredFusionKeys: Set<string> = new Set();
 
@@ -42,7 +42,7 @@ const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
   custom_356: 'dorulumon',
 };
 
-export interface CustomDigimonRaw {
+export interface CatalogDigimonRaw {
   id: string; dbId: number; name: string; attribute: string; rarity: string; element: string;
   baseStats: { hp: number; mp: number; atk: number; def: number; spt: number; spd: number; apt: number };
   description: string; attackName?: string; attackElement?: string;
@@ -53,14 +53,14 @@ export interface CustomDigimonRaw {
   scannable: boolean; hasImage: boolean; imageMimeType?: string; imageScale: number; imageUpdatedAt?: number;
 }
 
-// Aliases: custom DB names that should map to a base character ID
+// Aliases: catalogue names that should map to a base character ID
 // e.g. "Omnimon" in the DB is the same Digimon as base "omegamon"
 const CHAR_NAME_ALIASES: Record<string, string> = {
   'omnimon': 'omegamon',
   'megalogrowmon': 'megaloGrowlmon',
 };
 
-// Spirit sacrifice drops: when a Frontier Warrior custom digimon is sacrificed,
+// Spirit sacrifice drops: when a Frontier Warrior Digimon is sacrificed,
 // it drops its corresponding Spirit piece (used for crafting / Susanoomon evolution).
 const SPIRIT_SACRIFICE_DROPS_BY_NAME: Record<string, { itemId: string; chance: number }[]> = {
   'Agnimon':          [{ itemId: 'spirit_humano_fogo',      chance: 1.0 }],
@@ -107,7 +107,7 @@ const VARIANT_LEVEL_BY_RARITY: Partial<Record<Character['rarity'], number>> = {
 // A trailing X is an X-Antibody form only when the catalogue also contains
 // the same name without that X. This avoids false matches such as JesmonGX.
 // The Black prefix follows the same counterpart rule.
-function applyVariantEvolutionRules(chars: CustomDigimonRaw[]): CustomDigimonRaw[] {
+function applyVariantEvolutionRules(chars: CatalogDigimonRaw[]): CatalogDigimonRaw[] {
   const idByName = new Map<string, string>();
   for (const [id, character] of Object.entries(CHARACTERS)) idByName.set(_normKey(character.name), id);
   for (const character of chars) {
@@ -153,11 +153,11 @@ const _IMAGE_BY_NORM: Record<string, any> = (() => {
   return map;
 })();
 
-export function getRawCustomDigimons(): CustomDigimonRaw[] {
-  return _rawCustomDigimons;
+export function getRawCatalogDigimons(): CatalogDigimonRaw[] {
+  return _rawCatalogDigimons;
 }
 
-export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) {
+export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string) {
   // Runtime identity is name-based and stable. Database row numbers are metadata only.
   // Convert every legacy custom_<number> relation before it can reach gameplay/save data.
   const stableIdByLegacyId = new Map<string, string>();
@@ -235,8 +235,8 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   });
 
   _apiUrl = apiUrl;
-  _rawCustomDigimons = chars;
-  _customChars = {};
+  _rawCatalogDigimons = chars;
+  _catalogChars = {};
   _farmEvoMap = {};
   _elementBabyMap = {};
   _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon']);
@@ -259,7 +259,7 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
       continue;
     }
 
-    _customChars[c.id] = {
+    _catalogChars[c.id] = {
       id: c.id, dbId: c.dbId, name: c.name,
       attribute: c.attribute as Character['attribute'],
       rarity: c.rarity as Character['rarity'],
@@ -537,7 +537,7 @@ export function loadCharacterOverrides(overrides: Array<{
 }
 
 export function getCharacter(id: string): Character | undefined {
-  const base: Character | undefined = CHARACTERS[id] ?? _customChars[id];
+  const base: Character | undefined = CHARACTERS[id] ?? _catalogChars[id];
   if (!base) return undefined;
   const ov = _overrides[id];
   const merged: Character = !ov ? base : {
@@ -575,8 +575,8 @@ export function getAllCharacters(): Record<string, Character> {
   for (const [id, char] of Object.entries(CHARACTERS)) {
     base[id] = getCharacter(id) ?? char;
   }
-  for (const [id] of Object.entries(_customChars)) {
-    base[id] = getCharacter(id) ?? _customChars[id];
+  for (const [id] of Object.entries(_catalogChars)) {
+    base[id] = getCharacter(id) ?? _catalogChars[id];
   }
   return base;
 }
@@ -622,7 +622,7 @@ export function getCharacterImageSource(id: string): any {
   if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
   if ((CHARACTER_IMAGES as Record<string, any>)[id]) return (CHARACTER_IMAGES as Record<string, any>)[id];
-  const custom = _customChars[id];
+  const custom = _catalogChars[id];
   if (custom) {
     const localByName = custom.name ? _IMAGE_BY_NORM[_normKey(custom.name)] : undefined;
     if (localByName) return localByName;
@@ -634,12 +634,12 @@ export function getCharacterImageSource(id: string): any {
 export function getCharacterImageScale(id: string): number {
   const ov = _overrides[id];
   if (ov?.imageScale !== undefined) return ov.imageScale;
-  if (_customChars[id]) return _customChars[id].imageScale ?? 0.8;
+  if (_catalogChars[id]) return _catalogChars[id].imageScale ?? 0.8;
   return 0.8;
 }
 
-export function getCustomCharacters(): CustomCharacterEntry[] {
-  return Object.values(_customChars);
+export function getCatalogCharacters(): CatalogCharacterEntry[] {
+  return Object.values(_catalogChars);
 }
 
 export function getApiUrl(): string { return _apiUrl; }
