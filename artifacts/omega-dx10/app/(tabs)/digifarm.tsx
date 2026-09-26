@@ -12,14 +12,16 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, PRE_ROOKIE_STAGE_RARITIES, RARITY_LABELS, GAME_MAPS } from '@/constants/gameData';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar } from '@/components/GameComponents';
+import EvolutionAnimation from '@/components/EvolutionAnimation';
 import { useLanguage } from '@/context/LanguageContext';
 import { isAsfalto, snapAsfalto, resolveAsfaltoMeta, AsfaltoMeta, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 
 const FARM_BG    = require('../../assets/images/digifarm-bg3.webp');
 const FARM_FRAME = require('../../assets/images/farm_frame_transparent.webp');
+const EGG_NEST   = require('../../assets/images/ninho.png');
 
 const FOOD_ITEMS: Record<string, { name: string; emoji: string; image: any }> = {
   food_apple:  { name: 'Maçã',       emoji: '🍎', image: require('../../assets/images/food_apple.webp') },
@@ -237,7 +239,13 @@ let _decoObstacles: { x1: number; y1: number; x2: number; y2: number }[] = [];
 
 const SLOT_STARTS = [
   { x: 380, y: 570 }, { x: 610, y: 545 }, { x: 840, y: 575 },
-  { x: 360, y: 750 }, { x: 580, y: 770 }, { x: 820, y: 745 },
+  { x: 360, y: 750 }, { x: 580, y: 770 },
+  { x: 470, y: 650 }, { x: 700, y: 650 }, { x: 920, y: 650 },
+  { x: 500, y: 820 }, { x: 740, y: 820 },
+];
+const NEST_OFFSETS = [
+  { x: -120, y: 96 }, { x: -60, y: 125 }, { x: 0, y: 142 },
+  { x: 60, y: 125 }, { x: 120, y: 96 },
 ];
 
 // Obstacle zones mapped from the background image (canvas 750x600).
@@ -281,7 +289,7 @@ function findWalkableTarget(curX: number, curY: number): { x: number; y: number 
   return { x: 350, y: 390 };
 }
 
-function maxFarmSlots(tamerLevel: number) { return Math.min(6, 1 + Math.floor(tamerLevel / 5)); }
+function maxFarmSlots(tamerLevel: number) { return Math.max(1, Math.min(5, Math.floor(tamerLevel))); }
 
 function calcPendingXp(slots: string[], lastClaim: number, tamerLevel: number, xpPerHour: number, maxHours: number) {
   if (slots.length === 0) return 0;
@@ -378,8 +386,11 @@ export default function DigifarmScreen() {
   const { width: screenW, height: screenH } = useWindowDimensions();
   const {
     collection, tamerLevel, farmSlots, farmLastClaim, farmEntryTimes,
-    farmFoods, farmLastFeed, farmBattleRequests, farmDailyRewardClaim,
-    setFarmSlots, gainExp, processFarmEvolutions,
+    farmNurserySlots, farmEggSlots, farmNurseryEntryTimes, farmEggEntryTimes,
+    farmFoods, farmLastFeed, farmBattleRequests, farmDailyRewardClaim, gemas,
+    setFarmSlots, setFarmNurserySlots, setFarmEggSlots,
+    sendToFarmProcess, accelerateFarmProcess, completeFarmProcess, claimFarmProduction,
+    processFarmEvolutions,
     feedFarmDigimon, generateFarmBattleRequests, claimFarmDailyReward,
     customGameMaps,
     farmDecorations, farmDecorInventory,
@@ -411,21 +422,23 @@ export default function DigifarmScreen() {
   const panMaxY = (FARM_CANVAS_H / 2) * (effectiveScale - 1);
   const maxSlots = maxFarmSlots(tamerLevel);
   const activeFarmSlots = farmSlots.slice(0, maxSlots);
+  const activeNurserySlots = farmNurserySlots.slice(0, maxSlots);
+  const roamingSlots = [...activeFarmSlots, ...activeNurserySlots];
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSlotIdx, setPickerSlotIdx] = useState<number | null>(null);
-  const [xpPerHour, setXpPerHour] = useState(10);
-  const [maxHours, setMaxHours] = useState(8);
   const [elapsed, setElapsed] = useState('0s');
-  const [pendingXp, setPendingXp] = useState(0);
+  const [productionReady, setProductionReady] = useState(false);
   const [collecting, setCollecting] = useState(false);
+  const [farmTick, setFarmTick] = useState(Date.now());
+  const [evoAnim, setEvoAnim] = useState<{ fromCharacterId: string; toCharacterId: string } | null>(null);
   const bounceAnim = useRef(new Animated.Value(1)).current;
 
   const [selectedFarmDigi, setSelectedFarmDigi] = useState<string | null>(null);
   const [feedModalOpen, setFeedModalOpen] = useState(false);
   const [battleConfirmModal, setBattleConfirmModal] = useState<{ mapId: string; stageIndex: number; mapName: string } | null>(null);
   const [rewardModal, setRewardModal] = useState<{ label: string } | null>(null);
-  const [bubbles, setBubbles] = useState<BubbleData[]>(Array(6).fill(null));
+  const [bubbles, setBubbles] = useState<BubbleData[]>(Array(10).fill(null));
 
   const [farmTab, setFarmTab] = useState<'digimons' | 'decoracao'>('digimons');
   const [placingDecoType, setPlacingDecoType] = useState<string | null>(null);
@@ -498,13 +511,13 @@ export default function DigifarmScreen() {
   const weatherIcon = weather === 'rain' ? '🌧' : weather === 'snow' ? '❄️' : (skyTint ? '🌅' : '☀️');
   const timeLabel = `${String(farmTime.getHours()).padStart(2, '0')}:${String(farmTime.getMinutes()).padStart(2, '0')}`;
 
-  const bubbleOpaqs = useRef(Array.from({ length: 6 }, () => new Animated.Value(0))).current;
-  const bubbleTransY = useRef(Array.from({ length: 6 }, () => new Animated.Value(0))).current;
+  const bubbleOpaqs = useRef(Array.from({ length: 10 }, () => new Animated.Value(0))).current;
+  const bubbleTransY = useRef(Array.from({ length: 10 }, () => new Animated.Value(0))).current;
 
   const digiAnims = useRef(
-    Array.from({ length: 6 }, (_, i) => new Animated.ValueXY({ x: SLOT_STARTS[i].x, y: SLOT_STARTS[i].y }))
+    Array.from({ length: 10 }, (_, i) => new Animated.ValueXY({ x: SLOT_STARTS[i].x, y: SLOT_STARTS[i].y }))
   ).current;
-  const digiScaleX = useRef(Array.from({ length: 6 }, () => new Animated.Value(1))).current;
+  const digiScaleX = useRef(Array.from({ length: 10 }, () => new Animated.Value(1))).current;
   const digiCurrentPos = useRef(SLOT_STARTS.map((s) => ({ x: s.x, y: s.y }))).current;
 
   // ── Panning + Zoom do mapa ───────────────────────────────────────────────
@@ -588,7 +601,7 @@ export default function DigifarmScreen() {
   useEffect(() => {
     if (activeFarmSlots.length === 0) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
-    activeFarmSlots.forEach((ownedId, slotIdx) => {
+    roamingSlots.forEach((ownedId, slotIdx) => {
       const lf = farmLastFeed[ownedId] ?? 0;
       const hungry = lf === 0 || (Date.now() - lf) >= 4 * 3600000;
       if (hungry) {
@@ -601,22 +614,30 @@ export default function DigifarmScreen() {
     return () => timers.forEach(clearTimeout);
   }, [activeFarmSlots.join(',')]);
 
-  // ── Deco obstacles — computed synchronously so wander effect sees them fresh ─
+  // ── Solid obstacles: decorations + occupied incubator nests ───────────────
+  const placedHouse = farmDecorations.find((d) => d.type === 'house');
+  const houseAnchor = placedHouse ? { x: placedHouse.x, y: placedHouse.y } : { x: 760, y: 405 };
+  const nestPositions = NEST_OFFSETS.map((off) => ({ x: houseAnchor.x + off.x, y: houseAnchor.y + off.y }));
   const decoKey = (() => {
-    _decoObstacles = farmDecorations.map((d) => {
+    const decorObstacles = farmDecorations.map((d) => {
       const cat = DECO_CATALOG[d.type];
       if (!cat) return null;
       const hw = cat.solidW / 2;
       const hh = cat.solidH / 2;
       return { x1: d.x - hw, y1: d.y - hh, x2: d.x + hw, y2: d.y + hh };
     }).filter(Boolean) as { x1: number; y1: number; x2: number; y2: number }[];
-    return farmDecorations.map((d) => `${d.id}:${d.x}:${d.y}`).join('|');
+    const nestObstacles = farmEggSlots.slice(0, maxSlots).map((_, idx) => {
+      const p = nestPositions[idx];
+      return { x1: p.x - 48, y1: p.y + 8, x2: p.x + 48, y2: p.y + 48 };
+    });
+    _decoObstacles = [...decorObstacles, ...nestObstacles];
+    return farmDecorations.map((d) => `${d.id}:${d.x}:${d.y}`).join('|') + '|eggs:' + farmEggSlots.join('|');
   })();
 
   // ── Wander ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     // Sync current animated position → avoid teleporting when wander restarts
-    activeFarmSlots.forEach((_, i) => {
+    roamingSlots.forEach((_, i) => {
       const ax = (digiAnims[i].x as any).__getValue();
       const ay = (digiAnims[i].y as any).__getValue();
       if (ax !== 0 || ay !== 0) {
@@ -624,14 +645,14 @@ export default function DigifarmScreen() {
         digiCurrentPos[i].y = ay;
       }
     });
-    const flags = activeFarmSlots.map(() => ({ value: true }));
-    activeFarmSlots.forEach((_, i) => startWander(digiAnims[i], digiScaleX[i], digiCurrentPos[i], flags[i]));
+    const flags = roamingSlots.map(() => ({ value: true }));
+    roamingSlots.forEach((_, i) => startWander(digiAnims[i], digiScaleX[i], digiCurrentPos[i], flags[i]));
     return () => {
       flags.forEach((f) => { f.value = false; });
-      activeFarmSlots.forEach((_, i) => digiAnims[i].stopAnimation());
+      roamingSlots.forEach((_, i) => digiAnims[i].stopAnimation());
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFarmSlots.length, decoKey]);
+  }, [roamingSlots.length, decoKey]);
 
   // ── Bubble trigger ──────────────────────────────────────────────────────────
   const triggerBubble = useCallback((slotIdx: number, text: string, type: 'speech' | 'thought' | 'emoji') => {
@@ -657,7 +678,7 @@ export default function DigifarmScreen() {
     if (activeFarmSlots.length === 0) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
-    activeFarmSlots.forEach((ownedId, slotIdx) => {
+    roamingSlots.forEach((ownedId, slotIdx) => {
       function schedule() {
         const delay = 18000 + Math.random() * 27000;
         const t = setTimeout(() => {
@@ -689,7 +710,7 @@ export default function DigifarmScreen() {
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [activeFarmSlots.length, farmLastFeed, farmBattleRequests]);
+  }, [roamingSlots.length, farmLastFeed, farmBattleRequests]);
 
   // ── Interações sociais entre Digimons ───────────────────────────────────────
   const triggerInteraction = useCallback(() => {
@@ -882,30 +903,18 @@ export default function DigifarmScreen() {
 
   // ── Config & timers ─────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch(`${apiUrl}/config`)
-      .then((r) => r.ok ? r.json() : null)
-      .then((data) => {
-        if (data?.config) {
-          const xph = Number(data.config.farmXpPerHour ?? 10);
-          const mh  = Number(data.config.farmMaxHours ?? 8);
-          setXpPerHour(isNaN(xph) ? 10 : xph);
-          setMaxHours(isNaN(mh) ? 8 : mh);
-        }
-      }).catch(() => {});
-  }, [apiUrl]);
-
-  useEffect(() => {
     const update = () => {
-      const cappedMs = Math.min(Date.now() - farmLastClaim, maxHours * 3600000);
+      const cappedMs = Math.min(Date.now() - farmLastClaim, 5 * 3600000);
       setElapsed(formatDuration(cappedMs));
-      setPendingXp(calcPendingXp(farmSlots, farmLastClaim, tamerLevel, xpPerHour, maxHours));
-      processFarmEvolutions();
+      setProductionReady(cappedMs >= 30 * 60 * 1000 && activeFarmSlots.length > 0);
+      setFarmTick(Date.now());
       generateFarmBattleRequests();
     };
     update();
     const timer = setInterval(update, 5000);
     return () => clearInterval(timer);
-  }, [farmSlots, farmLastClaim, tamerLevel, xpPerHour, maxHours]);
+  }, [farmSlots, farmLastClaim, tamerLevel, farmEggSlots, farmNurserySlots]);
+
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   function openPicker(slotIdx: number) { setPickerSlotIdx(slotIdx); setPickerOpen(true); }
@@ -948,19 +957,67 @@ export default function DigifarmScreen() {
     }
   }
 
-  function collectXp() {
-    if (pendingXp <= 0 || farmSlots.length === 0) return;
+  function collectProduction() {
+    if (!productionReady || farmSlots.length === 0) return;
     setCollecting(true);
     Animated.sequence([
       Animated.timing(bounceAnim, { toValue: 1.3, duration: 150, useNativeDriver: true }),
       Animated.timing(bounceAnim, { toValue: 0.9, duration: 100, useNativeDriver: true }),
-      Animated.timing(bounceAnim, { toValue: 1,   duration: 100, useNativeDriver: true }),
+      Animated.timing(bounceAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
     ]).start();
-    const xpEach = Math.max(1, Math.floor(pendingXp / farmSlots.length));
-    farmSlots.forEach((id) => gainExp(id, xpEach));
-    setFarmSlots(farmSlots, true);
-    processFarmEvolutions();
+    const reward = claimFarmProduction();
+    if (reward) {
+      Alert.alert(
+        'Produção da Digifarm',
+        `Bateria Verde ×${reward.green}\nBateria Roxa ×${reward.purple}\nBateria Dourada ×${reward.gold}\nPílula Energética ×${reward.pills}\nGemas +${reward.gems}`,
+      );
+    } else {
+      Alert.alert('Produção pausada', 'A satisfação precisa estar Boa ou superior para produzir recompensas.');
+    }
     setTimeout(() => setCollecting(false), 500);
+  }
+
+  function farmProcessInfo(ownedId: string) {
+    const owned = collection.find((entry) => entry.ownedId === ownedId);
+    const char = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
+    if (!owned || !char) return null;
+    const rarity = String(char.rarity);
+    const isEgg = rarity === 'EGG';
+    const duration = isEgg ? 60 * 60 * 1000 : rarity === 'BABY' ? 60 * 60 * 1000 : 150 * 60 * 1000;
+    const started = isEgg ? (farmEggEntryTimes[ownedId] ?? farmTick) : (farmNurseryEntryTimes[ownedId] ?? farmTick);
+    const remaining = Math.max(0, duration - (farmTick - started));
+    return { rarity, remaining, ready: remaining <= 0, char };
+  }
+
+  function accelerateProcess(ownedId: string) {
+    Alert.alert('Acelerar processo', 'Deseja gastar 100 Gemas para concluir este processo agora?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Gastar 100 Gemas',
+        onPress: () => {
+          const ok = accelerateFarmProcess(ownedId);
+          if (!ok) Alert.alert('Gemas insuficientes', 'Você precisa de 100 Gemas.');
+          setFarmTick(Date.now());
+        },
+      },
+    ]);
+  }
+
+  function finishProcess(ownedId: string) {
+    const owned = collection.find((entry) => entry.ownedId === ownedId);
+    if (!owned) return;
+    const from = owned.characterId;
+    const char = getCharacter(from) ?? CHARACTERS[from];
+    const target = char?.rarity === 'EGG'
+      ? null
+      : getFarmEvolutionTarget(from);
+    const ok = completeFarmProcess(ownedId);
+    if (!ok) {
+      Alert.alert('Digifarm', char?.rarity === 'EGG' ? 'É necessário ter um slot Baby/Training livre para chocar.' : 'Este Digimon ainda não está pronto.');
+      return;
+    }
+    if (target) setEvoAnim({ fromCharacterId: from, toCharacterId: target });
+    setFarmTick(Date.now());
   }
 
   function handleFeed(foodId: string) {
@@ -969,7 +1026,7 @@ export default function DigifarmScreen() {
     if (ok) {
       setFeedModalOpen(false);
       triggerBubble(
-        activeFarmSlots.indexOf(selectedFarmDigi),
+        roamingSlots.indexOf(selectedFarmDigi),
         '😋 Hmm, delicioso!',
         'speech'
       );
@@ -1384,7 +1441,37 @@ export default function DigifarmScreen() {
               );
             })()}
 
-            {activeFarmSlots.map((ownedId, slotIdx) => {
+            {/* Incubadoras: ~2 quadros à frente da casa. Ovo fica ATRÁS do ninho. */}
+            {farmEggSlots.slice(0, maxSlots).map((ownedId, idx) => {
+              const owned = collection.find((entry) => entry.ownedId === ownedId);
+              if (!owned) return null;
+              const info = farmProcessInfo(ownedId);
+              const p = nestPositions[idx];
+              const element = info?.char?.element ?? 'NULL';
+              const glow: Record<string, string> = {
+                FIRE:'#ff5a36', WATER:'#38bdf8', PLANT:'#4ade80', WIND:'#a7f3d0', EARTH:'#b7791f',
+                LIGHTNING:'#fde047', LIGHT:'#fff7ae', DARK:'#a855f7', ICE:'#bae6fd', METAL:'#cbd5e1', NULL:'#e5e7eb',
+              };
+              return (
+                <View key={ownedId} style={{ position:'absolute', left:p.x-52, top:p.y-62, width:104, height:104, zIndex:6 }}>
+                  {info?.ready && <View pointerEvents="none" style={{ position:'absolute', left:22, top:20, width:60, height:60, borderRadius:30, backgroundColor:glow[element] ?? '#e5e7eb', opacity:0.42 }} />}
+                  <View style={{ position:'absolute', left:31, top:20, zIndex:1 }}>
+                    <CharacterAvatar characterId={owned.characterId} size={42} />
+                  </View>
+                  <Image source={EGG_NEST} resizeMode="contain" style={{ position:'absolute', left:0, top:0, width:104, height:104, zIndex:2 }} />
+                  <TouchableOpacity
+                    style={{ position:'absolute', left:8, right:8, bottom:-25, zIndex:4, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.92)', paddingVertical:5, borderRadius:7, alignItems:'center' }}
+                    onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}
+                  >
+                    <Text style={{ color:'#fff', fontSize:9, fontWeight:'900' }}>
+                      {info?.ready ? '✨ CHOCAR' : `${formatDuration(info?.remaining ?? 0)} · ⚡100💎`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+
+            {roamingSlots.map((ownedId, slotIdx) => {
               const owned = collection.find((c) => c.ownedId === ownedId);
               const slotChar = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
               if (!owned) return null;
@@ -1441,6 +1528,21 @@ export default function DigifarmScreen() {
                 </Animated.View>
               );
             })}
+            {activeNurserySlots.map((ownedId, idx) => {
+              const info = farmProcessInfo(ownedId);
+              const pos = digiCurrentPos[activeFarmSlots.length + idx] ?? SLOT_STARTS[5 + idx];
+              return (
+                <TouchableOpacity
+                  key={`process_${ownedId}`}
+                  style={{ position:'absolute', left:pos.x-45, top:pos.y+38, zIndex:20, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.9)', paddingHorizontal:7, paddingVertical:4, borderRadius:6 }}
+                  onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}
+                >
+                  <Text style={{ color:'#fff', fontSize:8, fontWeight:'900' }}>
+                    {info?.ready ? '✨ EVOLUIR' : `${formatDuration(info?.remaining ?? 0)} · ⚡100💎`}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </Animated.View>
 
           {/* ── Sky tint (day/night overlay) ──────────────────────────── */}
@@ -1488,13 +1590,13 @@ export default function DigifarmScreen() {
             </View>
           </View>
 
-          {/* Badge XP */}
-          {pendingXp > 0 && activeFarmSlots.length > 0 && (
-            <TouchableOpacity style={[styles.xpBadge, { top: 10 }]} onPress={collectXp} activeOpacity={0.8}>
-              <Text style={{ fontSize: 15 }}>⭐</Text>
+          {/* Produção dos 5 slots normais: itens/30min + 10 gemas/h, máximo 5h */}
+          {productionReady && activeFarmSlots.length > 0 && (
+            <TouchableOpacity style={[styles.xpBadge, { top: 10 }]} onPress={collectProduction} activeOpacity={0.8}>
+              <Text style={{ fontSize: 15 }}>🎁</Text>
               <View>
-                <Text style={styles.xpBadgeMain}>+{pendingXp.toLocaleString()} XP</Text>
-                <Text style={styles.xpBadgeSub}>TOQUE PARA COLETAR</Text>
+                <Text style={styles.xpBadgeMain}>PRODUÇÃO PRONTA</Text>
+                <Text style={styles.xpBadgeSub}>BATERIAS · PÍLULA · GEMAS</Text>
               </View>
             </TouchableOpacity>
           )}
@@ -1881,6 +1983,13 @@ export default function DigifarmScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <EvolutionAnimation
+        visible={!!evoAnim}
+        fromCharacterId={evoAnim?.fromCharacterId ?? ''}
+        toCharacterId={evoAnim?.toCharacterId ?? ''}
+        onComplete={() => setEvoAnim(null)}
+      />
 
       {/* ── Reward modal ─────────────────────────────────────────────────────── */}
       <Modal visible={!!rewardModal} transparent animationType="fade" onRequestClose={() => setRewardModal(null)}>
