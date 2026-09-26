@@ -29,7 +29,13 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Support both proxy styles used by OMEGA DX deployments:
+// 1) nginx preserves /api  -> backend receives /api/digimons/catalog
+// 2) nginx strips /api/    -> backend receives /digimons/catalog
+// The production proxy has used both forms over time. Accepting both prevents
+// the canonical Digimon catalogue from disappearing and leaving Banco loading forever.
 app.use("/api", router);
+app.use(router);
 
 // Keep API failures JSON even when a client calls an unknown endpoint. This
 // prevents the frontend from trying to parse an HTML fallback page as JSON.
