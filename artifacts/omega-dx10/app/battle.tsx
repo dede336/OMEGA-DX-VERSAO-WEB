@@ -59,6 +59,7 @@ const BASE_HP_STEP_TIME = 100;
 const HP_STEP_COUNT = 10;
 const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
 const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
+const BATTLE_SPEED_KEY = 'omega_dx_battle_speed_v1';
 
 type AutoBattleQuota = { hour: number; usedSeconds: number };
 
@@ -332,7 +333,20 @@ export default function BattleScreen() {
   const [autoMode, setAutoMode] = useState(false);
   const [battleSpeed, setBattleSpeed] = useState<1 | 2>(1);
   const battleSpeedRef = useRef<1 | 2>(1);
-  useEffect(() => { battleSpeedRef.current = battleSpeed; }, [battleSpeed]);
+  useEffect(() => {
+    battleSpeedRef.current = battleSpeed;
+    AsyncStorage.setItem(BATTLE_SPEED_KEY, String(battleSpeed)).catch(() => {});
+  }, [battleSpeed]);
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(BATTLE_SPEED_KEY).then((saved) => {
+      if (!active) return;
+      const restored: 1 | 2 = saved === '2' ? 2 : 1;
+      battleSpeedRef.current = restored;
+      setBattleSpeed(restored);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
   const speedMs = useCallback((ms: number) => Math.max(1, Math.round(ms / battleSpeedRef.current)), []);
   const [autoQuotaReady, setAutoQuotaReady] = useState(false);
   const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_LIMIT_SECONDS);
