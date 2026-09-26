@@ -40,7 +40,7 @@ void Promise.all(
 
 // These two were incorrectly classified as Training and must never hatch from Digitamas.
 const DIGIMON_RARITY_FIXES: Readonly<Record<string, string>> = {
-  Aruramon: "ROOKIE",
+  Aruraumon: "ROOKIE",
   Rurimon: "ROOKIE",
 };
 void Promise.all(
