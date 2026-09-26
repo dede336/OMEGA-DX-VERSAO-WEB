@@ -32,7 +32,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   piece_brasao_pureza:       require('../assets/images/sinceridade piece.png'),
   piece_brasao_amor:         require('../assets/images/amor piece.png'),
   piece_brasao_luz:          require('../assets/images/luz piece.png'),
-  piece_brasao_conhecimento: require('../assets/images/conhecimento.png'),
+  piece_brasao_conhecimento: require('../assets/images/conhecimento piece.png'),
   piece_brasao_milagre:      require('../assets/images/milagre piece.png'),
   piece_brasao_destino:      require('../assets/images/destino piece.png'),
   piece_digivice_d3:          require('../assets/images/piece_digivice_d3.png'),
