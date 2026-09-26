@@ -9,7 +9,7 @@ import {
   PRE_ROOKIE_STAGE_RARITIES,
   EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
 } from '@/constants/gameData';
-import { loadCustomCharacters, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/extendedCharacters';
+import { loadCharacterCatalog, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/extendedCharacters';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';
@@ -271,8 +271,8 @@ interface GameContextValue extends GameState {
   setGachaAdminPool: (pool: GachaPoolEntry[] | null) => void;
   setTamerId: (id: string) => void;
   resetGame: () => Promise<void>;
-  customCharsRevision: number;
-  customCharsReady: boolean;
+  rosterRevision: number;
+  rosterReady: boolean;
 }
 
 const STORAGE_KEY_PREFIX = 'omega_dx10_save_v3';
@@ -466,8 +466,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [customGameMaps, setCustomGameMaps] = useState<(GameMap & { backgroundImageUri?: string })[]>([]);
   const [gachaAdminPool, setGachaAdminPool] = useState<GachaPoolEntry[] | null>(null);
   const gachaAdminPoolRef = useRef<GachaPoolEntry[] | null>(null);
-  const [customCharsRevision, setCustomCharsRevision] = useState(0);
-  const [customCharsReady, setCustomCharsReady] = useState(false);
+  const [rosterRevision, setRosterRevision] = useState(0);
+  const [rosterReady, setRosterReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -1831,15 +1831,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       const token = await AsyncStorage.getItem('omega_dx10_auth_token');
       if (!token) return;
 
-      // The player save is the first priority. Custom content must never block
+      // The player save is the first priority. The Digimon catalogue must never block
       // account hydration: a slow /digimons/catalog or /overrides request used to
       // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
-      const customContentPromise = Promise.all([
+      const catalogContentPromise = Promise.all([
         fetch(`${apiUrl}/digimons/catalog`).then((r) => r.ok ? r.json() : null).catch(() => null),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
-      ]).then(([customData, overridesData]) => {
-        if (customData?.digimons) {
-          loadCustomCharacters(customData.digimons, apiUrl);
+      ]).then(([catalogData, overridesData]) => {
+        if (catalogData?.digimons) {
+          loadCharacterCatalog(catalogData.digimons, apiUrl);
           setState((prev) => ({
             ...prev,
             collection: prev.collection.map((owned) => ({
@@ -1852,10 +1852,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           }));
         }
         if (overridesData?.overrides) loadCharacterOverrides(overridesData.overrides, apiUrl);
-        if (customData?.digimons || overridesData?.overrides) setCustomCharsRevision((v) => v + 1);
-        setCustomCharsReady(true);
+        if (catalogData?.digimons || overridesData?.overrides) setRosterRevision((v) => v + 1);
+        setRosterReady(true);
       }).catch(() => {
-        setCustomCharsReady(true);
+        setRosterReady(true);
       });
 
       // Items e mapas podem carregar em background (não afetam lista de personagens)
@@ -1968,7 +1968,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         ...DEFAULT_MESSAGES.filter((m) => !savedIds.has(m.id)),
         ...savedMessages,
       ].sort((a, b) => b.createdAt - a.createdAt);
-      await customContentPromise;
+      await catalogContentPromise;
       const migratedCollection = (saveData.collection ?? defaultState.collection)
         .map((owned: OwnedCharacter) => ({ ...owned, characterId: migrateLegacyCharacterId(owned.characterId) }));
       const collection: OwnedCharacter[] = migrateClaimedMailGiftStars(
@@ -2015,14 +2015,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Authenticated GameProvider intentionally stays unloaded until cloud hydration.
       // Mark it loaded only after the authoritative server save has been applied.
       setLoaded(true);
-      void customContentPromise;
+      void catalogContentPromise;
       setLoaded(true);
     } catch {
       // CRITICAL: authenticated accounts are cloud-authoritative.
       // Never mark the game as loaded with defaultState after a network/API error.
       // Doing so sends the player through onboarding with the 1-Digimon starter
       // state and creates the visible "account keeps resetting" loop.
-      setCustomCharsReady(true);
+      setRosterReady(true);
       if (!user?.id) setLoaded(true);
     }
   }, [storageKey, isMeaningfulSave, user?.id]);
@@ -2101,8 +2101,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         gachaAdminPool,
         setGachaAdminPool,
         resetGame,
-        customCharsRevision,
-        customCharsReady,
+        rosterRevision,
+        rosterReady,
         setTamerId,
       }}
     >
