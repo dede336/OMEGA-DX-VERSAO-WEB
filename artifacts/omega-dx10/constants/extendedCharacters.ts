@@ -34,17 +34,17 @@ let _elementBabyMap: Record<string, string[]> = {};
 // Canonical egg pools confirmed from the current Banco roster (44 BABY + 50 TRAINING).
 // These names intentionally define exactly which pre-rookie Digimon each elemental egg can hatch.
 const CANONICAL_EGG_POOL_NAMES: Record<string, string[]> = {
-  FIRE: ['Bombmon','BombmonXW','Chibomon','Chichimon','Curimon','Jyarrimon','Babydmon','DemiVeemon','Frimon','Gigimon','Goromon','Gurimon','Koromon','Missimon','Sunmon','Xiaomon'],
-  PLANT: ['Fukamon','Leafmon','Yuramon','Aruraumon','Budmon','Minomon','Tanemon'],
-  WATER: ['Conomon','Petitmon','Pichimon','Pitchmon','Bukamon','Moonmon','Rurimon','Viximon','Wanyamon'],
-  WIND: ['Dodomon','Fufumon','MetalKoromon','Nyokimon','Pafumon','Puwamon','Relemon','Sakumon','Zerimon','Bowmon','Dorimon','Gummymon','Kapurimon','Kyokyomon','Pinamon','Poromon','Yokomon'],
-  EARTH: ['Datirimon','Chapmon','Hopmon','Kokomon'],
+  FIRE: ['Bombmon','BombmonXW','Chibomon','Chichimon','Curimon','Jyarrimon','Mokumon','Botamon','Fukamon','Babydmon','DemiVeemon','Frimon','Gigimon','Goromon','Gurimon','Koromon','Missimon','Sunmon','Xiaomon'],
+  PLANT: ['Leafmon','Yuramon','Aruraumon','Budmon','Minomon','Tanemon'],
+  WATER: ['Pichimon','Pitchmon','Bukamon','Moonmon','Rurimon','Wanyamon'],
+  WIND: ['Dodomon','Fufumon','Nyokimon','Pafumon','Puwamon','Relemon','Sakumon','Zerimon','Petitmon','Bowmon','Dorimon','Gummymon','Kapurimon','Kyokyomon','Pinamon','Poromon','Yokomon'],
+  EARTH: ['Datirimon','Conomon','Chapmon','Hopmon','Kokomon'],
   LIGHTNING: ['Pabumon','Pusumon','Motimon','Pusurimon'],
-  LIGHT: ['Poyomon','Pyontomon','YukimiBotamon','Cupimon','Kyaramon','Nyaromon','Tokomon'],
-  DARK: ['Botamon','Keemon','Kuramon','Zurumon','AlgomonTraining','ArkadimonTraining','Pagumon','Tsumemon','Yaamon'],
-  ICE: ['Punimon','Pupumon','Pururumon','Tsunomon'],
-  METAL: [],
-  NULL: ['AlgomonBaby','Mokumon','Paomon','Popomon','Puttimon','Pyonmon','Sunamon','TorikaraBallmon','Tsubumon','Bibimon','Hiyarimon','Negamon','Offmon','Pickmon','Puroromon','Sakuttomon','Upamon'],
+  LIGHT: ['Poyomon','Pyontomon','YukimiBotamon','Puttimon','Cupimon','Kyaramon','Nyaromon','Tokomon'],
+  DARK: ['Keemon','Kuramon','Zurumon','AlgomonTraining','ArkadimonTraining','Pagumon','Tsumemon','Yaamon'],
+  ICE: ['Punimon','Pupumon','Pururumon','Hiyarimon','Tsunomon'],
+  METAL: ['MetalKoromon','Sakuttomon'],
+  NULL: ['AlgomonBaby','Paomon','Popomon','Pyonmon','Sunamon','TorikaraBallmon','Tsubumon','Bibimon','Negamon','Offmon','Pickmon','Puroromon','Upamon','Viximon'],
 };
 // Forms whose innate Divine Gift was unlocked through a Sacred Ring evolution.
 // The item is consumed during evolution; battle checks only the resulting form.
