@@ -6,7 +6,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS } from '@/constants/gameData';
-import { getCustomCharacters, CustomDigimonRaw } from '@/constants/extendedCharacters';
+import { getCatalogCharacters, CatalogDigimonRaw } from '@/constants/extendedCharacters';
 import {
   AttrKey, RarityKey, ElemKey, ATTRS, RARITIES, ELEMENTS, ELEM_ATTACK, PRE_ROOKIE_RARITIES,
   PickerRow, ToggleRow, FieldInput, ImagePickerBlock, ImageData,
@@ -45,7 +45,7 @@ const emptyForm = (): FormState => ({
 
 type PickerTarget = 'evolvesFrom' | 'sacrifice' | 'fusionPartner' | 'sendDigimon' | null;
 
-interface AllCharEntry { id: string; name: string; isBase: boolean; dbId?: number; rawData?: CustomDigimonRaw; isActive?: boolean; }
+interface AllCharEntry { id: string; name: string; isBase: boolean; dbId?: number; rawData?: CatalogDigimonRaw; isActive?: boolean; }
 
 export default function DigimonSection() {
   const colors = useColors();
@@ -55,7 +55,7 @@ export default function DigimonSection() {
   const [form, setForm] = useState<FormState>(emptyForm());
   const [loading, setLoading] = useState(false);
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null);
-  const [customList, setCustomList] = useState<CustomDigimonRaw[]>([]);
+  const [customList, setCustomList] = useState<CatalogDigimonRaw[]>([]);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isBaseEdit, setIsBaseEdit] = useState(false);
@@ -200,7 +200,7 @@ export default function DigimonSection() {
     return id;
   }
 
-  function loadCustomForEdit(d: CustomDigimonRaw) {
+  function loadCustomForEdit(d: CatalogDigimonRaw) {
     setEditingId(d.dbId); setIsBaseEdit(false); setBaseEditCharId('');
     setForm({
       ...emptyForm(),
@@ -326,14 +326,14 @@ export default function DigimonSection() {
   return (
     <View style={{ flex: 1 }}>
       <DigimonPickerModal visible={pickerTarget !== null && pickerTarget !== 'sendDigimon'} onClose={() => setPickerTarget(null)}
-        customDigimons={customList.map((c) => ({ id: c.id, name: c.name }))}
+        catalogDigimons={customList.map((c) => ({ id: c.id, name: c.name }))}
         onSelect={(id, name) => {
           if (pickerTarget === 'evolvesFrom') setForm((f) => ({ ...f, evolvesFromId: id, evolvesFromName: name }));
           else if (pickerTarget === 'sacrifice') setForm((f) => ({ ...f, requiredSacrifice: id, requiredSacrificeName: name }));
           else if (pickerTarget === 'fusionPartner') setForm((f) => ({ ...f, fusionPartner: id, fusionPartnerName: name }));
         }} />
       <DigimonPickerModal visible={pickerTarget === 'sendDigimon'} onClose={() => setPickerTarget(null)}
-        customDigimons={customList.map((c) => ({ id: c.id, name: c.name }))}
+        catalogDigimons={customList.map((c) => ({ id: c.id, name: c.name }))}
         onSelect={(id, name) => { setSendDigimonId(id); setSendDigimonName(name); }} />
 
       <View style={ss.tabRow}>
