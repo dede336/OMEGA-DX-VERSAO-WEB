@@ -284,11 +284,11 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     }
   }
 
-  // Build element → baby pool for egg hatching.
-  // Every registered BABY is a valid Special Digitama hatch result.
-  // Normal elemental eggs still use their own element-specific pool.
+  // Build element → pre-rookie pool for egg hatching.
+  // BABY and TRAINING Digimon hatch from the egg matching their element.
+  // Special Digitama can hatch any registered BABY or TRAINING Digimon.
   for (const c of chars) {
-    if (c.rarity === 'BABY') {
+    if (c.rarity === 'BABY' || c.rarity === 'TRAINING') {
       const baseId = c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined;
       const babyId = baseId ?? c.id;
       if (!_elementBabyMap[c.element]) _elementBabyMap[c.element] = [];
@@ -298,10 +298,9 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     }
   }
 
-  // Include static BABY characters too, so Special Digitama can hatch ANY baby
-  // registered in the game, not only babies returned by the runtime catalogue.
+  // Include static BABY/TRAINING characters too for compatibility with local entries.
   for (const [id, char] of Object.entries(CHARACTERS)) {
-    if (char.rarity !== 'BABY') continue;
+    if (char.rarity !== 'BABY' && char.rarity !== 'TRAINING') continue;
     if (!_elementBabyMap[char.element]) _elementBabyMap[char.element] = [];
     if (!_elementBabyMap[char.element].includes(id)) {
       _elementBabyMap[char.element].push(id);
@@ -501,17 +500,18 @@ export function hasDivineGiftPassive(characterId: string): boolean {
   return _divineGiftCharacterIds.has(characterId);
 }
 
-// Returns a random BABY of the given element.
-// NULL element (Digitama Especial / Nulo) picks from ALL babies across all elements.
-export function getRandomHatchTarget(element: string): string | null {
-  if (element === 'NULL') {
-    const all = Object.values(_elementBabyMap).flat();
+// Returns a random BABY/TRAINING Digimon for egg hatching.
+// Normal eggs use only their own element, including the normal NULL egg.
+// Special Digitama ignores element and can hatch from the complete pre-rookie pool.
+export function getRandomHatchTarget(element: string, special = false): string | null {
+  if (special) {
+    const all = [...new Set(Object.values(_elementBabyMap).flat())];
     if (all.length > 0) return all[Math.floor(Math.random() * all.length)];
     return null;
   }
-  const babies = _elementBabyMap[element];
-  if (babies && babies.length > 0) {
-    return babies[Math.floor(Math.random() * babies.length)];
+  const targets = _elementBabyMap[element];
+  if (targets && targets.length > 0) {
+    return targets[Math.floor(Math.random() * targets.length)];
   }
   return null;
 }
