@@ -23,7 +23,7 @@ const PIECE_META: Record<string, { label: string; icon: string; color: string; i
   piece_brasao_pureza:       { label: 'Fragmento da Pureza',       icon: 'droplet', color: '#22c55e', image: require('../../assets/images/sinceridade piece.png') },
   piece_brasao_amor:         { label: 'Fragmento do Amor',         icon: 'heart',   color: '#f43f5e', image: require('../../assets/images/amor piece.png') },
   piece_brasao_luz:          { label: 'Fragmento da Luz',          icon: 'star',    color: '#c084fc', image: require('../../assets/images/luz piece.png') },
-  piece_brasao_conhecimento: { label: 'Fragmento do Conhecimento', icon: 'book',    color: '#a855f7', image: require('../../assets/images/conhecimento.png') },
+  piece_brasao_conhecimento: { label: 'Fragmento do Conhecimento', icon: 'book',    color: '#a855f7', image: require('../../assets/images/conhecimento piece.png') },
   piece_brasao_bondade:      { label: 'Fragmento da Bondade',      icon: 'heart',   color: '#d946ef', image: require('../../assets/images/bondade piece.png') },
   piece_brasao_milagre:      { label: 'Fragmento do Milagre',      icon: 'star',    color: '#facc15' , image: require('../../assets/images/milagre piece.png') },
   piece_brasao_destino:      { label: 'Fragmento do Destino',      icon: 'compass', color: '#a78bfa' , image: require('../../assets/images/destino piece.png') },
