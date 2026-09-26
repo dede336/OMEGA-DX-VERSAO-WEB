@@ -692,7 +692,7 @@ export default function EvoTreeScreen() {
   const { characterId } = useLocalSearchParams<{ characterId: string }>();
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { customCharsRevision, tamerId } = useGame();
+  const { rosterRevision, tamerId } = useGame();
   const tamerAccent = TAMERS.find(t => t.id === tamerId)?.accentColor;
 
   const [selectedNode, setSelectedNode] = useState<SelectedNode | null>(null);
@@ -705,7 +705,7 @@ export default function EvoTreeScreen() {
     const reverseMap = buildReverseMap();
     const rootId = findRoot(characterId, reverseMap);
     return buildTreeNode(rootId, new Set([rootId]));
-  }, [characterId, customCharsRevision]);
+  }, [characterId, rosterRevision]);
 
   // Pre-select the branches that lead to the current character
   useEffect(() => {
@@ -720,7 +720,7 @@ export default function EvoTreeScreen() {
     if (!characterId) return '';
     const c = getCharacter(characterId) ?? CHARACTERS[characterId];
     return c?.name ?? characterId;
-  }, [characterId, customCharsRevision]);
+  }, [characterId, rosterRevision]);
 
   // Build the active linear path based on current branch selections
   const activePath = useMemo(() => {
