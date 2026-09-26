@@ -3250,7 +3250,7 @@ export async function activateAllSeededDigimons(): Promise<void> {
 
 // Desativa entradas legadas/duplicadas que não devem existir no jogo
 export async function deactivateLegacyEntries(): Promise<void> {
-  const legacyNames = ['FufumonX', 'KyokyomonX', 'Lucemon', 'LucemonX', 'Owryumon', 'Kyokyumon', 'Pyocomon'];
+  const legacyNames = ['FufumonX', 'KyokyomonX', 'Lucemon', 'LucemonX', 'Owryumon', 'Kyokyumon', 'Pyocomon', 'Pitchmon'];
   try {
     await db
       .update(customDigimonsTable)
