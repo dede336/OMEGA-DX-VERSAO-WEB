@@ -265,64 +265,47 @@ export default function BancoScreen() {
   }, [customDigimons]);
 
   const baseEntries = useMemo(() => {
-    // CODEX_ORDER is only a legacy/manual ordering list and contains only a
-    // fraction of the hardcoded roster. Build the Banco from every registered
-    // base character, while preserving CODEX_ORDER as the preferred order.
-    const orderedIds = [
+    // There must be a single registered roster. getAllCharacters() is the
+    // canonical registry used by the rest of the game and already merges
+    // static CHARACTERS with every custom/server Digimon loaded at runtime.
+    const registered = getAllCharacters();
+    const preferredOrder = [
       ...CODEX_ORDER,
-      ...Object.keys(CHARACTERS).filter((id) => !CODEX_ORDER.includes(id)),
+      ...Object.keys(registered).filter((id) => !CODEX_ORDER.includes(id)),
     ];
 
-    return orderedIds.map((id) => {
-      const char = CHARACTERS[id];
-      if (!char) return null;
-      if (char.rarity === 'EGG') return null;
+    const seen = new Set<string>();
+    return preferredOrder.flatMap((id) => {
+      const char = registered[id];
+      if (!char || char.rarity === 'EGG') return [];
+      const canonicalId = char.id || id;
+      const uniqueKey = char.name.trim().toLowerCase();
+      if (seen.has(uniqueKey)) return [];
+      seen.add(uniqueKey);
+
       const methods = getObtainMethods(id);
-      const isOwned = ownedSet.has(id) || ownedSet.has(char.id);
-      const isAvailable = methods.length > 0;
-      return { id, char, methods, isOwned, isAvailable, isCustom: false, isActive: true };
-    }).filter(Boolean) as {
-      id: string;
-      char: (typeof CHARACTERS)[string];
-      methods: ObtainMethod[];
-      isOwned: boolean;
-      isAvailable: boolean;
-      isCustom: boolean;
-      isActive: boolean;
-    }[];
-  }, [ownedSet]);
+      const isOwned = ownedSet.has(id) || ownedSet.has(canonicalId);
+      const isCustom = !Object.prototype.hasOwnProperty.call(CHARACTERS, id);
+      return [{
+        id,
+        char,
+        methods,
+        isOwned,
+        isAvailable: methods.length > 0,
+        isCustom,
+        isActive: true,
+      }];
+    });
+  }, [ownedSet, customCharsRevision]);
 
   const normalizeRarity = (r: string): string => r;
 
-  const customEntries = useMemo(() => {
-    return customDigimons
-      .filter((d) => d.rarity !== 'EGG')
-      .filter((d) => !Object.values(CHARACTERS).some(
-        (c) => c.name.toLowerCase() === d.name.toLowerCase()
-      ))
-      .map((d) => {
-        const methods = getCustomObtainMethods(d, allCharsMap);
-        const isOwned = ownedSet.has(d.id);
-        const isAvailable = methods.length > 0;
-        const isActive = (d as any).isActive !== false;
-        const char = {
-          id: d.id, name: d.name,
-          attribute: d.attribute as any,
-          rarity: normalizeRarity(d.rarity) as any,
-          element: d.element as any,
-          description: d.description,
-          baseStats: d.baseStats,
-        };
-        return { id: d.id, char, methods, isOwned, isAvailable, isCustom: true, isActive };
-      });
-  }, [customDigimons, ownedSet, allCharsMap]);
+  // baseEntries already comes from the canonical registry (static + server/custom).
+  // Keeping a second custom list here would create two different registries and duplicates.
+  const customEntries = useMemo(() => [], [customCharsRevision]);
 
-  const entries = useMemo(() => {
-    const all = [...baseEntries, ...customEntries];
-    // Non-admins never see inactive entries
-    if (!isAdmin) return all.filter((e) => e.isActive);
-    return all;
-  }, [baseEntries, customEntries, isAdmin]);
+
+  const entries = useMemo(() => baseEntries, [baseEntries]);
 
   const totalCount = entries.length;
 
