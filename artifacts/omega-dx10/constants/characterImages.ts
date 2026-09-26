@@ -99,7 +99,7 @@ const CHARACTER_IMAGES: Record<string, any> = {
   argomonMega: require('../assets/images/digimons/Argomon_Mega_vg.webp'),
   argomonUltimate: require('../assets/images/digimons/Argomon_Ultimate_vg.webp'),
   armadillomon: require('../assets/images/digimons/Armadillomon.webp'),
-  armageddemon: require('../assets/images/digimons/Armageddemon_vg.webp'),
+  armageddemon: require('../assets/images/digimons/Armageddemon_vg.gif'),
   arukenimon: require('../assets/images/digimons/Arukenimon.webp'),
   aruraumon: require('../assets/images/digimons/Aruraumon.gif'),
   aurumon: require('../assets/images/digimons/Aurumon_vg.webp'),
