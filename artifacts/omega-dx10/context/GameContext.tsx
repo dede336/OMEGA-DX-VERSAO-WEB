@@ -1835,7 +1835,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // account hydration: a slow /digimons/catalog or /overrides request used to
       // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
       const catalogContentPromise = Promise.all([
-        fetch(`${apiUrl}/digimons/catalog`).then((r) => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${apiUrl}/digimons/catalog`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.ok ? r.json() : null).catch(() => null),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
       ]).then(([catalogData, overridesData]) => {
         if (catalogData?.digimons) {
