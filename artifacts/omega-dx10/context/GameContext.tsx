@@ -246,7 +246,7 @@ interface GameContextValue extends GameState {
   setTeam: (ownedIds: string[]) => void;
   getSaveSnapshot: () => GameState;
   loadFromCloud: (apiUrl: string) => Promise<void>;
-  refreshCustomData: (apiUrl: string) => Promise<void>;
+  refreshRosterData: (apiUrl: string) => Promise<void>;
   isDailyDungeonAvailable: boolean;
   claimDailyDungeon: () => void;
   setFarmSlots: (slots: string[], resetTime?: boolean) => void;
@@ -2077,7 +2077,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         setTeam,
         getSaveSnapshot,
         loadFromCloud,
-        refreshCustomData: loadFromCloud,
+        refreshRosterData: loadFromCloud,
         isDailyDungeonAvailable,
         claimDailyDungeon,
         setFarmSlots,
