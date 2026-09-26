@@ -576,6 +576,55 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     gachaAdminPoolRef.current = gachaAdminPool;
   }, [gachaAdminPool]);
 
+  // One-time/roster-refresh migration: old saves could keep Eggs/Baby/Training
+  // in the normal XP-era farm slots. Move them into the dedicated lanes and
+  // enforce the new five-slot cap without deleting any Digimon from collection.
+  useEffect(() => {
+    if (!loaded) return;
+    setState((prev) => {
+      const max = Math.max(1, Math.min(5, Math.floor(prev.tamerLevel)));
+      const normal: string[] = [];
+      const nursery = [...prev.farmNurserySlots];
+      const eggs = [...prev.farmEggSlots];
+      const nurseryTimes = { ...prev.farmNurseryEntryTimes };
+      const eggTimes = { ...prev.farmEggEntryTimes };
+      const now = Date.now();
+
+      for (const ownedId of prev.farmSlots) {
+        const owned = prev.collection.find((entry) => entry.ownedId === ownedId);
+        const char = owned ? getCharacter(owned.characterId) : undefined;
+        const rarity = String(char?.rarity ?? '');
+        if (rarity === 'EGG') {
+          if (!eggs.includes(ownedId) && eggs.length < max) {
+            eggs.push(ownedId);
+            eggTimes[ownedId] = prev.farmEntryTimes[ownedId] ?? now;
+          }
+        } else if (rarity === 'BABY' || rarity === 'TRAINING') {
+          if (!nursery.includes(ownedId) && nursery.length < max) {
+            nursery.push(ownedId);
+            nurseryTimes[ownedId] = prev.farmEntryTimes[ownedId] ?? now;
+          }
+        } else if (normal.length < 5) {
+          normal.push(ownedId);
+        }
+      }
+
+      const changed =
+        normal.join('|') !== prev.farmSlots.join('|')
+        || nursery.join('|') !== prev.farmNurserySlots.join('|')
+        || eggs.join('|') !== prev.farmEggSlots.join('|');
+      if (!changed) return prev;
+      return {
+        ...prev,
+        farmSlots: normal,
+        farmNurserySlots: nursery.slice(0, max),
+        farmEggSlots: eggs.slice(0, max),
+        farmNurseryEntryTimes: nurseryTimes,
+        farmEggEntryTimes: eggTimes,
+      };
+    });
+  }, [loaded, rosterRevision]);
+
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cloud sync and page-hide handlers must read the latest state directly.
