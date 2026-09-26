@@ -11,20 +11,20 @@ const app: Express = express();
 // Canonical Baby/Training classification used by OMEGA DX.
 // All entries below use the Free attribute (FR) and only game-supported elements.
 const DIGIMON_CLASSIFICATION_FIXES: Readonly<Record<string, string>> = {
-  MetalKoromon: "METAL", Mokumon: "FIRE", Botamon: "FIRE", Fukamon: "FIRE", Conomon: "EARTH", Nyokimon: "PLANT", Pabumon: "PLANT",
-  Pafumon: "WIND", Paomon: "LIGHT", Petitmon: "WIND", Pichimon: "WATER",
-  Pitchmon: "WATER", Popomon: "PLANT", Poyomon: "WATER", Punimon: "ICE",
-  Pupumon: "PLANT", Pururumon: "WIND", Pusumon: "NULL", Puttimon: "LIGHT",
-  Puwamon: "WIND", Pyonmon: "PLANT", Pyontomon: "NULL", Relemon: "NULL",
-  Sakumon: "METAL", Sunamon: "EARTH", TorikaraBallmon: "NULL", Tsubumon: "WIND",
-  YukimiBotamon: "ICE", Yuramon: "PLANT", Zerimon: "NULL", Zurumon: "DARK",
-  Minomon: "PLANT", Missimon: "METAL", Moonmon: "DARK", Motimon: "PLANT",
-  Negamon: "DARK", Nyaromon: "LIGHT", Offmon: "LIGHT", Pagumon: "DARK",
-  Pickmon: "METAL", Pinamon: "WIND", Poromon: "WIND", Puroromon: "METAL",
-  Pusurimon: "EARTH", Rurimon: "LIGHT", Sakuttomon: "METAL", Hiyarimon: "ICE", Koromon: "FIRE", Sunmon: "FIRE",
-  Tanemon: "PLANT", Tokomon: "LIGHT", Tsumemon: "DARK", Tsunomon: "EARTH",
-  Upamon: "WATER", Viximon: "NULL", Wanyamon: "NULL", Xiaomon: "FIRE",
-  Yaamon: "DARK", Yokomon: "PLANT",
+  MetalKoromon: "METAL", Mokumon: "FIRE", Botamon: "FIRE", Fukamon: "FIRE", Conomon: "EARTH",
+  Nyokimon: "PLANT", Pabumon: "PLANT", Pafumon: "LIGHT", Paomon: "LIGHT", Petitmon: "WIND",
+  Pichimon: "WATER", Pitchmon: "WATER", Popomon: "PLANT", Poyomon: "WATER", Punimon: "ICE",
+  Pupumon: "WIND", Pururumon: "WIND", Pusumon: "NULL", Puttimon: "LIGHT", Puwamon: "WIND",
+  Pyonmon: "PLANT", Pyontomon: "NULL", Relemon: "NULL", Sakumon: "METAL", Sunamon: "EARTH",
+  TorikaraBallmon: "NULL", Tsubumon: "WIND", YukimiBotamon: "ICE", Yuramon: "PLANT",
+  Zerimon: "NULL", Zurumon: "DARK", Minomon: "PLANT", Missimon: "METAL", Moonmon: "WATER",
+  Motimon: "PLANT", Negamon: "DARK", Nyaromon: "LIGHT", Offmon: "LIGHT", Pagumon: "DARK",
+  Pickmon: "METAL", Pinamon: "WIND", Poromon: "WIND", Puroromon: "WATER", Pusurimon: "EARTH",
+  Sakuttomon: "METAL", Hiyarimon: "ICE", Koromon: "FIRE", Sunmon: "FIRE", Tanemon: "PLANT",
+  Tokomon: "LIGHT", Tsumemon: "DARK", Tsunomon: "ICE", Upamon: "WATER", Viximon: "NULL",
+  Wanyamon: "WATER", Xiaomon: "NULL", Yaamon: "DARK", Yokomon: "PLANT", Goromon: "EARTH",
+  Babydmon: "WIND", Dorimon: "METAL", Kapurimon: "METAL", Kyokyomon: "METAL",
+  Dodomon: "METAL", Fufumon: "METAL", AlgomonTraining: "DARK",
 };
 
 void Promise.all(
@@ -36,6 +36,21 @@ void Promise.all(
 )
   .then(() => logger.info({ count: Object.keys(DIGIMON_CLASSIFICATION_FIXES).length }, "Applied Baby/Training classifications"))
   .catch((err) => logger.error({ err }, "Failed to apply Baby/Training classifications"));
+
+// These two were incorrectly classified as Training and must never hatch from Digitamas.
+const DIGIMON_RARITY_FIXES: Readonly<Record<string, string>> = {
+  Aruramon: "ROOKIE",
+  Rurimon: "ROOKIE",
+};
+void Promise.all(
+  Object.entries(DIGIMON_RARITY_FIXES).map(([name, rarity]) =>
+    db.update(customDigimonsTable)
+      .set({ rarity, updatedAt: new Date() })
+      .where(eq(customDigimonsTable.name, name)),
+  ),
+)
+  .then(() => logger.info({ names: Object.keys(DIGIMON_RARITY_FIXES) }, "Applied Digimon rarity corrections"))
+  .catch((err) => logger.error({ err }, "Failed to apply Digimon rarity corrections"));
 
 // Permanently purge duplicate catalogue records that were previously seeded.
 const REMOVED_DUPLICATE_DIGIMONS = ["Mochimon", "Chicomon", "Choromon", "ArkadimonBaby", "Chocomon"];
