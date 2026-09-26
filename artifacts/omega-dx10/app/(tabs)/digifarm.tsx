@@ -291,12 +291,6 @@ function findWalkableTarget(curX: number, curY: number): { x: number; y: number 
 
 function maxFarmSlots(tamerLevel: number) { return Math.max(1, Math.min(5, Math.floor(tamerLevel / 5) + 1)); }
 
-function calcPendingXp(slots: string[], lastClaim: number, tamerLevel: number, xpPerHour: number, maxHours: number) {
-  if (slots.length === 0) return 0;
-  const elapsedHours = Math.min((Date.now() - lastClaim) / 3600000, maxHours);
-  return Math.floor(xpPerHour * (1 + tamerLevel * 0.1) * elapsedHours * slots.length);
-}
-
 function formatDuration(ms: number) {
   const totalSec = Math.floor(ms / 1000);
   const h = Math.floor(totalSec / 3600);
@@ -390,7 +384,6 @@ export default function DigifarmScreen() {
     farmFoods, farmLastFeed, farmBattleRequests, farmDailyRewardClaim, gemas,
     setFarmSlots, setFarmNurserySlots, setFarmEggSlots,
     sendToFarmProcess, accelerateFarmProcess, completeFarmProcess, claimFarmProduction,
-    processFarmEvolutions,
     feedFarmDigimon, generateFarmBattleRequests, claimFarmDailyReward,
     customGameMaps,
     farmDecorations, farmDecorInventory,
