@@ -14,7 +14,7 @@ const DIGIMON_CLASSIFICATION_FIXES: Readonly<Record<string, string>> = {
   Bibimon: "LIGHTNING",
   MetalKoromon: "METAL", Mokumon: "FIRE", Botamon: "FIRE", Fukamon: "FIRE", Conomon: "EARTH",
   Nyokimon: "PLANT", Pabumon: "PLANT", Pafumon: "LIGHT", Paomon: "LIGHT", Petitmon: "WIND",
-  Pichimon: "WATER", Pitchmon: "WATER", Popomon: "PLANT", Poyomon: "WATER", Punimon: "ICE",
+  Pichimon: "WATER", Popomon: "PLANT", Poyomon: "WATER", Punimon: "ICE",
   Pupumon: "WIND", Pururumon: "WIND", Pusumon: "NULL", Puttimon: "LIGHT", Puwamon: "WIND",
   Pyonmon: "PLANT", Pyontomon: "NULL", Relemon: "NULL", Sakumon: "METAL", Sunamon: "EARTH",
   TorikaraBallmon: "NULL", Tsubumon: "WIND", YukimiBotamon: "ICE", Yuramon: "PLANT",
