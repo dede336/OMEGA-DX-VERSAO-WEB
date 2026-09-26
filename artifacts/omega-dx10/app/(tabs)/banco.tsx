@@ -15,7 +15,7 @@ import {
 } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
-import { CustomDigimonRaw, getRawCustomDigimons } from '@/constants/extendedCharacters';
+import { CustomDigimonRaw, getRawCustomDigimons, getAllCharacters } from '@/constants/extendedCharacters';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';
@@ -265,12 +265,20 @@ export default function BancoScreen() {
   }, [customDigimons]);
 
   const baseEntries = useMemo(() => {
-    return CODEX_ORDER.map((id) => {
+    // CODEX_ORDER is only a legacy/manual ordering list and contains only a
+    // fraction of the hardcoded roster. Build the Banco from every registered
+    // base character, while preserving CODEX_ORDER as the preferred order.
+    const orderedIds = [
+      ...CODEX_ORDER,
+      ...Object.keys(CHARACTERS).filter((id) => !CODEX_ORDER.includes(id)),
+    ];
+
+    return orderedIds.map((id) => {
       const char = CHARACTERS[id];
       if (!char) return null;
       if (char.rarity === 'EGG') return null;
       const methods = getObtainMethods(id);
-      const isOwned = ownedSet.has(id);
+      const isOwned = ownedSet.has(id) || ownedSet.has(char.id);
       const isAvailable = methods.length > 0;
       return { id, char, methods, isOwned, isAvailable, isCustom: false, isActive: true };
     }).filter(Boolean) as {
