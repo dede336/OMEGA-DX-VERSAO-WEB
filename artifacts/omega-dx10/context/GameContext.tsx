@@ -582,7 +582,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loaded) return;
     setState((prev) => {
-      const max = Math.max(1, Math.min(5, Math.floor(prev.tamerLevel)));
+      const max = Math.max(1, Math.min(5, Math.floor(prev.tamerLevel / 5) + 1));
       const normal: string[] = [];
       const nursery = [...prev.farmNurserySlots];
       const eggs = [...prev.farmEggSlots];
@@ -1792,7 +1792,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const FARM_EGG_MS = 60 * 60 * 1000;
   const FARM_BABY_MS = 60 * 60 * 1000;
   const FARM_TRAINING_MS = 150 * 60 * 1000;
-  const farmProcessMaxSlots = (level: number) => Math.max(1, Math.min(5, Math.floor(level)));
+  const farmProcessMaxSlots = (level: number) => Math.max(1, Math.min(5, Math.floor(level / 5) + 1));
 
   const setFarmNurserySlots = useCallback((slots: string[]) => {
     setState((prev) => {
