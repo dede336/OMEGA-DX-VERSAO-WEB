@@ -2957,7 +2957,6 @@ export async function applyManualImageDecisions(): Promise<void> {
       ["NoblePumpkinmon", "MEGA", "NoblePumpkinmon.png", "DA", "DARK"],
       ["Nohemon", "CHAMPION", "Nohemon.gif", "DA", "NULL"],
       ["Offmon", "TRAINING", "Offmon.gif", "DA", "NULL"],
-      ["Pitchmon", "BABY", "Pitchmon_1782996630752.gif", "DA", "WATER"],
       ["Praieriemon", "CHAMPION", "Praieriemon.gif", "DA", "PLANT"],
       ["Pucchiemon Green", "CHAMPION", "Pucchiemon green.gif", "DA", "PLANT"],
       ["Rabbitmon", "CHAMPION", "Rabbitmon.gif", "DA", "NULL"],
