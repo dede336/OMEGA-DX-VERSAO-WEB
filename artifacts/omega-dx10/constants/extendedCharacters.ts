@@ -513,6 +513,11 @@ export function hasDivineGiftPassive(characterId: string): boolean {
 // Returns a random BABY/TRAINING Digimon for egg hatching.
 // Normal eggs use only their own element, including the normal NULL egg.
 // Special Digitama ignores element and can hatch from the complete pre-rookie pool.
+export function getHatchTargets(element: string, special = false): string[] {
+  if (special) return [...new Set(Object.values(_elementBabyMap).flat())];
+  return [...(_elementBabyMap[element] ?? [])];
+}
+
 export function getRandomHatchTarget(element: string, special = false): string | null {
   if (special) {
     const all = [...new Set(Object.values(_elementBabyMap).flat())];
