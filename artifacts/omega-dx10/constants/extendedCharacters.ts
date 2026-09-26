@@ -163,10 +163,15 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   const stableIdByLegacyId = new Map<string, string>();
   for (const entry of chars) {
     const baseId = entry.name ? BASE_NAME_MAP[entry.name.toLowerCase()] : undefined;
+    // Static game entries (especially eggs) are canonical and must never be
+    // re-identified by a stale custom_<dbId> from the server catalogue.
     const canonicalId = baseId ?? `name:${entry.name}`;
     stableIdByLegacyId.set(entry.id, canonicalId);
     // One-way compatibility for old DB relations/saves created before stable IDs.
-    stableIdByLegacyId.set(`custom_${entry.dbId}`, canonicalId);
+    // Do not let a stale custom row hijack an existing canonical game ID.
+    if (!CHARACTERS[`custom_${entry.dbId}`]) {
+      stableIdByLegacyId.set(`custom_${entry.dbId}`, canonicalId);
+    }
   }
   _legacyCharacterIds = stableIdByLegacyId;
   const stableId = (value?: string): string | undefined => {
