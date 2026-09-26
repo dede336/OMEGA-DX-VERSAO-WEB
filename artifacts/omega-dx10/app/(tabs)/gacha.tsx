@@ -228,7 +228,9 @@ function GachaBubbleColumn() {
 function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolean }) {
   const colors = useColors();
   const char = getCharacter(reward.characterId) ?? CHARACTERS[reward.characterId];
-  const img = getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
+  const isSpecialDigitama = reward.characterId === 'specialDigitama'
+    || reward.nome?.replace(/^✨\\s*/, '').toLowerCase() === 'digitama especial';
+  const img = isSpecialDigitama ? null : getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
   const cardSize = big ? 150 : 110;
   const imgSize = big ? 90 : 64;
   const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
