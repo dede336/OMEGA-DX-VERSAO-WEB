@@ -106,7 +106,6 @@ export const VERIFIED_RARITIES: Readonly<Record<string, string>> = {
   "Minotaurmon": "ULTIMATE",
   "MinotaurmonAdult": "CHAMPION",
   "MistyMon": "ULTIMATE",
-  "Mochimon": "TRAINING",
   "ModokiBetamon": "ROOKIE",
   "Mokumon": "BABY",
   "Monodramon": "ROOKIE",
