@@ -873,7 +873,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "YukimiBotamon": require("../assets/images/digimons/YukimiBotamon.gif"),
   "Yuramon": require("../assets/images/digimons/Yuramon.gif"),
   "Zanbamon": require("../assets/images/digimons/Zanbamon.webp"),
-  "ZeedMillenniumon": require("../assets/images/digimons/ZeedMillenniumon.webp"),
+  "ZeedMillenniumon": require("../assets/images/digimons/ZeedMillenniumon.gif"),
   "Zephyrmon": require("../assets/images/digimons/Zephyrmon.png"),
   "Zerimon": require("../assets/images/digimons/Zerimon.gif"),
   "Zhuqiaomon": require("../assets/images/digimons/Zhuqiaomon.gif"),
