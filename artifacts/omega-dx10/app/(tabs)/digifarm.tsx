@@ -427,6 +427,7 @@ export default function DigifarmScreen() {
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSlotIdx, setPickerSlotIdx] = useState<number | null>(null);
+  const [pickerMode, setPickerMode] = useState<'normal' | 'nursery' | 'egg'>('normal');
   const [elapsed, setElapsed] = useState('0s');
   const [productionReady, setProductionReady] = useState(false);
   const [collecting, setCollecting] = useState(false);
@@ -917,10 +918,20 @@ export default function DigifarmScreen() {
 
 
   // ── Handlers ────────────────────────────────────────────────────────────────
-  function openPicker(slotIdx: number) { setPickerSlotIdx(slotIdx); setPickerOpen(true); }
+  function openPicker(slotIdx: number, mode: 'normal' | 'nursery' | 'egg' = 'normal') {
+    setPickerSlotIdx(slotIdx);
+    setPickerMode(mode);
+    setPickerOpen(true);
+  }
 
   function assignToSlot(ownedId: string) {
     if (pickerSlotIdx === null) return;
+    if (pickerMode === 'egg' || pickerMode === 'nursery') {
+      const ok = sendToFarmProcess(ownedId);
+      if (!ok) Alert.alert('Digifarm', 'Não foi possível colocar neste slot.');
+      setPickerOpen(false);
+      return;
+    }
     const newSlots = [...farmSlots];
     const existingIdx = newSlots.indexOf(ownedId);
     if (existingIdx !== -1) newSlots.splice(existingIdx, 1);
@@ -931,7 +942,9 @@ export default function DigifarmScreen() {
   }
 
   function removeFromSlot(ownedId: string) {
-    setFarmSlots(farmSlots.filter((id) => id !== ownedId));
+    if (farmNurserySlots.includes(ownedId)) setFarmNurserySlots(farmNurserySlots.filter((id) => id !== ownedId));
+    else if (farmEggSlots.includes(ownedId)) setFarmEggSlots(farmEggSlots.filter((id) => id !== ownedId));
+    else setFarmSlots(farmSlots.filter((id) => id !== ownedId));
     if (selectedFarmDigi === ownedId) setSelectedFarmDigi(null);
   }
 
@@ -1042,27 +1055,7 @@ export default function DigifarmScreen() {
     }
   }
 
-  function getEvoInfo(ownedId: string, characterId: string, level: number) {
-    const char = getCharacter(characterId) ?? CHARACTERS[characterId];
-    if (!char) return null;
-    const rarity = char.rarity as string;
-    if (!PRE_ROOKIE_STAGE_RARITIES.has(rarity as any)) return null;
-    const ONE_DAY = 24 * 60 * 60 * 1000;
-    if (rarity === 'EGG' || rarity === 'BABY') {
-      const entryTime = farmEntryTimes[ownedId] ?? Date.now();
-      const remaining = ONE_DAY - (Date.now() - entryTime);
-      const stageName = RARITY_LABELS[rarity as keyof typeof RARITY_LABELS];
-      if (remaining <= 0) return { label: `${stageName} → ${t('farm.readyToEvo')}`, color: '#22c55e' };
-      return { label: `${stageName} ${t('farm.evolveIn')} ${formatDuration(remaining)}`, color: '#fbbf24' };
-    }
-    if (rarity === 'TRAINING') {
-      if (level >= 5) return { label: `Treinamento → ${t('farm.readyToEvo')}`, color: '#22c55e' };
-      return { label: `Treinamento ${t('farm.evolveAtLv')} 5 (Lv. ${level})`, color: '#60a5fa' };
-    }
-    return null;
-  }
-
-  const selectedDigi = selectedFarmDigi ? collection.find((c) => c.ownedId === selectedFarmDigi) : null;
+    const selectedDigi = selectedFarmDigi ? collection.find((c) => c.ownedId === selectedFarmDigi) : null;
   const selectedChar = selectedDigi ? (getCharacter(selectedDigi.characterId) ?? CHARACTERS[selectedDigi.characterId]) : null;
   const selectedSat = selectedFarmDigi ? computeSatisfaction(selectedFarmDigi, farmLastFeed, farmBattleRequests) : 0;
   const selectedReq = selectedFarmDigi ? farmBattleRequests[selectedFarmDigi] : undefined;
@@ -1078,8 +1071,15 @@ export default function DigifarmScreen() {
     return lf > 0 && (Date.now() - lf) < 8 * 3600000 && (!req || req.fulfilled);
   });
 
-  const availableDigimons = collection.filter((c) => !activeFarmSlots.includes(c.ownedId));
-  const nextLevelSlot = maxSlots < 6 ? maxSlots * 5 : null;
+  const availableDigimons = collection.filter((owned) => {
+    if (farmSlots.includes(owned.ownedId) || farmNurserySlots.includes(owned.ownedId) || farmEggSlots.includes(owned.ownedId)) return false;
+    const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
+    const rarity = String(char?.rarity ?? '');
+    if (pickerMode === 'egg') return rarity === 'EGG';
+    if (pickerMode === 'nursery') return rarity === 'BABY' || rarity === 'TRAINING';
+    return !['EGG','BABY','TRAINING'].includes(rarity);
+  });
+  const nextLevelSlot = maxSlots < 5 ? maxSlots + 1 : null;
 
   const suggestedMap = selectedDigi ? getSuggestedMap(selectedDigi.level, customGameMaps) : null;
 
@@ -1769,6 +1769,50 @@ export default function DigifarmScreen() {
               })}
             </View>
 
+            <Text style={{ color:'rgba(255,255,255,0.7)', fontSize:10, fontWeight:'900', marginTop:8, marginBottom:4 }}>
+              🍼 BABY / TREINAMENTO {activeNurserySlots.length}/{maxSlots}
+            </Text>
+            <View style={styles.slotsRow}>
+              {Array.from({ length: maxSlots }).map((_, i) => {
+                const ownedId = activeNurserySlots[i];
+                const owned = ownedId ? collection.find((entry) => entry.ownedId === ownedId) : null;
+                const info = ownedId ? farmProcessInfo(ownedId) : null;
+                return owned ? (
+                  <TouchableOpacity key={ownedId} style={styles.slotFilled} onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}>
+                    <CharacterAvatar characterId={owned.characterId} size={40} />
+                    <Text style={{ color:info?.ready?'#4ade80':'#fbbf24', fontSize:7, fontWeight:'900' }}>{info?.ready?'PRONTO':formatDuration(info?.remaining ?? 0)}</Text>
+                    <TouchableOpacity onPress={() => removeFromSlot(ownedId)} style={styles.slotRemove}><Feather name="x" size={9} color="#fff" /></TouchableOpacity>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity key={`nursery-empty-${i}`} onPress={() => openPicker(i,'nursery')} style={styles.slotEmpty}>
+                    <Feather name="plus" size={20} color="rgba(255,255,255,0.4)" />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text style={{ color:'rgba(255,255,255,0.7)', fontSize:10, fontWeight:'900', marginTop:8, marginBottom:4 }}>
+              🥚 INCUBADORAS {farmEggSlots.length}/{maxSlots}
+            </Text>
+            <View style={styles.slotsRow}>
+              {Array.from({ length: maxSlots }).map((_, i) => {
+                const ownedId = farmEggSlots[i];
+                const owned = ownedId ? collection.find((entry) => entry.ownedId === ownedId) : null;
+                const info = ownedId ? farmProcessInfo(ownedId) : null;
+                return owned ? (
+                  <TouchableOpacity key={ownedId} style={styles.slotFilled} onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}>
+                    <CharacterAvatar characterId={owned.characterId} size={38} />
+                    <Text style={{ color:info?.ready?'#4ade80':'#fbbf24', fontSize:7, fontWeight:'900' }}>{info?.ready?'CHOCAR':formatDuration(info?.remaining ?? 0)}</Text>
+                    <TouchableOpacity onPress={() => removeFromSlot(ownedId)} style={styles.slotRemove}><Feather name="x" size={9} color="#fff" /></TouchableOpacity>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity key={`egg-empty-${i}`} onPress={() => openPicker(i,'egg')} style={styles.slotEmpty}>
+                    <Feather name="plus" size={20} color="rgba(255,255,255,0.4)" />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
             {/* Painel de ação do Digimon selecionado */}
             {selectedFarmDigi && selectedDigi && selectedChar && (
               <View style={[styles.actionPanel, { backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }, pixelStyle]}>
@@ -1849,7 +1893,9 @@ export default function DigifarmScreen() {
         <Pressable style={styles.pickerOverlay} onPress={() => setPickerOpen(false)}>
           <Pressable style={[styles.pickerSheet, { backgroundColor: colors.card }, pixelStyle]} onPress={(e) => e.stopPropagation()}>
             <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-            <Text style={[styles.pickerTitle, { color: colors.foreground }]}>{t('farm.chooseDigi')}</Text>
+            <Text style={[styles.pickerTitle, { color: colors.foreground }]}>
+              {pickerMode === 'egg' ? 'Escolha um Ovo para chocar' : pickerMode === 'nursery' ? 'Escolha Baby/Training para treinar' : t('farm.chooseDigi')}
+            </Text>
             {availableDigimons.length === 0 ? (
               <View style={styles.pickerEmpty}>
                 <Feather name="inbox" size={36} color={colors.mutedForeground} />
