@@ -289,7 +289,7 @@ function findWalkableTarget(curX: number, curY: number): { x: number; y: number 
   return { x: 350, y: 390 };
 }
 
-function maxFarmSlots(tamerLevel: number) { return Math.max(1, Math.min(5, Math.floor(tamerLevel))); }
+function maxFarmSlots(tamerLevel: number) { return Math.max(1, Math.min(5, Math.floor(tamerLevel / 5) + 1)); }
 
 function calcPendingXp(slots: string[], lastClaim: number, tamerLevel: number, xpPerHour: number, maxHours: number) {
   if (slots.length === 0) return 0;
@@ -1092,7 +1092,7 @@ export default function DigifarmScreen() {
     if (pickerMode === 'nursery') return rarity === 'BABY' || rarity === 'TRAINING';
     return !['EGG','BABY','TRAINING'].includes(rarity);
   });
-  const nextLevelSlot = maxSlots < 5 ? maxSlots + 1 : null;
+  const nextLevelSlot = maxSlots < 5 ? maxSlots * 5 : null;
 
   const suggestedMap = selectedDigi ? getSuggestedMap(selectedDigi.level, customGameMaps) : null;
 
