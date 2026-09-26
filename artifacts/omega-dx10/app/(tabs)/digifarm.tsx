@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, PRE_ROOKIE_STAGE_RARITIES, RARITY_LABELS, GAME_MAPS } from '@/constants/gameData';
 import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
-import { CharacterAvatar } from '@/components/GameComponents';
+import { CharacterAvatar, AnimatedEgg } from '@/components/GameComponents';
 import EvolutionAnimation from '@/components/EvolutionAnimation';
 import { useLanguage } from '@/context/LanguageContext';
 import { isAsfalto, snapAsfalto, resolveAsfaltoMeta, AsfaltoMeta, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
@@ -433,6 +433,7 @@ export default function DigifarmScreen() {
   const [collecting, setCollecting] = useState(false);
   const [farmTick, setFarmTick] = useState(Date.now());
   const [evoAnim, setEvoAnim] = useState<{ fromCharacterId: string; toCharacterId: string } | null>(null);
+  const [hatchingEggId, setHatchingEggId] = useState<string | null>(null);
   const bounceAnim = useRef(new Animated.Value(1)).current;
 
   const [selectedFarmDigi, setSelectedFarmDigi] = useState<string | null>(null);
@@ -1021,12 +1022,24 @@ export default function DigifarmScreen() {
     if (!owned) return;
     const from = owned.characterId;
     const char = getCharacter(from) ?? CHARACTERS[from];
-    const target = char?.rarity === 'EGG'
-      ? null
-      : getFarmEvolutionTarget(from);
+
+    if (char?.rarity === 'EGG') {
+      // Hatch sequence: egg turns white + element-colored light, then Baby appears.
+      if (hatchingEggId) return;
+      setHatchingEggId(ownedId);
+      setTimeout(() => {
+        const ok = completeFarmProcess(ownedId);
+        if (!ok) Alert.alert('Digifarm', 'É necessário ter um slot Baby/Training livre para chocar.');
+        setHatchingEggId(null);
+        setFarmTick(Date.now());
+      }, 1100);
+      return;
+    }
+
+    const target = getFarmEvolutionTarget(from);
     const ok = completeFarmProcess(ownedId);
     if (!ok) {
-      Alert.alert('Digifarm', char?.rarity === 'EGG' ? 'É necessário ter um slot Baby/Training livre para chocar.' : 'Este Digimon ainda não está pronto.');
+      Alert.alert('Digifarm', 'Este Digimon ainda não está pronto.');
       return;
     }
     if (target) setEvoAnim({ fromCharacterId: from, toCharacterId: target });
@@ -1456,7 +1469,10 @@ export default function DigifarmScreen() {
                 <View key={ownedId} style={{ position:'absolute', left:p.x-52, top:p.y-62, width:104, height:104, zIndex:6 }}>
                   {info?.ready && <View pointerEvents="none" style={{ position:'absolute', left:22, top:20, width:60, height:60, borderRadius:30, backgroundColor:glow[element] ?? '#e5e7eb', opacity:0.42 }} />}
                   <View style={{ position:'absolute', left:31, top:20, zIndex:1 }}>
-                    <CharacterAvatar characterId={owned.characterId} size={42} />
+                    <AnimatedEgg characterId={owned.characterId} element={element} size={42} />
+                    {hatchingEggId === ownedId && (
+                      <View style={{ position:'absolute', left:5, top:1, width:32, height:40, borderRadius:18, backgroundColor:'#fff', opacity:0.92 }} />
+                    )}
                   </View>
                   <Image source={EGG_NEST} resizeMode="contain" style={{ position:'absolute', left:0, top:0, width:104, height:104, zIndex:2 }} />
                   <TouchableOpacity
@@ -1588,6 +1604,12 @@ export default function DigifarmScreen() {
               <Text style={{ fontSize: 11, marginLeft: 6 }}>{weatherIcon}</Text>
               <Text style={[styles.hudTitle, { marginLeft: 2 }]}>{timeLabel}</Text>
             </View>
+            {(farmEggSlots.some((id) => farmProcessInfo(id)?.ready) || activeNurserySlots.some((id) => farmProcessInfo(id)?.ready)) && (
+              <View style={[styles.hudPill, { marginTop: 5, borderColor:'#fbbf24' }]}>
+                <Text style={{ fontSize: 11 }}>🔔</Text>
+                <Text style={[styles.hudTitle, { color:'#fbbf24' }]}>CHOCAR / EVOLUIR DISPONÍVEL</Text>
+              </View>
+            )}
           </View>
 
           {/* Produção dos 5 slots normais: itens/30min + 10 gemas/h, máximo 5h */}
