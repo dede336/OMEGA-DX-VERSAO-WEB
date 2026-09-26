@@ -277,7 +277,7 @@ export default function BancoScreen() {
     const seen = new Set<string>();
     return preferredOrder.flatMap((id) => {
       const char = registered[id];
-      if (!char || char.rarity === 'EGG') return [];
+      if (!char) return [];
       const canonicalId = char.id || id;
       const uniqueKey = char.name.trim().toLowerCase();
       if (seen.has(uniqueKey)) return [];
