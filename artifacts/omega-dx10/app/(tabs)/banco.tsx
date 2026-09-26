@@ -220,7 +220,7 @@ const ELEM_FILTERS = [
 export default function BancoScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshCustomData } = useGame();
+  const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshRosterData } = useGame();
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
 
@@ -229,8 +229,8 @@ export default function BancoScreen() {
   // of silently falling back to the small bundled roster.
   useEffect(() => {
     if (!token) return;
-    refreshCustomData(getApiUrl()).catch(() => {});
-  }, [token, getApiUrl, refreshCustomData]);
+    refreshRosterData(getApiUrl()).catch(() => {});
+  }, [token, getApiUrl, refreshRosterData]);
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
@@ -257,9 +257,9 @@ export default function BancoScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
-      await refreshCustomData(getApiUrl());
+      await refreshRosterData(getApiUrl());
     } catch {}
-  }, [getApiUrl, token, refreshCustomData]);
+  }, [getApiUrl, token, refreshRosterData]);
 
   const ownedSet = useMemo(
     () => new Set(collection.map((c) => c.characterId)),
