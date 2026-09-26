@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useColors } from '@/hooks/useColors';
 import { CHARACTERS } from '@/constants/gameData';
-import { getCustomCharacters } from '@/constants/extendedCharacters';
+import { getCatalogCharacters } from '@/constants/extendedCharacters';
 import ImageCropEditor from './ImageCropEditor';
 import { pixelStyle } from '@/constants/pixelStyle';
 
@@ -231,16 +231,16 @@ export function ImagePickerBlock({ data, onChange, label, cropWidth, cropHeight 
 }
 
 interface DigiEntry { id: string; name: string; isCustom: boolean; }
-export function DigimonPickerModal({ visible, onClose, onSelect, customDigimons }: {
+export function DigimonPickerModal({ visible, onClose, onSelect, catalogDigimons }: {
   visible: boolean; onClose: () => void; onSelect: (id: string, name: string) => void;
-  customDigimons?: { id: string; name: string }[];
+  catalogDigimons?: { id: string; name: string }[];
 }) {
   const colors = useColors();
   const [search, setSearch] = useState('');
-  const customEntries = customDigimons ?? getCustomCharacters().map((c) => ({ id: c.id, name: c.name }));
+  const catalogEntries = catalogDigimons ?? getCatalogCharacters().map((c) => ({ id: c.id, name: c.name }));
   const allDigimons: DigiEntry[] = [
     ...Object.values(CHARACTERS).map((c) => ({ id: c.id, name: c.name, isCustom: false })),
-    ...customEntries.map((c) => ({ id: c.id, name: c.name, isCustom: true })),
+    ...catalogEntries.map((c) => ({ id: c.id, name: c.name, isCustom: true })),
   ].filter((d, i, arr) => arr.findIndex((x) => x.id === d.id) === i).sort((a, b) => a.name.localeCompare(b.name));
   const filtered = search.trim()
     ? allDigimons.filter((d) => d.name.toLowerCase().includes(search.toLowerCase()))
