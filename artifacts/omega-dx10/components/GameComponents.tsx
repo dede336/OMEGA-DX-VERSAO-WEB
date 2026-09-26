@@ -18,7 +18,9 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 export function AnimatedEgg({ characterId, element, size }: { characterId: string; element: string; size: number }) {
   const characterName = getCharacter(characterId)?.name ?? '';
-  const isSpecial = element === 'SPECIAL' || characterName.toLowerCase() === 'digitama especial';
+  const isSpecial = characterId === 'specialDigitama'
+    || element === 'SPECIAL'
+    || characterName.toLowerCase() === 'digitama especial';
   const imgSource = isSpecial ? EGG_IMAGES.SPECIAL : (EGG_IMAGES[element] ?? EGG_IMAGES.NULL);
 
   const rockAnim = useRef(new Animated.Value(0)).current;
