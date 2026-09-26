@@ -15,7 +15,7 @@ import {
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, ITEM_NAMES, TAMERS,
   Character,
 } from '@/constants/gameData';
-import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
+import { getCharacter, getCharacterImageSource, getHatchTargets } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { useLanguage } from '@/context/LanguageContext';
@@ -515,6 +515,9 @@ export default function CollectionScreen() {
               const rarityColor = char ? RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] : colors.primary;
               // Only show alt evo if its target is different from the primary evo target
               const showAltEvo = !!(modalAltEvo && modalAltEvoChar && modalAltEvo.evolvesTo !== modalEvo?.evolvesTo);
+              const isEggModal = !!(char && (char.rarity === 'EGG' || modalOwned.characterId === 'specialDigitama' || char.name?.toLowerCase() === 'digitama especial'));
+              const isSpecialEggModal = modalOwned.characterId === 'specialDigitama' || char?.name?.toLowerCase() === 'digitama especial';
+              const hatchTargets = isEggModal && char ? getHatchTargets(char.element, isSpecialEggModal) : [];
 
               return (
                 <>
@@ -560,6 +563,28 @@ export default function CollectionScreen() {
 
                   {/* Divider */}
                   <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+                  {isEggModal && (
+                    <View style={{ marginBottom: 14 }}>
+                      <Text style={[styles.sheetTitle, { color: colors.foreground, fontSize: 13, marginBottom: 8 }]}>POSSÍVEIS DIGIMON AO CHOCAR ({hatchTargets.length})</Text>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                        {hatchTargets.map((characterId) => {
+                          const target = getCharacter(characterId) ?? CHARACTERS[characterId];
+                          if (!target) return null;
+                          return (
+                            <View key={characterId} style={{ width: '30%', minWidth: 86, alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.background }}>
+                              <CharacterAvatar characterId={characterId} size={42} />
+                              <Text numberOfLines={2} style={{ color: colors.foreground, fontSize: 9, fontWeight: '700', textAlign: 'center', marginTop: 5 }}>{target.name}</Text>
+                              <View style={{ flexDirection: 'row', gap: 3, marginTop: 4 }}>
+                                <AttributeBadge attr={target.attribute} />
+                                <ElementBadge elem={target.element} />
+                              </View>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  )}
 
                   {/* Evolution row */}
                   {modalEvo && modalEvoChar ? (
