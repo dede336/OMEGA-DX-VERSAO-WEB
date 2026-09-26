@@ -1630,6 +1630,19 @@ export default function BattleScreen() {
               </Text>
             </View>
           )}
+          <TouchableOpacity
+            onPress={() => setBattleSpeed((speed) => speed === 1 ? 2 : 1)}
+            style={[styles.speedBtn, pixelStyle]}
+            accessibilityLabel={battleSpeed === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X'}
+          >
+            <Image
+              source={battleSpeed === 2
+                ? require('../assets/images/2X_ATIVO.gif')
+                : require('../assets/images/2X_INATIVO.png')}
+              style={styles.speedBtnImage}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Arena: all enemies at once */}
