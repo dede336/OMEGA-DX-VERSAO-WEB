@@ -1658,7 +1658,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Entrada da Floresta', enemyCharacterId: 'demiDevimon', enemyLevel: 3,  expReward: 50,  gemsFirstClear: 50,  enemyCharacterIds: ['demiDevimon', 'agumon', 'gabumon'], randomEnemyCount: 1 },
       { index: 1, name: 'Clareira dos Dados',  enemyCharacterId: 'gabumon',     enemyLevel: 6,  expReward: 90,  gemsFirstClear: 100, enemyCharacterIds: ['gabumon', 'pyomon', 'salamon'], randomEnemyCount: 1 },
       { index: 2, name: 'Núcleo da Floresta',  enemyCharacterId: 'pyomon',      enemyLevel: 9,  expReward: 160, gemsFirstClear: 150, enemyCharacterIds: ['pyomon', 'patamon', 'palmon'], randomEnemyCount: 1 },
-      { index: 3, name: '⚔️ Boss — Patamon', enemyCharacterId: 'patamon', enemyLevel: 12, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['patamon'] },
+      { index: 3, name: '⚔️ Boss — Patamon', enemyCharacterId: 'patamon', enemyLevel: 12, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['patamon'] },
     ],
   },
   // ── WORLD 2: Santuário de Gelo ──────────────────────────────────────────────
@@ -1674,7 +1674,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Portal Congelado',  enemyCharacterId: 'blackSalamon', enemyLevel: 12, expReward: 220,  gemsFirstClear: 50,  enemyCharacterIds: ['blackSalamon', 'mushroomon', 'tentomon'], randomEnemyCount: 2 },
       { index: 1, name: 'Muralhas de Gelo',  enemyCharacterId: 'renamon',      enemyLevel: 12, expReward: 380,  gemsFirstClear: 100, enemyCharacterIds: ['renamon', 'terriermon', 'wormon'], randomEnemyCount: 2 },
       { index: 2, name: 'Trono de Cristal',  enemyCharacterId: 'kumamon',      enemyLevel: 14, expReward: 650,  gemsFirstClear: 150, enemyCharacterIds: ['kumamon', 'blackSalamon', 'mushroomon'], randomEnemyCount: 2 },
-      { index: 3, name: '⚔️ Boss — Woodmon', enemyCharacterId: 'woodmon', enemyLevel: 16, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['woodmon'] },
+      { index: 3, name: '⚔️ Boss — Woodmon', enemyCharacterId: 'woodmon', enemyLevel: 16, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 1.8, def: 1.3 }, enemyCharacterIds: ['woodmon'] },
     ],
   },
   // ── WORLD 3: Catacumbas Sombrias ────────────────────────────────────────────
@@ -1690,7 +1690,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Entrada das Catacumbas', enemyCharacterId: 'wormon',   enemyLevel: 16, expReward: 800,  gemsFirstClear: 50,  enemyCharacterIds: ['wormon', 'salamon', 'patamon'], randomEnemyCount: 2 },
       { index: 1, name: 'Corredor das Almas',     enemyCharacterId: 'gomamon',  enemyLevel: 16, expReward: 1200, gemsFirstClear: 100, enemyCharacterIds: ['gomamon', 'kokwamon'], randomEnemyCount: 2 },
       { index: 2, name: 'Câmara das Trevas',      enemyCharacterId: 'lalamon',  enemyLevel: 18, expReward: 1800, gemsFirstClear: 150, enemyCharacterIds: ['lalamon', 'wormon', 'salamon'], randomEnemyCount: 2 },
-      { index: 3, name: '⚔️ Boss — Devimon', enemyCharacterId: 'devimon', enemyLevel: 21, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['devimon'] },
+      { index: 3, name: '⚔️ Boss — Devimon', enemyCharacterId: 'devimon', enemyLevel: 21, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['devimon'] },
     ],
   },
   // ── WORLD 4: Floresta Encantada ─────────────────────────────────────────────
@@ -1706,7 +1706,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Prado das Flores',   enemyCharacterId: 'gaomon',   enemyLevel: 21, expReward: 2200,  gemsFirstClear: 50,  enemyCharacterIds: ['gaomon', 'kotemon', 'gabumon'], randomEnemyCount: 2 },
       { index: 1, name: 'Estufa Selvagem',    enemyCharacterId: 'otamamon', enemyLevel: 22, expReward: 3000,  gemsFirstClear: 100, enemyCharacterIds: ['otamamon', 'betamon', 'gaomon'], randomEnemyCount: 2 },
       { index: 2, name: 'Rainha da Floresta', enemyCharacterId: 'greymon',  enemyLevel: 24, expReward: 4200,  gemsFirstClear: 150, enemyCharacterIds: ['greymon', 'garurumon'] },
-      { index: 3, name: '⚔️ Boss — Garurumon', enemyCharacterId: 'garurumon', enemyLevel: 27, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['garurumon'] },
+      { index: 3, name: '⚔️ Boss — Garurumon', enemyCharacterId: 'garurumon', enemyLevel: 27, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['garurumon'] },
     ],
   },
   // ── WORLD 5: Mina de Crômio ─────────────────────────────────────────────────
@@ -1722,7 +1722,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Túnel de Entrada',  enemyCharacterId: 'candlemon',  enemyLevel: 27, expReward: 5000,  gemsFirstClear: 50,  enemyCharacterIds: ['candlemon', 'falcomon', 'hagurumon'], randomEnemyCount: 2 },
       { index: 1, name: 'Veio dos Cristais', enemyCharacterId: 'kamemon',    enemyLevel: 27, expReward: 6500,  gemsFirstClear: 100, enemyCharacterIds: ['kamemon', 'monodramon', 'penguinmon'], randomEnemyCount: 2 },
       { index: 2, name: 'Câmara de Crômio',  enemyCharacterId: 'pipismon',   enemyLevel: 29, expReward: 8500,  gemsFirstClear: 150, enemyCharacterIds: ['pipismon', 'candlemon'] },
-      { index: 3, name: '⚔️ Boss — Guardromon', enemyCharacterId: 'guardromon', enemyLevel: 30, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['guardromon'] },
+      { index: 3, name: '⚔️ Boss — Guardromon', enemyCharacterId: 'guardromon', enemyLevel: 30, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['guardromon'] },
     ],
   },
   // ── WORLD 6: Costa da Luz ───────────────────────────────────────────────────
@@ -1738,7 +1738,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Dunas Sagradas',     enemyCharacterId: 'salamon',  enemyLevel: 30, expReward: 9500,  gemsFirstClear: 50,  enemyCharacterIds: ['salamon', 'solarmon', 'toyagumon'], randomEnemyCount: 2 },
       { index: 1, name: 'Litoral Celestial',  enemyCharacterId: 'patamon',  enemyLevel: 30, expReward: 11500, gemsFirstClear: 100, enemyCharacterIds: ['patamon', 'tailmon', 'angemon'], randomEnemyCount: 3 },
       { index: 2, name: 'Santuário Costeiro', enemyCharacterId: 'piddomon', enemyLevel: 31, expReward: 14000, gemsFirstClear: 150, enemyCharacterIds: ['piddomon', 'angemon'] },
-      { index: 3, name: '⚔️ Boss — Reppamon', enemyCharacterId: 'reppamon', enemyLevel: 33, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['piddomon', 'reppamon'] },
+      { index: 3, name: '⚔️ Boss — Reppamon', enemyCharacterId: 'reppamon', enemyLevel: 33, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['piddomon', 'reppamon'] },
     ],
   },
   // ── WORLD 7: Deserto de Areia ───────────────────────────────────────────────
@@ -1754,7 +1754,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Cânion das Sombras', enemyCharacterId: 'guardromon', enemyLevel: 33, expReward: 15000, gemsFirstClear: 50,  enemyCharacterIds: ['guardromon', 'greymon', 'birdramon'] },
       { index: 1, name: 'Arena do Deserto',   enemyCharacterId: 'togemon',    enemyLevel: 33, expReward: 17000, gemsFirstClear: 100, enemyCharacterIds: ['togemon', 'woodmon', 'stingmon'] },
       { index: 2, name: 'Senhor das Areias',  enemyCharacterId: 'aquilamon',  enemyLevel: 35, expReward: 20000, gemsFirstClear: 150, enemyCharacterIds: ['aquilamon', 'guardromon'] },
-      { index: 3, name: '⚔️ Boss — Ogremon', enemyCharacterId: 'ogremon', enemyLevel: 37, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['aquilamon', 'ogremon'] },
+      { index: 3, name: '⚔️ Boss — Ogremon', enemyCharacterId: 'ogremon', enemyLevel: 37, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.0, def: 1.3 }, enemyCharacterIds: ['aquilamon', 'ogremon'] },
     ],
   },
   // ── WORLD 8: Templo dos Dragões ─────────────────────────────────────────────
@@ -1770,7 +1770,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Salão dos Guerreiros', enemyCharacterId: 'greymon',     enemyLevel: 37, expReward: 21000, gemsFirstClear: 50,  enemyCharacterIds: ['greymon', 'geoGreymon', 'airdramon'] },
       { index: 1, name: 'Câmara dos Campeões',  enemyCharacterId: 'tyranomon',   enemyLevel: 37, expReward: 23500, gemsFirstClear: 100, enemyCharacterIds: ['tyranomon', 'seadramon', 'allomon'] },
       { index: 2, name: 'Trono Dracônico',      enemyCharacterId: 'darktyranomon', enemyLevel: 39, expReward: 26000, gemsFirstClear: 150, enemyCharacterIds: ['darktyranomon', 'airdramon'] },
-      { index: 3, name: '⚔️ Boss — DarkTyranomon', enemyCharacterId: 'darktyranomon', enemyLevel: 41, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.3 }, enemyCharacterIds: ['tyranomon', 'darktyranomon'] },
+      { index: 3, name: '⚔️ Boss — DarkTyranomon', enemyCharacterId: 'darktyranomon', enemyLevel: 41, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.3 }, enemyCharacterIds: ['tyranomon', 'darktyranomon'] },
     ],
   },
   // ── WORLD 9: Pradaria dos Tamers ────────────────────────────────────────────
@@ -1786,7 +1786,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Campos da Glória',   enemyCharacterId: 'angemon',   enemyLevel: 40, expReward: 27000, gemsFirstClear: 50,  enemyCharacterIds: ['angemon', 'tailmon', 'devimon'] },
       { index: 1, name: 'Centro da Pradaria', enemyCharacterId: 'garurumon', enemyLevel: 40, expReward: 29500, gemsFirstClear: 100, enemyCharacterIds: ['garurumon', 'geoGreymon', 'birdramon'] },
       { index: 2, name: 'Altar dos Tamers',   enemyCharacterId: 'geoGreymon',enemyLevel: 40, expReward: 32000, gemsFirstClear: 150, enemyCharacterIds: ['geoGreymon', 'togemon', 'angemon'] },
-      { index: 3, name: '⚔️ Boss — MetalGreymon', enemyCharacterId: 'metalGreymon', enemyLevel: 50, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['geoGreymon', 'metalGreymon'] },
+      { index: 3, name: '⚔️ Boss — MetalGreymon', enemyCharacterId: 'metalGreymon', enemyLevel: 50, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['geoGreymon', 'metalGreymon'] },
     ],
   },
   // ── WORLD 10: Templo das Sombras ────────────────────────────────────────────
@@ -1802,7 +1802,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Entrada Maldita', enemyCharacterId: 'devimon',      enemyLevel: 45, expReward: 33000, gemsFirstClear: 50,  enemyCharacterIds: ['devimon', 'blacktailmon', 'ogremon'] },
       { index: 1, name: 'Salão dos Olhos', enemyCharacterId: 'darklizardmon',enemyLevel: 45, expReward: 35500, gemsFirstClear: 100, enemyCharacterIds: ['darklizardmon', 'devidramon', 'devimon'] },
       { index: 2, name: 'Sanctum Sombrio', enemyCharacterId: 'blacktailmon', enemyLevel: 45, expReward: 38000, gemsFirstClear: 150, enemyCharacterIds: ['blacktailmon', 'devidramon', 'ogremon'] },
-      { index: 3, name: '⚔️ Boss — SkullGreymon', enemyCharacterId: 'skullgreymon', enemyLevel: 52, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['blacktailmon', 'skullgreymon'] },
+      { index: 3, name: '⚔️ Boss — SkullGreymon', enemyCharacterId: 'skullgreymon', enemyLevel: 52, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.2, def: 1.4 }, enemyCharacterIds: ['blacktailmon', 'skullgreymon'] },
     ],
   },
   // ── WORLD 11: Castelo Esquecido ─────────────────────────────────────────────
@@ -1818,7 +1818,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Portão em Ruínas', enemyCharacterId: 'tailmon',      enemyLevel: 50, expReward: 38500, gemsFirstClear: 50,  enemyCharacterIds: ['tailmon', 'geoGreymon'] },
       { index: 1, name: 'Torre Caída',      enemyCharacterId: 'metalGreymon', enemyLevel: 50, expReward: 40500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'wereGarurumon'] },
       { index: 2, name: 'Trono Abandonado', enemyCharacterId: 'myotismon',    enemyLevel: 50, expReward: 42500, gemsFirstClear: 150, enemyCharacterIds: ['myotismon', 'metalGreymon'] },
-      { index: 3, name: '⚔️ Boss — Angewomon', enemyCharacterId: 'angewomon', enemyLevel: 55, expReward: 0, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angemon', 'tailmon', 'angewomon'] },
+      { index: 3, name: '⚔️ Boss — Angewomon', enemyCharacterId: 'angewomon', enemyLevel: 55, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 2 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angemon', 'tailmon', 'angewomon'] },
     ],
   },
   // ── WORLD 12: Vale dos Fósseis ───────────────────────────────────────────────
@@ -1834,7 +1834,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Cânion dos Ossos',   enemyCharacterId: 'angewomon',    enemyLevel: 50, expReward: 43000, gemsFirstClear: 50,  enemyCharacterIds: ['angewomon', 'wereGarurumon'] },
       { index: 1, name: 'Gruta dos Fósseis',  enemyCharacterId: 'metalGreymon', enemyLevel: 52, expReward: 44500, gemsFirstClear: 100, enemyCharacterIds: ['metalGreymon', 'myotismon'] },
       { index: 2, name: 'Guardião Ancestral', enemyCharacterId: 'garudamon',    enemyLevel: 52, expReward: 46000, gemsFirstClear: 150, enemyCharacterIds: ['garudamon', 'angewomon'] },
-      { index: 3, name: '⚔️ Boss — MagnaAngemon', enemyCharacterId: 'magnaAngemon', enemyLevel: 60, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['garudamon', 'metalGreymon', 'magnaAngemon'] },
+      { index: 3, name: '⚔️ Boss — MagnaAngemon', enemyCharacterId: 'magnaAngemon', enemyLevel: 60, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['garudamon', 'metalGreymon', 'magnaAngemon'] },
     ],
   },
   // ── WORLD 13: Base Secreta ───────────────────────────────────────────────────
@@ -1850,7 +1850,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Setor de Armazenamento', enemyCharacterId: 'magnaAngemon', enemyLevel: 53, expReward: 46000, gemsFirstClear: 50,  enemyCharacterIds: ['magnaAngemon', 'garudamon'] },
       { index: 1, name: 'Câmara de Controle',     enemyCharacterId: 'wereGarurumon',enemyLevel: 56, expReward: 47500, gemsFirstClear: 100, enemyCharacterIds: ['wereGarurumon', 'myotismon'] },
       { index: 2, name: 'Núcleo da Base',         enemyCharacterId: 'rizeGreymon',  enemyLevel: 56, expReward: 49000, gemsFirstClear: 150, enemyCharacterIds: ['rizeGreymon', 'magnaAngemon'] },
-      { index: 3, name: '⚔️ Boss — Myotismon', enemyCharacterId: 'myotismon', enemyLevel: 62, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'wereGarurumon', 'myotismon'] },
+      { index: 3, name: '⚔️ Boss — Myotismon', enemyCharacterId: 'myotismon', enemyLevel: 62, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'wereGarurumon', 'myotismon'] },
     ],
   },
   // ── WORLD 14: Monte Infernus ─────────────────────────────────────────────────
@@ -1866,7 +1866,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Planícies de Lava',  enemyCharacterId: 'myotismon',   enemyLevel: 66, expReward: 48000, gemsFirstClear: 50,  enemyCharacterIds: ['myotismon', 'wereGarurumon'] },
       { index: 1, name: 'Fendas Vulcânicas',  enemyCharacterId: 'garudamon',   enemyLevel: 66, expReward: 49500, gemsFirstClear: 100, enemyCharacterIds: ['garudamon', 'angewomon'] },
       { index: 2, name: 'Cume do Infernus',   enemyCharacterId: 'lillymon',    enemyLevel: 66, expReward: 50500, gemsFirstClear: 150, enemyCharacterIds: ['lillymon', 'rizeGreymon'] },
-      { index: 3, name: '⚔️ Boss — Rosemon', enemyCharacterId: 'rosemon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['lillymon', 'garudamon', 'rosemon'] },
+      { index: 3, name: '⚔️ Boss — Rosemon', enemyCharacterId: 'rosemon', enemyLevel: 70, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['lillymon', 'garudamon', 'rosemon'] },
     ],
   },
   // ── WORLD 15: Pântano Digital ────────────────────────────────────────────────
@@ -1882,7 +1882,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Margem do Pântano',   enemyCharacterId: 'rizeGreymon',  enemyLevel: 66, expReward: 49000, gemsFirstClear: 50,  enemyCharacterIds: ['rizeGreymon', 'garudamon'] },
       { index: 1, name: 'Profundeza do Brejo', enemyCharacterId: 'lillymon',     enemyLevel: 66, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['lillymon', 'magnaAngemon'] },
       { index: 2, name: 'Raiz das Trevas',     enemyCharacterId: 'vnonMyotismon',enemyLevel: 66, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['vnonMyotismon', 'rosemon'] },
-      { index: 3, name: '⚔️ Boss — WarGreymon', enemyCharacterId: 'warGreymon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'garudamon', 'warGreymon'] },
+      { index: 3, name: '⚔️ Boss — WarGreymon', enemyCharacterId: 'warGreymon', enemyLevel: 70, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'garudamon', 'warGreymon'] },
     ],
   },
   // ── WORLD 16: Desfiladeiro dos Ventos ───────────────────────────────────────
@@ -1898,7 +1898,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Entrada do Desfiladeiro', enemyCharacterId: 'warGreymon',    enemyLevel: 66, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['warGreymon', 'metalGarurumon'] },
       { index: 1, name: 'Passagem dos Ventos',     enemyCharacterId: 'seraphimon',    enemyLevel: 67, expReward: 50000, gemsFirstClear: 100, enemyCharacterIds: ['seraphimon', 'warGreymon'] },
       { index: 2, name: 'Saída dos Guerreiros',    enemyCharacterId: 'metalGarurumon',enemyLevel: 67, expReward: 51000, gemsFirstClear: 150, enemyCharacterIds: ['metalGarurumon', 'goldramon'] },
-      { index: 3, name: '⚔️ Boss — Ophanimon', enemyCharacterId: 'ophanimon', enemyLevel: 70, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angewomon', 'seraphimon', 'ophanimon'] },
+      { index: 3, name: '⚔️ Boss — Ophanimon', enemyCharacterId: 'ophanimon', enemyLevel: 70, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 2.5, def: 1.5 }, enemyCharacterIds: ['angewomon', 'seraphimon', 'ophanimon'] },
     ],
   },
   // ── WORLD 17: Clareira Sagrada ───────────────────────────────────────────────
@@ -1914,7 +1914,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Caminho Iluminado', enemyCharacterId: 'ophanimon',  enemyLevel: 70, expReward: 50000, gemsFirstClear: 50,  enemyCharacterIds: ['ophanimon', 'seraphimon'] },
       { index: 1, name: 'Altar da Floresta', enemyCharacterId: 'goldramon',  enemyLevel: 70, expReward: 51000, gemsFirstClear: 100, enemyCharacterIds: ['goldramon', 'magnadramon'] },
       { index: 2, name: 'Centro da Clareira',enemyCharacterId: 'phoenixmon', enemyLevel: 70, expReward: 52000, gemsFirstClear: 150, enemyCharacterIds: ['phoenixmon', 'goldramon'] },
-      { index: 3, name: '⚔️ Boss — ShineGreymon', enemyCharacterId: 'shineGreymon', enemyLevel: 80, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'phoenixmon', 'shineGreymon'] },
+      { index: 3, name: '⚔️ Boss — ShineGreymon', enemyCharacterId: 'shineGreymon', enemyLevel: 80, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['rizeGreymon', 'phoenixmon', 'shineGreymon'] },
     ],
   },
   // ── WORLD 18: Zona Kernel ────────────────────────────────────────────────────
@@ -1930,7 +1930,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Plataformas Flutuantes', enemyCharacterId: 'shineGreymon', enemyLevel: 68, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymon', 'warGreymon'] },
       { index: 1, name: 'Corredor de Dados',      enemyCharacterId: 'magnadramon',  enemyLevel: 68, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['magnadramon', 'rosemon'] },
       { index: 2, name: 'Coração do Kernel',      enemyCharacterId: 'rosemon',      enemyLevel: 68, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['rosemon', 'phoenixmon', 'magnadramon'] },
-      { index: 3, name: '⚔️ Boss — Sinduramon', enemyCharacterId: 'sinduramon', enemyLevel: 80, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['phoenixmon', 'shineGreymon', 'sinduramon'] },
+      { index: 3, name: '⚔️ Boss — Sinduramon', enemyCharacterId: 'sinduramon', enemyLevel: 80, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 1.5 }, enemyCharacterIds: ['phoenixmon', 'shineGreymon', 'sinduramon'] },
     ],
   },
   // ── WORLD 19: Setor Omega ────────────────────────────────────────────────────
@@ -1946,7 +1946,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Setor Industrial',   enemyCharacterId: 'sinduramon',     enemyLevel: 68, expReward: 51000, gemsFirstClear: 50,  enemyCharacterIds: ['sinduramon', 'shineGreymon'] },
       { index: 1, name: 'Núcleo de Controle', enemyCharacterId: 'gulusGammamon',  enemyLevel: 68, expReward: 52000, gemsFirstClear: 100, enemyCharacterIds: ['gulusGammamon', 'sinduramon'] },
       { index: 2, name: 'Câmara Omega',       enemyCharacterId: 'valdurmon',      enemyLevel: 68, expReward: 53000, gemsFirstClear: 150, enemyCharacterIds: ['valdurmon', 'gulusGammamon'] },
-      { index: 3, name: '⚔️ Boss — GulusGammamon', enemyCharacterId: 'gulusGammamon', enemyLevel: 81, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 2.0 }, enemyCharacterIds: ['valdurmon', 'regulusmon', 'gulusGammamon'] },
+      { index: 3, name: '⚔️ Boss — GulusGammamon', enemyCharacterId: 'gulusGammamon', enemyLevel: 81, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.0, def: 2.0 }, enemyCharacterIds: ['valdurmon', 'regulusmon', 'gulusGammamon'] },
     ],
   },
   // ── WORLD 20: Corredor Final ─────────────────────────────────────────────────
@@ -1962,7 +1962,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Corredor de Aço',    enemyCharacterId: 'valdurmon',         enemyLevel: 68,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['valdurmon', 'sinduramon'] },
       { index: 1, name: 'Sala de Julgamento', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 70, expReward: 53000, gemsFirstClear: 100, enemyCharacterIds: ['shineGreymonBurstMode', 'warGreymon'] },
       { index: 2, name: 'Portal do Fim',      enemyCharacterId: 'rosemonBurstMode',  enemyLevel: 70, expReward: 54000, gemsFirstClear: 150, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'valdurmon'] },
-      { index: 3, name: '⚔️ Boss — RosemonBurstMode', enemyCharacterId: 'rosemonBurstMode', enemyLevel: 85, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.5, def: 2.0 }, enemyCharacterIds: ['valdurmon', 'shineGreymonBurstMode', 'rosemonBurstMode'] },
+      { index: 3, name: '⚔️ Boss — RosemonBurstMode', enemyCharacterId: 'rosemonBurstMode', enemyLevel: 85, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 3.5, def: 2.0 }, enemyCharacterIds: ['valdurmon', 'shineGreymonBurstMode', 'rosemonBurstMode'] },
     ],
   },
   // ── WORLD 21: Arena dos Dados ───────────────────────────────────────────────
@@ -1978,7 +1978,7 @@ export const GAME_MAPS: GameMap[] = [
       { index: 0, name: 'Pista de Entrada', enemyCharacterId: 'shineGreymonBurstMode', enemyLevel: 72,  expReward: 52000, gemsFirstClear: 50,  enemyCharacterIds: ['shineGreymonBurstMode', 'rosemonBurstMode'] },
       { index: 1, name: 'Centro da Arena',  enemyCharacterId: 'valdurmon',             enemyLevel: 72,  expReward: 54000, gemsFirstClear: 100, enemyCharacterIds: ['valdurmon', 'gulusGammamon', 'sinduramon'] },
       { index: 2, name: 'Final do Torneio', enemyCharacterId: 'rosemonBurstMode',      enemyLevel: 72, expReward: 55000, gemsFirstClear: 200, enemyCharacterIds: ['shineGreymonBurstMode', 'metalGarurumon', 'warGreymon'] },
-      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 88, expReward: 0, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'omegamon'] },
+      { index: 3, name: '⚔️ Boss — Omegamon', enemyCharacterId: 'omegamon', enemyLevel: 88, expReward: 0, gemsFirstClear: 100, isBoss: true, tamerCrestReward: { amount: 3 }, bossMultipliers: { hp: 4.0, def: 2.5 }, enemyCharacterIds: ['rosemonBurstMode', 'shineGreymonBurstMode', 'omegamon'] },
     ],
   },
   // ── DUNGEONS (ao final) ──────────────────────────────────────────────────────
@@ -2063,6 +2063,7 @@ export const GAME_MAPS: GameMap[] = [
         enemyCharacterId: 'lucemonChaosMode',
         enemyLevel: 10,
         expReward: 3600,
+        gemsFirstClear: 100,
         bossMultipliers: { hp: 1.5, def: 1.2 },
         drops: [
           { type: 'bits', amount: 500, chance: 1.00 },
@@ -2086,6 +2087,7 @@ export const GAME_MAPS: GameMap[] = [
         enemyCharacterId: 'gulusGammamon',
         enemyLevel: 25,
         expReward: 0,
+        gemsFirstClear: 100,
         bossMultipliers: { hp: 2, def: 4 / 3 },
         firstClearReward: 'digivice_d2',
         drops: [
@@ -2123,6 +2125,7 @@ export const GAME_MAPS: GameMap[] = [
         enemyLevels: [60, 60, 60],
         enemyAscensionStarsByIndex: [0, 0, 0],
         expReward: 0,
+        gemsFirstClear: 100,
         drops: [
           { type: 'piece', id: 'piece_digivice_d3', amount: 1, chance: 0.10 },
           { type: 'piece', id: 'piece_digivice_d_ark', amount: 1, chance: 0.10 },
