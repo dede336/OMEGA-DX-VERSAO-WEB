@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image, Easing, FlatList,
+  Platform, Modal, Pressable, Animated, Image, Easing, FlatList, Alert,
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -204,6 +204,7 @@ export default function CollectionScreen() {
   const {
     collection, selectedCharacter, setSelectedCharacter, evolveDigimon, changeFormDigimon,
     pieces, inventory, sacrificeDigimon, isAdmin, tamerId, useXpItem,
+    tamerLevel, farmEggSlots, farmNurserySlots, sendToFarmProcess,
     ascendDigimon, craftGoldenAscensionStar,
   } = useGame();
   const tamerAccent = TAMERS.find(t => t.id === tamerId)?.accentColor;
@@ -586,8 +587,39 @@ export default function CollectionScreen() {
                     </View>
                   )}
 
-                  {/* Evolution row */}
-                  {modalEvo && modalEvoChar ? (
+                  {/* Pré-Rookie só é processado na DigiFarm. */}
+                  {char && ['EGG','BABY','TRAINING'].includes(String(char.rarity)) && (
+                    <TouchableOpacity
+                      style={[styles.evoRow, { backgroundColor: '#16a34a22', borderColor: '#16a34a', marginBottom: 12 }]}
+                      activeOpacity={0.85}
+                      onPress={() => {
+                        const ok = sendToFarmProcess(modalOwned.ownedId);
+                        if (ok) {
+                          Alert.alert(
+                            'Digifarm',
+                            char.rarity === 'EGG'
+                              ? 'Ovo enviado para a incubadora. Tempo para chocar: 1 hora.'
+                              : char.rarity === 'BABY'
+                                ? 'Digimon enviado para treinamento. Evolui em 1 hora.'
+                                : 'Digimon enviado para treinamento. Evolui para Rookie em 2 horas e 30 minutos.',
+                          );
+                          closeModal();
+                        } else {
+                          const max = Math.max(1, Math.min(5, Math.floor(tamerLevel)));
+                          const used = char.rarity === 'EGG' ? farmEggSlots.length : farmNurserySlots.length;
+                          Alert.alert('Slots ocupados', `Você possui ${used}/${max} slots disponíveis para esta área da Digifarm.`);
+                        }
+                      }}
+                    >
+                      <Feather name={char.rarity === 'EGG' ? 'sun' : 'activity'} size={18} color="#16a34a" />
+                      <Text style={[styles.evoRowText, { color: '#16a34a' }]}>
+                        {char.rarity === 'EGG' ? 'LEVAR PARA CHOCAR' : 'LEVAR PARA TREINAR'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Evolution row — Baby/Training não evoluem no DigiBank */}
+                  {char && !['EGG','BABY','TRAINING'].includes(String(char.rarity)) && modalEvo && modalEvoChar ? (
                     modalCanEvolve ? (
                       <TouchableOpacity
                         style={[styles.evoRow, { backgroundColor: '#f59e0b22', borderColor: '#f59e0b' }]}
