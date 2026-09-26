@@ -189,7 +189,6 @@ const ATTR_FILTERS = [
 
 const RARITY_FILTERS = [
   { key: '', label: 'Todas' },
-  { key: 'EGG',       label: 'Ovo'         },
   { key: 'BABY',      label: 'Bebê'        },
   { key: 'TRAINING',  label: 'Treinamento' },
   { key: 'ROOKIE',    label: 'Rookie'      },
@@ -286,7 +285,7 @@ export default function BancoScreen() {
     const seen = new Set<string>();
     return preferredOrder.flatMap((id) => {
       const char = registered[id];
-      if (!char) return [];
+      if (!char || char.rarity === 'EGG') return [];
       const canonicalId = char.id || id;
       const uniqueKey = char.name.trim().toLowerCase();
       if (seen.has(uniqueKey)) return [];
