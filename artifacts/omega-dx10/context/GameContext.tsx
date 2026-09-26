@@ -191,6 +191,11 @@ interface GameState {
   farmSlots: string[];
   farmLastClaim: number;
   farmEntryTimes: Record<string, number>;
+  // Dedicated DigiFarm processing lanes. Normal slots never contain Eggs/Baby/Training.
+  farmNurserySlots: string[];
+  farmEggSlots: string[];
+  farmNurseryEntryTimes: Record<string, number>;
+  farmEggEntryTimes: Record<string, number>;
   farmFoods: Record<string, number>;
   farmLastFeed: Record<string, number>;
   farmBattleRequests: Record<string, { requestedAt: number; nextRequestAt: number; fulfilled: boolean }>;
@@ -250,6 +255,12 @@ interface GameContextValue extends GameState {
   isDailyDungeonAvailable: boolean;
   claimDailyDungeon: () => void;
   setFarmSlots: (slots: string[], resetTime?: boolean) => void;
+  setFarmNurserySlots: (slots: string[]) => void;
+  setFarmEggSlots: (slots: string[]) => void;
+  sendToFarmProcess: (ownedId: string) => boolean;
+  accelerateFarmProcess: (ownedId: string) => boolean;
+  completeFarmProcess: (ownedId: string) => boolean;
+  claimFarmProduction: () => { green: number; purple: number; gold: number; pills: number; gems: number } | null;
   processFarmEvolutions: () => void;
   addFarmFood: (foodId: string, qty: number) => void;
   feedFarmDigimon: (ownedId: string, foodId: string) => boolean;
@@ -440,6 +451,10 @@ const defaultState: GameState = {
   farmSlots: [],
   farmLastClaim: Date.now(),
   farmEntryTimes: {},
+  farmNurserySlots: [],
+  farmEggSlots: [],
+  farmNurseryEntryTimes: {},
+  farmEggEntryTimes: {},
   farmFoods: {},
   farmLastFeed: {},
   farmBattleRequests: {},
@@ -526,6 +541,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             farmSlots: parsed.farmSlots ?? [],
             farmLastClaim: parsed.farmLastClaim ?? Date.now(),
             farmEntryTimes: (parsed as any).farmEntryTimes ?? {},
+            farmNurserySlots: (parsed as any).farmNurserySlots ?? [],
+            farmEggSlots: (parsed as any).farmEggSlots ?? [],
+            farmNurseryEntryTimes: (parsed as any).farmNurseryEntryTimes ?? {},
+            farmEggEntryTimes: (parsed as any).farmEggEntryTimes ?? {},
             farmFoods: (parsed as any).farmFoods ?? {},
             farmLastFeed: (parsed as any).farmLastFeed ?? {},
             farmBattleRequests: (parsed as any).farmBattleRequests ?? {},
@@ -1721,53 +1740,196 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const processFarmEvolutions = useCallback(() => {
+  const FARM_EGG_MS = 60 * 60 * 1000;
+  const FARM_BABY_MS = 60 * 60 * 1000;
+  const FARM_TRAINING_MS = 150 * 60 * 1000;
+  const farmProcessMaxSlots = (level: number) => Math.max(1, Math.min(5, Math.floor(level)));
+
+  const setFarmNurserySlots = useCallback((slots: string[]) => {
     setState((prev) => {
-      let collection = [...prev.collection];
-      let farmSlots = [...prev.farmSlots];
-      let farmEntryTimes = { ...prev.farmEntryTimes };
+      const max = farmProcessMaxSlots(prev.tamerLevel);
+      const clean = slots.filter(Boolean).slice(0, max);
       const now = Date.now();
-      const ONE_DAY = 24 * 60 * 60 * 1000;
-      let changed = false;
-
-      for (const ownedId of [...farmSlots]) {
-        const owned = collection.find((c) => c.ownedId === ownedId);
-        if (!owned) continue;
-        const char = getCharacter(owned.characterId);
-        if (!char) continue;
-        const rarity = char.rarity as string;
-        if (!PRE_ROOKIE_STAGE_RARITIES.has(rarity as any)) continue;
-
-        const entryTime = farmEntryTimes[ownedId] ?? now;
-        const elapsed = now - entryTime;
-
-        if ((rarity === 'EGG' || rarity === 'BABY') && elapsed >= ONE_DAY) {
-          const target = rarity === 'EGG'
-            ? getRandomHatchTarget(char.element, owned.characterId === 'specialDigitama')
-            : getFarmEvolutionTarget(owned.characterId);
-          if (target) {
-            collection = collection.map((c) =>
-              c.ownedId === ownedId ? { ...c, characterId: target, level: 1, exp: 0 } : c
-            );
-            farmEntryTimes[ownedId] = now;
-            changed = true;
-          }
-        } else if (rarity === 'TRAINING' && owned.level >= 5) {
-          const target = getFarmEvolutionTarget(owned.characterId);
-          if (target) {
-            collection = collection.map((c) =>
-              c.ownedId === ownedId ? { ...c, characterId: target, level: 1, exp: 0 } : c
-            );
-            farmSlots = farmSlots.filter((id) => id !== ownedId);
-            delete farmEntryTimes[ownedId];
-            changed = true;
-          }
-        }
-      }
-
-      if (!changed) return prev;
-      return { ...prev, collection, farmSlots, farmEntryTimes };
+      const times = { ...prev.farmNurseryEntryTimes };
+      clean.forEach((id) => { if (!prev.farmNurserySlots.includes(id)) times[id] = now; });
+      prev.farmNurserySlots.forEach((id) => { if (!clean.includes(id)) delete times[id]; });
+      return { ...prev, farmNurserySlots: clean, farmNurseryEntryTimes: times };
     });
+  }, []);
+
+  const setFarmEggSlots = useCallback((slots: string[]) => {
+    setState((prev) => {
+      const max = farmProcessMaxSlots(prev.tamerLevel);
+      const clean = slots.filter(Boolean).slice(0, max);
+      const now = Date.now();
+      const times = { ...prev.farmEggEntryTimes };
+      clean.forEach((id) => { if (!prev.farmEggSlots.includes(id)) times[id] = now; });
+      prev.farmEggSlots.forEach((id) => { if (!clean.includes(id)) delete times[id]; });
+      return { ...prev, farmEggSlots: clean, farmEggEntryTimes: times };
+    });
+  }, []);
+
+  const sendToFarmProcess = useCallback((ownedId: string): boolean => {
+    const prev = stateRef.current;
+    const owned = prev.collection.find((entry) => entry.ownedId === ownedId);
+    const char = owned ? getCharacter(owned.characterId) : undefined;
+    if (!owned || !char) return false;
+    const rarity = String(char.rarity);
+    const max = farmProcessMaxSlots(prev.tamerLevel);
+    if (rarity === 'EGG') {
+      if (prev.farmEggSlots.includes(ownedId)) return true;
+      if (prev.farmEggSlots.length >= max) return false;
+      setState((s) => ({
+        ...s,
+        farmSlots: s.farmSlots.filter((id) => id !== ownedId),
+        farmNurserySlots: s.farmNurserySlots.filter((id) => id !== ownedId),
+        farmEggSlots: [...s.farmEggSlots, ownedId],
+        farmEggEntryTimes: { ...s.farmEggEntryTimes, [ownedId]: Date.now() },
+      }));
+      return true;
+    }
+    if (rarity === 'BABY' || rarity === 'TRAINING') {
+      if (prev.farmNurserySlots.includes(ownedId)) return true;
+      if (prev.farmNurserySlots.length >= max) return false;
+      setState((s) => ({
+        ...s,
+        farmSlots: s.farmSlots.filter((id) => id !== ownedId),
+        farmEggSlots: s.farmEggSlots.filter((id) => id !== ownedId),
+        farmNurserySlots: [...s.farmNurserySlots, ownedId],
+        farmNurseryEntryTimes: { ...s.farmNurseryEntryTimes, [ownedId]: Date.now() },
+      }));
+      return true;
+    }
+    return false;
+  }, []);
+
+  const accelerateFarmProcess = useCallback((ownedId: string): boolean => {
+    const prev = stateRef.current;
+    if (prev.gemas < 100) return false;
+    const owned = prev.collection.find((entry) => entry.ownedId === ownedId);
+    const char = owned ? getCharacter(owned.characterId) : undefined;
+    if (!owned || !char) return false;
+    const now = Date.now();
+    const rarity = String(char.rarity);
+    if (rarity === 'EGG' && prev.farmEggSlots.includes(ownedId)) {
+      setState((s) => ({ ...s, gemas: s.gemas - 100, farmEggEntryTimes: { ...s.farmEggEntryTimes, [ownedId]: now - FARM_EGG_MS } }));
+      return true;
+    }
+    if ((rarity === 'BABY' || rarity === 'TRAINING') && prev.farmNurserySlots.includes(ownedId)) {
+      const duration = rarity === 'BABY' ? FARM_BABY_MS : FARM_TRAINING_MS;
+      setState((s) => ({ ...s, gemas: s.gemas - 100, farmNurseryEntryTimes: { ...s.farmNurseryEntryTimes, [ownedId]: now - duration } }));
+      return true;
+    }
+    return false;
+  }, []);
+
+  const completeFarmProcess = useCallback((ownedId: string): boolean => {
+    const prev = stateRef.current;
+    const owned = prev.collection.find((entry) => entry.ownedId === ownedId);
+    const char = owned ? getCharacter(owned.characterId) : undefined;
+    if (!owned || !char) return false;
+    const rarity = String(char.rarity);
+    const now = Date.now();
+
+    if (rarity === 'EGG' && prev.farmEggSlots.includes(ownedId)) {
+      const started = prev.farmEggEntryTimes[ownedId] ?? now;
+      if (now - started < FARM_EGG_MS) return false;
+      const max = farmProcessMaxSlots(prev.tamerLevel);
+      if (prev.farmNurserySlots.length >= max) return false;
+      const target = getRandomHatchTarget(char.element, owned.characterId === 'specialDigitama');
+      if (!target) return false;
+      setState((s) => {
+        const eggTimes = { ...s.farmEggEntryTimes }; delete eggTimes[ownedId];
+        return {
+          ...s,
+          collection: s.collection.map((entry) => entry.ownedId === ownedId ? { ...entry, characterId: target, level: 1, exp: 0 } : entry),
+          farmEggSlots: s.farmEggSlots.filter((id) => id !== ownedId),
+          farmEggEntryTimes: eggTimes,
+          farmNurserySlots: [...s.farmNurserySlots, ownedId],
+          farmNurseryEntryTimes: { ...s.farmNurseryEntryTimes, [ownedId]: now },
+        };
+      });
+      return true;
+    }
+
+    if ((rarity === 'BABY' || rarity === 'TRAINING') && prev.farmNurserySlots.includes(ownedId)) {
+      const duration = rarity === 'BABY' ? FARM_BABY_MS : FARM_TRAINING_MS;
+      const started = prev.farmNurseryEntryTimes[ownedId] ?? now;
+      if (now - started < duration) return false;
+      const target = getFarmEvolutionTarget(owned.characterId);
+      if (!target) return false;
+      setState((s) => {
+        const nextChar = getCharacter(target);
+        const becomesRookie = String(nextChar?.rarity) === 'ROOKIE';
+        const times = { ...s.farmNurseryEntryTimes };
+        if (becomesRookie) delete times[ownedId]; else times[ownedId] = now;
+        return {
+          ...s,
+          collection: s.collection.map((entry) => entry.ownedId === ownedId ? { ...entry, characterId: target, level: 1, exp: 0 } : entry),
+          farmNurserySlots: becomesRookie ? s.farmNurserySlots.filter((id) => id !== ownedId) : s.farmNurserySlots,
+          farmNurseryEntryTimes: times,
+        };
+      });
+      return true;
+    }
+    return false;
+  }, []);
+
+  const claimFarmProduction = useCallback(() => {
+    const prev = stateRef.current;
+    const now = Date.now();
+    const elapsed = Math.min(Math.max(0, now - prev.farmLastClaim), 5 * 60 * 60 * 1000);
+    if (elapsed < 30 * 60 * 1000 || prev.farmSlots.length === 0) return null;
+
+    let green = 0, purple = 0, gold = 0, pills = 0, gems = 0;
+    const itemCycles = Math.min(10, Math.floor(elapsed / (30 * 60 * 1000)));
+    const gemCycles = Math.min(5, Math.floor(elapsed / (60 * 60 * 1000)));
+    let eligible = 0;
+
+    for (const ownedId of prev.farmSlots.slice(0, 5)) {
+      let sat = 50;
+      const lastFeed = prev.farmLastFeed[ownedId] ?? 0;
+      const sinceFeed = lastFeed > 0 ? now - lastFeed : Infinity;
+      if (sinceFeed < 4 * 3600000) sat += 30;
+      else if (sinceFeed > 8 * 3600000) sat -= 20;
+      else sat -= 10;
+      const req = prev.farmBattleRequests[ownedId];
+      if (req) {
+        if (req.fulfilled) sat += 20;
+        else if (now - req.requestedAt > 5 * 3600000) sat -= 20;
+      }
+      if (sat < 50) continue; // "Boa" ou superior.
+      eligible += 1;
+      for (let i = 0; i < itemCycles; i += 1) {
+        const roll = Math.random();
+        if (roll < 0.40) green += 1;
+        else if (roll < 0.70) purple += 1;
+        else if (roll < 0.90) gold += 1;
+        else pills += 1;
+      }
+      gems += gemCycles * 10;
+    }
+
+    if (eligible === 0) return null;
+    setState((s) => ({
+      ...s,
+      farmLastClaim: now,
+      gemas: s.gemas + gems,
+      pieces: {
+        ...s.pieces,
+        piece_battery_green: (s.pieces.piece_battery_green ?? 0) + green,
+        piece_battery_purple: (s.pieces.piece_battery_purple ?? 0) + purple,
+        piece_battery_gold: (s.pieces.piece_battery_gold ?? 0) + gold,
+      },
+      inventory: [...s.inventory, ...Array.from({ length: pills }, () => 'pilula_energetica')],
+    }));
+    return { green, purple, gold, pills, gems };
+  }, []);
+
+  // Legacy entry point retained for compatibility. Evolution is now manual in DigiFarm:
+  // timers only mark Egg/Baby/Training as ready; nothing evolves automatically.
+  const processFarmEvolutions = useCallback(() => {
+    return;
   }, []);
 
   const isDailyDungeonAvailable = state.lastDailyDate !== getTodayDateString();
@@ -2015,6 +2177,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         farmSlots: parsed.farmSlots ?? [],
         farmLastClaim: parsed.farmLastClaim ?? Date.now(),
         farmEntryTimes: (parsed as any).farmEntryTimes ?? {},
+        farmNurserySlots: (parsed as any).farmNurserySlots ?? [],
+        farmEggSlots: (parsed as any).farmEggSlots ?? [],
+        farmNurseryEntryTimes: (parsed as any).farmNurseryEntryTimes ?? {},
+        farmEggEntryTimes: (parsed as any).farmEggEntryTimes ?? {},
         farmFoods: (parsed as any).farmFoods ?? {},
         farmLastFeed: (parsed as any).farmLastFeed ?? {},
         farmBattleRequests: (parsed as any).farmBattleRequests ?? {},
@@ -2098,6 +2264,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         isDailyDungeonAvailable,
         claimDailyDungeon,
         setFarmSlots,
+        setFarmNurserySlots,
+        setFarmEggSlots,
+        sendToFarmProcess,
+        accelerateFarmProcess,
+        completeFarmProcess,
+        claimFarmProduction,
         processFarmEvolutions,
         addFarmFood,
         feedFarmDigimon,
