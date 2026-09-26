@@ -622,14 +622,18 @@ export function getCharacterImageSource(id: string): any {
   }
   const ov = _overrides[id];
   if (ov?.overrideImageUrl) return { uri: ov.overrideImageUrl };
-  if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
+
+  // Bundled Digimon artwork is the canonical visual when it exists.
+  // The server image is only a fallback. This prevents stale DB images from
+  // replacing corrected assets such as Flamon.gif and ZeedMillenniumon.gif.
   if ((CHARACTER_IMAGES as Record<string, any>)[id]) return (CHARACTER_IMAGES as Record<string, any>)[id];
-  const custom = _catalogChars[id];
-  if (custom) {
-    const localByName = custom.name ? _IMAGE_BY_NORM[_normKey(custom.name)] : undefined;
+  const catalogCharacter = _catalogChars[id];
+  if (catalogCharacter) {
+    const localByName = catalogCharacter.name ? _IMAGE_BY_NORM[_normKey(catalogCharacter.name)] : undefined;
     if (localByName) return localByName;
-    if (custom.imageApiUrl) return { uri: custom.imageApiUrl };
   }
+  if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
+  if (catalogCharacter?.imageApiUrl) return { uri: catalogCharacter.imageApiUrl };
   return null;
 }
 
