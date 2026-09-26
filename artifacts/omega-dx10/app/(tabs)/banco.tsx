@@ -142,15 +142,15 @@ function renderMethodLabel(m: ObtainMethod): { icon: string; label: string; colo
       const fromName = getCharacter(m.from)?.name ?? m.from;
       const sacrificeName = m.sacrifice ? (getCharacter(m.sacrifice)?.name ?? m.sacrifice) : null;
       const multiSacNames = m.sacrifices && m.sacrifices.length > 0
-        ? m.sacrifices.map((cid) => CHARACTERS[cid]?.name ?? cid).join(', ')
+        ? m.sacrifices.map((cid) => getCharacter(cid)?.name ?? cid).join(', ')
         : null;
       const itemLabel = m.item ? ' + Item Especial' : '';
       const sacLabel = multiSacNames ? ` + Sacrificar [${multiSacNames}]` : sacrificeName ? ` + Sacrificar ${sacrificeName}` : '';
       return { icon: '✨', label: `Evolução Alt. de ${fromName} (Lv ${m.level})${sacLabel}${itemLabel}`, color: '#fb923c' };
     }
     case 'fusion': {
-      const aName = CHARACTERS[m.a]?.name ?? m.a;
-      const bName = CHARACTERS[m.b]?.name ?? m.b;
+      const aName = getCharacter(m.a)?.name ?? m.a;
+      const bName = getCharacter(m.b)?.name ?? m.b;
       return { icon: '🔀', label: `Fusão: ${aName} + ${bName} (Lv ${m.level})`, color: '#e879f9' };
     }
     case 'customEvo': {
@@ -273,8 +273,7 @@ export default function BancoScreen() {
 
   const baseEntries = useMemo(() => {
     // There must be a single registered roster. getAllCharacters() is the
-    // canonical registry used by the rest of the game and already merges
-    // static CHARACTERS with every server Digimon loaded at runtime.
+    // canonical registry used by the rest of the game: server catalogue only.
     const registered = getAllCharacters();
     const preferredOrder = [
       ...CODEX_ORDER,
@@ -292,7 +291,7 @@ export default function BancoScreen() {
 
       const methods = getObtainMethods(id);
       const isOwned = ownedSet.has(id) || ownedSet.has(canonicalId);
-      const isCatalog = !Object.prototype.hasOwnProperty.call(CHARACTERS, id);
+      const isCatalog = true;
       return [{
         id,
         char,
@@ -307,7 +306,7 @@ export default function BancoScreen() {
 
   const normalizeRarity = (r: string): string => r;
 
-  // baseEntries already comes from the canonical registry (static + server/custom).
+  // baseEntries already comes from the single server-backed canonical registry.
   // Keeping a second custom list here would create two different registries and duplicates.
   const catalogEntries = useMemo(() => [], [rosterRevision]);
 
@@ -648,7 +647,7 @@ export default function BancoScreen() {
                 .filter((charId) => {
                   const q = search.trim().toLowerCase();
                   if (!q) return true;
-                  const char = CHARACTERS[charId];
+                  const char = getCharacter(charId);
                   return char ? char.name.toLowerCase().includes(q) : true;
                 })
                 .map((charId) => {
