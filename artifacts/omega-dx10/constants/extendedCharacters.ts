@@ -285,11 +285,26 @@ export function loadCustomCharacters(chars: CustomDigimonRaw[], apiUrl: string) 
   }
 
   // Build element → baby pool for egg hatching.
-  // Only babies that have a TRAINING target in _farmEvoMap are valid hatch candidates.
+  // Every registered BABY is a valid Special Digitama hatch result.
+  // Normal elemental eggs still use their own element-specific pool.
   for (const c of chars) {
-    if (c.rarity === 'BABY' && _farmEvoMap[c.id]) {
+    if (c.rarity === 'BABY') {
+      const baseId = c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined;
+      const babyId = baseId ?? c.id;
       if (!_elementBabyMap[c.element]) _elementBabyMap[c.element] = [];
-      _elementBabyMap[c.element].push(c.id);
+      if (!_elementBabyMap[c.element].includes(babyId)) {
+        _elementBabyMap[c.element].push(babyId);
+      }
+    }
+  }
+
+  // Include static BABY characters too, so Special Digitama can hatch ANY baby
+  // registered in the game, not only babies returned by the runtime catalogue.
+  for (const [id, char] of Object.entries(CHARACTERS)) {
+    if (char.rarity !== 'BABY') continue;
+    if (!_elementBabyMap[char.element]) _elementBabyMap[char.element] = [];
+    if (!_elementBabyMap[char.element].includes(id)) {
+      _elementBabyMap[char.element].push(id);
     }
   }
 
