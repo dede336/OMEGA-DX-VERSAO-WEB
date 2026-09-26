@@ -263,13 +263,35 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
 
 function YggdrasilBlessingAnnouncement() {
-  const [visible, setVisible] = useState(() => isYggdrasilBlessingActive());
+  const { isAuthLoaded, user } = useAuth();
+  const previousUserRef = useRef<typeof user | null>(null);
+  const initializedRef = useRef(false);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    setVisible(isYggdrasilBlessingActive());
-  }, []);
+    if (!isAuthLoaded) return;
 
-  if (!visible) return null;
+    // Never show the announcement before authentication. It opens only when
+    // this running session transitions from logged-out to logged-in.
+    if (!initializedRef.current) {
+      previousUserRef.current = user ?? null;
+      initializedRef.current = true;
+      return;
+    }
+
+    const wasLoggedOut = !previousUserRef.current;
+    const isLoggedIn = !!user;
+
+    if (wasLoggedOut && isLoggedIn && isYggdrasilBlessingActive()) {
+      setVisible(true);
+    } else if (!isLoggedIn) {
+      setVisible(false);
+    }
+
+    previousUserRef.current = user ?? null;
+  }, [isAuthLoaded, user]);
+
+  if (!visible || !user) return null;
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={() => setVisible(false)}>
