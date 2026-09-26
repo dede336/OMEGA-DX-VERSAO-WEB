@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import {
   Dimensions, FlatList, Image, Modal, Platform, ScrollView, StyleSheet, Text, TextInput,
   TouchableOpacity, View, ActivityIndicator,
@@ -223,6 +223,15 @@ export default function BancoScreen() {
   const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshCustomData } = useGame();
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
+
+  // Banco must always reflect the complete canonical catalogue from the server.
+  // If the catalogue was not ready when navigation happened, reload it here instead
+  // of silently falling back to the small bundled roster.
+  useEffect(() => {
+    if (!token) return;
+    refreshCustomData(getApiUrl()).catch(() => {});
+  }, [token, getApiUrl, refreshCustomData]);
+
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [attrFilter, setAttrFilter] = useState('');
