@@ -1080,18 +1080,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const recompensas: GachaReward[] = [];
 
     for (let i = 0; i < quantidade; i++) {
-      // 1% fixed chance for Digitama Especial (only via percentage, never via pity guarantees)
-      if (Math.random() < TAXA_DIGITAMA_ESPECIAL) {
-        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'EGG', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
-        continue;
-      }
-
+      // Every pull counts toward pity. The 50th pull has absolute priority:
+      // it MUST come from the current admin-configured Champion pool.
       pity += 1;
 
       if (pity >= 50) {
-        // Guaranteed Raro at 50 pity — picks from Raro pool (excludes Digitama which is percentage-only)
-        recompensas.push(pickFrom('Champion'));
+        const pityPool = pool.filter((p) => p.raridade === 'Champion');
+        if (pityPool.length > 0) {
+          recompensas.push(pityPool[Math.floor(Math.random() * pityPool.length)]);
+        } else {
+          // Safety fallback only when the admin pool has no Champion entries.
+          // Keep the guarantee rare instead of accidentally drawing Rookie/Especial.
+          const fallbackChampion: GachaReward[] = [
+            { characterId: 'permissao_real', raridade: 'Champion', tipo: 'ITEM', nome: '⚔️ Permição Real da Deusa' },
+            { characterId: 'dorumon', raridade: 'Champion', tipo: 'DIGIMON', nome: 'Dorumon' },
+            { characterId: 'custom_313', raridade: 'Champion', tipo: 'DIGIMON', nome: 'Ryudamon' },
+          ];
+          recompensas.push(fallbackChampion[Math.floor(Math.random() * fallbackChampion.length)]);
+        }
         pity = 0;
+        continue;
+      }
+
+      // Digitama Especial remains a fixed 1% independent drop, but it cannot
+      // replace/skip the guaranteed 50th-pull reward.
+      if (Math.random() < TAXA_DIGITAMA_ESPECIAL) {
+        recompensas.push({ characterId: DIGITAMA_ESPECIAL_ID, raridade: 'EGG', tipo: 'DIGIMON', nome: '✨ Digitama Especial' });
         continue;
       }
       if (pity % 10 === 0) {
