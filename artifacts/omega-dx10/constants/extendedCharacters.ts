@@ -250,17 +250,17 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
 
   for (const c of chars) {
     if (!c.name) continue; // skip entries with null/undefined name (bad DB data)
-    // If a base char with the same name exists, capture its API image then skip
+    // Every server catalogue row belongs to the ONE runtime Digimon registry.
+    // Legacy bundled IDs are used only as stable aliases for old saves/relations;
+    // they must never form a second roster or be skipped from the server catalogue.
     const baseId = BASE_NAME_MAP[c.name.toLowerCase()];
-    if (baseId) {
-      if (c.hasImage) {
-        _baseCharImageUrls[baseId] = `${apiUrl}/digimons/catalog/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}`;
-      }
-      continue;
+    const canonicalId = baseId ?? c.id;
+    if (c.hasImage) {
+      _baseCharImageUrls[canonicalId] = `${apiUrl}/digimons/catalog/${c.dbId}/image?v=${c.imageUpdatedAt ?? 0}`;
     }
 
-    _catalogChars[c.id] = {
-      id: c.id, dbId: c.dbId, name: c.name,
+    _catalogChars[canonicalId] = {
+      id: canonicalId, dbId: c.dbId, name: c.name,
       attribute: c.attribute as Character['attribute'],
       rarity: c.rarity as Character['rarity'],
       element: c.element as Character['element'],
@@ -537,7 +537,9 @@ export function loadCharacterOverrides(overrides: Array<{
 }
 
 export function getCharacter(id: string): Character | undefined {
-  const base: Character | undefined = CHARACTERS[id] ?? _catalogChars[id];
+  // The server catalogue is authoritative. CHARACTERS is legacy compatibility
+  // only for old saves during migration and is never the runtime roster.
+  const base: Character | undefined = _catalogChars[id] ?? CHARACTERS[id];
   if (!base) return undefined;
   const ov = _overrides[id];
   const merged: Character = !ov ? base : {
@@ -571,14 +573,14 @@ export function getCharacter(id: string): Character | undefined {
 }
 
 export function getAllCharacters(): Record<string, Character> {
-  const base: Record<string, Character> = {};
-  for (const [id, char] of Object.entries(CHARACTERS)) {
-    base[id] = getCharacter(id) ?? char;
+  // ONE authoritative roster: only Digimons delivered by /digimons/catalog.
+  // Never merge the old bundled CHARACTERS list here; doing so recreated the
+  // 103-Digimon fallback/category that the game no longer uses.
+  const roster: Record<string, Character> = {};
+  for (const [id, char] of Object.entries(_catalogChars)) {
+    roster[id] = getCharacter(id) ?? char;
   }
-  for (const [id] of Object.entries(_catalogChars)) {
-    base[id] = getCharacter(id) ?? _catalogChars[id];
-  }
-  return base;
+  return roster;
 }
 
 export function findCharacterIdByName(name: string): string | null {
