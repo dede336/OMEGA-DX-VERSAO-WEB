@@ -19,12 +19,12 @@ const DIGIMON_CLASSIFICATION_FIXES: Readonly<Record<string, string>> = {
   TorikaraBallmon: "NULL", Tsubumon: "WIND", YukimiBotamon: "ICE", Yuramon: "PLANT",
   Zerimon: "NULL", Zurumon: "DARK", Minomon: "PLANT", Missimon: "METAL", Moonmon: "WATER",
   Motimon: "PLANT", Negamon: "DARK", Nyaromon: "LIGHT", Offmon: "LIGHT", Pagumon: "DARK",
-  Pickmon: "METAL", Pinamon: "WIND", Poromon: "WIND", Puroromon: "WATER", Pusurimon: "EARTH",
+  Pickmon: "METAL", Pinamon: "WIND", Poromon: "WIND", Puroromon: "WIND", Pusurimon: "EARTH",
   Sakuttomon: "METAL", Hiyarimon: "ICE", Koromon: "FIRE", Sunmon: "FIRE", Tanemon: "PLANT",
   Tokomon: "LIGHT", Tsumemon: "DARK", Tsunomon: "ICE", Upamon: "WATER", Viximon: "NULL",
   Wanyamon: "WATER", Xiaomon: "NULL", Yaamon: "DARK", Yokomon: "PLANT", Goromon: "EARTH",
   Babydmon: "WIND", Dorimon: "METAL", Kapurimon: "METAL", Kyokyomon: "METAL",
-  Dodomon: "METAL", Fufumon: "METAL", AlgomonTraining: "DARK",
+  Dodomon: "METAL", Fufumon: "METAL", Frimon: "NULL", AlgomonTraining: "DARK",
 };
 
 void Promise.all(
