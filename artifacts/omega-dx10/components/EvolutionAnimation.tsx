@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Image,
   Modal,
   StyleSheet,
   Text,
@@ -234,10 +233,10 @@ export default function EvolutionAnimation({
             },
           ]}
         >
-          <Image
+          <ExpoImage
             source={toImage}
             style={styles.digimon}
-            resizeMode="contain"
+            contentFit="contain"
           />
         </Animated.View>
 
