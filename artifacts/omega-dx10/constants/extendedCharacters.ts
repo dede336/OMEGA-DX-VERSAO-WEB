@@ -28,8 +28,24 @@ export function migrateLegacyCharacterId(id: string): string {
 }
 // farmEvoMap: fromCharId → targetCharId  (for BABY/TRAINING pre-rookie chain)
 let _farmEvoMap: Record<string, string> = {};
-// element → list of BABY char IDs (for random egg hatching; only babies with a training target)
+// element → list of BABY/TRAINING character IDs eligible to hatch from each Digitama.
 let _elementBabyMap: Record<string, string[]> = {};
+
+// Canonical egg pools confirmed from the current Banco roster (44 BABY + 50 TRAINING).
+// These names intentionally define exactly which pre-rookie Digimon each elemental egg can hatch.
+const CANONICAL_EGG_POOL_NAMES: Record<string, string[]> = {
+  FIRE: ['Bombmon','BombmonXW','Chibomon','Chichimon','Curimon','Jyarrimon','Babydmon','DemiVeemon','Frimon','Gigimon','Goromon','Gurimon','Koromon','Missimon','Sunmon','Xiaomon'],
+  PLANT: ['Fukamon','Leafmon','Yuramon','Aruraumon','Budmon','Minomon','Tanemon'],
+  WATER: ['Conomon','Petitmon','Pichimon','Pitchmon','Bukamon','Moonmon','Rurimon','Viximon','Wanyamon'],
+  WIND: ['Dodomon','Fufumon','MetalKoromon','Nyokimon','Pafumon','Puwamon','Relemon','Sakumon','Zerimon','Bowmon','Dorimon','Gummymon','Kapurimon','Kyokyomon','Pinamon','Poromon','Yokomon'],
+  EARTH: ['Datirimon','Chapmon','Hopmon','Kokomon'],
+  LIGHTNING: ['Pabumon','Pusumon','Motimon','Pusurimon'],
+  LIGHT: ['Poyomon','Pyontomon','YukimiBotamon','Cupimon','Kyaramon','Nyaromon','Tokomon'],
+  DARK: ['Botamon','Keemon','Kuramon','Zurumon','AlgomonTraining','ArkadimonTraining','Pagumon','Tsumemon','Yaamon'],
+  ICE: ['Punimon','Pupumon','Pururumon','Tsunomon'],
+  METAL: [],
+  NULL: ['AlgomonBaby','Mokumon','Paomon','Popomon','Puttimon','Pyonmon','Sunamon','TorikaraBallmon','Tsubumon','Bibimon','Hiyarimon','Negamon','Offmon','Pickmon','Puroromon','Sakuttomon','Upamon'],
+};
 // Forms whose innate Divine Gift was unlocked through a Sacred Ring evolution.
 // The item is consumed during evolution; battle checks only the resulting form.
 let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon', 'slashAngemon']);
@@ -284,26 +300,20 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     }
   }
 
-  // Build element → pre-rookie pool for egg hatching.
-  // BABY and TRAINING Digimon hatch from the egg matching their element.
-  // Special Digitama can hatch any registered BABY or TRAINING Digimon.
-  for (const c of chars) {
-    if (c.rarity === 'BABY' || c.rarity === 'TRAINING') {
-      const baseId = c.name ? BASE_NAME_MAP[c.name.toLowerCase()] : undefined;
-      const babyId = baseId ?? c.id;
-      if (!_elementBabyMap[c.element]) _elementBabyMap[c.element] = [];
-      if (!_elementBabyMap[c.element].includes(babyId)) {
-        _elementBabyMap[c.element].push(babyId);
-      }
-    }
+  // Build the exact canonical egg pools from the confirmed 94-card Banco roster.
+  // Resolve names against the live catalogue so database IDs never leak into gameplay.
+  _elementBabyMap = {};
+  const hatchableByName = new Map<string, string>();
+  for (const entry of chars) {
+    if (entry.rarity !== 'BABY' && entry.rarity !== 'TRAINING') continue;
+    const baseId = entry.name ? BASE_NAME_MAP[entry.name.toLowerCase()] : undefined;
+    hatchableByName.set(_normKey(entry.name), baseId ?? entry.id);
   }
-
-  // Include static BABY/TRAINING characters too for compatibility with local entries.
-  for (const [id, char] of Object.entries(CHARACTERS)) {
-    if (char.rarity !== 'BABY' && char.rarity !== 'TRAINING') continue;
-    if (!_elementBabyMap[char.element]) _elementBabyMap[char.element] = [];
-    if (!_elementBabyMap[char.element].includes(id)) {
-      _elementBabyMap[char.element].push(id);
+  for (const [element, names] of Object.entries(CANONICAL_EGG_POOL_NAMES)) {
+    _elementBabyMap[element] = [];
+    for (const name of names) {
+      const id = hatchableByName.get(_normKey(name));
+      if (id && !_elementBabyMap[element].includes(id)) _elementBabyMap[element].push(id);
     }
   }
 
