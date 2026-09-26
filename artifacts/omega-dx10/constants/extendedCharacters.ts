@@ -37,7 +37,7 @@ let _divineGiftCharacterIds = new Set<string>(['ophanimon', 'seraphimon', 'slash
 let _registeredBaseCharKeys: Set<string> = new Set();
 let _registeredFusionKeys: Set<string> = new Set();
 
-const CUSTOM_CHARACTER_NAME_ALIASES: Record<string, string> = {
+const LEGACY_CHARACTER_NAME_ALIASES: Record<string, string> = {
   custom_313: 'ryudamon',
   custom_356: 'dorulumon',
 };
@@ -159,7 +159,7 @@ export function getRawCatalogDigimons(): CatalogDigimonRaw[] {
 
 export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string) {
   // Runtime identity is name-based and stable. Database row numbers are metadata only.
-  // Convert every legacy custom_<number> relation before it can reach gameplay/save data.
+  // Convert every legacy legacy database IDs relation before it can reach gameplay/save data.
   const stableIdByLegacyId = new Map<string, string>();
   for (const entry of chars) {
     const baseId = entry.name ? BASE_NAME_MAP[entry.name.toLowerCase()] : undefined;
@@ -592,7 +592,7 @@ export function findCharacterIdByName(name: string): string | null {
 export function getKnownCharacterName(id: string): string | null {
   const character = getCharacter(id);
   if (character?.name) return character.name;
-  const alias = CUSTOM_CHARACTER_NAME_ALIASES[id];
+  const alias = LEGACY_CHARACTER_NAME_ALIASES[id];
   if (alias) {
     const match = Object.values(getAllCharacters()).find((c) => _normKey(c.name) === alias);
     return match?.name ?? alias;
@@ -607,8 +607,8 @@ export function getCharacterImageSourceByName(name: string): any {
 
 export function getCharacterImageSource(id: string): any {
   // Known legacy gacha IDs must resolve to the bundled image by Digimon name.
-  // This prevents a stale/missing custom API image from showing the wrong art.
-  const aliasedName = CUSTOM_CHARACTER_NAME_ALIASES[id];
+  // This prevents a stale/missing catalogue API image from showing the wrong art.
+  const aliasedName = LEGACY_CHARACTER_NAME_ALIASES[id];
   if (aliasedName) {
     const aliasedImage = _IMAGE_BY_NORM[aliasedName];
     if (aliasedImage) return aliasedImage;
