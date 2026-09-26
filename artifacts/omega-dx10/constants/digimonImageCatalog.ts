@@ -380,6 +380,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Hexblaumon": require("../assets/images/digimons/Hexblaumon.png"),
   "HiAndromon": require("../assets/images/digimons/HiAndromon.webp"),
   "Hisyaryumon": require("../assets/images/digimons/Hisyaryumon.gif"),
+  "Hiyarimon": require("../assets/images/digimons/Hiyarimon.gif"),
   "Honey Beemon": require("../assets/images/digimons/Honey Beemon.gif"),
   "Hookmon": require("../assets/images/digimons/Hookmon.webp"),
   "Hopmon": require("../assets/images/digimons/Hopmon.gif"),
