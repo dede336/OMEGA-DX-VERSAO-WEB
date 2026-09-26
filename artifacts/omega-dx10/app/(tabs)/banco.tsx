@@ -15,7 +15,7 @@ import {
 } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
-import { CustomDigimonRaw, getRawCustomDigimons, getAllCharacters } from '@/constants/extendedCharacters';
+import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters } from '@/constants/extendedCharacters';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';
@@ -110,7 +110,7 @@ function resolveDigimonName(id: string, allChars: Record<string, { name: string 
   return id;
 }
 
-function getCustomObtainMethods(d: CustomDigimonRaw, allChars: Record<string, { name: string }>): ObtainMethod[] {
+function getCatalogObtainMethods(d: CatalogDigimonRaw, allChars: Record<string, { name: string }>): ObtainMethod[] {
   const methods: ObtainMethod[] = [];
   if (d.scannable) methods.push({ type: 'scan' });
   if (!d.isBaseForm && d.evolvesFromId) {
@@ -220,7 +220,7 @@ const ELEM_FILTERS = [
 export default function BancoScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { collection, isAdmin, scanProgress, createFromScan, customCharsReady, customCharsRevision, refreshCustomData } = useGame();
+  const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshCustomData } = useGame();
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
@@ -233,12 +233,12 @@ export default function BancoScreen() {
   const [showStatusPreview, setShowStatusPreview] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState<'elem' | 'rarity' | 'attr' | null>(null);
 
-  // Use the custom digimons already loaded by GameContext — no separate fetch needed.
-  // customCharsRevision increments every time GameContext reloads custom data.
-  const customDigimons = useMemo(
-    () => getRawCustomDigimons(),
+  // Use the catalogue Digimons already loaded by GameContext — no separate fetch needed.
+  // rosterRevision increments every time GameContext reloads custom data.
+  const catalogDigimons = useMemo(
+    () => getRawCatalogDigimons(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [customCharsRevision],
+    [rosterRevision],
   );
 
   const handleToggleBanco = useCallback(async (dbId: number) => {
@@ -260,14 +260,14 @@ export default function BancoScreen() {
   const allCharsMap = useMemo(() => {
     const map: Record<string, { name: string }> = {};
     Object.entries(CHARACTERS).forEach(([id, c]) => { map[id] = { name: c.name }; });
-    customDigimons.forEach((c) => { map[c.id] = { name: c.name }; });
+    catalogDigimons.forEach((c) => { map[c.id] = { name: c.name }; });
     return map;
-  }, [customDigimons]);
+  }, [catalogDigimons]);
 
   const baseEntries = useMemo(() => {
     // There must be a single registered roster. getAllCharacters() is the
     // canonical registry used by the rest of the game and already merges
-    // static CHARACTERS with every custom/server Digimon loaded at runtime.
+    // static CHARACTERS with every server Digimon loaded at runtime.
     const registered = getAllCharacters();
     const preferredOrder = [
       ...CODEX_ORDER,
@@ -285,24 +285,24 @@ export default function BancoScreen() {
 
       const methods = getObtainMethods(id);
       const isOwned = ownedSet.has(id) || ownedSet.has(canonicalId);
-      const isCustom = !Object.prototype.hasOwnProperty.call(CHARACTERS, id);
+      const isCatalog = !Object.prototype.hasOwnProperty.call(CHARACTERS, id);
       return [{
         id,
         char,
         methods,
         isOwned,
         isAvailable: methods.length > 0,
-        isCustom,
+        isCatalog,
         isActive: true,
       }];
     });
-  }, [ownedSet, customCharsRevision]);
+  }, [ownedSet, rosterRevision]);
 
   const normalizeRarity = (r: string): string => r;
 
   // baseEntries already comes from the canonical registry (static + server/custom).
   // Keeping a second custom list here would create two different registries and duplicates.
-  const customEntries = useMemo(() => [], [customCharsRevision]);
+  const catalogEntries = useMemo(() => [], [rosterRevision]);
 
 
   const entries = useMemo(() => baseEntries, [baseEntries]);
@@ -453,7 +453,7 @@ export default function BancoScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, marginBottom: 4 }}>
         <Text style={[st.countText, { color: colors.mutedForeground, flex: 1 }]}>
           {ownedSet.size}/{totalCount} {t('banco.obtained')} · {filtered.length} {t('banco.shown')}
-          {!customCharsReady && ` · ${t('banco.loading')}`}
+          {!rosterReady && ` · ${t('banco.loading')}`}
         </Text>
         {activeFiltersCount > 0 && (
           <TouchableOpacity onPress={() => { setAttrFilter(''); setRarityFilter(''); setElemFilter(''); }}
@@ -512,10 +512,10 @@ export default function BancoScreen() {
                     )}
                   </View>
 
-                  {isAdmin && item.isCustom && (
+                  {isAdmin && item.isCatalog && (
                     <TouchableOpacity
                       onPress={() => {
-                        const d = customDigimons.find(c => c.id === item.id);
+                        const d = catalogDigimons.find(c => c.id === item.id);
                         if (d && (d as any).dbId) handleToggleBanco((d as any).dbId);
                       }}
                       style={[st.toggleBadge, {
@@ -624,7 +624,7 @@ export default function BancoScreen() {
         );
       })()}
 
-      {!customCharsReady && entries.length === 0 ? (
+      {!rosterReady && entries.length === 0 ? (
         <ActivityIndicator color={colors.primary} style={{ marginTop: 24 }} />
       ) : (
         <FlatList
