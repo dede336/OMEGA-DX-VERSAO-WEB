@@ -10,12 +10,12 @@ import { useGame } from '@/context/GameContext';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import {
-  ATTRIBUTES, ELEMENTS, CHARACTERS, RARITY_COLORS, RARITY_LABELS, RARITY_ORDER,
+  ATTRIBUTES, ELEMENTS, RARITY_COLORS, RARITY_LABELS, RARITY_ORDER,
   CODEX_ORDER, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FUSIONS, SCANNABLE_CHARACTERS,
 } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
-import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters } from '@/constants/extendedCharacters';
+import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters, getCharacter } from '@/constants/extendedCharacters';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';
@@ -134,13 +134,13 @@ function renderMethodLabel(m: ObtainMethod): { icon: string; label: string; colo
     case 'mail':
       return { icon: '📬', label: `Correio — Tamer Rank ${m.rank}`, color: '#a78bfa' };
     case 'evolution': {
-      const fromName = CHARACTERS[m.from]?.name ?? m.from;
+      const fromName = getCharacter(m.from)?.name ?? m.from;
       const extra = m.item ? ` + Item` : '';
       return { icon: '⬆️', label: `Evolução de ${fromName} (Lv ${m.level})${extra}`, color: '#60a5fa' };
     }
     case 'altEvo': {
-      const fromName = CHARACTERS[m.from]?.name ?? m.from;
-      const sacrificeName = m.sacrifice ? (CHARACTERS[m.sacrifice]?.name ?? m.sacrifice) : null;
+      const fromName = getCharacter(m.from)?.name ?? m.from;
+      const sacrificeName = m.sacrifice ? (getCharacter(m.sacrifice)?.name ?? m.sacrifice) : null;
       const multiSacNames = m.sacrifices && m.sacrifices.length > 0
         ? m.sacrifices.map((cid) => CHARACTERS[cid]?.name ?? cid).join(', ')
         : null;
@@ -267,10 +267,9 @@ export default function BancoScreen() {
 
   const allCharsMap = useMemo(() => {
     const map: Record<string, { name: string }> = {};
-    Object.entries(CHARACTERS).forEach(([id, c]) => { map[id] = { name: c.name }; });
-    catalogDigimons.forEach((c) => { map[c.id] = { name: c.name }; });
+    Object.entries(getAllCharacters()).forEach(([id, c]) => { map[id] = { name: c.name }; });
     return map;
-  }, [catalogDigimons]);
+  }, [catalogDigimons, rosterRevision]);
 
   const baseEntries = useMemo(() => {
     // There must be a single registered roster. getAllCharacters() is the
