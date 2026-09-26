@@ -1835,7 +1835,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // account hydration: a slow /digimons/catalog or /overrides request used to
       // leave GameContext on defaultState (1 Agumon) while the app entered the tabs.
       const catalogContentPromise = Promise.all([
-        fetch(`${apiUrl}/digimons/catalog`, { headers: { Authorization: `Bearer ${token}` } }).then((r) => r.ok ? r.json() : null).catch(() => null),
+        fetch(`${apiUrl}/digimons/catalog`, { headers: { Authorization: `Bearer ${token}` } }).then(async (r) => {
+          if (!r.ok) throw new Error(`Digimon catalog HTTP ${r.status}`);
+          const data = await r.json();
+          if (!Array.isArray(data?.digimons)) throw new Error('Invalid Digimon catalog payload');
+          return data;
+        }),
         fetch(`${apiUrl}/overrides`).then((r) => r.ok ? r.json() : null).catch(() => null),
       ]).then(([catalogData, overridesData]) => {
         if (catalogData?.digimons) {
@@ -1854,8 +1859,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (overridesData?.overrides) loadCharacterOverrides(overridesData.overrides, apiUrl);
         if (catalogData?.digimons || overridesData?.overrides) setRosterRevision((v) => v + 1);
         setRosterReady(true);
-      }).catch(() => {
-        setRosterReady(true);
+      }).catch((error) => {
+        // Do not silently turn a failed catalogue request into an empty game.
+        // Keep rosterReady=false so catalogue-dependent screens can show the
+        // real loading/error state instead of "0 Digimons".
+        console.error('[OMEGA DX] Falha ao carregar catálogo único de Digimons:', error);
+        setRosterReady(false);
       });
 
       // Items e mapas podem carregar em background (não afetam lista de personagens)
