@@ -617,13 +617,15 @@ export default function BattleScreen() {
       });
     }
 
-    if ((stage as any)?.tamerCrestReward && tamerId) {
+    // Boss crest fragments are a FIRST-CLEAR reward, exactly like gems.
+    // Replaying the boss must never grant the crest again.
+    if (!wasCleared && (stage as any)?.tamerCrestReward && tamerId) {
       const pieceId = TAMER_CREST_MAP[tamerId];
       if (pieceId) {
         const amount = (stage as any).tamerCrestReward.amount as number;
         gainPiece(pieceId, amount);
         recordDrop(pieceId, amount);
-        addLog(`🏅 +${amount}× Fragmento do Brasão obtido!`, '#f59e0b');
+        addLog(`🏅 +${amount}× Fragmento do Brasão (1ª conclusão)!`, '#f59e0b');
       }
     }
     if (Math.random() < 0.20) { gainPiece('piece_tecido', 1); recordDrop('piece_tecido', 1); addLog('🎨 Tecido Colorido!', '#ec4899'); }
