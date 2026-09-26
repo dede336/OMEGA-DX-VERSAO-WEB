@@ -4,9 +4,38 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { db, customDigimonsTable } from "@workspace/db";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 const app: Express = express();
+
+// Canonical Baby/Training classification used by OMEGA DX.
+// All entries below use the Free attribute (FR) and only game-supported elements.
+const DIGIMON_CLASSIFICATION_FIXES: Readonly<Record<string, string>> = {
+  MetalKoromon: "METAL", Mokumon: "FIRE", Nyokimon: "PLANT", Pabumon: "PLANT",
+  Pafumon: "WIND", Paomon: "LIGHT", Petitmon: "FIRE", Pichimon: "WATER",
+  Pitchmon: "WATER", Popomon: "PLANT", Poyomon: "WATER", Punimon: "ICE",
+  Pupumon: "PLANT", Pururumon: "WIND", Pusumon: "NULL", Puttimon: "LIGHT",
+  Puwamon: "WIND", Pyonmon: "PLANT", Pyontomon: "NULL", Relemon: "NULL",
+  Sakumon: "METAL", Sunamon: "EARTH", TorikaraBallmon: "NULL", Tsubumon: "WIND",
+  YukimiBotamon: "ICE", Yuramon: "PLANT", Zerimon: "NULL", Zurumon: "DARK",
+  Minomon: "PLANT", Missimon: "METAL", Moonmon: "DARK", Motimon: "PLANT",
+  Negamon: "DARK", Nyaromon: "LIGHT", Offmon: "LIGHT", Pagumon: "DARK",
+  Pickmon: "METAL", Pinamon: "WIND", Poromon: "WIND", Puroromon: "METAL",
+  Pusurimon: "EARTH", Rurimon: "LIGHT", Sakuttomon: "METAL", Sunmon: "FIRE",
+  Tanemon: "PLANT", Tokomon: "LIGHT", Tsumemon: "DARK", Tsunomon: "EARTH",
+  Upamon: "WATER", Viximon: "DARK", Wanyamon: "NULL", Xiaomon: "FIRE",
+  Yaamon: "DARK", Yokomon: "PLANT",
+};
+
+void Promise.all(
+  Object.entries(DIGIMON_CLASSIFICATION_FIXES).map(([name, element]) =>
+    db.update(customDigimonsTable)
+      .set({ attribute: "FR", element, updatedAt: new Date() })
+      .where(eq(customDigimonsTable.name, name)),
+  ),
+)
+  .then(() => logger.info({ count: Object.keys(DIGIMON_CLASSIFICATION_FIXES).length }, "Applied Baby/Training classifications"))
+  .catch((err) => logger.error({ err }, "Failed to apply Baby/Training classifications"));
 
 // Permanently purge duplicate catalogue records that were previously seeded.
 const REMOVED_DUPLICATE_DIGIMONS = ["Mochimon", "Chicomon", "Choromon", "ArkadimonBaby", "Chocomon"];
