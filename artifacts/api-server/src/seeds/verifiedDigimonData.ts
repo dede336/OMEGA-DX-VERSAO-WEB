@@ -120,7 +120,7 @@ export const VERIFIED_RARITIES: Readonly<Record<string, string>> = {
   "Pteromon": "ROOKIE",
   "Pulsemon": "ROOKIE",
   "Puroromon": "TRAINING",
-  "Puttimon": "BABY",
+  "Puttimon": "TRAINING",
   "Pyonmon": "BABY",
   "Quartzmon": "MEGA",
   "Ragnamon": "MEGA",
