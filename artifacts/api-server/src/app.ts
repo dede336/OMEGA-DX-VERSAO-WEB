@@ -3,8 +3,17 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { db, customDigimonsTable } from "@workspace/db";
+import { inArray } from "drizzle-orm";
 
 const app: Express = express();
+
+// Permanently purge duplicate catalogue records that were previously seeded.
+const REMOVED_DUPLICATE_DIGIMONS = ["Mochimon", "Chicomon", "Choromon", "ArkadimonBaby", "Chocomon"];
+void db.delete(customDigimonsTable)
+  .where(inArray(customDigimonsTable.name, REMOVED_DUPLICATE_DIGIMONS))
+  .then(() => logger.info({ names: REMOVED_DUPLICATE_DIGIMONS }, "Removed duplicate Digimon catalogue records"))
+  .catch((err) => logger.error({ err }, "Failed to remove duplicate Digimon catalogue records"));
 
 app.use(
   pinoHttp({
