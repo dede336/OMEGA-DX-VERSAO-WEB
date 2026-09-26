@@ -2056,7 +2056,7 @@ export default function DigifarmScreen() {
         visible={!!evoAnim}
         fromCharacterId={evoAnim?.fromCharacterId ?? ''}
         toCharacterId={evoAnim?.toCharacterId ?? ''}
-        onComplete={() => setEvoAnim(null)}
+        onClose={() => setEvoAnim(null)}
       />
 
       {/* ── Reward modal ─────────────────────────────────────────────────────── */}
