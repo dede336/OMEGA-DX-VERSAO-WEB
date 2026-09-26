@@ -605,7 +605,7 @@ export default function CollectionScreen() {
                           );
                           closeModal();
                         } else {
-                          const max = Math.max(1, Math.min(5, Math.floor(tamerLevel)));
+                          const max = Math.max(1, Math.min(5, Math.floor(tamerLevel / 5) + 1));
                           const used = char.rarity === 'EGG' ? farmEggSlots.length : farmNurserySlots.length;
                           Alert.alert('Slots ocupados', `Você possui ${used}/${max} slots disponíveis para esta área da Digifarm.`);
                         }
