@@ -1743,7 +1743,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
         if ((rarity === 'EGG' || rarity === 'BABY') && elapsed >= ONE_DAY) {
           const target = rarity === 'EGG'
-            ? getRandomHatchTarget(char.element)
+            ? getRandomHatchTarget(char.element, owned.characterId === 'specialDigitama')
             : getFarmEvolutionTarget(owned.characterId);
           if (target) {
             collection = collection.map((c) =>
