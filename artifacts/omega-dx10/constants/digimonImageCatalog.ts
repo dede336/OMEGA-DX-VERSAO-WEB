@@ -283,7 +283,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Firamon": require("../assets/images/digimons/Firamon.webp"),
   "Flamedramon": require("../assets/images/digimons/Flamedramon.gif"),
   "FlameWizardmon": require("../assets/images/digimons/FlameWizardmon.gif"),
-  "Flamon": require("../assets/images/digimons/Flamon.png"),
+  "Flamon": require("../assets/images/digimons/Flamon.gif"),
   "Flaremon": require("../assets/images/digimons/Flaremon.webp"),
   "Flarerizamon": require("../assets/images/digimons/Flarerizamon.webp"),
   "Floramon": require("../assets/images/digimons/Floramon.png"),
