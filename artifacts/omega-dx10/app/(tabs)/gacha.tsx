@@ -55,48 +55,56 @@ function getGachaDisplayName(characterId: string, configuredName?: string, fallb
 }
 
 function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const pulseAnim = useRef(new Animated.Value(0.25)).current;
-  const isSpecialDigitama = reward.characterId === 'specialDigitama' || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
+  const pulseAnim = useRef(new Animated.Value(0.55)).current;
+  const isSpecialDigitama = reward.characterId === 'specialDigitama'
+    || reward.nome?.replace(/^✨\s*/, '').toLowerCase() === 'digitama especial';
 
   useEffect(() => {
-    const rotateLoop = Animated.loop(
-      Animated.timing(rotateAnim, { toValue: 1, duration: 7000, easing: Easing.linear, useNativeDriver: true })
-    );
     const pulseLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 0.9, duration: 1400, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 0.25, duration: 1400, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.55, duration: 900, useNativeDriver: true }),
       ])
     );
-    rotateLoop.start();
     pulseLoop.start();
-    return () => { rotateLoop.stop(); pulseLoop.stop(); };
+    return () => pulseLoop.stop();
   }, []);
 
-  if (reward.raridade === 'Rookie') return null;
+  // Special Digitama deliberately keeps its original rainbow effect.
+  if (isSpecialDigitama) {
+    return (
+      <Animated.Image
+        pointerEvents="none"
+        source={FUSION_RAINBOW_CORE}
+        style={{
+          position: 'absolute',
+          width: size * 1.65,
+          height: size * 1.65,
+          opacity: pulseAnim,
+        }}
+        resizeMode="contain"
+      />
+    );
+  }
 
-  const rotate = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
-  const isRainbow = isSpecialDigitama;
-  const glowColor = reward.raridade === 'Champion' ? '#facc15' : '#38bdf8';
+  const glowSource = reward.raridade === 'Champion'
+    ? GACHA_GLOW_GOLD
+    : reward.raridade === 'Especial'
+      ? GACHA_GLOW_PURPLE
+      : GACHA_GLOW_BLUE;
 
   return (
-    <Animated.View
+    <Animated.Image
       pointerEvents="none"
+      source={glowSource}
       style={{
         position: 'absolute',
-        width: size * 1.45,
-        height: size * 1.45,
-        borderRadius: size,
+        width: size * 1.9,
+        height: size * 1.9,
         opacity: pulseAnim,
-        backgroundColor: isRainbow ? 'transparent' : glowColor,
-        transform: [{ rotate }],
       }}
-    >
-      {isRainbow && (
-        <Image source={FUSION_RAINBOW_CORE} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
-      )}
-    </Animated.View>
+      resizeMode="contain"
+    />
   );
 }
 
