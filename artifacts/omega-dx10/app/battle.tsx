@@ -1933,12 +1933,19 @@ export default function BattleScreen() {
               <TouchableOpacity
                 activeOpacity={0.8}
                 disabled={autoRemainingSeconds <= 0}
-                onPress={() => { setAutoMode((p) => { const n = !p && autoRemainingSeconds > 0; if (n) setAttackMenuOpen(false); return n; }); }}
+                onPress={() => {
+                  // Once AUTO is started, keep it active for the full remaining quota.
+                  // The button cannot manually disable AUTO mid-session.
+                  if (!autoMode && autoRemainingSeconds > 0) {
+                    setAttackMenuOpen(false);
+                    setAutoMode(true);
+                  }
+                }}
                 style={[styles.autoBtn, { backgroundColor: autoMode ? '#22c55e22' : colors.card, borderColor: autoMode ? '#22c55e' : colors.border }, pixelStyle]}
               >
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 18, height: 18, opacity: autoMode ? 1 : 0.5 }} resizeMode="contain" />
                 <Text style={[styles.autoBtnLabel, { color: autoMode ? '#22c55e' : colors.mutedForeground }]}>
-                  {autoMode ? '⏸' : t('battle.auto')} {Math.floor(autoRemainingSeconds / 60)}:{String(autoRemainingSeconds % 60).padStart(2, '0')}
+                  {t('battle.auto')} {Math.floor(autoRemainingSeconds / 60)}:{String(autoRemainingSeconds % 60).padStart(2, '0')}
                 </Text>
               </TouchableOpacity>
             )}
