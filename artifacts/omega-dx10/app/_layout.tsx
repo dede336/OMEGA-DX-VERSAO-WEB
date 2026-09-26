@@ -114,14 +114,14 @@ const offlineStyles = StyleSheet.create({
 });
 
 function NavigationGuard() {
-  const { isLoaded, customCharsReady } = useGame();
+  const { isLoaded, rosterReady } = useGame();
   const { isAuthLoaded, user, serverOffline } = useAuth();
   const { isLanguageLoaded, isLanguageSelected } = useLanguage();
   const fired = useRef(false);
   useEffect(() => {
     if (!isLoaded || !isAuthLoaded || serverOffline || !isLanguageLoaded || fired.current) return;
-    // Se há usuário logado, aguarda os custom chars carregarem antes de navegar
-    if (user && !customCharsReady) return;
+    // Se há usuário logado, aguarda os Digimon catalogue carregarem antes de navegar
+    if (user && !rosterReady) return;
     fired.current = true;
     if (!isLanguageSelected) {
       router.replace('/language-select' as never);
@@ -130,7 +130,7 @@ function NavigationGuard() {
     } else {
       router.replace('/intro' as never);
     }
-  }, [isLoaded, isAuthLoaded, serverOffline, isLanguageLoaded, isLanguageSelected, user, customCharsReady]);
+  }, [isLoaded, isAuthLoaded, serverOffline, isLanguageLoaded, isLanguageSelected, user, rosterReady]);
   return null;
 }
 
