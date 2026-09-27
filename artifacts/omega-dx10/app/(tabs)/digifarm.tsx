@@ -623,7 +623,7 @@ export default function DigifarmScreen() {
     }).filter(Boolean) as { x1: number; y1: number; x2: number; y2: number }[];
     const nestObstacles = farmEggSlots.slice(0, maxSlots).map((_, idx) => {
       const p = nestPositions[idx];
-      return { x1: p.x - 48, y1: p.y + 8, x2: p.x + 48, y2: p.y + 48 };
+      return { x1: p.x - 24, y1: p.y + 4, x2: p.x + 24, y2: p.y + 24 };
     });
     _decoObstacles = [...decorObstacles, ...nestObstacles];
     return farmDecorations.map((d) => `${d.id}:${d.x}:${d.y}`).join('|') + '|eggs:' + farmEggSlots.join('|');
@@ -1459,17 +1459,17 @@ export default function DigifarmScreen() {
                 LIGHTNING:'#fde047', LIGHT:'#fff7ae', DARK:'#a855f7', ICE:'#bae6fd', METAL:'#cbd5e1', NULL:'#e5e7eb',
               };
               return (
-                <View key={ownedId} style={{ position:'absolute', left:p.x-52, top:p.y-62, width:104, height:104, zIndex:6 }}>
-                  {info?.ready && <View pointerEvents="none" style={{ position:'absolute', left:22, top:20, width:60, height:60, borderRadius:30, backgroundColor:glow[element] ?? '#e5e7eb', opacity:0.42 }} />}
-                  <View style={{ position:'absolute', left:31, top:20, zIndex:1 }}>
-                    <AnimatedEgg characterId={owned.characterId} element={element} size={42} />
+                <View key={ownedId} style={{ position:'absolute', left:p.x-26, top:p.y-31, width:52, height:52, zIndex:6 }}>
+                  {info?.ready && <View pointerEvents="none" style={{ position:'absolute', left:11, top:10, width:30, height:30, borderRadius:15, backgroundColor:glow[element] ?? '#e5e7eb', opacity:0.42 }} />}
+                  <View style={{ position:'absolute', left:15.5, top:10, zIndex:1 }}>
+                    <AnimatedEgg characterId={owned.characterId} element={element} size={21} />
                     {hatchingEggId === ownedId && (
-                      <View style={{ position:'absolute', left:5, top:1, width:32, height:40, borderRadius:18, backgroundColor:'#fff', opacity:0.92 }} />
+                      <View style={{ position:'absolute', left:2.5, top:0.5, width:16, height:20, borderRadius:9, backgroundColor:'#fff', opacity:0.92 }} />
                     )}
                   </View>
-                  <Image source={EGG_NEST} resizeMode="contain" style={{ position:'absolute', left:0, top:0, width:104, height:104, zIndex:2 }} />
+                  <Image source={EGG_NEST} resizeMode="contain" style={{ position:'absolute', left:0, top:0, width:52, height:52, zIndex:2 }} />
                   <TouchableOpacity
-                    style={{ position:'absolute', left:8, right:8, bottom:-25, zIndex:4, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.92)', paddingVertical:5, borderRadius:7, alignItems:'center' }}
+                    style={{ position:'absolute', left:-12, right:-12, bottom:-25, zIndex:4, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.92)', paddingVertical:5, borderRadius:7, alignItems:'center' }}
                     onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}
                   >
                     <Text style={{ color:'#fff', fontSize:9, fontWeight:'900' }}>
