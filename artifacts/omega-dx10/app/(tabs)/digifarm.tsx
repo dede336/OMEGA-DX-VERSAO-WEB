@@ -1567,8 +1567,22 @@ export default function DigifarmScreen() {
               const owned = collection.find((c) => c.ownedId === ownedId);
               const slotChar = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
               if (!owned) return null;
-              const isEgg = slotChar?.rarity === 'EGG';
-              const size = isEgg ? 44 : 68;
+              const rarity = String(slotChar?.rarity ?? 'ROOKIE');
+              // Escala visual da DigiFarm por fase:
+              // BABY < TRAINING (+10%) < ROOKIE (+20%) < CHAMPION (+20%) < ULTIMATE/MEGA (+10%).
+              const BABY_FARM_SIZE = 48;
+              const farmSizeByRarity: Record<string, number> = {
+                EGG: 44,
+                BABY: BABY_FARM_SIZE,
+                TRAINING: BABY_FARM_SIZE * 1.10,
+                ROOKIE: BABY_FARM_SIZE * 1.10 * 1.20,
+                CHAMPION: BABY_FARM_SIZE * 1.10 * 1.20 * 1.20,
+                ULTIMATE: BABY_FARM_SIZE * 1.10 * 1.20 * 1.20 * 1.10,
+                MEGA: BABY_FARM_SIZE * 1.10 * 1.20 * 1.20 * 1.10,
+                ULTRA: BABY_FARM_SIZE * 1.10 * 1.20 * 1.20 * 1.10,
+                BURST: BABY_FARM_SIZE * 1.10 * 1.20 * 1.20 * 1.10,
+              };
+              const size = farmSizeByRarity[rarity] ?? farmSizeByRarity.ROOKIE;
               const bubble = bubbles[slotIdx];
 
               return (
