@@ -171,6 +171,7 @@ const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   mokumon: 'BABY',
   fukamon: 'TRAINING',
   candlemon: 'ROOKIE',
+  wizardmon: 'CHAMPION',
   demimeramon: 'ROOKIE',
   meramon: 'CHAMPION',
   bluemeramon: 'ULTIMATE',
@@ -462,6 +463,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const mokumon = chars.find((char) => _normKey(char.name ?? '') === 'mokumon');
   const fukamon = chars.find((char) => _normKey(char.name ?? '') === 'fukamon');
   const candlemon = chars.find((char) => _normKey(char.name ?? '') === 'candlemon');
+  const wizardmon = chars.find((char) => _normKey(char.name ?? '') === 'wizardmon');
   const demimeramon = chars.find((char) => _normKey(char.name ?? '') === 'demimeramon');
   const meramon = chars.find((char) => _normKey(char.name ?? '') === 'meramon');
   const bluemeramon = chars.find((char) => _normKey(char.name ?? '') === 'bluemeramon');
@@ -479,6 +481,17 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     EVOLUTIONS[fukamon.id] = { evolvesTo: candlemon.id, requiredLevel: 12, label: 'Candlemon' };
     _farmEvoMap[mokumon.id] = fukamon.id;
     _farmEvoMap[fukamon.id] = candlemon.id;
+
+    if (wizardmon) {
+      delete ALTERNATE_EVOLUTIONS[candlemon.id];
+      delete EXTRA_ALTERNATE_EVOLUTIONS[candlemon.id];
+      EVOLUTIONS[candlemon.id] = {
+        evolvesTo: wizardmon.id,
+        requiredLevel: 20,
+        label: 'Wizardmon',
+      };
+      _farmEvoMap[candlemon.id] = wizardmon.id;
+    }
 
     // Mokumon also has DemiMeramon as an alternate Rookie evolution.
     if (demimeramon) {
