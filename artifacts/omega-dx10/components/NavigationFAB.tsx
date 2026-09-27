@@ -200,6 +200,7 @@ interface NavItem {
   minLevel?: number;
   isChat?: boolean;
   isMail?: boolean;
+  isFarm?: boolean;
   bigIcon?: boolean;
 }
 
@@ -212,7 +213,7 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.world', route: '/(tabs)/map', image: ICON_MUNDO, color: '#22c55e' },
   { labelKey: 'nav.mail', route: '/(tabs)/correios', image: ICON_MAIL, color: '#ec4899', isMail: true },
   { labelKey: 'nav.ranking', route: '/(tabs)/ranking', image: ICON_RANKING, color: '#f97316' },
-  { labelKey: 'nav.digifarm', route: '/(tabs)/digifarm', image: ICON_DIGIFARM, color: '#84cc16' },
+  { labelKey: 'nav.digifarm', route: '/(tabs)/digifarm', image: ICON_DIGIFARM, color: '#84cc16', isFarm: true },
   { labelKey: 'nav.friends', route: '/(tabs)/amigos', image: ICON_AMIGOS, color: '#14b8a6', bigIcon: true },
   { labelKey: 'nav.chat', route: '/(tabs)/chat', image: ICON_CHAT, color: '#3b82f6', isChat: true },
   { labelKey: 'nav.admin', route: '/(tabs)/admin', image: ICON_ADMIN, color: '#6b7280', adminOnly: true },
@@ -233,11 +234,51 @@ export default function NavigationFAB() {
     unreadMailCount,
     isAdmin,
     tamerLevel,
+    farmSlots,
+    farmLastClaim,
+    farmNurserySlots,
+    farmEggSlots,
+    farmNurseryEntryTimes,
+    farmEggEntryTimes,
   } = useGame();
 
   const { logout, user } = useAuth();
   const { totalUnread: unreadChat } = useSocket();
   const { t } = useLanguage();
+
+
+  // Badge da DigiFarm: atualiza mesmo fora da tela da Farm.
+  const [farmNotificationTick, setFarmNotificationTick] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setFarmNotificationTick(Date.now()), 10000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const maxFarmSlots = Math.max(1, Math.min(5, Math.floor(tamerLevel / 5) + 1));
+  const farmNotificationCount = (() => {
+    const now = farmNotificationTick;
+    let count = 0;
+
+    // Produção dos slots normais: primeira coleta disponível após 30 minutos.
+    if (farmSlots.slice(0, maxFarmSlots).some(Boolean) && now - farmLastClaim >= 30 * 60 * 1000) {
+      count += 1;
+    }
+
+    // Ovos prontos para chocar (1h).
+    for (const ownedId of farmEggSlots.slice(0, maxFarmSlots)) {
+      const enteredAt = farmEggEntryTimes[ownedId] ?? now;
+      if (now - enteredAt >= 60 * 60 * 1000) count += 1;
+    }
+
+    // Baby/Treinamento prontos. O tempo exato depende da fase e é confirmado
+    // dentro da Farm; 1h já sinaliza que há um processo que merece atenção.
+    for (const ownedId of farmNurserySlots.slice(0, maxFarmSlots)) {
+      const enteredAt = farmNurseryEntryTimes[ownedId] ?? now;
+      if (now - enteredAt >= 60 * 60 * 1000) count += 1;
+    }
+
+    return count;
+  })();
 
   const canShowAdmin =
     (user?.isAdmin ?? isAdmin) ||
@@ -456,12 +497,12 @@ export default function NavigationFAB() {
             />
           )}
 
-          {unreadMailCount > 0 && (
+          {(unreadMailCount > 0 || farmNotificationCount > 0) && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {unreadMailCount > 9
+                {(unreadMailCount + farmNotificationCount) > 9
                   ? '9+'
-                  : unreadMailCount}
+                  : (unreadMailCount + farmNotificationCount)}
               </Text>
             </View>
           )}
@@ -621,7 +662,9 @@ export default function NavigationFAB() {
                         ? unreadChat
                         : item.isMail
                           ? unreadMailCount
-                          : 0;
+                          : item.isFarm
+                            ? farmNotificationCount
+                            : 0;
 
                     const hasUnread =
                       badgeCount > 0;
