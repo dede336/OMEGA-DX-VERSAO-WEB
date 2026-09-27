@@ -174,6 +174,7 @@ const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   demimeramon: 'ROOKIE',
   meramon: 'CHAMPION',
   bluemeramon: 'ULTIMATE',
+  skullmeramon: 'ULTIMATE',
 };
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
@@ -462,6 +463,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const demimeramon = chars.find((char) => _normKey(char.name ?? '') === 'demimeramon');
   const meramon = chars.find((char) => _normKey(char.name ?? '') === 'meramon');
   const bluemeramon = chars.find((char) => _normKey(char.name ?? '') === 'bluemeramon');
+  const skullmeramon = chars.find((char) => _normKey(char.name ?? '') === 'skullmeramon');
   if (mokumon && fukamon && candlemon) {
     // These three are one authoritative line; remove stale outgoing branches.
     delete ALTERNATE_EVOLUTIONS[mokumon.id];
@@ -499,6 +501,13 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
             label: 'BlueMeramon',
           };
           _farmEvoMap[meramon.id] = bluemeramon.id;
+        }
+        if (skullmeramon) {
+          ALTERNATE_EVOLUTIONS[meramon.id] = {
+            evolvesTo: skullmeramon.id,
+            requiredLevel: 40,
+            label: 'SkullMeramon',
+          };
         }
       }
     }
