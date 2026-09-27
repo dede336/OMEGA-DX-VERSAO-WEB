@@ -14,6 +14,7 @@ import {
   getCharacter,
   getCharacterImageSource,
 } from '@/constants/extendedCharacters';
+import { EGG_IMAGES } from '@/constants/characterImages';
 
 type Props = {
   visible: boolean;
@@ -48,8 +49,23 @@ export default function EvolutionAnimation({
   const evolvedOpacity =
     useRef(new Animated.Value(0)).current;
 
-  const fromImage =
-    getCharacterImageSource(fromCharacterId);
+  const fromCharacter =
+    getCharacter(fromCharacterId);
+
+  const fromIsEgg =
+    fromCharacter?.rarity === 'EGG' ||
+    fromCharacterId === 'specialDigitama';
+
+  // Eggs are rendered elsewhere through EGG_IMAGES, not through the normal
+  // character artwork map. Without this fallback the component returned null
+  // before opening the Modal, which is why hatch evolution was invisible.
+  const fromImage = fromIsEgg
+    ? (
+        fromCharacterId === 'specialDigitama' || fromCharacter?.element === 'SPECIAL'
+          ? EGG_IMAGES.SPECIAL
+          : (EGG_IMAGES[fromCharacter?.element ?? 'NULL'] ?? EGG_IMAGES.NULL)
+      )
+    : getCharacterImageSource(fromCharacterId);
 
   const toImage =
     getCharacterImageSource(toCharacterId);
