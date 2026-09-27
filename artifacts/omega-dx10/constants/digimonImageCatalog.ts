@@ -859,6 +859,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Wingdramon": require("../assets/images/digimons/Wingdramon.gif"),
   "Witchmon": require("../assets/images/digimons/Witchmon.png"),
   "Wizardmon": require("../assets/images/digimons/Wizardmon.png"),
+  "Wisemon": require("../assets/images/digimons/Wizemon.gif"),
   "Woodmon": require("../assets/images/digimons/Woodmon.gif"),
   "Wormmon": require("../assets/images/digimons/Wormmon.gif"),
   "wormon": require("../assets/images/digimons/Wormmon.gif"),
