@@ -31,6 +31,7 @@ const CHARACTER_IMAGES: Record<string, any> = {
   tiranomon:      require('../assets/images/digimons/Tyrannomon.gif'),
   tyranomon:      require('../assets/images/digimons/Tyrannomon.gif'),
   skullgreymon:   require('../assets/images/digimons/SkullGreymon.webp'),
+  skullMeramon:   require('../assets/images/digimons/SkullMeramon.gif'),
   greymon:        require('../assets/images/digimons/Greymon.gif'),
   metalGreymon:   require('../assets/images/digimons/metalGreymon.gif'),
   warGreymon:     require('../assets/images/digimons/warGreymon.gif'),
