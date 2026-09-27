@@ -965,7 +965,7 @@ export default function DigifarmScreen() {
   }
 
   function collectProduction() {
-    if (!productionReady || farmSlots.length === 0) return;
+    if (!productionReady || activeFarmSlots.length === 0) return;
     setCollecting(true);
     Animated.sequence([
       Animated.timing(bounceAnim, { toValue: 1.3, duration: 150, useNativeDriver: true }),
@@ -1607,7 +1607,7 @@ export default function DigifarmScreen() {
 
           {/* Produção dos 5 slots normais: itens/30min + 10 gemas/h, máximo 5h */}
           {productionReady && activeFarmSlots.length > 0 && (
-            <TouchableOpacity style={[styles.xpBadge, { top: 10 }]} onPress={collectProduction} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.xpBadge, { top: 52, zIndex: 50, elevation: 50 }]} onPress={collectProduction} activeOpacity={0.8}>
               <Text style={{ fontSize: 15 }}>🎁</Text>
               <View>
                 <Text style={styles.xpBadgeMain}>PRODUÇÃO PRONTA</Text>
@@ -2089,7 +2089,7 @@ const styles = StyleSheet.create({
   hudTitle: { fontSize: 12, fontWeight: '900' as const, color: '#fff', letterSpacing: 0.5 },
   hudSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: '700' },
 
-  xpBadge: { position: 'absolute' as const, right: 12, flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: '#166534', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: '#22c55e' },
+  xpBadge: { position: 'absolute' as const, right: 12, zIndex: 50, elevation: 50, flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: '#166534', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 7, borderWidth: 1, borderColor: '#22c55e' },
   xpBadgeMain: { fontSize: 14, fontWeight: '900' as const, color: '#fff' },
   xpBadgeSub: { fontSize: 8, color: 'rgba(255,255,255,0.8)', fontWeight: '700', letterSpacing: 0.5 },
   zoomControls: { position: 'absolute' as const, bottom: 10, right: 10, flexDirection: 'column', alignItems: 'center', gap: 2, zIndex: 20 },
