@@ -527,6 +527,7 @@ const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Meicrackmon": require("../assets/images/digimons/Meicrackmon.gif"),
   "MeicrackmonViciousMode": require("../assets/images/digimons/MeicrackmonViciousMode.png"),
   "Meramon": require("../assets/images/digimons/Meramon.gif"),
+  "SkullMeramon": require("../assets/images/digimons/SkullMeramon.gif"),
   "mercurimon": require("../assets/images/digimons/mercurimon.png"),
   "MercurimonRM": require("../assets/images/digimons/MercurimonRM.png"),
   "Mermaimon": require("../assets/images/digimons/Mermaimon.png"),
