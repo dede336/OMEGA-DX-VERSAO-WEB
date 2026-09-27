@@ -246,7 +246,7 @@ export default function BattleScreen() {
   const stageIndex = Number(params.stageIndex ?? '0');
   const paramAutoMode = params.auto === '1';
   const map = GAME_MAPS.find((m) => m.id === mapId) ?? customGameMaps.find((m) => m.id === mapId);
-  const stage = map?.stages[stageIndex];
+  const stage = map?.stages.find((candidate) => candidate.index === stageIndex) ?? map?.stages[stageIndex];
   const equippedDigivice = equippedItems.digivice
     ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.digivice)
     : undefined;
@@ -732,7 +732,7 @@ export default function BattleScreen() {
   // ── Start battle ───────────────────────────────────────────────────────────
   function startBattle(teamIds: string[]) {
     if (!stage || teamIds.length === 0) return;
-    if (!(user?.isAdmin ?? false) && (stage as any)?.isBoss && isBossOnCooldown(mapId, stageIndex)) {
+    if (!isAdmin && (stage as any)?.isBoss && isBossOnCooldown(mapId, stageIndex)) {
       Alert.alert('Boss em recarga', 'Este Boss só pode ser enfrentado uma vez a cada 30 minutos.');
       return;
     }
