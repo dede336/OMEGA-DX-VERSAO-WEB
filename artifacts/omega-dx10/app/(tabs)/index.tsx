@@ -7,7 +7,8 @@ import { router } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
-import { CHARACTERS, ATTRIBUTES, GAME_MAPS, getScaledStats, TAMERS } from '@/constants/gameData';
+import { CHARACTERS, ATTRIBUTES, GAME_MAPS, getScaledStats, TAMERS, EQUIPMENT_ITEMS } from '@/constants/gameData';
+import { getEquipItemImage } from '@/constants/equipImages';
 import { getCharacter } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, HPBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -62,7 +63,7 @@ export default function HomeScreen() {
     const next = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
     setLanguage(next);
   }
-  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId } = game;
+  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId, equippedItems } = game;
 
   const [swapModalVisible, setSwapModalVisible] = useState(false);
   const [tamerPickerVisible, setTamerPickerVisible] = useState(false);
@@ -82,6 +83,10 @@ export default function HomeScreen() {
   const isMimi = tamerId === 'tamer_mimi';
   const isKari = tamerId === 'tamer_kari';
   const isMatt = tamerId === 'tamer_matt';
+  const equippedCrest = equippedItems.brasao ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.brasao) : null;
+  const equippedDigivice = equippedItems.digivice ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.digivice) : null;
+  const equippedCrestImage = equippedItems.brasao ? getEquipItemImage(equippedItems.brasao, tamerId) : null;
+  const equippedDigiviceImage = equippedItems.digivice ? getEquipItemImage(equippedItems.digivice, tamerId) : null;
 
   const botPad = Platform.OS === 'web' ? 20 : insets.bottom + 20;
 
@@ -178,6 +183,30 @@ export default function HomeScreen() {
           <Text style={[styles.heroName, { color: colors.foreground }]} numberOfLines={1}>{playerName}</Text>
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
+          )}
+          {(equippedCrest || equippedDigivice) && (
+            <View style={styles.heroEquipmentRow}>
+              {equippedCrest && (
+                <View style={[styles.heroEquipmentItem, { borderColor: colors.primary + '66', backgroundColor: '#00000055' }]}>
+                  {equippedCrestImage ? (
+                    <Image source={equippedCrestImage} style={styles.heroEquipmentImage} resizeMode="contain" />
+                  ) : (
+                    <Feather name="shield" size={20} color={colors.primary} />
+                  )}
+                  <Text style={[styles.heroEquipmentName, { color: colors.foreground }]} numberOfLines={1}>{equippedCrest.name}</Text>
+                </View>
+              )}
+              {equippedDigivice && (
+                <View style={[styles.heroEquipmentItem, { borderColor: colors.primary + '66', backgroundColor: '#00000055' }]}>
+                  {equippedDigiviceImage ? (
+                    <Image source={equippedDigiviceImage} style={styles.heroEquipmentImage} resizeMode="contain" />
+                  ) : (
+                    <Feather name="cpu" size={20} color={colors.primary} />
+                  )}
+                  <Text style={[styles.heroEquipmentName, { color: colors.foreground }]} numberOfLines={1}>{equippedDigivice.name}</Text>
+                </View>
+              )}
+            </View>
           )}
         </View>
 
@@ -454,6 +483,10 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
+  heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 5, maxWidth: 220 },
+  heroEquipmentItem: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 7, paddingHorizontal: 5, paddingVertical: 3, maxWidth: 108 },
+  heroEquipmentImage: { width: 24, height: 24 },
+  heroEquipmentName: { fontSize: 8, fontWeight: '700', maxWidth: 74 },
   heroBadges: { alignItems: 'flex-end', gap: 6 },
   rankBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignItems: 'center', minWidth: 46 },
   rankBadgeLabel: { fontSize: 8, fontWeight: '700' as const, letterSpacing: 1 },
