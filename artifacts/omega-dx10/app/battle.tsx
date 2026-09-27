@@ -333,12 +333,10 @@ export default function BattleScreen() {
 
   // ── Auto battle ────────────────────────────────────────────────────────────
   const [autoMode, setAutoMode] = useState(false);
-  const [battleSpeed, setBattleSpeed] = useState<1 | 2>(1);
+  // undefined enquanto carrega: evita gravar "1" por cima da preferência salva
+  // antes de o AsyncStorage terminar a leitura ao abrir uma nova batalha.
+  const [battleSpeed, setBattleSpeed] = useState<1 | 2 | null>(null);
   const battleSpeedRef = useRef<1 | 2>(1);
-  useEffect(() => {
-    battleSpeedRef.current = battleSpeed;
-    AsyncStorage.setItem(BATTLE_SPEED_KEY, String(battleSpeed)).catch(() => {});
-  }, [battleSpeed]);
   useEffect(() => {
     let active = true;
     AsyncStorage.getItem(BATTLE_SPEED_KEY).then((saved) => {
@@ -346,8 +344,28 @@ export default function BattleScreen() {
       const restored: 1 | 2 = saved === '2' ? 2 : 1;
       battleSpeedRef.current = restored;
       setBattleSpeed(restored);
-    }).catch(() => {});
+    }).catch(() => {
+      if (!active) return;
+      battleSpeedRef.current = 1;
+      setBattleSpeed(1);
+    });
     return () => { active = false; };
+  }, []);
+  useEffect(() => {
+    if (battleSpeed === null) return;
+    battleSpeedRef.current = battleSpeed;
+    AsyncStorage.setItem(BATTLE_SPEED_KEY, String(battleSpeed)).catch(() => {});
+  }, [battleSpeed]);
+
+  const toggleBattleSpeed = useCallback(() => {
+    setBattleSpeed((speed) => {
+      const current = speed ?? battleSpeedRef.current;
+      const next: 1 | 2 = current === 1 ? 2 : 1;
+      battleSpeedRef.current = next;
+      // Persiste no próprio clique também, para sobreviver imediatamente à troca de tela/batalha.
+      AsyncStorage.setItem(BATTLE_SPEED_KEY, String(next)).catch(() => {});
+      return next;
+    });
   }, []);
   const speedMs = useCallback((ms: number) => Math.max(1, Math.round(ms / battleSpeedRef.current)), []);
   const [autoQuotaReady, setAutoQuotaReady] = useState(false);
@@ -1461,11 +1479,11 @@ export default function BattleScreen() {
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>{stage.name}</Text>
           <TouchableOpacity
-            onPress={() => setBattleSpeed((speed) => speed === 1 ? 2 : 1)}
+            onPress={toggleBattleSpeed}
             style={[styles.speedBtn, pixelStyle]}
           >
             <Image
-              source={battleSpeed === 2
+              source={(battleSpeed ?? battleSpeedRef.current) === 2
                 ? require('../assets/images/2X_ATIVO.gif')
                 : require('../assets/images/2X_INATIVO.png')}
               style={styles.speedBtnImage}
@@ -1658,12 +1676,12 @@ export default function BattleScreen() {
             </View>
           )}
           <TouchableOpacity
-            onPress={() => setBattleSpeed((speed) => speed === 1 ? 2 : 1)}
+            onPress={toggleBattleSpeed}
             style={[styles.speedBtn, pixelStyle]}
-            accessibilityLabel={battleSpeed === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X'}
+            accessibilityLabel={(battleSpeed ?? battleSpeedRef.current) === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X'}
           >
             <Image
-              source={battleSpeed === 2
+              source={(battleSpeed ?? battleSpeedRef.current) === 2
                 ? require('../assets/images/2X_ATIVO.gif')
                 : require('../assets/images/2X_INATIVO.png')}
               style={styles.speedBtnImage}
