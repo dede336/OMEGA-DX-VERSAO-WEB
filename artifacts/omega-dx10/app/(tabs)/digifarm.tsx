@@ -188,7 +188,7 @@ const DECO_CATALOG: Record<string, { name: string; image: any; displayW: number;
   tree_pine: {
     name: 'Pinheiro',
     image: require('../../assets/images/deco_tree_pine.webp'),
-    displayW: 90, displayH: 140, solidW: 55, solidH: 35,
+    displayW: 130, displayH: 190, solidW: 72, solidH: 45,
   },
   tree_autumn: {
     name: 'Árvore Outono',
@@ -226,7 +226,7 @@ const DECO_CATALOG: Record<string, { name: string; image: any; displayW: number;
   flower: {
     name: 'Flores Rosas',
     image: require('../../assets/images/deco_flower.webp'),
-    displayW: 72, displayH: 92, solidW: 50, solidH: 35,
+    displayW: 46, displayH: 58, solidW: 34, solidH: 22,
   },
   flower2: {
     name: 'Flores Amarelas',
@@ -1353,7 +1353,10 @@ export default function DigifarmScreen() {
                     style={{
                       width: cat.displayW,
                       height: cat.displayH,
+                      // O PNG do pinheiro possui folga transparente na base.
+                      // Deslocamos apenas a arte para baixo, mantendo a âncora/colisão no chão.
                       transform: [
+                        { translateY: d.type === 'tree_pine' ? 18 : 0 },
                         { rotate: `${(d as any).rotation ?? 0}deg` },
                         { scaleX: (cat.mirror || d.mirrored) ? -1 : 1 },
                       ],
