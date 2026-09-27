@@ -16,6 +16,7 @@ import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharac
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, AnimatedEgg } from '@/components/GameComponents';
 import EvolutionAnimation from '@/components/EvolutionAnimation';
+import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 import { useLanguage } from '@/context/LanguageContext';
 import { isAsfalto, snapAsfalto, resolveAsfaltoMeta, AsfaltoMeta, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 
@@ -373,6 +374,7 @@ function startWander(
 }
 
 type BubbleData = { text: string; type: 'speech' | 'thought' | 'emoji'; key: number } | null;
+type FarmRewardFloat = { key: string; image: any; amount: number; anim: Animated.Value };
 
 export default function DigifarmScreen() {
   const colors = useColors();
@@ -429,6 +431,7 @@ export default function DigifarmScreen() {
   const [hatchingEggId, setHatchingEggId] = useState<string | null>(null);
   const [hatchAnim, setHatchAnim] = useState<{ fromCharacterId: string; toCharacterId: string } | null>(null);
   const bounceAnim = useRef(new Animated.Value(1)).current;
+  const [rewardFloats, setRewardFloats] = useState<FarmRewardFloat[]>([]);
 
   const [selectedFarmDigi, setSelectedFarmDigi] = useState<string | null>(null);
   const [feedModalOpen, setFeedModalOpen] = useState(false);
@@ -988,10 +991,32 @@ export default function DigifarmScreen() {
     ]).start();
     const reward = claimFarmProduction();
     if (reward) {
-      Alert.alert(
-        'Produção da Digifarm',
-        `Bateria Verde ×${reward.green}\nBateria Roxa ×${reward.purple}\nBateria Dourada ×${reward.gold}\nPílula Energética ×${reward.pills}\nGemas +${reward.gems}`,
-      );
+      const drops = [
+        { id: 'green', amount: reward.green, image: require('../../assets/images/battery_green.webp') },
+        { id: 'purple', amount: reward.purple, image: require('../../assets/images/battery_purple.webp') },
+        { id: 'gold', amount: reward.gold, image: require('../../assets/images/battery_gold.webp') },
+        { id: 'pill', amount: reward.pills, image: ENERGY_PILL_IMAGE },
+        { id: 'gems', amount: reward.gems, image: require('../../assets/images/gema.png') },
+      ].filter((drop) => drop.amount > 0);
+
+      const floats: FarmRewardFloat[] = drops.map((drop, index) => ({
+        key: `${Date.now()}_${drop.id}_${index}`,
+        image: drop.image,
+        amount: drop.amount,
+        anim: new Animated.Value(0),
+      }));
+      setRewardFloats(floats);
+
+      floats.forEach((drop, index) => {
+        setTimeout(() => {
+          Animated.timing(drop.anim, {
+            toValue: 1,
+            duration: 1800,
+            useNativeDriver: true,
+          }).start();
+        }, index * 120);
+      });
+      setTimeout(() => setRewardFloats([]), 2600);
     } else {
       Alert.alert('Produção pausada', 'A satisfação precisa estar Boa ou superior para produzir recompensas.');
     }
@@ -2105,6 +2130,33 @@ export default function DigifarmScreen() {
         </Pressable>
       </Modal>
 
+      {/* Recompensas da produção: flutuam sobre a própria DigiFarm, sem escurecer a tela. */}
+      {rewardFloats.length > 0 && (
+        <View pointerEvents="none" style={styles.productionRewardLayer}>
+          {rewardFloats.map((drop, index) => {
+            const translateY = drop.anim.interpolate({ inputRange: [0, 1], outputRange: [45, -125] });
+            const opacity = drop.anim.interpolate({ inputRange: [0, 0.12, 0.72, 1], outputRange: [0, 1, 1, 0] });
+            const scale = drop.anim.interpolate({ inputRange: [0, 0.18, 1], outputRange: [0.65, 1.12, 1] });
+            return (
+              <Animated.View
+                key={drop.key}
+                style={[
+                  styles.productionRewardFloat,
+                  {
+                    marginLeft: (index - (rewardFloats.length - 1) / 2) * 58,
+                    opacity,
+                    transform: [{ translateY }, { scale }],
+                  },
+                ]}
+              >
+                <Image source={drop.image} style={styles.productionRewardImage} resizeMode="contain" />
+                <Text style={styles.productionRewardQty}>×{drop.amount}</Text>
+              </Animated.View>
+            );
+          })}
+        </View>
+      )}
+
       <EvolutionAnimation
         visible={!!evoAnim}
         fromCharacterId={evoAnim?.fromCharacterId ?? ''}
@@ -2137,6 +2189,10 @@ export default function DigifarmScreen() {
 }
 
 const styles = StyleSheet.create({
+  productionRewardLayer: { ...StyleSheet.absoluteFillObject, zIndex: 200, alignItems: 'center', justifyContent: 'center' },
+  productionRewardFloat: { position: 'absolute', flexDirection: 'row', alignItems: 'center', gap: 3 },
+  productionRewardImage: { width: 46, height: 46 },
+  productionRewardQty: { color: '#fff', fontSize: 19, fontWeight: '900', textShadowColor: '#000', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 5 },
   farmCanvas: { width: FARM_CANVAS_W, height: FARM_CANVAS_H, position: 'relative' as const },
   farmBgImg: { width: FARM_CANVAS_W, height: FARM_CANVAS_H, position: 'absolute' as const, top: 0, left: 0 },
   digimonOnFarm: { position: 'absolute' as const, top: 0, left: 0, zIndex: 6 },
