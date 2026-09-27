@@ -207,27 +207,6 @@ export default function HomeScreen() {
 
         </View>
 
-        {(equippedCrestId || equippedDigiviceId) && (
-          <View style={styles.homeEquipmentOverlay} pointerEvents="none">
-            {equippedCrestId && (
-              <View style={styles.homeEquipmentSlot}>
-                {equippedCrestImage
-                  ? <Image source={equippedCrestImage} style={styles.homeEquipmentImage} resizeMode="contain" />
-                  : <Feather name="award" size={28} color="#facc15" />}
-                <Text style={styles.homeEquipmentLabel}>BRASÃO</Text>
-              </View>
-            )}
-            {equippedDigiviceId && (
-              <View style={styles.homeEquipmentSlot}>
-                {equippedDigiviceImage
-                  ? <Image source={equippedDigiviceImage} style={styles.homeEquipmentImage} resizeMode="contain" />
-                  : <Feather name="watch" size={28} color="#60a5fa" />}
-                <Text style={styles.homeEquipmentLabel}>DIGIVICE</Text>
-              </View>
-            )}
-          </View>
-        )}
-
         {/* Rank badge + account + language */}
         <View style={styles.heroBadges}>
           <View style={[styles.rankBadge, { backgroundColor: colors.primary, }, pixelStyle]}>
@@ -273,6 +252,33 @@ export default function HomeScreen() {
           <Image source={GEM_ICON_IMG} style={styles.statIcon} resizeMode="contain" />
           <Text style={[styles.statNum, { color: '#22d3ee' }]}>{gemas >= 1000 ? `${(gemas / 1000).toFixed(1)}k` : gemas}</Text>
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.gems')}</Text>
+        </View>
+      </View>
+
+      {/* Current Crest + Digivice: fixed Home section, outside the hero overlay. */}
+      <View style={[styles.homeEquipmentBar, { borderColor: colors.border, backgroundColor: 'rgba(20,20,20,0.82)' }]}>
+        <View style={styles.homeEquipmentBarItem}>
+          {equippedCrestImage
+            ? <Image source={equippedCrestImage} style={styles.homeEquipmentBarImage} resizeMode="contain" />
+            : <Feather name="award" size={30} color={equippedCrestId ? '#facc15' : colors.mutedForeground} />}
+          <View style={styles.homeEquipmentBarText}>
+            <Text style={[styles.homeEquipmentBarLabel, { color: colors.mutedForeground }]}>BRASÃO</Text>
+            <Text style={[styles.homeEquipmentBarValue, { color: colors.foreground }]} numberOfLines={1}>
+              {equippedCrestId ?? 'NÃO EQUIPADO'}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.homeEquipmentBarDivider, { backgroundColor: colors.border }]} />
+        <View style={styles.homeEquipmentBarItem}>
+          {equippedDigiviceImage
+            ? <Image source={equippedDigiviceImage} style={styles.homeEquipmentBarImage} resizeMode="contain" />
+            : <Feather name="watch" size={30} color={equippedDigiviceId ? '#60a5fa' : colors.mutedForeground} />}
+          <View style={styles.homeEquipmentBarText}>
+            <Text style={[styles.homeEquipmentBarLabel, { color: colors.mutedForeground }]}>DIGIVICE</Text>
+            <Text style={[styles.homeEquipmentBarValue, { color: colors.foreground }]} numberOfLines={1}>
+              {equippedDigiviceId ?? 'NÃO EQUIPADO'}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -501,6 +507,13 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
+  homeEquipmentBar:{marginHorizontal:16,marginTop:10,borderWidth:1,borderRadius:10,paddingHorizontal:10,paddingVertical:8,flexDirection:'row',alignItems:'center'},
+  homeEquipmentBarItem:{flex:1,minWidth:0,flexDirection:'row',alignItems:'center',gap:7},
+  homeEquipmentBarImage:{width:36,height:36},
+  homeEquipmentBarText:{flex:1,minWidth:0},
+  homeEquipmentBarLabel:{fontSize:6,fontWeight:'900'},
+  homeEquipmentBarValue:{fontSize:6,fontWeight:'800',marginTop:2},
+  homeEquipmentBarDivider:{width:1,height:38,marginHorizontal:8},
   homeEquipmentOverlay:{position:'absolute',left:170,bottom:4,flexDirection:'row',alignItems:'flex-end',gap:8,zIndex:50,elevation:50},
   homeEquipmentSlot:{width:50,minHeight:54,alignItems:'center',justifyContent:'flex-end',backgroundColor:'#00000066',borderWidth:1,borderColor:'#ffffff33',borderRadius:8,padding:3},
   homeEquipmentImage:{width:38,height:38},
