@@ -996,7 +996,7 @@ export default function DigifarmScreen() {
         { id: 'purple', amount: reward.purple, image: require('../../assets/images/battery_purple.webp') },
         { id: 'gold', amount: reward.gold, image: require('../../assets/images/battery_gold.webp') },
         { id: 'pill', amount: reward.pills, image: ENERGY_PILL_IMAGE },
-        { id: 'gems', amount: reward.gems, image: require('../../assets/images/gema.png') },
+        { id: 'gems', amount: reward.gems, image: require('../../assets/images/diamante.gif') },
       ].filter((drop) => drop.amount > 0);
 
       const floats: FarmRewardFloat[] = drops.map((drop, index) => ({
