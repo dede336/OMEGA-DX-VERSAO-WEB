@@ -1094,17 +1094,22 @@ export default function DigifarmScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: '#000' }}>
 
-      {/* ── Grupo central: mapa + slots juntos, centralizados na tela ──────── */}
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-      }}>
+      {/* ── Grupo central: no celular a Farm inteira rola verticalmente ──────── */}
+      <ScrollView
+        style={{ flex: 1, width: '100%' }}
+        contentContainerStyle={{
+          alignItems: 'center',
+          paddingTop: insets.top + 8,
+          paddingBottom: insets.bottom + 120,
+          minHeight: frameH + 420,
+        }}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+      >
 
         {/* ── Wrapper: mapa + slots + moldura ─────────────────────────── */}
-        <View style={{ position: 'relative', width: viewW, height: frameH + 80 }}>
+        <View style={{ position: 'relative', width: viewW, minHeight: frameH + 330 }}>
 
         {/* Farm canvas — quadrado com frame, panning habilitado */}
         <View
@@ -1894,7 +1899,7 @@ export default function DigifarmScreen() {
 
         </View>{/* fim do wrapper mapa+slots+moldura */}
 
-      </View>{/* fim do grupo central */}
+      </ScrollView>{/* fim do grupo central */}
 
       {/* ── Botão flutuante notificação ────────────────────────────────────── */}
       {(dailyAvailable && allSatisfied) && (
