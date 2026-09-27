@@ -159,6 +159,14 @@ const KUDAMON_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   tyilinmon: 'ULTIMATE',
   kentaurusmon: 'MEGA',
 };
+const CHRONOMON_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
+  chichimon: 'TRAINING',
+  hyokomon: 'ROOKIE',
+  buraimon: 'CHAMPION',
+  butenmon: 'ULTIMATE',
+  chronomonhm: 'MEGA',
+  chronomondm: 'MEGA',
+};
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
   for (const [key, val] of Object.entries(CHARACTER_IMAGES as Record<string, any>)) {
@@ -219,7 +227,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
         ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
       };
     }
-    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name] ?? KUDAMON_LINE_CANONICAL_RARITIES[name];
+    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name] ?? KUDAMON_LINE_CANONICAL_RARITIES[name] ?? CHRONOMON_LINE_CANONICAL_RARITIES[name];
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
   });
 
@@ -438,6 +446,49 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     EXTRA_ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: blackAgumon.id, requiredLevel: blackAgumon.requiredLevel ?? 15, label: blackAgumon.name, requiredItem: 'black_digitron' };
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
+
+  // Chronomon line fixed by game design:
+  // Chichimon (Training) -> Hyokomon -> Buraimon -> Butenmon -> Chronomon HM / Chronomon DM.
+  const findChronomonStage = (keys: string[]) =>
+    chars.find((char) => keys.includes(_normKey(char.name ?? '')) || keys.includes(_normKey(char.id ?? '')));
+  const chichimon = findChronomonStage(['chichimon']);
+  const hyokomon = findChronomonStage(['hyokomon']);
+  const buraimon = findChronomonStage(['buraimon']);
+  const butenmon = findChronomonStage(['butenmon']);
+  const chronomonHM = findChronomonStage(['chronomonhm']);
+  const chronomonDM = findChronomonStage(['chronomondm']);
+
+  const chronomonBaseLine = [chichimon, hyokomon, buraimon, butenmon].filter(Boolean);
+  for (let i = 0; i < chronomonBaseLine.length - 1; i++) {
+    const from = chronomonBaseLine[i]!;
+    const to = chronomonBaseLine[i + 1]!;
+    delete ALTERNATE_EVOLUTIONS[from.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[from.id];
+    EVOLUTIONS[from.id] = {
+      evolvesTo: to.id,
+      requiredLevel: to.requiredLevel ?? (to.rarity === 'ROOKIE' ? 12 : to.rarity === 'CHAMPION' ? 20 : 40),
+      label: to.name,
+    };
+    _farmEvoMap[from.id] = to.id;
+  }
+
+  if (butenmon && chronomonHM) {
+    EVOLUTIONS[butenmon.id] = {
+      evolvesTo: chronomonHM.id,
+      requiredLevel: chronomonHM.requiredLevel ?? 60,
+      label: 'Chronomon HM',
+      requiredItem: 'anel_sagrado',
+    };
+    _divineGiftCharacterIds.add(chronomonHM.id);
+  }
+  if (butenmon && chronomonDM) {
+    ALTERNATE_EVOLUTIONS[butenmon.id] = {
+      evolvesTo: chronomonDM.id,
+      requiredLevel: chronomonDM.requiredLevel ?? 60,
+      label: 'Chronomon DM',
+      requiredItem: 'chrono_core',
+    };
+  }
 
   // Kudamon line fixed by game design:
   // Pafumon -> Kyaromon -> Kudamon -> Reppamon -> Chirinmon -> Kentaurusmon.
