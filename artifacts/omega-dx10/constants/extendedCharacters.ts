@@ -450,6 +450,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   // Chirinmon is the canonical OMEGA DX name; accept legacy Tyilinmon catalogue rows.
   const chirinmon = findKudamonStage(['chirinmon', 'tyilinmon']);
   const kentaurusmon = findKudamonStage(['kentaurusmon']);
+  const mitamamon = findKudamonStage(['mitamamon']);
 
   const kudamonLine = [pafumon, kyaromon, kudamon, reppamon, chirinmon, kentaurusmon].filter(Boolean);
   for (let i = 0; i < kudamonLine.length - 1; i++) {
@@ -463,6 +464,15 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
       label: _normKey(to.name ?? '') === 'tyilinmon' ? 'Chirinmon' : to.name,
     };
     _farmEvoMap[from.id] = to.id;
+  }
+
+  // Mitamamon is the alternate Mega evolution from Chirinmon.
+  if (chirinmon && mitamamon) {
+    ALTERNATE_EVOLUTIONS[chirinmon.id] = {
+      evolvesTo: mitamamon.id,
+      requiredLevel: mitamamon.requiredLevel ?? 60,
+      label: 'Mitamamon',
+    };
   }
 
   // Lopmon base line: Conomon (Baby) -> Kokomon (Training) -> Lopmon (Rookie).
