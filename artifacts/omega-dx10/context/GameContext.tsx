@@ -1763,7 +1763,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const isBossOnCooldown = useCallback((mapId: string, stageIdx: number): boolean => {
     const key = `${mapId}-${stageIdx}`;
     const last = stateRef.current.bossCooldowns[key] ?? 0;
-    return (Date.now() - last) < 4 * 3600000;
+    return (Date.now() - last) < 30 * 60 * 1000;
   }, []);
 
   const setFarmSlots = useCallback((slots: string[], resetTime = false) => {
