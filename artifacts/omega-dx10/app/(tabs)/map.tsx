@@ -76,7 +76,7 @@ export default function MapScreen() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.isAdmin ?? false;
-  const { isStageCleared, isMapUnlocked, selectedCharacter, collection, totalPlayerLevel, isDailyDungeonAvailable, customGameMaps } = useGame();
+  const { isStageCleared, isMapUnlocked, selectedCharacter, collection, totalPlayerLevel, isDailyDungeonAvailable, customGameMaps, isBossOnCooldown } = useGame();
 
   const allMaps = [
     ...GAME_MAPS,
@@ -111,6 +111,8 @@ export default function MapScreen() {
     if (!isAdmin && !isMapAvailableNow(availableDays, availableHours)) return;
     const selectedMap = allMaps.find((candidate) => candidate.id === mapId);
     if (!isAdmin && selectedMap?.isBiweeklyEvent && !getStarryNightAvailability().isOpen) return;
+    const selectedStage = selectedMap?.stages?.find((s: MapStage) => s.index === stageIndex);
+    if (!isAdmin && selectedStage?.isBoss && isBossOnCooldown(mapId, stageIndex)) return;
     router.push(`/battle?mapId=${mapId}&stageIndex=${stageIndex}`);
   }
 
@@ -321,7 +323,8 @@ export default function MapScreen() {
               const regularStagesCleared = !isBossStage ? true :
                 map.stages.filter((s: MapStage) => !s.isBoss).every((s: MapStage) => isStageCleared(map.id, s.index));
               const bossLocked = !isAdmin && isBossStage && !regularStagesCleared;
-              const canPlay = !!selectedCharacter && !stageDailyLocked && !bossLocked;
+              const bossCooldownLocked = !isAdmin && isBossStage && isBossOnCooldown(map.id, stage.index);
+              const canPlay = !!selectedCharacter && !stageDailyLocked && !bossLocked && !bossCooldownLocked;
 
               return (
                 <TouchableOpacity
@@ -334,7 +337,7 @@ export default function MapScreen() {
                     { borderBottomColor: colors.border, backgroundColor: isDungeon ? '#2a0f4e22' : 'transparent' },
                     isBossStage && { backgroundColor: '#3b000022' },
                     cleared && !isDaily && { backgroundColor: isBossStage ? '#22c55e22' : '#22c55e11' },
-                    (stageDailyLocked || bossLocked) && { opacity: 0.55 },
+                    (stageDailyLocked || bossLocked || bossCooldownLocked) && { opacity: 0.55 },
                     pixelStyle,
                   ]}
                 >
@@ -346,6 +349,12 @@ export default function MapScreen() {
                         <Text style={[styles.rewardText, { color: '#f59e0b' }]}>
                           +{(stage as any).tamerCrestReward.amount}× {t('map.tamerCrest')}
                         </Text>
+                      </View>
+                    )}
+                    {isBossStage && bossCooldownLocked && !bossLocked && (
+                      <View style={styles.rewardRow}>
+                        <Feather name="clock" size={11} color="#f59e0b" />
+                        <Text style={[styles.rewardText, { color: '#f59e0b' }]}>Boss em recarga — 30 min entre batalhas</Text>
                       </View>
                     )}
                     {isBossStage && bossLocked && (
