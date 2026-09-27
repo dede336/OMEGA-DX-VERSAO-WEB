@@ -209,13 +209,11 @@ export default function HomeScreen() {
               {equippedCrestImage && (
                 <View style={styles.heroEquipmentCompactItem}>
                   <Image source={equippedCrestImage} style={styles.heroEquipmentCompactImage} resizeMode="contain" />
-                  <Text style={styles.heroEquipmentCompactLabel}>BRASÃO</Text>
                 </View>
               )}
               {equippedDigiviceImage && (
                 <View style={styles.heroEquipmentCompactItem}>
                   <Image source={equippedDigiviceImage} style={styles.heroEquipmentCompactImage} resizeMode="contain" />
-                  <Text style={styles.heroEquipmentCompactLabel}>DIGIVICE</Text>
                 </View>
               )}
             </View>
@@ -498,9 +496,9 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
-  heroEquipmentCompact:{flexDirection:'row',alignItems:'flex-start',gap:6,marginTop:3},
-  heroEquipmentCompactItem:{alignItems:'center',width:28,borderWidth:0,backgroundColor:'transparent'},
-  heroEquipmentCompactImage:{width:22,height:22,borderWidth:0,backgroundColor:'transparent'},
+  heroEquipmentCompact:{flexDirection:'row',alignItems:'center',gap:7,marginTop:3},
+  heroEquipmentCompactItem:{alignItems:'center',justifyContent:'center',width:32,height:32,borderWidth:0,backgroundColor:'transparent'},
+  heroEquipmentCompactImage:{width:28,height:28,borderWidth:0,backgroundColor:'transparent'},
   heroEquipmentCompactLabel:{color:'#fff',fontSize:4,fontWeight:'900',marginTop:1},
   homeEquipmentBar:{marginHorizontal:16,marginTop:10,borderWidth:1,borderRadius:10,paddingHorizontal:10,paddingVertical:8,flexDirection:'row',alignItems:'center'},
   homeEquipmentBarItem:{flex:1,minWidth:0,flexDirection:'row',alignItems:'center',gap:7},
