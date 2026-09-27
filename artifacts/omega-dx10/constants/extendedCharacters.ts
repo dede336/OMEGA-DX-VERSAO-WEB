@@ -173,6 +173,7 @@ const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   candlemon: 'ROOKIE',
   wizardmon: 'CHAMPION',
   wisemon: 'ULTIMATE',
+  ancientwisemon: 'MEGA',
   demimeramon: 'ROOKIE',
   meramon: 'CHAMPION',
   bluemeramon: 'ULTIMATE',
@@ -466,6 +467,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const candlemon = chars.find((char) => _normKey(char.name ?? '') === 'candlemon');
   const wizardmon = chars.find((char) => _normKey(char.name ?? '') === 'wizardmon');
   const wisemon = chars.find((char) => _normKey(char.name ?? '') === 'wisemon');
+  const ancientwisemon = chars.find((char) => _normKey(char.name ?? '') === 'ancientwisemon');
   const demimeramon = chars.find((char) => _normKey(char.name ?? '') === 'demimeramon');
   const meramon = chars.find((char) => _normKey(char.name ?? '') === 'meramon');
   const bluemeramon = chars.find((char) => _normKey(char.name ?? '') === 'bluemeramon');
@@ -502,6 +504,16 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
           label: 'Wisemon',
         };
         _farmEvoMap[wizardmon.id] = wisemon.id;
+        if (ancientwisemon) {
+          delete ALTERNATE_EVOLUTIONS[wisemon.id];
+          delete EXTRA_ALTERNATE_EVOLUTIONS[wisemon.id];
+          EVOLUTIONS[wisemon.id] = {
+            evolvesTo: ancientwisemon.id,
+            requiredLevel: 70,
+            label: 'AncientWisemon',
+          };
+          _farmEvoMap[wisemon.id] = ancientwisemon.id;
+        }
       }
     }
 
