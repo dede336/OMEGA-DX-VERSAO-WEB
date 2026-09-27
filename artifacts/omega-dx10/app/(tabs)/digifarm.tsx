@@ -899,16 +899,26 @@ export default function DigifarmScreen() {
   // ── Config & timers ─────────────────────────────────────────────────────────
   useEffect(() => {
     const update = () => {
-      const cappedMs = Math.min(Date.now() - farmLastClaim, 5 * 3600000);
+      const now = Date.now();
+      const cappedMs = Math.min(Math.max(0, now - farmLastClaim), 5 * 3600000);
       setElapsed(formatDuration(cappedMs));
-      setProductionReady(cappedMs >= 30 * 60 * 1000 && activeFarmSlots.length > 0);
-      setFarmTick(Date.now());
+
+      // Só mostra "PRODUÇÃO PRONTA" quando há recompensa realmente coletável.
+      // Isso mantém a UI e claimFarmProduction usando exatamente as mesmas regras.
+      const hasCollectableProduction = activeFarmSlots.some((ownedId) => {
+        const enteredAt = farmEntryTimes[ownedId] ?? farmLastClaim;
+        const elapsedForDigimon = Math.min(Math.max(0, now - Math.max(farmLastClaim, enteredAt)), 5 * 3600000);
+        return elapsedForDigimon >= 30 * 60 * 1000
+          && computeSatisfaction(ownedId, farmLastFeed, farmBattleRequests) >= 50;
+      });
+      setProductionReady(hasCollectableProduction);
+      setFarmTick(now);
       generateFarmBattleRequests();
     };
     update();
     const timer = setInterval(update, 5000);
     return () => clearInterval(timer);
-  }, [farmSlots, farmLastClaim, tamerLevel, farmEggSlots, farmNurserySlots]);
+  }, [farmSlots, farmLastClaim, farmEntryTimes, farmLastFeed, farmBattleRequests, tamerLevel, farmEggSlots, farmNurserySlots]);
 
 
   // ── Handlers ────────────────────────────────────────────────────────────────
