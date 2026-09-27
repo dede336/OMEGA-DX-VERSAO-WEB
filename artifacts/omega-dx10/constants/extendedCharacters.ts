@@ -511,6 +511,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
             evolvesTo: ancientwisemon.id,
             requiredLevel: 70,
             label: 'AncientWisemon',
+            requiredItem: 'pergaminho_runa_antiga',
           };
           _farmEvoMap[wisemon.id] = ancientwisemon.id;
         }
