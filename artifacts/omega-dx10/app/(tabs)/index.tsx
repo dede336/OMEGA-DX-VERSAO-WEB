@@ -83,10 +83,12 @@ export default function HomeScreen() {
   const isMimi = tamerId === 'tamer_mimi';
   const isKari = tamerId === 'tamer_kari';
   const isMatt = tamerId === 'tamer_matt';
-  const equippedCrest = equippedItems.brasao ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.brasao) : null;
-  const equippedDigivice = equippedItems.digivice ? EQUIPMENT_ITEMS.find((item) => item.id === equippedItems.digivice) : null;
-  const equippedCrestImage = equippedItems.brasao ? getEquipItemImage(equippedItems.brasao, tamerId) : null;
-  const equippedDigiviceImage = equippedItems.digivice ? getEquipItemImage(equippedItems.digivice, tamerId) : null;
+  // The equipped ID is the source of truth. Do not hide Home equipment just
+  // because an older/custom item is absent from the static EQUIPMENT_ITEMS list.
+  const equippedCrestId = equippedItems.brasao ?? null;
+  const equippedDigiviceId = equippedItems.digivice ?? null;
+  const equippedCrestImage = equippedCrestId ? getEquipItemImage(equippedCrestId, tamerId) : null;
+  const equippedDigiviceImage = equippedDigiviceId ? getEquipItemImage(equippedDigiviceId, tamerId) : null;
 
   const botPad = Platform.OS === 'web' ? 20 : insets.bottom + 20;
 
@@ -184,25 +186,13 @@ export default function HomeScreen() {
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
           )}
-          {(equippedCrest || equippedDigivice) && (
+          {(equippedCrestId || equippedDigiviceId) && (
             <View style={styles.heroEquipmentRow}>
-              {equippedCrest && (
-                <View style={[styles.heroEquipmentItem, { borderColor: colors.primary + '66', backgroundColor: '#00000055' }]}>
-                  {equippedCrestImage ? (
-                    <Image source={equippedCrestImage} style={styles.heroEquipmentImage} resizeMode="contain" />
-                  ) : (
-                    <Feather name="shield" size={20} color={colors.primary} />
-                  )}
-                </View>
+              {equippedCrestId && equippedCrestImage && (
+                <ExpoImage source={equippedCrestImage} style={styles.heroEquipmentImage} contentFit="contain" autoplay />
               )}
-              {equippedDigivice && (
-                <View style={[styles.heroEquipmentItem, { borderColor: colors.primary + '66', backgroundColor: '#00000055' }]}>
-                  {equippedDigiviceImage ? (
-                    <Image source={equippedDigiviceImage} style={styles.heroEquipmentImage} resizeMode="contain" />
-                  ) : (
-                    <Feather name="cpu" size={20} color={colors.primary} />
-                  )}
-                </View>
+              {equippedDigiviceId && equippedDigiviceImage && (
+                <ExpoImage source={equippedDigiviceImage} style={styles.heroEquipmentImage} contentFit="contain" autoplay />
               )}
             </View>
           )}
@@ -481,9 +471,9 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
-  heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 5, maxWidth: 220 },
+  heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, minHeight: 32, maxWidth: 220 },
   heroEquipmentItem: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 7, padding: 3 },
-  heroEquipmentImage: { width: 24, height: 24 },
+  heroEquipmentImage: { width: 32, height: 32 },
   heroBadges: { alignItems: 'flex-end', gap: 6 },
   rankBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignItems: 'center', minWidth: 46 },
   rankBadgeLabel: { fontSize: 8, fontWeight: '700' as const, letterSpacing: 1 },
