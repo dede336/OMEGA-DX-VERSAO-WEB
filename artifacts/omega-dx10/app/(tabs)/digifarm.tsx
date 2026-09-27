@@ -187,7 +187,7 @@ const DECO_CATALOG: Record<string, { name: string; image: any; displayW: number;
   },
   tree_pine: {
     name: 'Pinheiro',
-    image: require('../../assets/images/deco_tree_pine.webp'),
+    image: require('../../assets/images/deco_tree_pine.png'),
     displayW: 130, displayH: 190, solidW: 72, solidH: 45,
   },
   tree_autumn: {
