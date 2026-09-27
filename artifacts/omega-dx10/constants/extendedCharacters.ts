@@ -429,6 +429,25 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
+  // Lopmon base line: Conomon (Baby) -> Kokomon (Training) -> Lopmon (Rookie).
+  const conomon = chars.find((char) => _normKey(char.name ?? '') === 'conomon');
+  const kokomon = chars.find((char) => _normKey(char.name ?? '') === 'kokomon');
+  const lopmon = chars.find((char) => _normKey(char.name ?? '') === 'lopmon');
+  const conomonId = conomon?.id ?? findCharacterIdByName('Conomon');
+  const kokomonId = kokomon?.id ?? findCharacterIdByName('Kokomon');
+  const lopmonId = lopmon?.id ?? findCharacterIdByName('Lopmon');
+
+  if (conomonId && kokomonId && lopmonId) {
+    delete ALTERNATE_EVOLUTIONS[conomonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[conomonId];
+    delete ALTERNATE_EVOLUTIONS[kokomonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[kokomonId];
+    EVOLUTIONS[conomonId] = { evolvesTo: kokomonId, requiredLevel: 1, label: 'Kokomon' };
+    EVOLUTIONS[kokomonId] = { evolvesTo: lopmonId, requiredLevel: 12, label: 'Lopmon' };
+    _farmEvoMap[conomonId] = kokomonId;
+    _farmEvoMap[kokomonId] = lopmonId;
+  }
+
   // Algomon line fixed by game design:
   // AlgomonBaby -> AlgomonTraining -> Algomon Rookie -> Algomon Champion -> Algomon Ultimate -> Algomon Mega.
   const findAlgomonStage = (keys: string[]) =>
