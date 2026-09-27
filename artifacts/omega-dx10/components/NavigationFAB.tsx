@@ -14,6 +14,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
+import { getCharacter } from '@/constants/extendedCharacters';
+import { CHARACTERS } from '@/constants/gameData';
 
 const FAB_IMG = require('../assets/images/menu-fab.webp');
 const ICON_HOME = require('../assets/images/home-icon.webp');
@@ -234,8 +236,12 @@ export default function NavigationFAB() {
     unreadMailCount,
     isAdmin,
     tamerLevel,
+    collection,
     farmSlots,
     farmLastClaim,
+    farmEntryTimes,
+    farmLastFeed,
+    farmBattleRequests,
     farmNurserySlots,
     farmEggSlots,
     farmNurseryEntryTimes,
@@ -259,22 +265,40 @@ export default function NavigationFAB() {
     const now = farmNotificationTick;
     let count = 0;
 
-    // Produção dos slots normais: primeira coleta disponível após 30 minutos.
-    if (farmSlots.slice(0, maxFarmSlots).some(Boolean) && now - farmLastClaim >= 30 * 60 * 1000) {
-      count += 1;
-    }
+    // Produção normal: usa a mesma condição de coleta da DigiFarm.
+    const hasCollectableProduction = farmSlots.slice(0, maxFarmSlots).some((ownedId) => {
+      if (!ownedId) return false;
+      const enteredAt = farmEntryTimes[ownedId] ?? farmLastClaim;
+      if (now - Math.max(farmLastClaim, enteredAt) < 30 * 60 * 1000) return false;
 
-    // Ovos prontos para chocar (1h).
+      let satisfaction = 50;
+      const lastFeed = farmLastFeed[ownedId] ?? 0;
+      const sinceFeed = lastFeed > 0 ? now - lastFeed : Infinity;
+      if (sinceFeed < 4 * 3600000) satisfaction += 30;
+      else if (sinceFeed > 8 * 3600000) satisfaction -= 20;
+      else satisfaction -= 10;
+      const req = farmBattleRequests[ownedId];
+      if (req) {
+        if (req.fulfilled) satisfaction += 20;
+        else if (now - req.requestedAt > 5 * 3600000) satisfaction -= 20;
+      }
+      return satisfaction >= 50;
+    });
+    if (hasCollectableProduction) count += 1;
+
     for (const ownedId of farmEggSlots.slice(0, maxFarmSlots)) {
+      if (!ownedId) continue;
       const enteredAt = farmEggEntryTimes[ownedId] ?? now;
       if (now - enteredAt >= 60 * 60 * 1000) count += 1;
     }
 
-    // Baby/Treinamento prontos. O tempo exato depende da fase e é confirmado
-    // dentro da Farm; 1h já sinaliza que há um processo que merece atenção.
     for (const ownedId of farmNurserySlots.slice(0, maxFarmSlots)) {
+      if (!ownedId) continue;
       const enteredAt = farmNurseryEntryTimes[ownedId] ?? now;
-      if (now - enteredAt >= 60 * 60 * 1000) count += 1;
+      const owned = collection.find((entry) => entry.ownedId === ownedId);
+      const char = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
+      const duration = String(char?.rarity ?? '') === 'TRAINING' ? 150 * 60 * 1000 : 60 * 60 * 1000;
+      if (now - enteredAt >= duration) count += 1;
     }
 
     return count;
