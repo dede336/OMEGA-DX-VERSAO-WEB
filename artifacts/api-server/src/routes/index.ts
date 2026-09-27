@@ -15,6 +15,7 @@ import chatRouter from "./chat.js";
 import namingToolRouter from "./naming-tool.js";
 import saveMapRouter from "./save-map.js";
 import moderationRouter from "./moderation.js";
+import pvpRouter from "./pvp.js";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use("/chat", chatRouter);
 router.use("/naming-tool", namingToolRouter);
 router.use("/save-map", saveMapRouter);
 router.use("/moderation", moderationRouter);
+router.use("/pvp", pvpRouter);
 
 export default router;
