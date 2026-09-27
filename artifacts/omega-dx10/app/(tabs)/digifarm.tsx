@@ -465,23 +465,26 @@ export default function DigifarmScreen() {
   // ── Day/Night + Weather ───────────────────────────────────────────────────
   const [farmTime, setFarmTime] = useState(() => new Date());
   const [weather, setWeather] = useState<'clear' | 'rain' | 'snow'>('clear');
-  const RAIN_CNT = 50;
-  const SNOW_CNT = 30;
+  const RAIN_CNT = 120;
+  const SNOW_CNT = 80;
   const rainAnims = useMemo(() => Array.from({ length: RAIN_CNT }, () => new Animated.Value(0)), []);
   const rainCfg = useMemo(() => Array.from({ length: RAIN_CNT }, (_, i) => ({
-    x: (i / RAIN_CNT) * 420,
-    dur: 330 + ((i * 97) % 250),
-    del: (i * 43) % 900,
-    len: 7 + ((i * 31) % 8),
-    op: parseFloat((0.5 + ((i * 17) % 40) / 100).toFixed(2)),
+    x: ((i * 73) % 420),
+    dur: 230 + ((i * 37) % 220),
+    del: (i * 29) % 700,
+    len: 12 + ((i * 17) % 20),
+    w: i % 7 === 0 ? 2 : 1,
+    drift: 28 + ((i * 11) % 32),
+    op: parseFloat((0.48 + ((i * 19) % 47) / 100).toFixed(2)),
   })), []);
   const snowAnims = useMemo(() => Array.from({ length: SNOW_CNT }, () => new Animated.Value(0)), []);
   const snowCfg = useMemo(() => Array.from({ length: SNOW_CNT }, (_, i) => ({
-    x: (i / SNOW_CNT) * 420,
-    dur: 2600 + ((i * 113) % 2500),
-    del: (i * 97) % 2000,
-    sz: i % 3 === 0 ? 3 : 2,
-    op: parseFloat((0.6 + ((i * 23) % 35) / 100).toFixed(2)),
+    x: ((i * 89) % 420),
+    dur: 2200 + ((i * 113) % 3600),
+    del: (i * 71) % 1800,
+    sz: 2 + (i % 4),
+    drift: 10 + ((i * 23) % 36),
+    op: parseFloat((0.58 + ((i * 17) % 40) / 100).toFixed(2)),
   })), []);
   const sunParams = useMemo(() => {
     const h = farmTime.getHours() + farmTime.getMinutes() / 60;
@@ -1501,31 +1504,58 @@ export default function DigifarmScreen() {
             )}
           {/* ── Weather overlay ───────────────────────────────────────── */}
           {weather !== 'clear' && (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <View style={{ position:'absolute', top:0, left:0, width:FARM_CANVAS_W, height:FARM_CANVAS_H, overflow:'hidden', pointerEvents:'none', zIndex:5 }}>
+              {/* Atmosfera: chuva escurece/esfria a cena; neve cria névoa clara. */}
+              <View style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: weather === 'rain' ? 'rgba(20,42,65,0.18)' : 'rgba(220,238,255,0.10)',
+              }} />
               {weather === 'rain' && rainAnims.map((anim, i) => {
-                const c = rainCfg[i];
-                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-20, FARM_CANVAS_H + 20] });
+                const cfg = rainCfg[i];
+                const yPos = anim.interpolate({ inputRange:[0,1], outputRange:[-45,FARM_CANVAS_H+45] });
+                const xDrift = anim.interpolate({ inputRange:[0,1], outputRange:[0,cfg.drift] });
                 return (
                   <Animated.View key={`rp${i}`} style={{
-                    position: 'absolute', left: c.x, top: yPos as any,
-                    width: 1, height: c.len,
-                    backgroundColor: `rgba(180,220,255,${c.op})`,
-                    transform: [{ rotate: '15deg' }],
+                    position:'absolute', left:cfg.x, top:yPos as any,
+                    width:cfg.w, height:cfg.len,
+                    backgroundColor:`rgba(190,225,255,${cfg.op})`,
+                    borderRadius:1,
+                    transform:[{ translateX:xDrift as any },{ rotate:'-12deg' }],
                   }} />
                 );
               })}
+              {weather === 'rain' && Array.from({ length: 22 }, (_, i) => (
+                <View key={`splash${i}`} style={{
+                  position:'absolute',
+                  left:(i*83)%FARM_CANVAS_W,
+                  top:FARM_CANVAS_H-18-((i*47)%180),
+                  width:6+(i%3)*3,
+                  height:2,
+                  borderRadius:6,
+                  borderWidth:1,
+                  borderColor:'rgba(190,225,255,0.38)',
+                  transform:[{ rotate:`${(i%2?8:-8)}deg` }],
+                }} />
+              ))}
               {weather === 'snow' && snowAnims.map((anim, i) => {
-                const c = snowCfg[i];
-                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-10, FARM_CANVAS_H + 10] });
+                const cfg = snowCfg[i];
+                const yPos = anim.interpolate({ inputRange:[0,1], outputRange:[-20,FARM_CANVAS_H+20] });
+                const sway = anim.interpolate({ inputRange:[0,0.25,0.5,0.75,1], outputRange:[0,cfg.drift,-cfg.drift*0.55,cfg.drift*0.7,0] });
+                const spin = anim.interpolate({ inputRange:[0,1], outputRange:['0deg', i%2===0?'260deg':'-220deg'] });
                 return (
                   <Animated.View key={`sp${i}`} style={{
-                    position: 'absolute', left: c.x, top: yPos as any,
-                    width: c.sz, height: c.sz,
-                    backgroundColor: `rgba(255,255,255,${c.op})`,
-                    borderRadius: 1,
+                    position:'absolute', left:cfg.x, top:yPos as any,
+                    width:cfg.sz, height:cfg.sz,
+                    backgroundColor:`rgba(255,255,255,${cfg.op})`,
+                    borderRadius:cfg.sz,
+                    shadowColor:'#fff', shadowOpacity:0.35, shadowRadius:2,
+                    transform:[{ translateX:sway as any },{ rotate:spin as any }],
                   }} />
                 );
               })}
+              {weather === 'snow' && (
+                <View style={{ position:'absolute', left:0, right:0, bottom:0, height:34, backgroundColor:'rgba(240,248,255,0.12)' }} />
+              )}
             </View>
           )}
 
