@@ -209,6 +209,7 @@ interface GameState {
   digiviceTemporaryCards: Record<string, { ascension?: DigiviceTemporaryCardBuff; fusion?: DigiviceTemporaryCardBuff }>;
   // PvP competitivo: formação defensiva registrada e energia de batalha.
   pvpPoints: number;
+  pvpCoins: number;
   pvpBattleCharges: number;
   pvpLastChargeAt: number;
   pvpTeam: string[];
@@ -293,6 +294,8 @@ interface GameContextValue extends GameState {
   refreshPvpBattles: () => void;
   consumePvpBattle: () => boolean;
   awardPvpVictory: () => void;
+  awardPvpDefeat: () => void;
+  purchasePvpShopItem: (itemId: string) => { success: boolean; message: string };
   resetGame: () => Promise<void>;
   rosterRevision: number;
   rosterReady: boolean;
@@ -479,6 +482,7 @@ const defaultState: GameState = {
   digiviceCards: {},
   digiviceTemporaryCards: {},
   pvpPoints: 0,
+  pvpCoins: 0,
   pvpBattleCharges: 5,
   pvpLastChargeAt: Date.now(),
   pvpTeam: [],
@@ -576,6 +580,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
             ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
             pvpPoints: (parsed as any).pvpPoints ?? 0,
+            pvpCoins: (parsed as any).pvpCoins ?? 0,
             pvpBattleCharges: Math.max(0, Math.min(5, (parsed as any).pvpBattleCharges ?? 5)),
             pvpLastChargeAt: (parsed as any).pvpLastChargeAt ?? Date.now(),
             pvpTeam: Array.isArray((parsed as any).pvpTeam) ? (parsed as any).pvpTeam.slice(0, 3) : [],
@@ -2294,6 +2299,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
         ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
         pvpPoints: (parsed as any).pvpPoints ?? 0,
+        pvpCoins: (parsed as any).pvpCoins ?? 0,
         pvpBattleCharges: Math.max(0, Math.min(5, (parsed as any).pvpBattleCharges ?? 5)),
         pvpLastChargeAt: (parsed as any).pvpLastChargeAt ?? Date.now(),
         pvpTeam: Array.isArray((parsed as any).pvpTeam) ? (parsed as any).pvpTeam.slice(0, 3) : [],
@@ -2359,7 +2365,64 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const awardPvpVictory = useCallback(() => {
-    setState((prev) => ({ ...prev, pvpPoints: prev.pvpPoints + 10 }));
+    // Vitória vale +10 pontos no ranking semanal e +10 Moedas PvP permanentes.
+    setState((prev) => ({ ...prev, pvpPoints: prev.pvpPoints + 10, pvpCoins: prev.pvpCoins + 10 }));
+  }, []);
+
+  const awardPvpDefeat = useCallback(() => {
+    // Derrota afeta somente o ranking. Moedas PvP nunca são perdidas.
+    setState((prev) => ({ ...prev, pvpPoints: Math.max(0, prev.pvpPoints - 5) }));
+  }, []);
+
+  const purchasePvpShopItem = useCallback((itemId: string): { success: boolean; message: string } => {
+    const prices: Record<string, number> = {
+      miracle_piece: 1500,
+      random_card: 2000,
+      gold_battery_10: 500,
+      energy_pill: 500,
+      pink_flower: 20,
+      food_apple: 50,
+      food_sushi: 50,
+      food_water: 50,
+      food_salad: 50,
+      food_burger: 50,
+      food_pizza: 50,
+    };
+    const price = prices[itemId];
+    if (!price) return { success: false, message: 'Item PvP inválido.' };
+    if (stateRef.current.pvpCoins < price) return { success: false, message: 'Moedas PvP insuficientes.' };
+
+    let result = { success: false, message: 'Não foi possível concluir a compra.' };
+    setState((prev) => {
+      if (prev.pvpCoins < price) return prev;
+      const next: GameState = { ...prev, pvpCoins: prev.pvpCoins - price };
+
+      if (itemId === 'miracle_piece') {
+        next.pieces = { ...prev.pieces, piece_brasao_milagre: (prev.pieces.piece_brasao_milagre ?? 0) + 1 };
+        result = { success: true, message: '1× Milagre Piece adquirido.' };
+      } else if (itemId === 'random_card') {
+        if (CARD_DEFINITIONS.length === 0) return prev;
+        const card = CARD_DEFINITIONS[Math.floor(Math.random() * CARD_DEFINITIONS.length)];
+        next.inventory = [...prev.inventory, card.id];
+        result = { success: true, message: `Carta obtida: ${card.name}.` };
+      } else if (itemId === 'gold_battery_10') {
+        next.pieces = { ...prev.pieces, piece_battery_gold: (prev.pieces.piece_battery_gold ?? 0) + 10 };
+        result = { success: true, message: '10× Baterias Douradas adquiridas.' };
+      } else if (itemId === 'energy_pill') {
+        next.inventory = [...prev.inventory, 'pilula_energetica'];
+        result = { success: true, message: '1× Pílula de Energia adquirida.' };
+      } else if (itemId === 'pink_flower') {
+        next.farmDecorInventory = { ...prev.farmDecorInventory, flower: (prev.farmDecorInventory.flower ?? 0) + 1 };
+        result = { success: true, message: '1× Flor Rosa adquirida para a DigiFarm.' };
+      } else if (itemId.startsWith('food_')) {
+        next.farmFoods = { ...prev.farmFoods, [itemId]: (prev.farmFoods[itemId] ?? 0) + 1 };
+        result = { success: true, message: '1× comida adquirida para a DigiFarm.' };
+      } else {
+        return prev;
+      }
+      return next;
+    });
+    return result;
   }, []);
 
   const resetGame = useCallback(async () => {
@@ -2450,6 +2513,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         refreshPvpBattles,
         consumePvpBattle,
         awardPvpVictory,
+        awardPvpDefeat,
+        purchasePvpShopItem,
       }}
     >
       {children}
