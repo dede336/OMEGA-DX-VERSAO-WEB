@@ -1848,7 +1848,7 @@ export default function DigifarmScreen() {
                   <TouchableOpacity
                     style={[styles.feedBtn, { backgroundColor: totalFood > 0 ? '#f59e0b' : '#2a2a2a' }, pixelStyle]}
                     onPress={() => setFeedModalOpen(true)}
-                    disabled={totalFood === 0}
+                    
                     activeOpacity={0.8}
                   >
                     <Text style={{ fontSize: 15 }}>🍎</Text>
