@@ -55,6 +55,10 @@ function NativeTabLayout() {
           <Icon sf={{ default: "leaf", selected: "leaf.fill" }} />
           <Label>{t('tab.digifarm')}</Label>
         </NativeTabs.Trigger>
+        <NativeTabs.Trigger name="pvp">
+          <Icon sf={{ default: "shield", selected: "shield.fill" }} />
+          <Label>PvP</Label>
+        </NativeTabs.Trigger>
         <NativeTabs.Trigger name="amigos">
           <Icon sf={{ default: "person.2", selected: "person.2.fill" }} />
           <Label>{t('tab.friends')}</Label>
@@ -106,6 +110,7 @@ function ClassicTabLayout() {
         <Tabs.Screen name="gacha" options={{ title: t('tab.gacha') }} />
         <Tabs.Screen name="ranking" options={{ title: t('tab.ranking') }} />
         <Tabs.Screen name="digifarm" options={{ title: t('tab.digifarm') }} />
+        <Tabs.Screen name="pvp" options={{ title: 'PvP' }} />
         <Tabs.Screen name="amigos" options={{ title: t('tab.friends') }} />
         <Tabs.Screen name="chat" options={{ title: t('tab.chat') }} />
         <Tabs.Screen name="admin" options={{ href: canShowAdmin ? undefined : null, title: t('tab.admin') }} />
