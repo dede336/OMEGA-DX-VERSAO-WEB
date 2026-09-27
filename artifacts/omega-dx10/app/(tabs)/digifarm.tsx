@@ -1605,16 +1605,6 @@ export default function DigifarmScreen() {
             )}
           </View>
 
-          {/* Produção dos 5 slots normais: itens/30min + 10 gemas/h, máximo 5h */}
-          {productionReady && activeFarmSlots.length > 0 && (
-            <TouchableOpacity style={[styles.xpBadge, { top: 52, zIndex: 50, elevation: 50 }]} onPress={collectProduction} activeOpacity={0.8}>
-              <Text style={{ fontSize: 15 }}>🎁</Text>
-              <View>
-                <Text style={styles.xpBadgeMain}>PRODUÇÃO PRONTA</Text>
-                <Text style={styles.xpBadgeSub}>BATERIAS · PÍLULA · GEMAS</Text>
-              </View>
-            </TouchableOpacity>
-          )}
 
           {/* ── Zoom controls ─────────────────────────────────────────── */}
           {!isPlacing && (
@@ -1878,6 +1868,21 @@ export default function DigifarmScreen() {
           )}
         </View>
 
+          {/* Produção: fora do responder do mapa para o toque não ser capturado pelo pan/zoom */}
+          {productionReady && activeFarmSlots.length > 0 && (
+            <TouchableOpacity
+              style={[styles.xpBadge, { top: 52, zIndex: 100, elevation: 100 }]}
+              onPress={collectProduction}
+              activeOpacity={0.7}
+            >
+              <Text style={{ fontSize: 15 }}>🎁</Text>
+              <View>
+                <Text style={styles.xpBadgeMain}>PRODUÇÃO PRONTA</Text>
+                <Text style={styles.xpBadgeSub}>BATERIAS · PÍLULA · GEMAS</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+
           {/* Moldura azul — fundo transparente */}
           <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, width: viewW, height: frameH, zIndex: 10 }}>
             <Image
@@ -1992,7 +1997,10 @@ export default function DigifarmScreen() {
                       disabled={qty === 0}
                       activeOpacity={0.8}
                     >
-                      <Image source={food.image} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                      <View style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                        <Image source={food.image} style={{ position: 'absolute', width: 44, height: 44 }} resizeMode="contain" />
+                        <Text style={{ fontSize: 30 }}>{food.emoji}</Text>
+                      </View>
                       <Text style={{ fontSize: 11, color: colors.foreground, marginTop: 2, fontWeight: '600' }}>{food.name}</Text>
                       <Text style={{ fontSize: 13, fontWeight: '800', color: qty > 0 ? '#f59e0b' : colors.mutedForeground }}>
                         {qty > 0 ? `×${qty}` : 'Sem'}
