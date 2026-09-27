@@ -76,7 +76,7 @@ export default function MapScreen() {
   const { t } = useLanguage();
   const { user } = useAuth();
   const isAdmin = user?.isAdmin ?? false;
-  const { isStageCleared, isMapUnlocked, selectedCharacter, collection, totalPlayerLevel, isDailyDungeonAvailable, customGameMaps, isBossOnCooldown } = useGame();
+  const { isStageCleared, isMapUnlocked, selectedCharacter, collection, totalPlayerLevel, isDailyDungeonAvailable, customGameMaps, isBossOnCooldown, getBossCooldownRemaining } = useGame();
 
   const allMaps = [
     ...GAME_MAPS,
@@ -324,6 +324,10 @@ export default function MapScreen() {
                 map.stages.filter((s: MapStage) => !s.isBoss).every((s: MapStage) => isStageCleared(map.id, s.index));
               const bossLocked = !isAdmin && isBossStage && !regularStagesCleared;
               const bossCooldownLocked = !isAdmin && isBossStage && isBossOnCooldown(map.id, stage.index);
+              const bossCooldownMs = bossCooldownLocked ? getBossCooldownRemaining(map.id, stage.index) : 0;
+              const bossCooldownMin = Math.floor(bossCooldownMs / 60000);
+              const bossCooldownSec = Math.floor((bossCooldownMs % 60000) / 1000);
+              const bossCooldownText = `${String(bossCooldownMin).padStart(2, '0')}:${String(bossCooldownSec).padStart(2, '0')}`;
               const canPlay = !!selectedCharacter && !stageDailyLocked && !bossLocked && !bossCooldownLocked;
 
               return (
@@ -354,7 +358,7 @@ export default function MapScreen() {
                     {isBossStage && bossCooldownLocked && !bossLocked && (
                       <View style={styles.rewardRow}>
                         <Feather name="clock" size={11} color="#f59e0b" />
-                        <Text style={[styles.rewardText, { color: '#f59e0b' }]}>Boss em recarga — 30 min entre batalhas</Text>
+                        <Text style={[styles.rewardText, { color: '#f59e0b' }]}>{`Boss em recarga — ${bossCooldownText}`}</Text>
                       </View>
                     )}
                     {isBossStage && bossLocked && (
