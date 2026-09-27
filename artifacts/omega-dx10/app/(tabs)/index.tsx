@@ -189,10 +189,14 @@ export default function HomeScreen() {
           {(equippedCrestId || equippedDigiviceId) && (
             <View style={styles.heroEquipmentRow}>
               {equippedCrestId && equippedCrestImage && (
-                <ExpoImage source={equippedCrestImage} style={styles.heroEquipmentImage} contentFit="contain" autoplay />
+                <View style={styles.heroEquipmentItem}>
+                  <Image source={equippedCrestImage} style={styles.heroEquipmentImage} resizeMode="contain" />
+                </View>
               )}
               {equippedDigiviceId && equippedDigiviceImage && (
-                <ExpoImage source={equippedDigiviceImage} style={styles.heroEquipmentImage} contentFit="contain" autoplay />
+                <View style={styles.heroEquipmentItem}>
+                  <Image source={equippedDigiviceImage} style={styles.heroEquipmentImage} resizeMode="contain" />
+                </View>
               )}
             </View>
           )}
@@ -472,7 +476,7 @@ const styles = StyleSheet.create({
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
   heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, minHeight: 32, maxWidth: 220 },
-  heroEquipmentItem: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 7, padding: 3 },
+  heroEquipmentItem: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#ffffff33', backgroundColor: '#00000044', borderRadius: 7, padding: 3 },
   heroEquipmentImage: { width: 32, height: 32 },
   heroBadges: { alignItems: 'flex-end', gap: 6 },
   rankBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignItems: 'center', minWidth: 46 },
