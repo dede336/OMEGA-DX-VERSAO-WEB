@@ -83,17 +83,23 @@ export default function HomeScreen() {
   const isMimi = tamerId === 'tamer_mimi';
   const isKari = tamerId === 'tamer_kari';
   const isMatt = tamerId === 'tamer_matt';
-  // The equipped ID is the source of truth. Do not hide Home equipment just
-  // because an older/custom item is absent from the static EQUIPMENT_ITEMS list.
+  // Resolve both equipped items from the real equipped slot first.
+  // Some saves/custom items use IDs that are not part of the static equipment catalog.
   const equippedCrestId = equippedItems.brasao ?? null;
   const equippedDigiviceId = equippedItems.digivice ?? null;
-  // Home also accepts legacy/custom crest ids. Normalize common legacy prefixes
-  // so an equipped crest never disappears just because the save predates the current IDs.
-  const crestCandidates = equippedCrestId
-    ? [equippedCrestId, equippedCrestId.replace(/^piece_/, ''), equippedCrestId.replace(/^crest_/, 'brasao_')]
-    : [];
-  const equippedCrestImage = crestCandidates.map((id) => getEquipItemImage(id, tamerId)).find(Boolean) ?? null;
-  const equippedDigiviceImage = equippedDigiviceId ? getEquipItemImage(equippedDigiviceId, tamerId) : null;
+  const resolveHomeEquipImage = (itemId: string | null, slot: 'brasao' | 'digivice') => {
+    if (!itemId) return null;
+    const candidates = slot === 'brasao'
+      ? [itemId, itemId.replace(/^piece_/, ''), itemId.replace(/^crest_/, 'brasao_')]
+      : [itemId, itemId.replace(/^piece_/, ''), itemId.replace(/^digivice-/, 'digivice_')];
+    for (const id of candidates) {
+      const image = getEquipItemImage(id, tamerId);
+      if (image) return image;
+    }
+    return null;
+  };
+  const equippedCrestImage = resolveHomeEquipImage(equippedCrestId, 'brasao');
+  const equippedDigiviceImage = resolveHomeEquipImage(equippedDigiviceId, 'digivice');
 
   const botPad = Platform.OS === 'web' ? 20 : insets.bottom + 20;
 
@@ -191,21 +197,15 @@ export default function HomeScreen() {
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
           )}
-          {(equippedCrestId || equippedDigiviceId) && (
-            <View style={styles.heroEquipmentRow}>
-              {equippedCrestId && equippedCrestImage && (
-                <View style={styles.heroEquipmentItem}>
-                  <Image source={equippedCrestImage} style={styles.heroEquipmentImage} resizeMode="contain" />
-                </View>
-              )}
-              {equippedDigiviceId && equippedDigiviceImage && (
-                <View style={styles.heroEquipmentItem}>
-                  <Image source={equippedDigiviceImage} style={styles.heroEquipmentImage} resizeMode="contain" />
-                </View>
-              )}
-            </View>
-          )}
+
         </View>
+
+        {(equippedCrestImage || equippedDigiviceImage) && (
+          <View style={styles.homeEquipmentOverlay} pointerEvents="none">
+            {equippedCrestImage && <Image source={equippedCrestImage} style={styles.homeEquipmentImage} resizeMode="contain" />}
+            {equippedDigiviceImage && <Image source={equippedDigiviceImage} style={styles.homeEquipmentImage} resizeMode="contain" />}
+          </View>
+        )}
 
         {/* Rank badge + account + language */}
         <View style={styles.heroBadges}>
@@ -480,6 +480,8 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
+  homeEquipmentOverlay:{position:'absolute',left:176,bottom:8,flexDirection:'row',alignItems:'center',gap:10,zIndex:20},
+  homeEquipmentImage:{width:42,height:42},
   heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, minHeight: 32, maxWidth: 220 },
   heroEquipmentItem: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#ffffff33', backgroundColor: '#00000044', borderRadius: 7, padding: 3 },
   heroEquipmentImage: { width: 32, height: 32 },
