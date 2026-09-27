@@ -427,6 +427,7 @@ export default function DigifarmScreen() {
   const [farmTick, setFarmTick] = useState(Date.now());
   const [evoAnim, setEvoAnim] = useState<{ fromCharacterId: string; toCharacterId: string } | null>(null);
   const [hatchingEggId, setHatchingEggId] = useState<string | null>(null);
+  const [hatchAnim, setHatchAnim] = useState<{ fromCharacterId: string; toCharacterId: string } | null>(null);
   const bounceAnim = useRef(new Animated.Value(1)).current;
 
   const [selectedFarmDigi, setSelectedFarmDigi] = useState<string | null>(null);
@@ -1030,15 +1031,27 @@ export default function DigifarmScreen() {
     const char = getCharacter(from) ?? CHARACTERS[from];
 
     if (char?.rarity === 'EGG') {
-      // Hatch sequence: egg turns white + element-colored light, then Baby appears.
+      // Primeiro conclui a regra do processo e captura o Baby resultante.
+      // Só então abre a animação, evitando o ovo desaparecer sem mostrar a chocagem.
       if (hatchingEggId) return;
       setHatchingEggId(ownedId);
+      const ok = completeFarmProcess(ownedId);
+      if (!ok) {
+        setHatchingEggId(null);
+        Alert.alert('Digifarm', 'É necessário ter um slot Baby/Training livre para chocar.');
+        return;
+      }
       setTimeout(() => {
-        const ok = completeFarmProcess(ownedId);
-        if (!ok) Alert.alert('Digifarm', 'É necessário ter um slot Baby/Training livre para chocar.');
+        const updated = collection.find((entry) => entry.ownedId === ownedId);
+        // O estado React pode ainda estar no frame anterior; o alvo oficial é obtido
+        // pela mesma função de chocagem para alimentar a animação visual.
+        const target = updated && updated.characterId !== from
+          ? updated.characterId
+          : getRandomHatchTarget(char.element, from === 'specialDigitama');
+        if (target) setHatchAnim({ fromCharacterId: from, toCharacterId: target });
         setHatchingEggId(null);
         setFarmTick(Date.now());
-      }, 1100);
+      }, 120);
       return;
     }
 
@@ -1489,14 +1502,7 @@ export default function DigifarmScreen() {
                     )}
                   </View>
                   <Image source={EGG_NEST} resizeMode="contain" style={{ position:'absolute', left:0, top:0, width:52, height:52, zIndex:2 }} />
-                  <TouchableOpacity
-                    style={{ position:'absolute', left:-12, right:-12, bottom:-25, zIndex:4, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.92)', paddingVertical:5, borderRadius:7, alignItems:'center' }}
-                    onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}
-                  >
-                    <Text style={{ color:'#fff', fontSize:9, fontWeight:'900' }}>
-                      {info?.ready ? '✨ CHOCAR' : `${formatDuration(info?.remaining ?? 0)} · ⚡100💎`}
-                    </Text>
-                  </TouchableOpacity>
+
                 </View>
               );
             })}
@@ -1634,21 +1640,7 @@ export default function DigifarmScreen() {
                 </Animated.View>
               );
             })}
-            {activeNurserySlots.map((ownedId, idx) => {
-              const info = farmProcessInfo(ownedId);
-              const pos = digiCurrentPos[activeFarmSlots.length + idx] ?? SLOT_STARTS[5 + idx];
-              return (
-                <TouchableOpacity
-                  key={`process_${ownedId}`}
-                  style={{ position:'absolute', left:pos.x-45, top:pos.y+38, zIndex:20, backgroundColor:info?.ready?'#16a34a':'rgba(17,24,39,0.9)', paddingHorizontal:7, paddingVertical:4, borderRadius:6 }}
-                  onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}
-                >
-                  <Text style={{ color:'#fff', fontSize:8, fontWeight:'900' }}>
-                    {info?.ready ? '✨ EVOLUIR' : `${formatDuration(info?.remaining ?? 0)} · ⚡100💎`}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+
           </Animated.View>
 
           {/* HUD */}
@@ -1848,7 +1840,6 @@ export default function DigifarmScreen() {
                   <TouchableOpacity key={ownedId} style={styles.slotFilled} onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}>
                     <CharacterAvatar characterId={owned.characterId} size={40} />
                     <Text style={{ color:info?.ready?'#4ade80':'#fbbf24', fontSize:7, fontWeight:'900' }}>{info?.ready?'PRONTO':formatDuration(info?.remaining ?? 0)}</Text>
-                    <TouchableOpacity onPress={() => removeFromSlot(ownedId)} style={styles.slotRemove}><Feather name="x" size={9} color="#fff" /></TouchableOpacity>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity key={`nursery-empty-${i}`} onPress={() => openPicker(i,'nursery')} style={styles.slotEmpty}>
@@ -1870,7 +1861,6 @@ export default function DigifarmScreen() {
                   <TouchableOpacity key={ownedId} style={styles.slotFilled} onPress={() => info?.ready ? finishProcess(ownedId) : accelerateProcess(ownedId)}>
                     <CharacterAvatar characterId={owned.characterId} size={38} />
                     <Text style={{ color:info?.ready?'#4ade80':'#fbbf24', fontSize:7, fontWeight:'900' }}>{info?.ready?'CHOCAR':formatDuration(info?.remaining ?? 0)}</Text>
-                    <TouchableOpacity onPress={() => removeFromSlot(ownedId)} style={styles.slotRemove}><Feather name="x" size={9} color="#fff" /></TouchableOpacity>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity key={`egg-empty-${i}`} onPress={() => openPicker(i,'egg')} style={styles.slotEmpty}>
@@ -2120,6 +2110,13 @@ export default function DigifarmScreen() {
         fromCharacterId={evoAnim?.fromCharacterId ?? ''}
         toCharacterId={evoAnim?.toCharacterId ?? ''}
         onClose={() => setEvoAnim(null)}
+      />
+
+      <EvolutionAnimation
+        visible={!!hatchAnim}
+        fromCharacterId={hatchAnim?.fromCharacterId ?? ''}
+        toCharacterId={hatchAnim?.toCharacterId ?? ''}
+        onClose={() => setHatchAnim(null)}
       />
 
       {/* ── Reward modal ─────────────────────────────────────────────────────── */}
