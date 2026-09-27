@@ -172,6 +172,7 @@ const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   fukamon: 'TRAINING',
   candlemon: 'ROOKIE',
   wizardmon: 'CHAMPION',
+  wisemon: 'ULTIMATE',
   demimeramon: 'ROOKIE',
   meramon: 'CHAMPION',
   bluemeramon: 'ULTIMATE',
@@ -464,6 +465,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const fukamon = chars.find((char) => _normKey(char.name ?? '') === 'fukamon');
   const candlemon = chars.find((char) => _normKey(char.name ?? '') === 'candlemon');
   const wizardmon = chars.find((char) => _normKey(char.name ?? '') === 'wizardmon');
+  const wisemon = chars.find((char) => _normKey(char.name ?? '') === 'wisemon');
   const demimeramon = chars.find((char) => _normKey(char.name ?? '') === 'demimeramon');
   const meramon = chars.find((char) => _normKey(char.name ?? '') === 'meramon');
   const bluemeramon = chars.find((char) => _normKey(char.name ?? '') === 'bluemeramon');
@@ -491,6 +493,16 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
         label: 'Wizardmon',
       };
       _farmEvoMap[candlemon.id] = wizardmon.id;
+      if (wisemon) {
+        delete ALTERNATE_EVOLUTIONS[wizardmon.id];
+        delete EXTRA_ALTERNATE_EVOLUTIONS[wizardmon.id];
+        EVOLUTIONS[wizardmon.id] = {
+          evolvesTo: wisemon.id,
+          requiredLevel: 40,
+          label: 'Wisemon',
+        };
+        _farmEvoMap[wizardmon.id] = wisemon.id;
+      }
     }
 
     // Mokumon also has DemiMeramon as an alternate Rookie evolution.
