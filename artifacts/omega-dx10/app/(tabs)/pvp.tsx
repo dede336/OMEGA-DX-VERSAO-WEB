@@ -15,11 +15,12 @@ import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 const PVP_ICON = require('../../assets/images/icone_pvp.gif');
 const PVP_COIN_ICON = require('../../assets/images/moeda_pvp.gif');
 const MAX_BATTLES = 5;
+const RANDOM_CARD_PREVIEW_IDS = ['card_aero_wing', 'card_asas_brancas', 'card_battle_tomahawk', 'card_blue'] as const;
 const RECHARGE_MS = 30 * 60 * 1000;
 const PVP_SHOP_IMAGES: Record<string, any> = {
   miracle_piece: getEquipItemImage('piece_brasao_milagre'),
   // Cartas não possuem um asset genérico de verso no projeto; usa o mesmo ícone de cartas da Mochila.
-  random_card: null,
+  random_card: getEquipItemImage('card_aero_wing'),
   gold_battery_10: require('../../assets/images/battery_gold.webp'),
   energy_pill: ENERGY_PILL_IMAGE,
   pink_flower: require('../../assets/images/deco_flower.webp'),
@@ -64,6 +65,7 @@ export default function PvpScreen() {
   const [opponent, setOpponent] = useState<any | null>(null);
   const [pvpResult, setPvpResult] = useState<'win' | 'loss' | null>(null);
   const [pvpBusy, setPvpBusy] = useState(false);
+  const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
   const [digimonSearch, setDigimonSearch] = useState('');
 
@@ -281,7 +283,11 @@ export default function PvpScreen() {
           ['food_pizza','Pizza','Comida ×1',50],
         ].map(([id,name,detail,price]) => (
           <View key={String(id)} style={[styles.shopRow,{borderColor:colors.border}]}>
-            <Image source={PVP_SHOP_IMAGES[String(id)]} style={styles.shopImage} resizeMode="contain" />
+            <Image
+              source={String(id) === 'random_card' ? getEquipItemImage(RANDOM_CARD_PREVIEW_IDS[cardPreviewIndex]) : PVP_SHOP_IMAGES[String(id)]}
+              style={[styles.shopImage, String(id) === 'energy_pill' && styles.energyPillShopImage, String(id) === 'random_card' && styles.randomCardImage]}
+              resizeMode="contain"
+            />
             <View style={{flex:1}}>
               <Text style={[styles.shopName,{color:colors.foreground}]}>{String(name)}</Text>
               <Text style={[styles.shopDetail,{color:colors.mutedForeground}]}>{String(detail)}</Text>
@@ -352,7 +358,7 @@ const styles=StyleSheet.create({
   equipRow:{gap:8,paddingBottom:6},equip:{width:92,minHeight:94,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:7},equipImg:{width:48,height:48},equipName:{fontSize:7,textAlign:'center',marginTop:4},
   register:{backgroundColor:'#2563eb',borderRadius:12,paddingVertical:14,alignItems:'center',marginVertical:16},registerText:{color:'#fff',fontSize:10,fontWeight:'900'},
   shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'center',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinIcon:{width:22,height:22,marginRight:5},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
-  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopImage:{width:42,height:42},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},priceRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4},priceCoinIcon:{width:16,height:16},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
+  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopImage:{width:42,height:42},energyPillShopImage:{width:28,height:28,marginHorizontal:7},randomCardImage:{width:38,height:48,marginHorizontal:2},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},priceRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4},priceCoinIcon:{width:16,height:16},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
   resultCard:{borderWidth:1,borderColor:'#ffffff22',borderRadius:12,padding:12,alignItems:'center',gap:5},resultTitle:{fontSize:18,fontWeight:'900',letterSpacing:2},resultGain:{fontSize:9,fontWeight:'800'},
   slotRow:{flexDirection:'row',gap:8,marginBottom:10},teamSlot:{flex:1,height:126,borderWidth:1,borderRadius:12,alignItems:'center',justifyContent:'center',padding:6},slotName:{fontSize:7,fontWeight:'900',marginTop:4,textAlign:'center',width:'100%'},slotEmpty:{fontSize:8,fontWeight:'900',marginTop:8},modalOverlay:{flex:1,backgroundColor:'#000b',justifyContent:'flex-end'},pickerSheet:{height:'78%',borderTopWidth:1,borderTopLeftRadius:18,borderTopRightRadius:18,padding:14},pickerHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:10},searchInput:{borderWidth:1,borderRadius:10,paddingHorizontal:12,paddingVertical:10,fontSize:10,marginBottom:10},pickerGrid:{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:40},pickerDigimon:{width:'31%',minHeight:100,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:6},rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
 });
