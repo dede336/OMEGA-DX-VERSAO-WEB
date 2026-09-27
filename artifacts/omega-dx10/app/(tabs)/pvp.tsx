@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Alert, Modal, TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useGame } from '@/context/GameContext';
@@ -10,11 +10,25 @@ import { EQUIPMENT_ITEMS } from '@/constants/gameData';
 import { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { getCharacter } from '@/constants/extendedCharacters';
+import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 
 const PVP_ICON = require('../../assets/images/icone_pvp.gif');
 const PVP_COIN_ICON = require('../../assets/images/moeda_pvp.gif');
 const MAX_BATTLES = 5;
 const RECHARGE_MS = 30 * 60 * 1000;
+const PVP_SHOP_IMAGES: Record<string, any> = {
+  miracle_piece: getEquipItemImage('piece_brasao_milagre'),
+  random_card: require('../../assets/images/card_back.webp'),
+  gold_battery_10: require('../../assets/images/battery_gold.webp'),
+  energy_pill: ENERGY_PILL_IMAGE,
+  pink_flower: require('../../assets/images/deco_flower.webp'),
+  food_apple: require('../../assets/images/food_apple.webp'),
+  food_sushi: require('../../assets/images/food_sushi.webp'),
+  food_water: require('../../assets/images/food_water.webp'),
+  food_salad: require('../../assets/images/food_salad.webp'),
+  food_burger: require('../../assets/images/food_burger.webp'),
+  food_pizza: require('../../assets/images/food_pizza.webp'),
+};
 
 type PvpEntry = {
   rank: number;
@@ -49,6 +63,8 @@ export default function PvpScreen() {
   const [opponent, setOpponent] = useState<any | null>(null);
   const [pvpResult, setPvpResult] = useState<'win' | 'loss' | null>(null);
   const [pvpBusy, setPvpBusy] = useState(false);
+  const [pickerSlot, setPickerSlot] = useState<number | null>(null);
+  const [digimonSearch, setDigimonSearch] = useState('');
 
   useEffect(() => {
     game.refreshPvpBattles();
@@ -98,13 +114,24 @@ export default function PvpScreen() {
   const nextMin = Math.floor(nextBattleMs / 60000);
   const nextSec = Math.floor((nextBattleMs % 60000) / 1000);
 
-  function toggleDigimon(ownedId: string) {
+  function chooseDigimonForSlot(ownedId: string) {
+    if (pickerSlot === null) return;
     setSelectedTeam((prev) => {
-      if (prev.includes(ownedId)) return prev.filter((id) => id !== ownedId);
-      if (prev.length >= 3) return prev;
-      return [...prev, ownedId];
+      const next = [prev[0] ?? '', prev[1] ?? '', prev[2] ?? ''];
+      const old = next.indexOf(ownedId);
+      if (old >= 0 && old !== pickerSlot) next[old] = '';
+      next[pickerSlot] = ownedId;
+      return next;
     });
+    setPickerSlot(null); setDigimonSearch('');
   }
+
+  const selectableDigimons = useMemo(() => game.collection.filter((owned) => {
+    const ch = getCharacter(owned.characterId);
+    if (!ch || String(ch.rarity ?? '') === 'EGG') return false;
+    const q = digimonSearch.trim().toLowerCase();
+    return !q || ch.name.toLowerCase().includes(q);
+  }), [game.collection, digimonSearch]);
 
   function buyShopItem(itemId: string, label: string, price: number) {
     Alert.alert('Loja PvP', `Comprar ${label} por ${price} Moedas PvP?`, [
@@ -253,11 +280,12 @@ export default function PvpScreen() {
           ['food_pizza','Pizza','Comida ×1',50],
         ].map(([id,name,detail,price]) => (
           <View key={String(id)} style={[styles.shopRow,{borderColor:colors.border}]}>
+            <Image source={PVP_SHOP_IMAGES[String(id)]} style={styles.shopImage} resizeMode="contain" />
             <View style={{flex:1}}>
               <Text style={[styles.shopName,{color:colors.foreground}]}>{String(name)}</Text>
               <Text style={[styles.shopDetail,{color:colors.mutedForeground}]}>{String(detail)}</Text>
             </View>
-            <TouchableOpacity style={[styles.buyBtn, game.pvpCoins < Number(price) ? {opacity:.45}:null]} onPress={()=>buyShopItem(String(id),String(name),Number(price))}>
+            <TouchableOpacity disabled={game.pvpCoins < Number(price)} style={[styles.buyBtn, game.pvpCoins < Number(price) ? {opacity:.45}:null]} onPress={()=>buyShopItem(String(id),String(name),Number(price))}>
               <View style={styles.priceRow}><Image source={PVP_COIN_ICON} style={styles.priceCoinIcon} resizeMode="contain" /><Text style={styles.buyText}>{Number(price)}</Text></View>
             </TouchableOpacity>
           </View>
@@ -265,22 +293,22 @@ export default function PvpScreen() {
       </View>
 
       <Text style={[styles.heading,{color:colors.foreground}]}>Equipe de defesa</Text>
-      <Text style={[styles.help,{color:colors.mutedForeground}]}>Escolha 3 Digimons. Este é o time que os outros Tamers poderão enfrentar.</Text>
-      <View style={styles.grid}>
-        {game.collection.filter((owned) => {
-          const c = getCharacter(owned.characterId);
-          return String(c?.rarity ?? '') !== 'EGG';
-        }).map((owned) => {
-          const active = selectedTeam.includes(owned.ownedId);
-          return (
-            <TouchableOpacity key={owned.ownedId} style={[styles.digimon, { borderColor: active ? '#22c55e' : colors.border, backgroundColor: colors.card }]} onPress={() => toggleDigimon(owned.ownedId)}>
-              <CharacterAvatar characterId={owned.characterId} size={52} />
-              <Text style={[styles.lv,{color:colors.foreground}]}>Lv {owned.level}</Text>
-              {active && <View style={styles.check}><Feather name="check" size={11} color="#fff" /></View>}
-            </TouchableOpacity>
-          );
+      <Text style={[styles.help,{color:colors.mutedForeground}]}>Escolha somente 3 Digimons. Toque no slot, pesquise e selecione.</Text>
+      <View style={styles.slotRow}>
+        {[0,1,2].map((slot) => {
+          const owned=game.collection.find((d)=>d.ownedId===selectedTeam[slot]); const ch=owned?getCharacter(owned.characterId):null;
+          return <TouchableOpacity key={slot} style={[styles.teamSlot,{borderColor:owned?'#22c55e':colors.border,backgroundColor:colors.card}]} onPress={()=>{setPickerSlot(slot);setDigimonSearch('');}}>
+            {owned&&ch?<><CharacterAvatar characterId={owned.characterId} size={58}/><Text style={[styles.slotName,{color:colors.foreground}]} numberOfLines={1}>{ch.name}</Text><Text style={[styles.lv,{color:colors.mutedForeground}]}>Lv {owned.level}</Text></>:<><Feather name="plus" size={26} color={colors.mutedForeground}/><Text style={[styles.slotEmpty,{color:colors.mutedForeground}]}>SLOT {slot+1}</Text></>}
+          </TouchableOpacity>
         })}
       </View>
+      <Modal visible={pickerSlot!==null} transparent animationType="slide" onRequestClose={()=>setPickerSlot(null)}>
+        <View style={styles.modalOverlay}><View style={[styles.pickerSheet,{backgroundColor:colors.background,borderColor:colors.border}]}>
+          <View style={styles.pickerHeader}><Text style={[styles.sectionTitle,{color:colors.foreground}]}>Escolher Digimon • Slot {(pickerSlot??0)+1}</Text><TouchableOpacity onPress={()=>setPickerSlot(null)}><Feather name="x" size={22} color={colors.foreground}/></TouchableOpacity></View>
+          <TextInput value={digimonSearch} onChangeText={setDigimonSearch} placeholder="Pesquisar Digimon..." placeholderTextColor={colors.mutedForeground} style={[styles.searchInput,{color:colors.foreground,borderColor:colors.border,backgroundColor:colors.card}]}/>
+          <ScrollView contentContainerStyle={styles.pickerGrid}>{selectableDigimons.map((owned)=>{const ch=getCharacter(owned.characterId);if(!ch)return null;const used=selectedTeam.includes(owned.ownedId)&&selectedTeam[pickerSlot??-1]!==owned.ownedId;return <TouchableOpacity disabled={used} key={owned.ownedId} style={[styles.pickerDigimon,{borderColor:colors.border,backgroundColor:colors.card},used&&{opacity:.35}]} onPress={()=>chooseDigimonForSlot(owned.ownedId)}><CharacterAvatar characterId={owned.characterId} size={50}/><Text style={[styles.slotName,{color:colors.foreground}]} numberOfLines={1}>{ch.name}</Text><Text style={[styles.lv,{color:colors.mutedForeground}]}>Lv {owned.level}</Text></TouchableOpacity>})}</ScrollView>
+        </View></View>
+      </Modal>
 
       <Text style={[styles.heading,{color:colors.foreground}]}>Brasão</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.equipRow}>
@@ -323,7 +351,7 @@ const styles=StyleSheet.create({
   equipRow:{gap:8,paddingBottom:6},equip:{width:92,minHeight:94,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:7},equipImg:{width:48,height:48},equipName:{fontSize:7,textAlign:'center',marginTop:4},
   register:{backgroundColor:'#2563eb',borderRadius:12,paddingVertical:14,alignItems:'center',marginVertical:16},registerText:{color:'#fff',fontSize:10,fontWeight:'900'},
   shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'center',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinIcon:{width:22,height:22,marginRight:5},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
-  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},priceRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4},priceCoinIcon:{width:16,height:16},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
+  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopImage:{width:42,height:42},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},priceRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4},priceCoinIcon:{width:16,height:16},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
   resultCard:{borderWidth:1,borderColor:'#ffffff22',borderRadius:12,padding:12,alignItems:'center',gap:5},resultTitle:{fontSize:18,fontWeight:'900',letterSpacing:2},resultGain:{fontSize:9,fontWeight:'800'},
-  rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
+  slotRow:{flexDirection:'row',gap:8,marginBottom:10},teamSlot:{flex:1,height:126,borderWidth:1,borderRadius:12,alignItems:'center',justifyContent:'center',padding:6},slotName:{fontSize:7,fontWeight:'900',marginTop:4,textAlign:'center',width:'100%'},slotEmpty:{fontSize:8,fontWeight:'900',marginTop:8},modalOverlay:{flex:1,backgroundColor:'#000b',justifyContent:'flex-end'},pickerSheet:{height:'78%',borderTopWidth:1,borderTopLeftRadius:18,borderTopRightRadius:18,padding:14},pickerHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:10},searchInput:{borderWidth:1,borderRadius:10,paddingHorizontal:12,paddingVertical:10,fontSize:10,marginBottom:10},pickerGrid:{flexDirection:'row',flexWrap:'wrap',gap:8,paddingBottom:40},pickerDigimon:{width:'31%',minHeight:100,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:6},rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
 });
