@@ -149,6 +149,16 @@ const LUCEMON_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   lucemonsatanmode: 'MEGA',
   lucemonlarvamode: 'MEGA',
 };
+const KUDAMON_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
+  pafumon: 'BABY',
+  kyaromon: 'TRAINING',
+  kudamon: 'ROOKIE',
+  kudamonsaver: 'ROOKIE',
+  reppamon: 'CHAMPION',
+  chirinmon: 'ULTIMATE',
+  tyilinmon: 'ULTIMATE',
+  kentaurusmon: 'MEGA',
+};
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
   for (const [key, val] of Object.entries(CHARACTER_IMAGES as Record<string, any>)) {
@@ -209,7 +219,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
         ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
       };
     }
-    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name];
+    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name] ?? KUDAMON_LINE_CANONICAL_RARITIES[name];
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
   });
 
@@ -428,6 +438,32 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     EXTRA_ALTERNATE_EVOLUTIONS.agumon = { evolvesTo: blackAgumon.id, requiredLevel: blackAgumon.requiredLevel ?? 15, label: blackAgumon.name, requiredItem: 'black_digitron' };
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
+
+  // Kudamon line fixed by game design:
+  // Pafumon -> Kyaromon -> Kudamon -> Reppamon -> Chirinmon -> Kentaurusmon.
+  const findKudamonStage = (keys: string[]) =>
+    chars.find((char) => keys.includes(_normKey(char.name ?? '')) || keys.includes(_normKey(char.id ?? '')));
+  const pafumon = findKudamonStage(['pafumon']);
+  const kyaromon = findKudamonStage(['kyaromon']);
+  const kudamon = findKudamonStage(['kudamon', 'kudamonsaver']);
+  const reppamon = findKudamonStage(['reppamon']);
+  // Chirinmon is the canonical OMEGA DX name; accept legacy Tyilinmon catalogue rows.
+  const chirinmon = findKudamonStage(['chirinmon', 'tyilinmon']);
+  const kentaurusmon = findKudamonStage(['kentaurusmon']);
+
+  const kudamonLine = [pafumon, kyaromon, kudamon, reppamon, chirinmon, kentaurusmon].filter(Boolean);
+  for (let i = 0; i < kudamonLine.length - 1; i++) {
+    const from = kudamonLine[i]!;
+    const to = kudamonLine[i + 1]!;
+    delete ALTERNATE_EVOLUTIONS[from.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[from.id];
+    EVOLUTIONS[from.id] = {
+      evolvesTo: to.id,
+      requiredLevel: to.rarity === 'TRAINING' ? 1 : (to.requiredLevel ?? (to.rarity === 'ROOKIE' ? 12 : to.rarity === 'CHAMPION' ? 20 : to.rarity === 'ULTIMATE' ? 40 : 60)),
+      label: _normKey(to.name ?? '') === 'tyilinmon' ? 'Chirinmon' : to.name,
+    };
+    _farmEvoMap[from.id] = to.id;
+  }
 
   // Lopmon base line: Conomon (Baby) -> Kokomon (Training) -> Lopmon (Rookie).
   const conomon = chars.find((char) => _normKey(char.name ?? '') === 'conomon');
