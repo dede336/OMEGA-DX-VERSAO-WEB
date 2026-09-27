@@ -296,6 +296,7 @@ interface GameContextValue extends GameState {
   awardPvpVictory: () => void;
   awardPvpDefeat: () => void;
   purchasePvpShopItem: (itemId: string) => { success: boolean; message: string };
+  applyPvpServerState: (patch: Partial<Pick<GameState, 'pvpPoints' | 'pvpCoins' | 'pvpBattleCharges' | 'pvpLastChargeAt' | 'gemas' | 'inventory' | 'pieces' | 'farmFoods' | 'farmDecorInventory'>>) => void;
   resetGame: () => Promise<void>;
   rosterRevision: number;
   rosterReady: boolean;
@@ -2425,6 +2426,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, []);
 
+  const applyPvpServerState = useCallback((patch: Partial<Pick<GameState, 'pvpPoints' | 'pvpCoins' | 'pvpBattleCharges' | 'pvpLastChargeAt' | 'gemas' | 'inventory' | 'pieces' | 'farmFoods' | 'farmDecorInventory'>>) => {
+    setState((prev) => ({ ...prev, ...patch }));
+  }, []);
+
   const resetGame = useCallback(async () => {
     await AsyncStorage.removeItem(storageKey);
     setState(defaultState);
@@ -2515,6 +2520,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         awardPvpVictory,
         awardPvpDefeat,
         purchasePvpShopItem,
+        applyPvpServerState,
       }}
     >
       {children}
