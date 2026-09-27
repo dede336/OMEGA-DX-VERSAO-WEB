@@ -19,6 +19,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   brasao_destino:       require('../assets/images/brasao-destino.gif'),
   pulseira_ouro:        require('../assets/images/pulseira_ouro.webp'),
   anel_sagrado:         require('../assets/images/anel_sagrado.webp'),
+  chrono_core:           require('../assets/images/Chrono_Core.png'),
   piece_anel_sagrado:   require('../assets/images/anel_sagrado.webp'),
   piece_agulha:         require('../assets/images/agulha-media.webp'),
   piece_tecido:         require('../assets/images/tecido-arco-iris.webp'),
