@@ -176,6 +176,7 @@ const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   bluemeramon: 'ULTIMATE',
   skullmeramon: 'ULTIMATE',
   boltmon: 'MEGA',
+  gankoomon: 'MEGA',
 };
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
@@ -466,6 +467,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const bluemeramon = chars.find((char) => _normKey(char.name ?? '') === 'bluemeramon');
   const skullmeramon = chars.find((char) => _normKey(char.name ?? '') === 'skullmeramon');
   const boltmon = chars.find((char) => _normKey(char.name ?? '') === 'boltmon');
+  const gankoomon = chars.find((char) => _normKey(char.name ?? '') === 'gankoomon');
   if (mokumon && fukamon && candlemon) {
     // These three are one authoritative line; remove stale outgoing branches.
     delete ALTERNATE_EVOLUTIONS[mokumon.id];
@@ -520,6 +522,16 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
             requiredLevel: 40,
             label: 'SkullMeramon',
           };
+          if (gankoomon) {
+            delete ALTERNATE_EVOLUTIONS[skullmeramon.id];
+            delete EXTRA_ALTERNATE_EVOLUTIONS[skullmeramon.id];
+            EVOLUTIONS[skullmeramon.id] = {
+              evolvesTo: gankoomon.id,
+              requiredLevel: 60,
+              label: 'Gankoomon',
+            };
+            _farmEvoMap[skullmeramon.id] = gankoomon.id;
+          }
         }
       }
     }
