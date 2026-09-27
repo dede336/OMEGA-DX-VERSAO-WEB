@@ -1934,15 +1934,20 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const claimFarmProduction = useCallback(() => {
     const prev = stateRef.current;
     const now = Date.now();
-    const elapsed = Math.min(Math.max(0, now - prev.farmLastClaim), 5 * 60 * 60 * 1000);
-    if (elapsed < 30 * 60 * 1000 || prev.farmSlots.length === 0) return null;
+    const maxSlots = Math.max(1, Math.min(5, Math.floor(prev.tamerLevel / 5) + 1));
+    const activeSlots = prev.farmSlots.filter(Boolean).slice(0, maxSlots);
+    if (activeSlots.length === 0) return null;
 
     let green = 0, purple = 0, gold = 0, pills = 0, gems = 0;
-    const itemCycles = Math.min(10, Math.floor(elapsed / (30 * 60 * 1000)));
-    const gemCycles = Math.min(5, Math.floor(elapsed / (60 * 60 * 1000)));
     let eligible = 0;
+    let produced = 0;
 
-    for (const ownedId of prev.farmSlots.slice(0, 5)) {
+    for (const ownedId of activeSlots) {
+      // Um Digimon nunca pode produzir tempo anterior à entrada dele na Farm.
+      const enteredAt = prev.farmEntryTimes[ownedId] ?? prev.farmLastClaim;
+      const cycleStart = Math.max(prev.farmLastClaim, enteredAt);
+      const elapsed = Math.min(Math.max(0, now - cycleStart), 5 * 60 * 60 * 1000);
+
       let sat = 50;
       const lastFeed = prev.farmLastFeed[ownedId] ?? 0;
       const sinceFeed = lastFeed > 0 ? now - lastFeed : Infinity;
@@ -1954,8 +1959,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         if (req.fulfilled) sat += 20;
         else if (now - req.requestedAt > 5 * 3600000) sat -= 20;
       }
-      if (sat < 50) continue; // "Boa" ou superior.
+
+      // Produção só corre em satisfação Boa (50) ou superior.
+      if (sat < 50) continue;
       eligible += 1;
+
+      const itemCycles = Math.min(10, Math.floor(elapsed / (30 * 60 * 1000)));
+      const gemCycles = Math.min(5, Math.floor(elapsed / (60 * 60 * 1000)));
+      if (itemCycles <= 0 && gemCycles <= 0) continue;
+      produced += 1;
+
       for (let i = 0; i < itemCycles; i += 1) {
         const roll = Math.random();
         if (roll < 0.40) green += 1;
@@ -1966,7 +1979,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       gems += gemCycles * 10;
     }
 
-    if (eligible === 0) return null;
+    // Não consome/reset o relógio quando não existe recompensa coletável.
+    if (eligible === 0 || produced === 0) return null;
+
     setState((s) => ({
       ...s,
       farmLastClaim: now,
