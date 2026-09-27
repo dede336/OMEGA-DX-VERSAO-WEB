@@ -466,26 +466,26 @@ export default function DigifarmScreen() {
   // ── Day/Night + Weather ───────────────────────────────────────────────────
   const [farmTime, setFarmTime] = useState(() => new Date());
   const [weather, setWeather] = useState<'clear' | 'rain' | 'snow'>('clear');
-  const RAIN_CNT = 120;
-  const SNOW_CNT = 80;
+  const RAIN_CNT = 220;
+  const SNOW_CNT = 150;
   const rainAnims = useMemo(() => Array.from({ length: RAIN_CNT }, () => new Animated.Value(0)), []);
   const rainCfg = useMemo(() => Array.from({ length: RAIN_CNT }, (_, i) => ({
-    x: ((i * 73) % 420),
+    x: ((i * 137) % FARM_CANVAS_W),
     dur: 230 + ((i * 37) % 220),
     del: (i * 29) % 700,
-    len: 12 + ((i * 17) % 20),
+    len: 18 + ((i * 17) % 28),
     w: i % 7 === 0 ? 2 : 1,
     drift: 28 + ((i * 11) % 32),
-    op: parseFloat((0.48 + ((i * 19) % 47) / 100).toFixed(2)),
+    op: parseFloat((0.62 + ((i * 19) % 35) / 100).toFixed(2)),
   })), []);
   const snowAnims = useMemo(() => Array.from({ length: SNOW_CNT }, () => new Animated.Value(0)), []);
   const snowCfg = useMemo(() => Array.from({ length: SNOW_CNT }, (_, i) => ({
-    x: ((i * 89) % 420),
+    x: ((i * 149) % FARM_CANVAS_W),
     dur: 2200 + ((i * 113) % 3600),
     del: (i * 71) % 1800,
-    sz: 2 + (i % 4),
+    sz: 3 + (i % 5),
     drift: 10 + ((i * 23) % 36),
-    op: parseFloat((0.58 + ((i * 17) % 40) / 100).toFixed(2)),
+    op: parseFloat((0.72 + ((i * 17) % 28) / 100).toFixed(2)),
   })), []);
   const sunParams = useMemo(() => {
     const h = farmTime.getHours() + farmTime.getMinutes() / 60;
@@ -1517,7 +1517,7 @@ export default function DigifarmScreen() {
               {/* Atmosfera: chuva escurece/esfria a cena; neve cria névoa clara. */}
               <View style={{
                 ...StyleSheet.absoluteFillObject,
-                backgroundColor: weather === 'rain' ? 'rgba(20,42,65,0.18)' : 'rgba(220,238,255,0.10)',
+                backgroundColor: weather === 'rain' ? 'rgba(12,32,55,0.28)' : 'rgba(225,240,255,0.16)',
               }} />
               {weather === 'rain' && rainAnims.map((anim, i) => {
                 const cfg = rainCfg[i];
@@ -1542,7 +1542,7 @@ export default function DigifarmScreen() {
                   height:2,
                   borderRadius:6,
                   borderWidth:1,
-                  borderColor:'rgba(190,225,255,0.38)',
+                  borderColor:'rgba(205,235,255,0.72)',
                   transform:[{ rotate:`${(i%2?8:-8)}deg` }],
                 }} />
               ))}
@@ -1563,7 +1563,7 @@ export default function DigifarmScreen() {
                 );
               })}
               {weather === 'snow' && (
-                <View style={{ position:'absolute', left:0, right:0, bottom:0, height:34, backgroundColor:'rgba(240,248,255,0.12)' }} />
+                <View style={{ position:'absolute', left:0, right:0, bottom:0, height:48, backgroundColor:'rgba(240,248,255,0.20)' }} />
               )}
             </View>
           )}
