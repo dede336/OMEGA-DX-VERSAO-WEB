@@ -400,6 +400,7 @@ const CHARACTER_IMAGES: Record<string, any> = {
   wendigomon: require('../assets/images/digimons/Wendigomon.gif'),
   whamon: require('../assets/images/digimons/Whamon_29_vg.webp'),
   wizardmon: require('../assets/images/digimons/Wizardmon.png'),
+  wisemon: require('../assets/images/digimons/Wizemon.gif'),
   woodmon: require('../assets/images/digimons/Woodmon.gif'),
   wormmon: require('../assets/images/digimons/Wormmon.gif'),
   wormon: require('../assets/images/digimons/Wormmon.gif'),
