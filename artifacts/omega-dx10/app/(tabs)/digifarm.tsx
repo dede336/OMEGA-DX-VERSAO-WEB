@@ -1485,6 +1485,41 @@ export default function DigifarmScreen() {
               );
             })}
 
+            {/* Iluminação/clima atrás dos Digimons para manter sprites 100% opacos */}
+            {skyTint !== null && (
+              <View style={{ position:'absolute', top:0, left:0, width:FARM_CANVAS_W, height:FARM_CANVAS_H, backgroundColor:skyTint, pointerEvents:'none', zIndex:4 }} />
+            )}
+          {/* ── Weather overlay ───────────────────────────────────────── */}
+          {weather !== 'clear' && (
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+              {weather === 'rain' && rainAnims.map((anim, i) => {
+                const c = rainCfg[i];
+                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-20, FARM_CANVAS_H + 20] });
+                return (
+                  <Animated.View key={`rp${i}`} style={{
+                    position: 'absolute', left: c.x, top: yPos as any,
+                    width: 1, height: c.len,
+                    backgroundColor: `rgba(180,220,255,${c.op})`,
+                    transform: [{ rotate: '15deg' }],
+                  }} />
+                );
+              })}
+              {weather === 'snow' && snowAnims.map((anim, i) => {
+                const c = snowCfg[i];
+                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-10, FARM_CANVAS_H + 10] });
+                return (
+                  <Animated.View key={`sp${i}`} style={{
+                    position: 'absolute', left: c.x, top: yPos as any,
+                    width: c.sz, height: c.sz,
+                    backgroundColor: `rgba(255,255,255,${c.op})`,
+                    borderRadius: 1,
+                  }} />
+                );
+              })}
+            </View>
+          )}
+
+
             {roamingSlots.map((ownedId, slotIdx) => {
               const owned = collection.find((c) => c.ownedId === ownedId);
               const slotChar = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
@@ -1558,41 +1593,6 @@ export default function DigifarmScreen() {
               );
             })}
           </Animated.View>
-
-          {/* ── Sky tint (day/night overlay) ──────────────────────────── */}
-          {skyTint !== null && (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: skyTint, pointerEvents: 'none' }} />
-          )}
-
-          {/* ── Weather overlay ───────────────────────────────────────── */}
-          {weather !== 'clear' && (
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-              {weather === 'rain' && rainAnims.map((anim, i) => {
-                const c = rainCfg[i];
-                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-20, frameH + 20] });
-                return (
-                  <Animated.View key={`rp${i}`} style={{
-                    position: 'absolute', left: c.x, top: yPos as any,
-                    width: 1, height: c.len,
-                    backgroundColor: `rgba(180,220,255,${c.op})`,
-                    transform: [{ rotate: '15deg' }],
-                  }} />
-                );
-              })}
-              {weather === 'snow' && snowAnims.map((anim, i) => {
-                const c = snowCfg[i];
-                const yPos = anim.interpolate({ inputRange: [0, 1], outputRange: [-10, frameH + 10] });
-                return (
-                  <Animated.View key={`sp${i}`} style={{
-                    position: 'absolute', left: c.x, top: yPos as any,
-                    width: c.sz, height: c.sz,
-                    backgroundColor: `rgba(255,255,255,${c.op})`,
-                    borderRadius: 1,
-                  }} />
-                );
-              })}
-            </View>
-          )}
 
           {/* HUD */}
           <View pointerEvents="none" style={[styles.hudTop, { top: 10 }]}>
