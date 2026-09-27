@@ -168,6 +168,17 @@ router.put("/", requireAuth, async (req, res) => {
       return;
     }
 
+    // PvP competitivo é autoritativo no servidor. Saves enviados pelo cliente
+    // nunca podem fabricar pontos, moedas, cargas ou sobrescrever a temporada.
+    const protectedPvpKeys = [
+      "pvpPoints", "pvpCoins", "pvpBattleCharges", "pvpLastChargeAt",
+      "pvpWeekKey", "pvpLastWeeklyReward",
+    ] as const;
+    for (const key of protectedPvpKeys) {
+      if (dbSave[key] !== undefined) merged[key] = dbSave[key];
+      else delete merged[key];
+    }
+
     // Always keep the highest tamerLevel (protects seeded/admin-boosted levels)
     const dbTamerLevel = (dbSave.tamerLevel as number) ?? 0;
     const clientTamerLevel = (merged.tamerLevel as number) ?? 0;
