@@ -36,7 +36,7 @@ function rewardForRank(rank: number, points: number) {
 export default function PvpScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { user, getApiUrl } = useAuth();
+  const { user, token, getApiUrl } = useAuth();
   const game = useGame();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const [selectedTeam, setSelectedTeam] = useState<string[]>(game.pvpTeam);
@@ -44,6 +44,10 @@ export default function PvpScreen() {
   const [digivice, setDigivice] = useState<string | null>(game.pvpDigivice);
   const [ranking, setRanking] = useState<PvpEntry[]>([]);
   const [now, setNow] = useState(Date.now());
+  const [category, setCategory] = useState('INICIANTE');
+  const [opponent, setOpponent] = useState<any | null>(null);
+  const [pvpResult, setPvpResult] = useState<'win' | 'loss' | null>(null);
+  const [pvpBusy, setPvpBusy] = useState(false);
 
   useEffect(() => {
     game.refreshPvpBattles();
@@ -55,11 +59,25 @@ export default function PvpScreen() {
   }, [game.refreshPvpBattles]);
 
   useEffect(() => {
+    if (token) {
+      fetch(`${getApiUrl()}/pvp/state`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(async (r) => r.ok ? r.json() : null)
+        .then((data) => {
+          if (!data) return;
+          setCategory(data.category ?? 'INICIANTE');
+          game.applyPvpServerState({
+            pvpPoints: data.pvpPoints,
+            pvpCoins: data.pvpCoins,
+            pvpBattleCharges: data.pvpBattleCharges,
+            pvpLastChargeAt: data.pvpLastChargeAt,
+          });
+        }).catch(() => {});
+    }
     fetch(`${getApiUrl()}/leaderboard?limit=100&type=pvp`)
       .then((r) => r.ok ? r.json() : [])
       .then((rows) => setRanking(Array.isArray(rows) ? rows : []))
       .catch(() => setRanking([]));
-  }, [getApiUrl, game.pvpPoints, game.pvpTeam]);
+  }, [getApiUrl, token, game.pvpTeam]);
 
   const ownedCrests = useMemo(() => EQUIPMENT_ITEMS.filter((item) =>
     item.slot === 'brasao' && (game.inventory.includes(item.id) || game.equippedItems.brasao === item.id)
@@ -92,12 +110,64 @@ export default function PvpScreen() {
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Comprar',
-        onPress: () => {
-          const result = game.purchasePvpShopItem(itemId);
-          Alert.alert(result.success ? 'Compra concluída' : 'Loja PvP', result.message);
+        onPress: async () => {
+          if (!token) return;
+          try {
+            const res = await fetch(`${getApiUrl()}/pvp/shop`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ itemId }),
+            });
+            const data = await res.json();
+            if (!res.ok) { Alert.alert('Loja PvP', data.error ?? 'Compra não concluída.'); return; }
+            const s = data.saveData ?? {};
+            game.applyPvpServerState({
+              pvpCoins: data.pvpCoins,
+              inventory: s.inventory,
+              pieces: s.pieces,
+              farmFoods: s.farmFoods,
+              farmDecorInventory: s.farmDecorInventory,
+            });
+            Alert.alert('Compra concluída', data.reward ?? label);
+          } catch { Alert.alert('Loja PvP', 'Não foi possível concluir a compra.'); }
         },
       },
     ]);
+  }
+
+  async function findOpponent() {
+    if (!token || game.pvpTeam.length !== 3 || !game.pvpCrest || !game.pvpDigivice) {
+      Alert.alert('PvP', 'Registre sua equipe de defesa antes de procurar uma batalha.');
+      return;
+    }
+    if (game.pvpBattleCharges <= 0) { Alert.alert('PvP', 'Sem batalhas disponíveis.'); return; }
+    setPvpBusy(true); setPvpResult(null);
+    try {
+      const res = await fetch(`${getApiUrl()}/pvp/opponent`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (!res.ok) { Alert.alert('PvP', data.error ?? 'Nenhum adversário disponível.'); return; }
+      setOpponent(data);
+      setCategory(data.category ?? category);
+    } finally { setPvpBusy(false); }
+  }
+
+  async function registerBattleResult(won: boolean) {
+    if (!token || pvpBusy) return;
+    setPvpBusy(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/pvp/result`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ won }),
+      });
+      const data = await res.json();
+      if (!res.ok) { Alert.alert('PvP', data.error ?? 'Resultado não registrado.'); return; }
+      game.applyPvpServerState({
+        pvpPoints: data.pvpPoints, pvpCoins: data.pvpCoins,
+        pvpBattleCharges: data.pvpBattleCharges, pvpLastChargeAt: data.pvpLastChargeAt,
+      });
+      setPvpResult(won ? 'win' : 'loss');
+    } finally { setPvpBusy(false); }
   }
 
   function saveRegistration() {
@@ -128,6 +198,27 @@ export default function PvpScreen() {
         </View>
         {game.pvpBattleCharges < 5 && <Text style={[styles.timer,{color:colors.mutedForeground}]}>Próxima batalha em {nextMin}:{String(nextSec).padStart(2,'0')}</Text>}
         {game.pvpBattleCharges === 5 && <Text style={styles.full}>● Batalhas cheias — 5/5</Text>}
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+        <Text style={[styles.sectionTitle,{color:colors.foreground}]}>Batalha PvP • Categoria {category}</Text>
+        <Text style={[styles.help,{color:colors.mutedForeground}]}>O adversário é sorteado aleatoriamente entre Tamers da sua categoria.</Text>
+        {!opponent ? (
+          <TouchableOpacity style={[styles.register, (game.pvpBattleCharges <= 0 || pvpBusy) ? {opacity:.45}:null]} onPress={findOpponent} disabled={pvpBusy}>
+            <Text style={styles.registerText}>{pvpBusy ? 'PROCURANDO...' : 'PROCURAR ADVERSÁRIO'}</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{gap:8}}>
+            <Text style={[styles.shopName,{color:colors.foreground}]}>{opponent.tamerName} • @{opponent.username}</Text>
+            <View style={styles.grid}>{(opponent.team ?? []).map((d:any)=><View key={d.ownedId} style={[styles.digimon,{borderColor:colors.border,backgroundColor:colors.background}]}><CharacterAvatar characterId={d.characterId} size={52}/><Text style={[styles.lv,{color:colors.foreground}]}>Lv {d.level}</Text></View>)}</View>
+            <Text style={[styles.help,{color:colors.mutedForeground}]}>Equipe defensiva registrada • Brasão e Digivice preservados.</Text>
+            <Text style={[styles.help,{color:'#f59e0b'}]}>A arena competitiva usará esta defesa. Enquanto a integração visual da batalha é finalizada, o resultado só pode ser registrado pelo fluxo de batalha.</Text>
+          </View>
+        )}
+        {pvpResult && <View style={styles.resultCard}>
+          <Text style={[styles.resultTitle,{color:pvpResult==='win'?'#22c55e':'#ef4444'}]}>{pvpResult==='win'?'VITÓRIA':'DERROTA'}</Text>
+          <Text style={[styles.resultGain,{color:colors.foreground}]}>{pvpResult==='win'?'+10 Pontos PvP  •  +10 Moedas PvP':'−5 Pontos PvP  •  Moedas PvP mantidas'}</Text>
+        </View>}
       </View>
 
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: game.pvpPoints >= 100 ? '#22c55e' : colors.border }, pixelStyle]}>
@@ -232,5 +323,6 @@ const styles=StyleSheet.create({
   register:{backgroundColor:'#2563eb',borderRadius:12,paddingVertical:14,alignItems:'center',marginVertical:16},registerText:{color:'#fff',fontSize:10,fontWeight:'900'},
   shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'baseline',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
   shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
+  resultCard:{borderWidth:1,borderColor:'#ffffff22',borderRadius:12,padding:12,alignItems:'center',gap:5},resultTitle:{fontSize:18,fontWeight:'900',letterSpacing:2},resultGain:{fontSize:9,fontWeight:'800'},
   rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
 });
