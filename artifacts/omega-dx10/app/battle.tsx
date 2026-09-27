@@ -673,6 +673,28 @@ export default function BattleScreen() {
 
     // ── Decoração drops — fases comuns (não boss, não daily) ─────────────────
     if (!map?.isDaily && !(stage as any)?.isBoss) {
+      // Drops exclusivos por região:
+      // Árvore: Floresta dos Dados (10%) e Pradaria dos Tamers (10%).
+      // Flores Rosas: Floresta Encantada (10%) e Pradaria dos Tamers (10%).
+      const targetedDecorDrops: { id: string; name: string; emoji: string; color: string; chance: number }[] = [];
+      if (mapId === 'map_forest' || mapId === 'map_final_domain') {
+        targetedDecorDrops.push({ id: 'tree', name: 'Árvore', emoji: '🌳', color: '#16a34a', chance: 0.10 });
+      }
+      if (mapId === 'map_plant' || mapId === 'map_final_domain') {
+        targetedDecorDrops.push({ id: 'flower', name: 'Flores Rosas', emoji: '🌸', color: '#db2777', chance: 0.10 });
+      }
+      for (const decor of targetedDecorDrops) {
+        if (Math.random() < decor.chance) {
+          gainFarmDecor(decor.id, 1);
+          const existing = drops.find((d) => d.id === decor.id);
+          if (existing) existing.amount += 1;
+          else drops.push({ id: decor.id, name: decor.name, amount: 1, color: decor.color, kind: 'deco' });
+          addLog(`${decor.emoji} ${decor.name} obtido! (10%)`, decor.color);
+        }
+      }
+
+      // Pool geral mantém as demais decorações. Árvore e Flores Rosas ficam fora
+      // daqui para respeitar os locais e taxas específicos definidos acima.
       const DECO_DROP_POOL: { id: string; name: string; emoji: string; color: string }[] = [
         { id: 'asfalto_curva1', name: 'Asfalto Curva',       emoji: '🛣️', color: '#64748b' },
         { id: 'asfalto_curva2', name: 'Asfalto Curva 2',     emoji: '🛣️', color: '#64748b' },
@@ -683,7 +705,6 @@ export default function BattleScreen() {
         { id: 'asfalto_v1',     name: 'Asfalto Vertical',    emoji: '🛣️', color: '#64748b' },
         { id: 'asfalto_v2',     name: 'Asfalto Vertical 2',  emoji: '🛣️', color: '#64748b' },
         { id: 'asfalto_t',      name: 'Asfalto em T',        emoji: '🛣️', color: '#64748b' },
-        { id: 'tree',           name: 'Árvore',               emoji: '🌳', color: '#16a34a' },
         { id: 'tree_pine',      name: 'Pinheiro',             emoji: '🌲', color: '#15803d' },
         { id: 'tree_autumn',    name: 'Árvore Outono',        emoji: '🍂', color: '#b45309' },
         { id: 'tree_oak',       name: 'Carvalho',             emoji: '🌳', color: '#166534' },
@@ -691,7 +712,6 @@ export default function BattleScreen() {
         { id: 'fence_mirror',   name: 'Cerca Espelhada',      emoji: '🪵', color: '#92400e' },
         { id: 'rock',           name: 'Pedras',               emoji: '🪨', color: '#78716c' },
         { id: 'bush',           name: 'Arbustos',             emoji: '🌿', color: '#4d7c0f' },
-        { id: 'flower',         name: 'Flores Rosas',         emoji: '🌸', color: '#db2777' },
         { id: 'flower2',        name: 'Flores Amarelas',      emoji: '🌼', color: '#ca8a04' },
       ];
       if (Math.random() < 0.20) {
