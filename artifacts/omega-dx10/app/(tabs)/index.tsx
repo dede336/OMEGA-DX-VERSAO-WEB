@@ -193,7 +193,6 @@ export default function HomeScreen() {
                   ) : (
                     <Feather name="shield" size={20} color={colors.primary} />
                   )}
-                  <Text style={[styles.heroEquipmentName, { color: colors.foreground }]} numberOfLines={1}>{equippedCrest.name}</Text>
                 </View>
               )}
               {equippedDigivice && (
@@ -203,7 +202,6 @@ export default function HomeScreen() {
                   ) : (
                     <Feather name="cpu" size={20} color={colors.primary} />
                   )}
-                  <Text style={[styles.heroEquipmentName, { color: colors.foreground }]} numberOfLines={1}>{equippedDigivice.name}</Text>
                 </View>
               )}
             </View>
@@ -484,9 +482,8 @@ const styles = StyleSheet.create({
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
   heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 5, maxWidth: 220 },
-  heroEquipmentItem: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: 7, paddingHorizontal: 5, paddingVertical: 3, maxWidth: 108 },
+  heroEquipmentItem: { alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderRadius: 7, padding: 3 },
   heroEquipmentImage: { width: 24, height: 24 },
-  heroEquipmentName: { fontSize: 8, fontWeight: '700', maxWidth: 74 },
   heroBadges: { alignItems: 'flex-end', gap: 6 },
   rankBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5, alignItems: 'center', minWidth: 46 },
   rankBadgeLabel: { fontSize: 8, fontWeight: '700' as const, letterSpacing: 1 },
