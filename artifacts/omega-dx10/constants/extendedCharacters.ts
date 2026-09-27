@@ -462,16 +462,20 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
       evolvesTo: to.id,
       requiredLevel: to.rarity === 'TRAINING' ? 1 : (to.requiredLevel ?? (to.rarity === 'ROOKIE' ? 12 : to.rarity === 'CHAMPION' ? 20 : to.rarity === 'ULTIMATE' ? 40 : 60)),
       label: _normKey(to.name ?? '') === 'tyilinmon' ? 'Chirinmon' : to.name,
+      ...(_normKey(to.name ?? '') === 'kentaurusmon' ? { requiredItem: 'anel_sagrado' } : {}),
     };
     _farmEvoMap[from.id] = to.id;
   }
 
   // Mitamamon is the alternate Mega evolution from Chirinmon.
+  if (chirinmon && kentaurusmon) _divineGiftCharacterIds.add(kentaurusmon.id);
   if (chirinmon && mitamamon) {
+    _divineGiftCharacterIds.add(mitamamon.id);
     ALTERNATE_EVOLUTIONS[chirinmon.id] = {
       evolvesTo: mitamamon.id,
       requiredLevel: mitamamon.requiredLevel ?? 60,
       label: 'Mitamamon',
+      requiredItem: 'anel_sagrado',
     };
   }
 
