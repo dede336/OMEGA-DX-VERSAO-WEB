@@ -11,7 +11,8 @@ import { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { getCharacter } from '@/constants/extendedCharacters';
 
-const PVP_ICON = require('../../assets/images/friend-battle-icon.webp');
+const PVP_ICON = require('../../assets/images/icone_pvp.gif');
+const PVP_COIN_ICON = require('../../assets/images/moeda_pvp.gif');
 const MAX_BATTLES = 5;
 const RECHARGE_MS = 30 * 60 * 1000;
 
@@ -236,7 +237,7 @@ export default function PvpScreen() {
             <Text style={[styles.sectionTitle,{color:colors.foreground}]}>Loja PvP</Text>
             <Text style={[styles.help,{color:colors.mutedForeground,marginBottom:0}]}>Moedas PvP são permanentes e não são perdidas em derrotas.</Text>
           </View>
-          <View style={styles.coinPill}><Text style={styles.coinValue}>{game.pvpCoins}</Text><Text style={styles.coinLabel}> MOEDAS PvP</Text></View>
+          <View style={styles.coinPill}><Image source={PVP_COIN_ICON} style={styles.coinIcon} resizeMode="contain" /><Text style={styles.coinValue}>{game.pvpCoins}</Text><Text style={styles.coinLabel}> MOEDAS PvP</Text></View>
         </View>
         {[
           ['miracle_piece','Milagre Piece','1 unidade',1500],
@@ -257,7 +258,7 @@ export default function PvpScreen() {
               <Text style={[styles.shopDetail,{color:colors.mutedForeground}]}>{String(detail)}</Text>
             </View>
             <TouchableOpacity style={[styles.buyBtn, game.pvpCoins < Number(price) ? {opacity:.45}:null]} onPress={()=>buyShopItem(String(id),String(name),Number(price))}>
-              <Text style={styles.buyText}>{Number(price)} PB</Text>
+              <View style={styles.priceRow}><Image source={PVP_COIN_ICON} style={styles.priceCoinIcon} resizeMode="contain" /><Text style={styles.buyText}>{Number(price)}</Text></View>
             </TouchableOpacity>
           </View>
         ))}
@@ -321,8 +322,8 @@ const styles=StyleSheet.create({
   lv:{fontSize:8,fontWeight:'800'},check:{position:'absolute',top:4,right:4,width:18,height:18,borderRadius:9,backgroundColor:'#22c55e',alignItems:'center',justifyContent:'center'},
   equipRow:{gap:8,paddingBottom:6},equip:{width:92,minHeight:94,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:7},equipImg:{width:48,height:48},equipName:{fontSize:7,textAlign:'center',marginTop:4},
   register:{backgroundColor:'#2563eb',borderRadius:12,paddingVertical:14,alignItems:'center',marginVertical:16},registerText:{color:'#fff',fontSize:10,fontWeight:'900'},
-  shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'baseline',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
-  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
+  shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'center',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinIcon:{width:22,height:22,marginRight:5},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
+  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},priceRow:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:4},priceCoinIcon:{width:16,height:16},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
   resultCard:{borderWidth:1,borderColor:'#ffffff22',borderRadius:12,padding:12,alignItems:'center',gap:5},resultTitle:{fontSize:18,fontWeight:'900',letterSpacing:2},resultGain:{fontSize:9,fontWeight:'800'},
   rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
 });
