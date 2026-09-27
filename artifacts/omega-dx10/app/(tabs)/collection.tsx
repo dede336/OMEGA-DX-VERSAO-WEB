@@ -393,7 +393,7 @@ export default function CollectionScreen() {
   const sacrificeOverride = modalOwned ? SACRIFICE_SCAN_OVERRIDES[modalOwned.characterId] : undefined;
   const sacrificeRookieId = modalOwned ? (ROOKIE_OF[modalOwned.characterId] ?? null) : null;
   const sacrificeScanPct  = modalChar ? (SACRIFICE_SCAN_PCT[modalChar.rarity] ?? 0) : 0;
-  const canSacrifice = !!(modalChar && modalChar.rarity !== 'ROOKIE');
+  const canSacrifice = !!(modalChar && !['EGG', 'ROOKIE'].includes(String(modalChar.rarity)));
   const modalAscensionStars = getAscensionStars(modalOwned);
   const isModalMega = modalChar?.rarity === 'MEGA';
   const ascensionCandidates = modalOwned
@@ -609,12 +609,12 @@ export default function CollectionScreen() {
                         {char?.name ?? modalOwned.characterId}
                       </Text>
                       <View style={styles.sheetSubRow}>
-                        <Text style={[styles.sheetSub, { color: rarityColor }]}>Lv {modalOwned.level}</Text>
+                        {!isEggModal && <Text style={[styles.sheetSub, { color: rarityColor }]}>Lv {modalOwned.level}</Text>}
                         <Text style={[styles.sheetSub, { color: colors.mutedForeground }]}>
-                          {' '}· {char ? RARITY_LABELS[char.rarity] : ''}
+                          {!isEggModal ? ' · ' : ''}{char ? RARITY_LABELS[char.rarity] : ''}
                         </Text>
                       </View>
-                      <AscensionStars stars={modalOwned.ascensionStars} size="medium" />
+                      {!isEggModal && <AscensionStars stars={modalOwned.ascensionStars} size="medium" />}
                       {char && (
                         <View style={styles.sheetBadgeRow}>
                           <AttributeBadge attr={char.attribute} />
@@ -680,7 +680,7 @@ export default function CollectionScreen() {
                     </TouchableOpacity>
                   )}
 
-                  {/* Evolution row — Baby/Training não evoluem no DigiBank */}
+                  {/* Evolution row — ovos/Baby/Training são processados somente na DigiFarm. */}
                   {char && !['EGG','BABY','TRAINING'].includes(String(char.rarity)) && modalEvo && modalEvoChar ? (
                     modalCanEvolve ? (
                       <TouchableOpacity
@@ -708,12 +708,12 @@ export default function CollectionScreen() {
                         <CharacterAvatar characterId={modalEvo.evolvesTo} size={32} />
                       </View>
                     )
-                  ) : (
+                  ) : char && !['EGG','BABY','TRAINING'].includes(String(char.rarity)) ? (
                     <View style={[styles.evoRow, { backgroundColor: colors.background, borderColor: colors.border }]}>
                       <Feather name="check-circle" size={16} color={colors.mutedForeground} />
                       <Text style={[styles.evoRowText, { color: colors.mutedForeground }]}>{t('collection.finalForm')}</Text>
                     </View>
-                  )}
+                  ) : null}
 
                   {/* Alt evo row (only if different target) */}
                   {showAltEvo && (
@@ -936,8 +936,8 @@ export default function CollectionScreen() {
                   {/* Divider */}
                   <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
-                  {/* Actions */}
-                  <TouchableOpacity
+                  {/* Ovos não podem ser definidos como ativos. */}
+                  {!isEggModal && <TouchableOpacity
                     style={[styles.setActiveBtn, { backgroundColor: colors.primary }, pixelStyle]}
                     onPress={() => {
                       setSelectedCharacter(modalOwned.ownedId);
@@ -947,9 +947,9 @@ export default function CollectionScreen() {
                   >
                     <Feather name="star" size={16} color={colors.primaryForeground} />
                     <Text style={[styles.setActiveBtnText, { color: colors.primaryForeground }]}>{t('collection.setActive')}</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity>}
 
-                  <TouchableOpacity
+                  {!isEggModal && <TouchableOpacity
                     style={[styles.xpBatteryButton, { borderColor: '#22c55e', backgroundColor: '#22c55e18' }, pixelStyle]}
                     onPress={() => setXpPanelVisible((visible) => !visible)}
                     activeOpacity={0.85}
@@ -957,9 +957,9 @@ export default function CollectionScreen() {
                     <Image source={require('../../assets/images/battery_green.webp')} style={styles.xpBatteryButtonImage} resizeMode="contain" />
                     <Text style={styles.xpBatteryButtonText}>USAR BATERIA EXP</Text>
                     <Feather name={xpPanelVisible ? 'chevron-up' : 'chevron-down'} size={17} color="#22c55e" />
-                  </TouchableOpacity>
+                  </TouchableOpacity>}
 
-                  {xpPanelVisible && (() => {
+                  {!isEggModal && xpPanelVisible && (() => {
                     const battery = XP_BATTERIES.find((item) => item.id === selectedBatteryId) ?? XP_BATTERIES[0];
                     const available = pieces[battery.id] ?? 0;
                     return (
