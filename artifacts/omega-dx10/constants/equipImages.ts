@@ -20,6 +20,7 @@ const EQUIP_ITEM_IMAGES: Record<string, any> = {
   pulseira_ouro:        require('../assets/images/pulseira_ouro.webp'),
   anel_sagrado:         require('../assets/images/anel_sagrado.webp'),
   chrono_core:           require('../assets/images/Chrono_Core.png'),
+  pergaminho_runa_antiga: require('../assets/images/Pergaminho_de_runa_antiga.png'),
   piece_anel_sagrado:   require('../assets/images/anel_sagrado.webp'),
   piece_agulha:         require('../assets/images/agulha-media.webp'),
   piece_tecido:         require('../assets/images/tecido-arco-iris.webp'),
