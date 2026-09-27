@@ -1216,14 +1216,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    setState((s) => ({
-      ...s,
-      gemas: s.gemas - custoGemas,
+    // Commit the gacha result from the SAME snapshot used for the roll.
+    // Using setState(s => ({ ...s, collection: newCollection })) allowed another
+    // queued state update to race with the gacha reward. Keep stateRef in sync
+    // immediately as well so a second pull cannot read a collection without
+    // the Digitama that was just awarded.
+    const nextState: GameState = {
+      ...prev,
+      gemas: prev.gemas - custoGemas,
       gachaContadorPity: pity,
       ultimoTiroGratis,
       collection: newCollection,
       inventory: newInventory,
-    }));
+    };
+    stateRef.current = nextState;
+    setState(nextState);
 
     return {
       mensagem: `🎉 Sorteio concluído! ${custoGemas > 0 ? `Gastou ${custoGemas} gemas.` : 'Tiro gratuito usado!'} Pity: ${pity}/50`,
