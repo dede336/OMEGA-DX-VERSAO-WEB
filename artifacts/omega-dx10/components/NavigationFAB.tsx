@@ -27,6 +27,7 @@ const ICON_MUNDO = require('../assets/images/map-icon.webp');
 const ICON_MAIL = require('../assets/images/mailbox-icon.webp');
 const ICON_RANKING = require('../assets/images/trophy-icon.webp');
 const ICON_DIGIFARM = require('../assets/images/digifarm-icon.webp');
+const ICON_PVP = require('../assets/images/friend-battle-icon.webp');
 const ICON_AMIGOS = require('../assets/images/amigos-icon.webp');
 const ICON_ADMIN = require('../assets/images/admin_icon.webp');
 const ICON_CHAT = require('../assets/images/chat-icon.webp');
@@ -203,6 +204,8 @@ interface NavItem {
   isChat?: boolean;
   isMail?: boolean;
   isFarm?: boolean;
+  isPvp?: boolean;
+  label?: string;
   bigIcon?: boolean;
 }
 
@@ -216,6 +219,7 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.mail', route: '/(tabs)/correios', image: ICON_MAIL, color: '#ec4899', isMail: true },
   { labelKey: 'nav.ranking', route: '/(tabs)/ranking', image: ICON_RANKING, color: '#f97316' },
   { labelKey: 'nav.digifarm', route: '/(tabs)/digifarm', image: ICON_DIGIFARM, color: '#84cc16', isFarm: true },
+  { labelKey: 'nav.pvp', label: 'PvP', route: '/(tabs)/pvp', image: ICON_PVP, color: '#dc2626', isPvp: true },
   { labelKey: 'nav.friends', route: '/(tabs)/amigos', image: ICON_AMIGOS, color: '#14b8a6', bigIcon: true },
   { labelKey: 'nav.chat', route: '/(tabs)/chat', image: ICON_CHAT, color: '#3b82f6', isChat: true },
   { labelKey: 'nav.admin', route: '/(tabs)/admin', image: ICON_ADMIN, color: '#6b7280', adminOnly: true },
@@ -246,6 +250,8 @@ export default function NavigationFAB() {
     farmEggSlots,
     farmNurseryEntryTimes,
     farmEggEntryTimes,
+    pvpBattleCharges,
+    refreshPvpBattles,
   } = useGame();
 
   const { logout, user } = useAuth();
@@ -303,6 +309,14 @@ export default function NavigationFAB() {
 
     return count;
   })();
+
+  // PvP: assim como a Farm, o menu avisa quando a energia chegou ao máximo (5/5).
+  useEffect(() => {
+    refreshPvpBattles();
+    const timer = setInterval(refreshPvpBattles, 10000);
+    return () => clearInterval(timer);
+  }, [refreshPvpBattles]);
+  const pvpNotificationCount = pvpBattleCharges >= 5 ? 1 : 0;
 
   const canShowAdmin =
     (user?.isAdmin ?? isAdmin) ||
@@ -521,12 +535,12 @@ export default function NavigationFAB() {
             />
           )}
 
-          {(unreadMailCount > 0 || farmNotificationCount > 0) && (
+          {(unreadMailCount > 0 || farmNotificationCount > 0 || pvpNotificationCount > 0) && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
-                {(unreadMailCount + farmNotificationCount) > 9
+                {(unreadMailCount + farmNotificationCount + pvpNotificationCount) > 9
                   ? '9+'
-                  : (unreadMailCount + farmNotificationCount)}
+                  : (unreadMailCount + farmNotificationCount + pvpNotificationCount)}
               </Text>
             </View>
           )}
@@ -688,7 +702,9 @@ export default function NavigationFAB() {
                           ? unreadMailCount
                           : item.isFarm
                             ? farmNotificationCount
-                            : 0;
+                            : item.isPvp
+                              ? pvpNotificationCount
+                              : 0;
 
                     const hasUnread =
                       badgeCount > 0;
@@ -737,7 +753,7 @@ export default function NavigationFAB() {
                             },
                           ]}
                         >
-                          {t(
+                          {item.label ?? t(
                             item.labelKey
                           )}
                         </Text>
