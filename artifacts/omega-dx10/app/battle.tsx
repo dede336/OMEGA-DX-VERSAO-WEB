@@ -713,14 +713,15 @@ export default function BattleScreen() {
           food_salad: '🥗 Salada', food_burger: '🍔 Hambúrguer', food_pizza: '🍕 Pizza',
         };
         const foodId = FARM_FOOD_IDS[Math.floor(Math.random() * FARM_FOOD_IDS.length)];
-        addFarmFood(foodId, 1);
+        const foodAmount = Math.floor(Math.random() * 5) + 1;
+        addFarmFood(foodId, foodAmount);
         setBossCooldown(mapId, stageIndex);
         completeFarmBattle();
         const foodName = FOOD_LABELS[foodId];
         const existingFood = drops.find((d) => d.id === foodId);
-        if (existingFood) existingFood.amount += 1;
-        else drops.push({ id: foodId, name: foodName, amount: 1, color: '#22c55e', kind: 'item' });
-        addLog(`${foodName} obtida para a Farm! 🌿`, '#22c55e');
+        if (existingFood) existingFood.amount += foodAmount;
+        else drops.push({ id: foodId, name: foodName, amount: foodAmount, color: '#22c55e', kind: 'item' });
+        addLog(`${foodAmount}× ${foodName} obtida para a Farm! 🌿`, '#22c55e');
       }
     }
 
