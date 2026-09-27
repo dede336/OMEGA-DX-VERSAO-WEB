@@ -26,7 +26,7 @@ type PvpEntry = {
 };
 
 function rewardForRank(rank: number, points: number) {
-  if (points < 100) return 0;
+  if (points < 100) return 50;
   if (rank <= 10) return 500;
   if (rank <= 20) return 300;
   if (rank <= 50) return 200;
@@ -71,7 +71,7 @@ export default function PvpScreen() {
 
   const me = ranking.find((entry) => entry.username === user?.username);
   const rank = me?.rank ?? 0;
-  const projectedReward = rank > 0 ? rewardForRank(rank, game.pvpPoints) : (game.pvpPoints >= 100 ? 150 : 0);
+  const projectedReward = rank > 0 ? rewardForRank(rank, game.pvpPoints) : (game.pvpPoints >= 100 ? 150 : 50);
 
   const nextBattleMs = game.pvpBattleCharges >= MAX_BATTLES
     ? 0
@@ -85,6 +85,19 @@ export default function PvpScreen() {
       if (prev.length >= 3) return prev;
       return [...prev, ownedId];
     });
+  }
+
+  function buyShopItem(itemId: string, label: string, price: number) {
+    Alert.alert('Loja PvP', `Comprar ${label} por ${price} Moedas PvP?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Comprar',
+        onPress: () => {
+          const result = game.purchasePvpShopItem(itemId);
+          Alert.alert(result.success ? 'Compra concluída' : 'Loja PvP', result.message);
+        },
+      },
+    ]);
   }
 
   function saveRegistration() {
@@ -120,10 +133,43 @@ export default function PvpScreen() {
       <View style={[styles.card, { backgroundColor: colors.card, borderColor: game.pvpPoints >= 100 ? '#22c55e' : colors.border }, pixelStyle]}>
         <Text style={[styles.sectionTitle,{color:colors.foreground}]}>Recompensa semanal</Text>
         <Text style={[styles.progress,{color: game.pvpPoints >= 100 ? '#22c55e' : '#f59e0b'}]}>
-          {game.pvpPoints >= 100 ? '✓ Qualificado para recompensa' : `${game.pvpPoints}/100 pontos para se qualificar`}
+          {game.pvpPoints >= 100 ? '✓ Classificado no ranking semanal' : `${game.pvpPoints}/100 pontos • ainda não classificado`}
         </Text>
-        <Text style={[styles.rules,{color:colors.mutedForeground}]}>1º–10º: 500 Gemas • 11º–20º: 300 • 21º–50º: 200 • 51º+: 150</Text>
+        <Text style={[styles.rules,{color:colors.mutedForeground}]}>1º–10º: 500 Gemas • 11º–20º: 300 • 21º–50º: 200 • 51º+: 150 • Abaixo de 100 pontos: 50 Gemas</Text>
         {projectedReward > 0 && <Text style={styles.reward}>Recompensa pela posição atual: {projectedReward} 💎</Text>}
+      </View>
+
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+        <View style={styles.shopHeader}>
+          <View>
+            <Text style={[styles.sectionTitle,{color:colors.foreground}]}>Loja PvP</Text>
+            <Text style={[styles.help,{color:colors.mutedForeground,marginBottom:0}]}>Moedas PvP são permanentes e não são perdidas em derrotas.</Text>
+          </View>
+          <View style={styles.coinPill}><Text style={styles.coinValue}>{game.pvpCoins}</Text><Text style={styles.coinLabel}> MOEDAS PvP</Text></View>
+        </View>
+        {[
+          ['miracle_piece','Milagre Piece','1 unidade',1500],
+          ['random_card','Carta Aleatória','1 carta aleatória',2000],
+          ['gold_battery_10','Bateria Dourada','10 unidades',500],
+          ['energy_pill','Pílula de Energia','1 unidade',500],
+          ['pink_flower','Flor Rosa','Decoração DigiFarm ×1',20],
+          ['food_apple','Maçã','Comida ×1',50],
+          ['food_sushi','Sushi','Comida ×1',50],
+          ['food_water','Água','Comida ×1',50],
+          ['food_salad','Salada','Comida ×1',50],
+          ['food_burger','Hambúrguer','Comida ×1',50],
+          ['food_pizza','Pizza','Comida ×1',50],
+        ].map(([id,name,detail,price]) => (
+          <View key={String(id)} style={[styles.shopRow,{borderColor:colors.border}]}>
+            <View style={{flex:1}}>
+              <Text style={[styles.shopName,{color:colors.foreground}]}>{String(name)}</Text>
+              <Text style={[styles.shopDetail,{color:colors.mutedForeground}]}>{String(detail)}</Text>
+            </View>
+            <TouchableOpacity style={[styles.buyBtn, game.pvpCoins < Number(price) ? {opacity:.45}:null]} onPress={()=>buyShopItem(String(id),String(name),Number(price))}>
+              <Text style={styles.buyText}>{Number(price)} PB</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
 
       <Text style={[styles.heading,{color:colors.foreground}]}>Equipe de defesa</Text>
@@ -184,5 +230,7 @@ const styles=StyleSheet.create({
   lv:{fontSize:8,fontWeight:'800'},check:{position:'absolute',top:4,right:4,width:18,height:18,borderRadius:9,backgroundColor:'#22c55e',alignItems:'center',justifyContent:'center'},
   equipRow:{gap:8,paddingBottom:6},equip:{width:92,minHeight:94,borderWidth:1,borderRadius:10,alignItems:'center',justifyContent:'center',padding:7},equipImg:{width:48,height:48},equipName:{fontSize:7,textAlign:'center',marginTop:4},
   register:{backgroundColor:'#2563eb',borderRadius:12,paddingVertical:14,alignItems:'center',marginVertical:16},registerText:{color:'#fff',fontSize:10,fontWeight:'900'},
+  shopHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:10,marginBottom:10},coinPill:{flexDirection:'row',alignItems:'baseline',backgroundColor:'#7c3aed',borderRadius:10,paddingHorizontal:9,paddingVertical:7},coinValue:{color:'#fff',fontSize:13,fontWeight:'900'},coinLabel:{color:'#ede9fe',fontSize:7,fontWeight:'800'},
+  shopRow:{flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,paddingVertical:9},shopName:{fontSize:9,fontWeight:'900'},shopDetail:{fontSize:7,marginTop:2},buyBtn:{minWidth:68,backgroundColor:'#7c3aed',borderRadius:9,paddingHorizontal:9,paddingVertical:8,alignItems:'center'},buyText:{color:'#fff',fontSize:8,fontWeight:'900'},
   rankRow:{flexDirection:'row',alignItems:'center',gap:10,borderWidth:1,borderRadius:10,padding:10,marginBottom:7},rankPos:{width:34,fontSize:10,fontWeight:'900'},rankName:{fontSize:9,fontWeight:'800'},rankUser:{fontSize:7,marginTop:2},rankPts:{fontSize:9,fontWeight:'900',color:'#60a5fa'},
 });
