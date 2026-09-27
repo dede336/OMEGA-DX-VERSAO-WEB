@@ -167,6 +167,12 @@ const CHRONOMON_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
   chronomonhm: 'MEGA',
   chronomondm: 'MEGA',
 };
+const FIRE_LINE_CANONICAL_RARITIES: Record<string, Character['rarity']> = {
+  mokumon: 'BABY',
+  fukamon: 'TRAINING',
+  candlemon: 'ROOKIE',
+  demimeramon: 'ROOKIE',
+};
 const _IMAGE_BY_NORM: Record<string, any> = (() => {
   const map: Record<string, any> = {};
   for (const [key, val] of Object.entries(CHARACTER_IMAGES as Record<string, any>)) {
@@ -227,7 +233,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
         ...(cupimonId ? { evolvesFromId: cupimonId, requiredLevel: 12 } : {}),
       };
     }
-    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name] ?? KUDAMON_LINE_CANONICAL_RARITIES[name] ?? CHRONOMON_LINE_CANONICAL_RARITIES[name];
+    const canonicalRarity = LUCEMON_CANONICAL_RARITIES[name] ?? KUDAMON_LINE_CANONICAL_RARITIES[name] ?? CHRONOMON_LINE_CANONICAL_RARITIES[name] ?? FIRE_LINE_CANONICAL_RARITIES[name];
     return canonicalRarity ? { ...c, rarity: canonicalRarity } : c;
   });
 
@@ -451,6 +457,7 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   const mokumon = chars.find((char) => _normKey(char.name ?? '') === 'mokumon');
   const fukamon = chars.find((char) => _normKey(char.name ?? '') === 'fukamon');
   const candlemon = chars.find((char) => _normKey(char.name ?? '') === 'candlemon');
+  const demimeramon = chars.find((char) => _normKey(char.name ?? '') === 'demimeramon');
   if (mokumon && fukamon && candlemon) {
     // These three are one authoritative line; remove stale outgoing branches.
     delete ALTERNATE_EVOLUTIONS[mokumon.id];
@@ -462,6 +469,15 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
     EVOLUTIONS[fukamon.id] = { evolvesTo: candlemon.id, requiredLevel: 12, label: 'Candlemon' };
     _farmEvoMap[mokumon.id] = fukamon.id;
     _farmEvoMap[fukamon.id] = candlemon.id;
+
+    // Mokumon also has DemiMeramon as an alternate Rookie evolution.
+    if (demimeramon) {
+      ALTERNATE_EVOLUTIONS[mokumon.id] = {
+        evolvesTo: demimeramon.id,
+        requiredLevel: 12,
+        label: 'DemiMeramon',
+      };
+    }
   }
 
   // Chronomon line fixed by game design:
