@@ -9,6 +9,7 @@ import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, ATTRIBUTES, GAME_MAPS, getScaledStats, TAMERS, EQUIPMENT_ITEMS } from '@/constants/gameData';
 import { getEquipItemImage } from '@/constants/equipImages';
+import { getItemImageSource } from '@/constants/extendedItems';
 import { getCharacter } from '@/constants/extendedCharacters';
 import { AttributeBadge, ElementBadge, HPBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -63,7 +64,7 @@ export default function HomeScreen() {
     const next = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
     setLanguage(next);
   }
-  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId, equippedItems } = game;
+  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId, equippedItems, pvpCrest, pvpDigivice } = game;
 
   const [swapModalVisible, setSwapModalVisible] = useState(false);
   const [tamerPickerVisible, setTamerPickerVisible] = useState(false);
@@ -83,21 +84,27 @@ export default function HomeScreen() {
   const isMimi = tamerId === 'tamer_mimi';
   const isKari = tamerId === 'tamer_kari';
   const isMatt = tamerId === 'tamer_matt';
-  // Resolve both equipped items from the real equipped slot first.
-  // Some saves/custom items use IDs that are not part of the static equipment catalog.
-  const equippedCrestId = equippedItems.brasao ?? null;
-  const equippedDigiviceId = equippedItems.digivice ?? null;
+  // Home shows the player's current Crest and Digivice.
+  // Normal equipment is authoritative; PvP registration is a compatibility fallback
+  // for saves where these two selections were already persisted there.
+  const equippedCrestId = equippedItems.brasao ?? pvpCrest ?? null;
+  const equippedDigiviceId = equippedItems.digivice ?? pvpDigivice ?? null;
+
   const resolveHomeEquipImage = (itemId: string | null, slot: 'brasao' | 'digivice') => {
     if (!itemId) return null;
     const candidates = slot === 'brasao'
       ? [itemId, itemId.replace(/^piece_/, ''), itemId.replace(/^crest_/, 'brasao_')]
       : [itemId, itemId.replace(/^piece_/, ''), itemId.replace(/^digivice-/, 'digivice_')];
+
     for (const id of candidates) {
-      const image = getEquipItemImage(id, tamerId);
-      if (image) return image;
+      const staticImage = getEquipItemImage(id, tamerId);
+      if (staticImage) return staticImage;
+      const customImage = getItemImageSource(id);
+      if (customImage) return customImage;
     }
     return null;
   };
+
   const equippedCrestImage = resolveHomeEquipImage(equippedCrestId, 'brasao');
   const equippedDigiviceImage = resolveHomeEquipImage(equippedDigiviceId, 'digivice');
 
@@ -200,10 +207,24 @@ export default function HomeScreen() {
 
         </View>
 
-        {(equippedCrestImage || equippedDigiviceImage) && (
+        {(equippedCrestId || equippedDigiviceId) && (
           <View style={styles.homeEquipmentOverlay} pointerEvents="none">
-            {equippedCrestImage && <Image source={equippedCrestImage} style={styles.homeEquipmentImage} resizeMode="contain" />}
-            {equippedDigiviceImage && <Image source={equippedDigiviceImage} style={styles.homeEquipmentImage} resizeMode="contain" />}
+            {equippedCrestId && (
+              <View style={styles.homeEquipmentSlot}>
+                {equippedCrestImage
+                  ? <Image source={equippedCrestImage} style={styles.homeEquipmentImage} resizeMode="contain" />
+                  : <Feather name="award" size={28} color="#facc15" />}
+                <Text style={styles.homeEquipmentLabel}>BRASÃO</Text>
+              </View>
+            )}
+            {equippedDigiviceId && (
+              <View style={styles.homeEquipmentSlot}>
+                {equippedDigiviceImage
+                  ? <Image source={equippedDigiviceImage} style={styles.homeEquipmentImage} resizeMode="contain" />
+                  : <Feather name="watch" size={28} color="#60a5fa" />}
+                <Text style={styles.homeEquipmentLabel}>DIGIVICE</Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -480,8 +501,10 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
-  homeEquipmentOverlay:{position:'absolute',left:176,bottom:8,flexDirection:'row',alignItems:'center',gap:10,zIndex:20},
-  homeEquipmentImage:{width:42,height:42},
+  homeEquipmentOverlay:{position:'absolute',left:170,bottom:4,flexDirection:'row',alignItems:'flex-end',gap:8,zIndex:50,elevation:50},
+  homeEquipmentSlot:{width:50,minHeight:54,alignItems:'center',justifyContent:'flex-end',backgroundColor:'#00000066',borderWidth:1,borderColor:'#ffffff33',borderRadius:8,padding:3},
+  homeEquipmentImage:{width:38,height:38},
+  homeEquipmentLabel:{color:'#fff',fontSize:5,fontWeight:'900',marginTop:1},
   heroEquipmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5, minHeight: 32, maxWidth: 220 },
   heroEquipmentItem: { width: 38, height: 38, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#ffffff33', backgroundColor: '#00000044', borderRadius: 7, padding: 3 },
   heroEquipmentImage: { width: 32, height: 32 },
