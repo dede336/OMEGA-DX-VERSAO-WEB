@@ -2128,7 +2128,7 @@ export default function DigifarmScreen() {
 const styles = StyleSheet.create({
   farmCanvas: { width: FARM_CANVAS_W, height: FARM_CANVAS_H, position: 'relative' as const },
   farmBgImg: { width: FARM_CANVAS_W, height: FARM_CANVAS_H, position: 'absolute' as const, top: 0, left: 0 },
-  digimonOnFarm: { position: 'absolute' as const, top: 0, left: 0 },
+  digimonOnFarm: { position: 'absolute' as const, top: 0, left: 0, zIndex: 6 },
 
   cartaBtn: { position: 'absolute' as const, top: -44, left: -6, zIndex: 20, padding: 4 },
   cartaIcon: { fontSize: 30 },
