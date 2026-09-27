@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image, Easing, FlatList, Alert,
+  Platform, Modal, Pressable, Animated, Image, Easing, FlatList, Alert, TextInput,
 } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +30,24 @@ import {
   GOLDEN_STAR_ITEM_ID,
   getAscensionStars,
 } from '@/utils/ascension';
+
+const DIGIBANK_ATTR_FILTERS = [
+  { key: '', label: 'Todos', color: '#6b7280' }, { key: 'VC', label: 'Vacina', color: '#22c55e' },
+  { key: 'VR', label: 'Vírus', color: '#ef4444' }, { key: 'DA', label: 'Data', color: '#3b82f6' },
+  { key: 'NO', label: 'Nulo', color: '#6b7280' }, { key: 'UN', label: 'Desconhecido', color: '#a855f7' },
+  { key: 'FR', label: 'Livre', color: '#f59e0b' },
+];
+const DIGIBANK_RARITY_FILTERS = [
+  { key:'',label:'Todas' }, { key:'BABY',label:'Bebê' }, { key:'TRAINING',label:'Treinamento' },
+  { key:'ROOKIE',label:'Rookie' }, { key:'CHAMPION',label:'Champion' }, { key:'ULTIMATE',label:'Ultimate' },
+  { key:'MEGA',label:'Mega' }, { key:'ULTRA',label:'Ultra' }, { key:'BURST',label:'Burst' }, { key:'EGG',label:'Ovo' },
+];
+const DIGIBANK_ELEM_FILTERS = [
+  {key:'',label:'Todos',color:'#6b7280'}, {key:'FIRE',label:'Fogo',color:'#ff6b35'}, {key:'PLANT',label:'Planta',color:'#22c55e'},
+  {key:'WATER',label:'Água',color:'#3b82f6'}, {key:'WIND',label:'Vento',color:'#84cc16'}, {key:'EARTH',label:'Terra',color:'#a16207'},
+  {key:'LIGHTNING',label:'Raio',color:'#facc15'}, {key:'LIGHT',label:'Luz',color:'#fde68a'}, {key:'DARK',label:'Trevas',color:'#8b5cf6'},
+  {key:'NULL',label:'Nulo',color:'#6b7280'}, {key:'ICE',label:'Gelo',color:'#a8d8f0'}, {key:'METAL',label:'Metal',color:'#94a3b8'},
+];
 
 const XP_BATTERIES = [
   { id: 'piece_battery_green',  name: 'Bateria Verde',   xp: 200,  color: '#22c55e', img: require('../../assets/images/battery_green.webp') },
@@ -215,6 +233,11 @@ export default function CollectionScreen() {
   const ownedCount = collection.length;
 
   const [digiTab, setDigiTab] = useState<'digimons' | 'eggs'>('digimons');
+  const [search, setSearch] = useState('');
+  const [attrFilter, setAttrFilter] = useState('');
+  const [rarityFilter, setRarityFilter] = useState('');
+  const [elemFilter, setElemFilter] = useState('');
+  const [filterModalOpen, setFilterModalOpen] = useState<'elem'|'rarity'|'attr'|null>(null);
 
   const resolvedCollection = collection.flatMap((owned) => {
     const char = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
@@ -230,7 +253,16 @@ export default function CollectionScreen() {
     || owned.characterId === 'specialDigitama'
     || char.name?.toLowerCase() === 'digitama especial'
   );
-  const activeCollection = digiTab === 'digimons' ? digimons : eggs;
+  const activeCollectionBase = digiTab === 'digimons' ? digimons : eggs;
+  const activeCollection = activeCollectionBase.filter(({ char }) => {
+    const q = search.trim().toLowerCase();
+    if (q && !char.name.toLowerCase().includes(q)) return false;
+    if (attrFilter && char.attribute !== attrFilter) return false;
+    if (rarityFilter && char.rarity !== rarityFilter) return false;
+    if (elemFilter && char.element !== elemFilter) return false;
+    return true;
+  });
+  const activeFiltersCount = [attrFilter, rarityFilter, elemFilter].filter(Boolean).length;
   const activeRows: { owned: OwnedCharacter; char: Character }[][] = [];
   for (let index = 0; index < activeCollection.length; index += 3) {
     activeRows.push(activeCollection.slice(index, index + 3));
@@ -389,6 +421,36 @@ export default function CollectionScreen() {
           <Text style={[styles.countText, { color: colors.primary }]}>{ownedCount} / {DIGIBANK_LIMIT}</Text>
         </View>
       </View>
+
+      {/* Pesquisa e filtros — mesmo sistema do Banco */}
+      <View style={[styles.searchRow, { borderColor: colors.border, backgroundColor: colors.card }, pixelStyle]}>
+        <Feather name="search" size={16} color={colors.mutedForeground} />
+        <TextInput style={[styles.searchInput,{color:colors.foreground}]} placeholder="Pesquisar Digimon..." placeholderTextColor={colors.mutedForeground} value={search} onChangeText={setSearch} returnKeyType="search" />
+        {!!search && <TouchableOpacity onPress={()=>setSearch('')}><Feather name="x" size={16} color={colors.mutedForeground}/></TouchableOpacity>}
+      </View>
+      <View style={styles.filterBtnRow}>
+        {([
+          ['elem','Elemento',elemFilter], ['rarity','Fase',rarityFilter], ['attr','Atributo',attrFilter],
+        ] as const).map(([kind,label,value])=>(
+          <TouchableOpacity key={kind} style={[styles.filterBtn,{borderColor:value?colors.primary:colors.border},pixelStyle]} onPress={()=>setFilterModalOpen(kind)}>
+            <Text style={[styles.filterBtnText,{color:value?colors.primary:colors.mutedForeground}]}>{value || label}</Text>
+            <Feather name="chevron-down" size={12} color={colors.mutedForeground}/>
+          </TouchableOpacity>
+        ))}
+        {activeFiltersCount>0 && <TouchableOpacity style={styles.clearFilterBtn} onPress={()=>{setAttrFilter('');setRarityFilter('');setElemFilter('')}}><Feather name="x" size={14} color="#ef4444"/></TouchableOpacity>}
+      </View>
+      <Modal visible={filterModalOpen!==null} transparent animationType="fade" onRequestClose={()=>setFilterModalOpen(null)}>
+        <Pressable style={styles.filterOverlay} onPress={()=>setFilterModalOpen(null)}>
+          <Pressable style={[styles.filterSheet,{backgroundColor:colors.card},pixelStyle]} onPress={e=>e.stopPropagation()}>
+            <Text style={[styles.sheetTitle,{color:colors.foreground,textAlign:'center'}]}>{filterModalOpen==='elem'?'⚡ ELEMENTO':filterModalOpen==='rarity'?'🎖 FASE':'🛡 ATRIBUTO'}</Text>
+            {(filterModalOpen==='elem'?DIGIBANK_ELEM_FILTERS:filterModalOpen==='rarity'?DIGIBANK_RARITY_FILTERS:DIGIBANK_ATTR_FILTERS).map((opt:any)=>{
+              const current=filterModalOpen==='elem'?elemFilter:filterModalOpen==='rarity'?rarityFilter:attrFilter;
+              const color=opt.color ?? (opt.key ? (RARITY_COLORS[opt.key as keyof typeof RARITY_COLORS]??colors.primary) : '#6b7280');
+              return <TouchableOpacity key={opt.key} style={[styles.filterOption,{borderColor:current===opt.key?color:colors.border,backgroundColor:current===opt.key?color+'22':colors.background}]} onPress={()=>{if(filterModalOpen==='elem')setElemFilter(opt.key);else if(filterModalOpen==='rarity')setRarityFilter(opt.key);else setAttrFilter(opt.key);setFilterModalOpen(null)}}><Text style={{color:current===opt.key?color:colors.foreground,fontWeight:'700'}}>{opt.label}</Text>{current===opt.key&&<Feather name="check" size={14} color={color}/>}</TouchableOpacity>
+            })}
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── Tab bar ── */}
       <View style={[styles.tabBar, { borderBottomColor: colors.border }]}>
@@ -1232,6 +1294,15 @@ const styles = StyleSheet.create({
   title: { fontSize: Platform.select({ web: 18, default: 20 }), fontWeight: '800' as const },
   countBadge: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 3 },
   countText: { fontSize: 11, fontWeight: '700' as const },
+  searchRow: { marginHorizontal: 12, marginTop: 8, marginBottom: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, height: 40, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  searchInput: { flex: 1, fontSize: 13, paddingVertical: 0 },
+  filterBtnRow: { flexDirection: 'row', paddingHorizontal: 12, gap: 6, marginBottom: 8 },
+  filterBtn: { flex: 1, minWidth: 0, borderWidth: 1, borderRadius: 8, paddingHorizontal: 7, paddingVertical: 7, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  filterBtnText: { fontSize: 10, fontWeight: '700', flexShrink: 1 },
+  clearFilterBtn: { width: 34, alignItems: 'center', justifyContent: 'center', borderRadius: 8, borderWidth: 1, borderColor: '#ef4444' },
+  filterOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'flex-end' },
+  filterSheet: { padding: 16, paddingBottom: 28, borderTopLeftRadius: 18, borderTopRightRadius: 18, maxHeight: '75%' },
+  filterOption: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 11, marginTop: 7, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   tabBar: {
     flexDirection: 'row' as const,
     borderBottomWidth: 1,
