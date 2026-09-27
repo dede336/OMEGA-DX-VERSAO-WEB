@@ -447,6 +447,23 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
+  // Fire line fixed by game design: Mokumon (Baby) -> Fukamon (Training) -> Candlemon (Rookie).
+  const mokumon = chars.find((char) => _normKey(char.name ?? '') === 'mokumon');
+  const fukamon = chars.find((char) => _normKey(char.name ?? '') === 'fukamon');
+  const candlemon = chars.find((char) => _normKey(char.name ?? '') === 'candlemon');
+  if (mokumon && fukamon && candlemon) {
+    // These three are one authoritative line; remove stale outgoing branches.
+    delete ALTERNATE_EVOLUTIONS[mokumon.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[mokumon.id];
+    delete ALTERNATE_EVOLUTIONS[fukamon.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[fukamon.id];
+
+    EVOLUTIONS[mokumon.id] = { evolvesTo: fukamon.id, requiredLevel: 1, label: 'Fukamon' };
+    EVOLUTIONS[fukamon.id] = { evolvesTo: candlemon.id, requiredLevel: 12, label: 'Candlemon' };
+    _farmEvoMap[mokumon.id] = fukamon.id;
+    _farmEvoMap[fukamon.id] = candlemon.id;
+  }
+
   // Chronomon line fixed by game design:
   // Chichimon (Training) -> Hyokomon -> Buraimon -> Butenmon -> Chronomon HM / Chronomon DM.
   const findChronomonStage = (keys: string[]) =>
