@@ -429,6 +429,36 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
+  // Gammamon base line: Curimon (Baby) -> Gurimon (Training) -> Gammamon (Rookie).
+  // Keep the three linked explicitly so the evolution tree does not split them
+  // into unrelated catalogue lines.
+  const curimon = chars.find((char) => _normKey(char.name ?? '') === 'curimon');
+  const gurimon = chars.find((char) => _normKey(char.name ?? '') === 'gurimon');
+  const baseGammamon = chars.find((char) => _normKey(char.name ?? '') === 'gammamon');
+  const curimonId = curimon?.id ?? findCharacterIdByName('Curimon');
+  const gurimonId = gurimon?.id ?? findCharacterIdByName('Gurimon');
+  const baseGammamonId = baseGammamon?.id ?? findCharacterIdByName('Gammamon');
+
+  if (curimonId && gurimonId && baseGammamonId) {
+    // Remove stale incoming catalogue links that would duplicate these two stages.
+    for (const map of [EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS]) {
+      for (const [fromId, evolution] of Object.entries(map)) {
+        if ((evolution.evolvesTo === curimonId || evolution.evolvesTo === gurimonId) && fromId !== curimonId) {
+          delete map[fromId];
+        }
+      }
+    }
+    delete ALTERNATE_EVOLUTIONS[curimonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[curimonId];
+    delete ALTERNATE_EVOLUTIONS[gurimonId];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[gurimonId];
+
+    EVOLUTIONS[curimonId] = { evolvesTo: gurimonId, requiredLevel: 1, label: 'Gurimon' };
+    EVOLUTIONS[gurimonId] = { evolvesTo: baseGammamonId, requiredLevel: 12, label: 'Gammamon' };
+    _farmEvoMap[curimonId] = gurimonId;
+    _farmEvoMap[gurimonId] = baseGammamonId;
+  }
+
   // Gammamon dark line — fixed game rule. Keep this authoritative even when
   // catalogue evolution metadata is incomplete or stale.
   const gammamon = chars.find((char) => _normKey(char.name ?? '') === 'gammamon');
