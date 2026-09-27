@@ -223,6 +223,7 @@ export default function BattleScreen() {
     tamerId,
     addFarmFood,
     setBossCooldown,
+    isBossOnCooldown,
     completeFarmBattle,
     gainFarmDecor,
     customGameMaps,
@@ -715,7 +716,11 @@ export default function BattleScreen() {
         addFarmFood(foodId, 1);
         setBossCooldown(mapId, stageIndex);
         completeFarmBattle();
-        addLog(`${FOOD_LABELS[foodId]} obtida para a Farm! 🌿`, '#22c55e');
+        const foodName = FOOD_LABELS[foodId];
+        const existingFood = drops.find((d) => d.id === foodId);
+        if (existingFood) existingFood.amount += 1;
+        else drops.push({ id: foodId, name: foodName, amount: 1, color: '#22c55e', kind: 'item' });
+        addLog(`${foodName} obtida para a Farm! 🌿`, '#22c55e');
       }
     }
 
@@ -725,6 +730,10 @@ export default function BattleScreen() {
   // ── Start battle ───────────────────────────────────────────────────────────
   function startBattle(teamIds: string[]) {
     if (!stage || teamIds.length === 0) return;
+    if (!(user?.isAdmin ?? false) && (stage as any)?.isBoss && isBossOnCooldown(mapId, stageIndex)) {
+      Alert.alert('Boss em recarga', 'Este Boss só pode ser enfrentado uma vez a cada 30 minutos.');
+      return;
+    }
     const availableDays = (map as any)?.availableDays as number[] | undefined;
     const availableHours = (map as any)?.availableHours as Array<{ start: number; end: number }> | undefined;
     const now = new Date();
