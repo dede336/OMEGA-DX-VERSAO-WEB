@@ -676,12 +676,16 @@ export default function BattleScreen() {
       // Drops exclusivos por região:
       // Árvore: Floresta dos Dados (10%) e Pradaria dos Tamers (10%).
       // Flores Rosas: Floresta Encantada (10%) e Pradaria dos Tamers (10%).
+      // Pinheiro: Santuário de Gelo (10%).
       const targetedDecorDrops: { id: string; name: string; emoji: string; color: string; chance: number }[] = [];
       if (mapId === 'map_forest' || mapId === 'map_final_domain') {
         targetedDecorDrops.push({ id: 'tree', name: 'Árvore', emoji: '🌳', color: '#16a34a', chance: 0.10 });
       }
       if (mapId === 'map_plant' || mapId === 'map_final_domain') {
         targetedDecorDrops.push({ id: 'flower', name: 'Flores Rosas', emoji: '🌸', color: '#db2777', chance: 0.10 });
+      }
+      if (mapId === 'map_city') {
+        targetedDecorDrops.push({ id: 'tree_pine', name: 'Pinheiro', emoji: '🌲', color: '#15803d', chance: 0.10 });
       }
       for (const decor of targetedDecorDrops) {
         if (Math.random() < decor.chance) {
@@ -705,7 +709,6 @@ export default function BattleScreen() {
         { id: 'asfalto_v1',     name: 'Asfalto Vertical',    emoji: '🛣️', color: '#64748b' },
         { id: 'asfalto_v2',     name: 'Asfalto Vertical 2',  emoji: '🛣️', color: '#64748b' },
         { id: 'asfalto_t',      name: 'Asfalto em T',        emoji: '🛣️', color: '#64748b' },
-        { id: 'tree_pine',      name: 'Pinheiro',             emoji: '🌲', color: '#15803d' },
         { id: 'tree_autumn',    name: 'Árvore Outono',        emoji: '🍂', color: '#b45309' },
         { id: 'tree_oak',       name: 'Carvalho',             emoji: '🌳', color: '#166534' },
         { id: 'fence',          name: 'Cerca',                emoji: '🪵', color: '#92400e' },
