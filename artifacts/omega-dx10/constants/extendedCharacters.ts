@@ -503,6 +503,16 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
             label: 'BlueMeramon',
           };
           _farmEvoMap[meramon.id] = bluemeramon.id;
+          if (boltmon) {
+            delete ALTERNATE_EVOLUTIONS[bluemeramon.id];
+            delete EXTRA_ALTERNATE_EVOLUTIONS[bluemeramon.id];
+            EVOLUTIONS[bluemeramon.id] = {
+              evolvesTo: boltmon.id,
+              requiredLevel: 60,
+              label: 'Boltmon',
+            };
+            _farmEvoMap[bluemeramon.id] = boltmon.id;
+          }
         }
         if (skullmeramon) {
           ALTERNATE_EVOLUTIONS[meramon.id] = {
@@ -510,16 +520,6 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
             requiredLevel: 40,
             label: 'SkullMeramon',
           };
-          if (boltmon) {
-            delete ALTERNATE_EVOLUTIONS[skullmeramon.id];
-            delete EXTRA_ALTERNATE_EVOLUTIONS[skullmeramon.id];
-            EVOLUTIONS[skullmeramon.id] = {
-              evolvesTo: boltmon.id,
-              requiredLevel: 60,
-              label: 'Boltmon',
-            };
-            _farmEvoMap[skullmeramon.id] = boltmon.id;
-          }
         }
       }
     }
