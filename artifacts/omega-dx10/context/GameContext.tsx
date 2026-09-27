@@ -207,6 +207,13 @@ interface GameState {
   starryNightClaimCycle: string;
   digiviceCards: Record<string, string[]>;
   digiviceTemporaryCards: Record<string, { ascension?: DigiviceTemporaryCardBuff; fusion?: DigiviceTemporaryCardBuff }>;
+  // PvP competitivo: formação defensiva registrada e energia de batalha.
+  pvpPoints: number;
+  pvpBattleCharges: number;
+  pvpLastChargeAt: number;
+  pvpTeam: string[];
+  pvpCrest: string | null;
+  pvpDigivice: string | null;
 }
 
 interface GameContextValue extends GameState {
@@ -282,6 +289,10 @@ interface GameContextValue extends GameState {
   gachaAdminPool: GachaPoolEntry[] | null;
   setGachaAdminPool: (pool: GachaPoolEntry[] | null) => void;
   setTamerId: (id: string) => void;
+  registerPvpTeam: (team: string[], crest: string, digivice: string) => boolean;
+  refreshPvpBattles: () => void;
+  consumePvpBattle: () => boolean;
+  awardPvpVictory: () => void;
   resetGame: () => Promise<void>;
   rosterRevision: number;
   rosterReady: boolean;
@@ -467,6 +478,12 @@ const defaultState: GameState = {
   starryNightClaimCycle: '',
   digiviceCards: {},
   digiviceTemporaryCards: {},
+  pvpPoints: 0,
+  pvpBattleCharges: 5,
+  pvpLastChargeAt: Date.now(),
+  pvpTeam: [],
+  pvpCrest: null,
+  pvpDigivice: null,
 };
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -558,6 +575,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             gemas: (parsed as any).gemas ?? 1000,
             gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
             ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
+            pvpPoints: (parsed as any).pvpPoints ?? 0,
+            pvpBattleCharges: Math.max(0, Math.min(5, (parsed as any).pvpBattleCharges ?? 5)),
+            pvpLastChargeAt: (parsed as any).pvpLastChargeAt ?? Date.now(),
+            pvpTeam: Array.isArray((parsed as any).pvpTeam) ? (parsed as any).pvpTeam.slice(0, 3) : [],
+            pvpCrest: (parsed as any).pvpCrest ?? null,
+            pvpDigivice: (parsed as any).pvpDigivice ?? null,
           });
         } catch {
           // Corrupt/unreadable local data must not reset a live player state.
@@ -2270,6 +2293,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         gemas: (parsed as any).gemas ?? 1000,
         gachaContadorPity: (parsed as any).gachaContadorPity ?? 0,
         ultimoTiroGratis: (parsed as any).ultimoTiroGratis ?? null,
+        pvpPoints: (parsed as any).pvpPoints ?? 0,
+        pvpBattleCharges: Math.max(0, Math.min(5, (parsed as any).pvpBattleCharges ?? 5)),
+        pvpLastChargeAt: (parsed as any).pvpLastChargeAt ?? Date.now(),
+        pvpTeam: Array.isArray((parsed as any).pvpTeam) ? (parsed as any).pvpTeam.slice(0, 3) : [],
+        pvpCrest: (parsed as any).pvpCrest ?? null,
+        pvpDigivice: (parsed as any).pvpDigivice ?? null,
       };
       setState(newState);
       await AsyncStorage.setItem(storageKey, JSON.stringify({ ...newState, _savedAt: Date.now() }));
@@ -2287,6 +2316,51 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       if (!user?.id) setLoaded(true);
     }
   }, [storageKey, isMeaningfulSave, user?.id]);
+
+  const refreshPvpBattles = useCallback(() => {
+    setState((prev) => {
+      if (prev.pvpBattleCharges >= 5) {
+        if (prev.pvpBattleCharges === 5) return prev;
+        return { ...prev, pvpBattleCharges: 5, pvpLastChargeAt: Date.now() };
+      }
+      const now = Date.now();
+      const elapsed = Math.max(0, now - prev.pvpLastChargeAt);
+      const recovered = Math.floor(elapsed / (30 * 60 * 1000));
+      if (recovered <= 0) return prev;
+      const nextCharges = Math.min(5, prev.pvpBattleCharges + recovered);
+      const nextAnchor = nextCharges >= 5
+        ? now
+        : prev.pvpLastChargeAt + recovered * 30 * 60 * 1000;
+      return { ...prev, pvpBattleCharges: nextCharges, pvpLastChargeAt: nextAnchor };
+    });
+  }, []);
+
+  const registerPvpTeam = useCallback((team: string[], crest: string, digivice: string): boolean => {
+    const clean = [...new Set(team.filter(Boolean))].slice(0, 3);
+    if (clean.length !== 3 || !crest || !digivice) return false;
+    const current = stateRef.current;
+    if (!clean.every((id) => current.collection.some((owned) => owned.ownedId === id))) return false;
+    setState((prev) => ({ ...prev, pvpTeam: clean, pvpCrest: crest, pvpDigivice: digivice }));
+    return true;
+  }, []);
+
+  const consumePvpBattle = useCallback((): boolean => {
+    const prev = stateRef.current;
+    const now = Date.now();
+    const recovered = prev.pvpBattleCharges >= 5
+      ? 0
+      : Math.floor(Math.max(0, now - prev.pvpLastChargeAt) / (30 * 60 * 1000));
+    const available = Math.min(5, prev.pvpBattleCharges + recovered);
+    if (available <= 0) return false;
+    const remaining = available - 1;
+    const anchor = available >= 5 || recovered > 0 ? now : prev.pvpLastChargeAt;
+    setState((stateNow) => ({ ...stateNow, pvpBattleCharges: remaining, pvpLastChargeAt: anchor }));
+    return true;
+  }, []);
+
+  const awardPvpVictory = useCallback(() => {
+    setState((prev) => ({ ...prev, pvpPoints: prev.pvpPoints + 10 }));
+  }, []);
 
   const resetGame = useCallback(async () => {
     await AsyncStorage.removeItem(storageKey);
@@ -2372,6 +2446,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         rosterRevision,
         rosterReady,
         setTamerId,
+        registerPvpTeam,
+        refreshPvpBattles,
+        consumePvpBattle,
+        awardPvpVictory,
       }}
     >
       {children}
