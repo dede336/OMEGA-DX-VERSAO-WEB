@@ -9,6 +9,7 @@ import { CharacterAvatar } from '@/components/GameComponents';
 import { EQUIPMENT_ITEMS } from '@/constants/gameData';
 import { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
+import { getCharacter } from '@/constants/extendedCharacters';
 
 const PVP_ICON = require('../../assets/images/friend-battle-icon.webp');
 const MAX_BATTLES = 5;
@@ -129,7 +130,7 @@ export default function PvpScreen() {
       <Text style={[styles.help,{color:colors.mutedForeground}]}>Escolha 3 Digimons. Este é o time que os outros Tamers poderão enfrentar.</Text>
       <View style={styles.grid}>
         {game.collection.filter((owned) => {
-          const c:any = (require('@/constants/extendedCharacters') as any).getCharacter(owned.characterId);
+          const c = getCharacter(owned.characterId);
           return String(c?.rarity ?? '') !== 'EGG';
         }).map((owned) => {
           const active = selectedTeam.includes(owned.ownedId);
