@@ -429,6 +429,32 @@ export function loadCharacterCatalog(chars: CatalogDigimonRaw[], apiUrl: string)
   }
   EVOLUTIONS.agumonSaver = { evolvesTo: 'geoGreymon', requiredLevel: 20, label: 'GeoGreymon' };
 
+  // Algomon line fixed by game design:
+  // AlgomonBaby -> AlgomonTraining -> Algomon Rookie -> Algomon Champion -> Algomon Ultimate -> Algomon Mega.
+  const findAlgomonStage = (keys: string[]) =>
+    chars.find((char) => keys.includes(_normKey(char.name ?? '')) || keys.includes(_normKey(char.id ?? '')));
+  const algBaby = findAlgomonStage(['algomonbaby']);
+  const algTraining = findAlgomonStage(['algomontraining', 'algomontraning']);
+  const algRookie = findAlgomonStage(['algomonrookie']);
+  const algChampion = findAlgomonStage(['algomonchampion']);
+  const algUltimate = findAlgomonStage(['algomonultimate']);
+  const algMega = findAlgomonStage(['algomonmega']);
+
+  const algomonChain = [algBaby, algTraining, algRookie, algChampion, algUltimate, algMega].filter(Boolean);
+  for (let i = 0; i < algomonChain.length - 1; i++) {
+    const from = algomonChain[i]!;
+    const to = algomonChain[i + 1]!;
+    // Remove alternate/stale catalogue branches from this fixed linear line.
+    delete ALTERNATE_EVOLUTIONS[from.id];
+    delete EXTRA_ALTERNATE_EVOLUTIONS[from.id];
+    EVOLUTIONS[from.id] = {
+      evolvesTo: to.id,
+      requiredLevel: to.rarity === 'TRAINING' ? 1 : (to.requiredLevel ?? (to.rarity === 'ROOKIE' ? 12 : to.rarity === 'CHAMPION' ? 20 : to.rarity === 'ULTIMATE' ? 40 : 60)),
+      label: to.name,
+    };
+    _farmEvoMap[from.id] = to.id;
+  }
+
   // Gammamon base line: Curimon (Baby) -> Gurimon (Training) -> Gammamon (Rookie).
   // Keep the three linked explicitly so the evolution tree does not split them
   // into unrelated catalogue lines.
