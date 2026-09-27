@@ -18,7 +18,8 @@ const MAX_BATTLES = 5;
 const RECHARGE_MS = 30 * 60 * 1000;
 const PVP_SHOP_IMAGES: Record<string, any> = {
   miracle_piece: getEquipItemImage('piece_brasao_milagre'),
-  random_card: require('../../assets/images/card_back.webp'),
+  // Cartas não possuem um asset genérico de verso no projeto; usa o mesmo ícone de cartas da Mochila.
+  random_card: null,
   gold_battery_10: require('../../assets/images/battery_gold.webp'),
   energy_pill: ENERGY_PILL_IMAGE,
   pink_flower: require('../../assets/images/deco_flower.webp'),
