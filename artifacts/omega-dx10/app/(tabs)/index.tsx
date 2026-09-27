@@ -204,6 +204,22 @@ export default function HomeScreen() {
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
           )}
+          {(equippedCrestImage || equippedDigiviceImage) && (
+            <View style={styles.heroEquipmentCompact}>
+              {equippedCrestImage && (
+                <View style={styles.heroEquipmentCompactItem}>
+                  <Image source={equippedCrestImage} style={styles.heroEquipmentCompactImage} resizeMode="contain" />
+                  <Text style={styles.heroEquipmentCompactLabel}>BRASÃO</Text>
+                </View>
+              )}
+              {equippedDigiviceImage && (
+                <View style={styles.heroEquipmentCompactItem}>
+                  <Image source={equippedDigiviceImage} style={styles.heroEquipmentCompactImage} resizeMode="contain" />
+                  <Text style={styles.heroEquipmentCompactLabel}>DIGIVICE</Text>
+                </View>
+              )}
+            </View>
+          )}
 
         </View>
 
@@ -255,32 +271,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Current Crest + Digivice: fixed Home section, outside the hero overlay. */}
-      <View style={[styles.homeEquipmentBar, { borderColor: colors.border, backgroundColor: 'rgba(20,20,20,0.82)' }]}>
-        <View style={styles.homeEquipmentBarItem}>
-          {equippedCrestImage
-            ? <Image source={equippedCrestImage} style={styles.homeEquipmentBarImage} resizeMode="contain" />
-            : <Feather name="award" size={30} color={equippedCrestId ? '#facc15' : colors.mutedForeground} />}
-          <View style={styles.homeEquipmentBarText}>
-            <Text style={[styles.homeEquipmentBarLabel, { color: colors.mutedForeground }]}>BRASÃO</Text>
-            <Text style={[styles.homeEquipmentBarValue, { color: colors.foreground }]} numberOfLines={1}>
-              {equippedCrestId ?? 'NÃO EQUIPADO'}
-            </Text>
-          </View>
-        </View>
-        <View style={[styles.homeEquipmentBarDivider, { backgroundColor: colors.border }]} />
-        <View style={styles.homeEquipmentBarItem}>
-          {equippedDigiviceImage
-            ? <Image source={equippedDigiviceImage} style={styles.homeEquipmentBarImage} resizeMode="contain" />
-            : <Feather name="watch" size={30} color={equippedDigiviceId ? '#60a5fa' : colors.mutedForeground} />}
-          <View style={styles.homeEquipmentBarText}>
-            <Text style={[styles.homeEquipmentBarLabel, { color: colors.mutedForeground }]}>DIGIVICE</Text>
-            <Text style={[styles.homeEquipmentBarValue, { color: colors.foreground }]} numberOfLines={1}>
-              {equippedDigiviceId ?? 'NÃO EQUIPADO'}
-            </Text>
-          </View>
-        </View>
-      </View>
+
 
       <View style={styles.body}>
         {/* ── Quick Actions ── */}
@@ -507,6 +498,10 @@ const styles = StyleSheet.create({
   heroGreeting: { fontSize: 10, fontWeight: '600' as const, letterSpacing: 0.5 },
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
+  heroEquipmentCompact:{flexDirection:'row',alignItems:'flex-start',gap:6,marginTop:3},
+  heroEquipmentCompactItem:{alignItems:'center',width:28},
+  heroEquipmentCompactImage:{width:22,height:22},
+  heroEquipmentCompactLabel:{color:'#fff',fontSize:4,fontWeight:'900',marginTop:1},
   homeEquipmentBar:{marginHorizontal:16,marginTop:10,borderWidth:1,borderRadius:10,paddingHorizontal:10,paddingVertical:8,flexDirection:'row',alignItems:'center'},
   homeEquipmentBarItem:{flex:1,minWidth:0,flexDirection:'row',alignItems:'center',gap:7},
   homeEquipmentBarImage:{width:36,height:36},
