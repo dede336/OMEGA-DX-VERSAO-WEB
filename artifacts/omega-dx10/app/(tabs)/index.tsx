@@ -87,7 +87,12 @@ export default function HomeScreen() {
   // because an older/custom item is absent from the static EQUIPMENT_ITEMS list.
   const equippedCrestId = equippedItems.brasao ?? null;
   const equippedDigiviceId = equippedItems.digivice ?? null;
-  const equippedCrestImage = equippedCrestId ? getEquipItemImage(equippedCrestId, tamerId) : null;
+  // Home also accepts legacy/custom crest ids. Normalize common legacy prefixes
+  // so an equipped crest never disappears just because the save predates the current IDs.
+  const crestCandidates = equippedCrestId
+    ? [equippedCrestId, equippedCrestId.replace(/^piece_/, ''), equippedCrestId.replace(/^crest_/, 'brasao_')]
+    : [];
+  const equippedCrestImage = crestCandidates.map((id) => getEquipItemImage(id, tamerId)).find(Boolean) ?? null;
   const equippedDigiviceImage = equippedDigiviceId ? getEquipItemImage(equippedDigiviceId, tamerId) : null;
 
   const botPad = Platform.OS === 'web' ? 20 : insets.bottom + 20;
