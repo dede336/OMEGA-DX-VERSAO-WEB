@@ -58,7 +58,8 @@ const BASE_ATTACK_EFFECT_TIME = 1000;
 const BASE_DAMAGE_START_TIME = 800;
 const BASE_HP_STEP_TIME = 100;
 const HP_STEP_COUNT = 10;
-const AUTO_BATTLE_LIMIT_SECONDS = 20 * 60;
+const AUTO_BATTLE_BASE_LIMIT_SECONDS = 20 * 60;
+const AUTO_BATTLE_2X_LIMIT_SECONDS = 10 * 60;
 const AUTO_BATTLE_QUOTA_KEY = 'omega_dx_auto_battle_hourly_v1';
 const BATTLE_SPEED_KEY = 'omega_dx_battle_speed_v1';
 
@@ -369,7 +370,10 @@ export default function BattleScreen() {
   }, []);
   const speedMs = useCallback((ms: number) => Math.max(1, Math.round(ms / battleSpeedRef.current)), []);
   const [autoQuotaReady, setAutoQuotaReady] = useState(false);
-  const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_LIMIT_SECONDS);
+  const autoLimitSeconds = battleSpeed === 2 ? AUTO_BATTLE_2X_LIMIT_SECONDS : AUTO_BATTLE_BASE_LIMIT_SECONDS;
+  const autoLimitSecondsRef = useRef(AUTO_BATTLE_BASE_LIMIT_SECONDS);
+  useEffect(() => { autoLimitSecondsRef.current = autoLimitSeconds; }, [autoLimitSeconds]);
+  const [autoRemainingSeconds, setAutoRemainingSeconds] = useState(AUTO_BATTLE_BASE_LIMIT_SECONDS);
   const autoModeRef = useRef(false);
   useEffect(() => { autoModeRef.current = autoMode; }, [autoMode]);
 
@@ -379,7 +383,7 @@ export default function BattleScreen() {
       const raw = await AsyncStorage.getItem(AUTO_BATTLE_QUOTA_KEY);
       const saved = raw ? JSON.parse(raw) as AutoBattleQuota : null;
       if (saved?.hour === hour) {
-        return { hour, usedSeconds: Math.max(0, Math.min(AUTO_BATTLE_LIMIT_SECONDS, Number(saved.usedSeconds) || 0)) };
+        return { hour, usedSeconds: Math.max(0, Math.min(AUTO_BATTLE_BASE_LIMIT_SECONDS, Number(saved.usedSeconds) || 0)) };
       }
     } catch {}
     const fresh = { hour, usedSeconds: 0 };
@@ -391,7 +395,7 @@ export default function BattleScreen() {
     let active = true;
     readAutoQuota().then((quota) => {
       if (!active) return;
-      const remaining = AUTO_BATTLE_LIMIT_SECONDS - quota.usedSeconds;
+      const remaining = Math.max(0, autoLimitSecondsRef.current - quota.usedSeconds);
       setAutoRemainingSeconds(remaining);
       setAutoQuotaReady(true);
       if (paramAutoMode && autoBattleAllowed && alreadyCleared && remaining > 0) setAutoMode(true);
@@ -407,14 +411,29 @@ export default function BattleScreen() {
     }
     const timer = setInterval(async () => {
       const quota = await readAutoQuota();
-      const usedSeconds = Math.min(AUTO_BATTLE_LIMIT_SECONDS, quota.usedSeconds + 1);
+      const limit = autoLimitSecondsRef.current;
+      const usedSeconds = Math.min(AUTO_BATTLE_BASE_LIMIT_SECONDS, quota.usedSeconds + 1);
       await AsyncStorage.setItem(AUTO_BATTLE_QUOTA_KEY, JSON.stringify({ hour: quota.hour, usedSeconds }));
-      const remaining = AUTO_BATTLE_LIMIT_SECONDS - usedSeconds;
+      const remaining = Math.max(0, limit - usedSeconds);
       setAutoRemainingSeconds(remaining);
       if (remaining <= 0) setAutoMode(false);
     }, 1000);
     return () => clearInterval(timer);
   }, [alreadyCleared, autoBattleAllowed, autoMode, autoRemainingSeconds, readAutoQuota]);
+
+  // 2X reduz imediatamente a cota AUTO da hora de 20 para 10 minutos.
+  // Ao voltar para 1X, a mesma quantidade já usada na hora é preservada.
+  useEffect(() => {
+    if (!autoQuotaReady) return;
+    let active = true;
+    readAutoQuota().then((quota) => {
+      if (!active) return;
+      const remaining = Math.max(0, autoLimitSeconds - quota.usedSeconds);
+      setAutoRemainingSeconds(remaining);
+      if (autoModeRef.current && remaining <= 0) setAutoMode(false);
+    });
+    return () => { active = false; };
+  }, [autoLimitSeconds, autoQuotaReady, readAutoQuota]);
 
   // ── Turn queue ─────────────────────────────────────────────────────────────
   type TurnEntry = { side: 'player' | 'enemy'; idx: number };
