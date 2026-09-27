@@ -276,6 +276,7 @@ interface GameContextValue extends GameState {
   moveAsfaltoAutoConnect: (id: string, x: number, y: number) => void;
   setBossCooldown: (mapId: string, stageIdx: number) => void;
   isBossOnCooldown: (mapId: string, stageIdx: number) => boolean;
+  getBossCooldownRemaining: (mapId: string, stageIdx: number) => number;
   realizarTiroGacha: (quantidade: 1 | 10) => { mensagem: string; recompensas: GachaReward[]; custoGemas: number } | null;
   isTiroGratisDisponivel: boolean;
   gachaAdminPool: GachaPoolEntry[] | null;
@@ -1766,6 +1767,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return (Date.now() - last) < 30 * 60 * 1000;
   }, []);
 
+  const getBossCooldownRemaining = useCallback((mapId: string, stageIdx: number): number => {
+    const key = `${mapId}-${stageIdx}`;
+    const last = stateRef.current.bossCooldowns[key] ?? 0;
+    return Math.max(0, 30 * 60 * 1000 - (Date.now() - last));
+  }, []);
+
   const setFarmSlots = useCallback((slots: string[], resetTime = false) => {
     setState((prev) => {
       const now = Date.now();
@@ -2334,6 +2341,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         moveAsfaltoAutoConnect,
         setBossCooldown,
         isBossOnCooldown,
+        getBossCooldownRemaining,
         realizarTiroGacha,
         isTiroGratisDisponivel: state.ultimoTiroGratis !== getTodayDateString(),
         gachaAdminPool,
