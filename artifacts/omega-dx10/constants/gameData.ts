@@ -1481,6 +1481,7 @@ export const ITEM_NAMES: Record<string, string> = {
   piece_golden_ascension_star: 'Fragmento de Estrela Dourada',
   anel_sagrado:           'Anel Sagrado ✨',
   chrono_core:             'Chrono Core',
+  pergaminho_runa_antiga:  'Pergaminho de Runa Antiga',
   piece_anel_sagrado:     'Fragmento do Anel Sagrado',
   permissao_real:         'Permissão Real da Deusa ⚔️',
   gehenna:                'Gehenna 🌑',
