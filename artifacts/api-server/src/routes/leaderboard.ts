@@ -9,6 +9,10 @@ type SaveData = {
   playerName?: string;
   collection?: { ownedId: string; characterId: string; level: number; exp?: number }[];
   tamerId?: string;
+  pvpPoints?: number;
+  pvpTeam?: string[];
+  pvpCrest?: string | null;
+  pvpDigivice?: string | null;
 };
 
 router.get("/", async (req, res) => {
@@ -29,6 +33,31 @@ router.get("/", async (req, res) => {
     .limit(limit * 5);
 
   const filtered = rows.filter((r) => !r.isAdmin);
+
+  if (type === "pvp") {
+    const entries = filtered
+      .map((row) => {
+        const data = row.saveData as SaveData;
+        const pvpTeam = Array.isArray(data.pvpTeam) ? data.pvpTeam.slice(0, 3) : [];
+        return {
+          username: row.username,
+          tamerLevel: data.tamerLevel ?? 1,
+          tamerName: data.playerName ?? row.username,
+          tamerId: data.tamerId ?? null,
+          pvpPoints: Math.max(0, Number(data.pvpPoints ?? 0)),
+          pvpTeam,
+          pvpCrest: data.pvpCrest ?? null,
+          pvpDigivice: data.pvpDigivice ?? null,
+          updatedAt: row.updatedAt,
+        };
+      })
+      .filter((entry) => entry.pvpTeam.length === 3 && !!entry.pvpCrest && !!entry.pvpDigivice)
+      .sort((a, b) => b.pvpPoints - a.pvpPoints || b.tamerLevel - a.tamerLevel)
+      .slice(0, limit)
+      .map((e, i) => ({ rank: i + 1, ...e }));
+    res.json(entries);
+    return;
+  }
 
   if (type === "count") {
     const entries = filtered
