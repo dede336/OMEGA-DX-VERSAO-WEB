@@ -18,5 +18,5 @@ const PIXEL_POLYGON =
   ')';
 
 export const pixelStyle: object = Platform.OS === 'web'
-  ? { clipPath: PIXEL_POLYGON, borderRadius: 0, borderWidth: 0 }
+  ? { clipPath: PIXEL_POLYGON, borderRadius: 0 }
   : { borderRadius: 10, overflow: 'hidden' };
