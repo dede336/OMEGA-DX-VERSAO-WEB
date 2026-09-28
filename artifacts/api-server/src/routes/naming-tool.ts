@@ -2,8 +2,18 @@ import { Router } from "express";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { requireAuth } from "../middlewares/requireAuth.js";
 
 const router = Router();
+
+router.use(requireAuth, async (req, res, next) => {
+  const [user] = await db.select({ isAdmin: usersTable.isAdmin })
+    .from(usersTable).where(eq(usersTable.id, req.auth!.userId)).limit(1);
+  if (!user?.isAdmin) { res.status(403).json({ error: "Apenas admins" }); return; }
+  next();
+});
 
 const UNNAMED_DIR = path.resolve(process.cwd(), "src/seeds/unnamed_temp");
 const MAPPING_FILE = path.resolve(process.cwd(), "src/seeds/unnamed_mapping.json");

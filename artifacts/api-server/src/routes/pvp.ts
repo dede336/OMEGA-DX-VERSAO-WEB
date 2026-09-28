@@ -6,7 +6,6 @@ import { requireAuth } from "../middlewares/requireAuth.js";
 const router = Router();
 const MAX_CHARGES = 5;
 const RECHARGE_MS = 30 * 60 * 1000;
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 type CollEntry = { ownedId: string; characterId: string; level: number; exp?: number; ascensionStars?: number };
 type SaveData = Record<string, any>;
@@ -51,30 +50,37 @@ function refreshCharges(data: SaveData, now = Date.now()) {
 
 async function settleWeeks() {
   const currentWeek = weekKey();
-  const rows = await db.select({ id: gameSavesTable.id, userId: gameSavesTable.userId, saveData: gameSavesTable.saveData }).from(gameSavesTable);
-  const eligible = rows.map((row) => {
-    const data = (row.saveData ?? {}) as SaveData;
-    return { row, data, points: Math.max(0, Number(data.pvpPoints ?? 0)) };
-  }).filter((x) => Array.isArray(x.data.pvpTeam) && x.data.pvpTeam.length === 3 && x.data.pvpCrest && x.data.pvpDigivice)
-    .sort((a, b) => b.points - a.points);
-
-  const ranks = new Map<number, number>();
-  eligible.forEach((entry, i) => ranks.set(entry.row.userId, i + 1));
-
-  for (const entry of eligible) {
-    const lastWeek = String(entry.data.pvpWeekKey ?? currentWeek);
-    if (lastWeek === currentWeek) continue;
-    const rank = ranks.get(entry.row.userId) ?? eligible.length;
-    const gems = rewardFor(rank, entry.points);
-    const next = {
-      ...entry.data,
-      gemas: Math.max(0, Number(entry.data.gemas ?? 0)) + gems,
-      pvpPoints: 0,
-      pvpWeekKey: currentWeek,
-      pvpLastWeeklyReward: { week: lastWeek, rank, points: entry.points, gems, claimedAt: Date.now() },
-    };
-    await db.update(gameSavesTable).set({ saveData: next, updatedAt: new Date() }).where(eq(gameSavesTable.userId, entry.row.userId));
-  }
+  await db.transaction(async (tx) => {
+    // Lock the saves while ranking and paying them so concurrent PvP requests
+    // cannot credit the same week twice.
+    const rows = await tx.select({ id: gameSavesTable.id, userId: gameSavesTable.userId, saveData: gameSavesTable.saveData })
+      .from(gameSavesTable).orderBy(gameSavesTable.id).for("update");
+    const byWeek = new Map<string, Array<{ row: typeof rows[number]; data: SaveData; points: number }>>();
+    for (const row of rows) {
+      const data = (row.saveData ?? {}) as SaveData;
+      const lastWeek = String(data.pvpWeekKey ?? "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(lastWeek) || lastWeek >= currentWeek) continue;
+      if (!Array.isArray(data.pvpTeam) || data.pvpTeam.length !== 3 || !data.pvpCrest || !data.pvpDigivice) continue;
+      const entries = byWeek.get(lastWeek) ?? [];
+      entries.push({ row, data, points: Math.max(0, Number(data.pvpPoints ?? 0)) });
+      byWeek.set(lastWeek, entries);
+    }
+    for (const [lastWeek, entries] of byWeek) {
+      entries.sort((a, b) => b.points - a.points || a.row.userId - b.row.userId);
+      for (const [index, entry] of entries.entries()) {
+        const rank = index + 1;
+        const gems = rewardFor(rank, entry.points);
+        const next = {
+          ...entry.data,
+          gemas: Math.max(0, Number(entry.data.gemas ?? 0)) + gems,
+          pvpPoints: 0,
+          pvpWeekKey: currentWeek,
+          pvpLastWeeklyReward: { week: lastWeek, rank, points: entry.points, gems, claimedAt: Date.now() },
+        };
+        await tx.update(gameSavesTable).set({ saveData: next, updatedAt: new Date() }).where(eq(gameSavesTable.id, entry.row.id));
+      }
+    }
+  });
 }
 
 router.get("/state", requireAuth, async (req, res) => {
