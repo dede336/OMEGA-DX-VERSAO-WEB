@@ -738,7 +738,7 @@ function styles(colors: ReturnType<typeof useColors>) {
   return StyleSheet.create({
     root: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: 'transparent',
       paddingTop: Platform.OS === 'ios' ? 54 : 16,
     },
     searchRow: {

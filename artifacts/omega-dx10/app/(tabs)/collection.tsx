@@ -413,7 +413,7 @@ export default function CollectionScreen() {
 
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       {/* ── Header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 6, borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.foreground }]}>{t('collection.title')}</Text>

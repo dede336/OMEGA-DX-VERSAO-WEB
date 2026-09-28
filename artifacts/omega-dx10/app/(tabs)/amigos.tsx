@@ -180,7 +180,7 @@ export default function AmigosScreen() {
 
   if (!token) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <Text style={[styles.title, { color: colors.foreground }]}>{t('amigos.title')}</Text>
         </View>
@@ -196,7 +196,7 @@ export default function AmigosScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.foreground }]}>{t('amigos.title')}</Text>
         <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>{friends.length} amigo{friends.length !== 1 ? 's' : ''}</Text>

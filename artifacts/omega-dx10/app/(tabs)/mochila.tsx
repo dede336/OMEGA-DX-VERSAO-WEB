@@ -103,7 +103,7 @@ export default function MochilaScreen() {
   return (
     <>
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: 'transparent' }]}
       contentContainerStyle={[styles.content, { paddingTop: topPad + 20, paddingBottom: botPad }]}
       showsVerticalScrollIndicator={false}
     >

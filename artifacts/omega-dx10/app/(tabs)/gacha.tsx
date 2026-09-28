@@ -523,7 +523,7 @@ export default function GachaScreen() {
 
   return (
     <ScrollView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[styles.container, { backgroundColor: 'transparent' }]}
       contentContainerStyle={[styles.content, { paddingTop: 20, paddingBottom: insets.bottom + 32 }]}
       showsVerticalScrollIndicator={false}
     >

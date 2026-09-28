@@ -3,7 +3,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { ImageBackground, Platform, StyleSheet, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
@@ -11,13 +11,29 @@ import { useSocket } from "@/context/SocketContext";
 import { useLanguage } from "@/context/LanguageContext";
 import NavigationFAB from "@/components/NavigationFAB";
 
+const DIGITAL_BACKGROUND = require('../../assets/images/imagem de fundo.png');
+
+function DigitalBackdrop() {
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <ImageBackground
+        source={DIGITAL_BACKGROUND}
+        resizeMode="cover"
+        style={StyleSheet.absoluteFill}
+        imageStyle={{ opacity: 0.7 }}
+      />
+    </View>
+  );
+}
+
 function NativeTabLayout() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const isAdmin = user?.isAdmin ?? false;
   const canShowAdmin = isAdmin || user?.role === 'digimon_creator';
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#07182c' }}>
+      <DigitalBackdrop />
       <NativeTabs>
         <NativeTabs.Trigger name="index">
           <Icon sf={{ default: "house", selected: "house.fill" }} />
@@ -87,10 +103,12 @@ function ClassicTabLayout() {
   const canShowAdmin = (user?.isAdmin ?? false) || user?.role === 'digimon_creator';
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#07182c' }}>
+      <DigitalBackdrop />
       <Tabs
         screenOptions={{
           headerShown: false,
+          sceneStyle: { backgroundColor: 'transparent' },
           tabBarStyle: { display: 'none' },
           tabBarBackground: () =>
             isIOS ? (

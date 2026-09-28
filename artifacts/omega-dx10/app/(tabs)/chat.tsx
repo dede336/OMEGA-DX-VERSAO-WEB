@@ -195,7 +195,7 @@ export default function ChatScreen() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: topPad }]}>
+    <View style={[styles.container, { backgroundColor: 'transparent', paddingTop: topPad }]}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.foreground }]}>{t('chat.title')}</Text>

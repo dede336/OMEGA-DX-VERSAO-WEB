@@ -368,7 +368,7 @@ export default function CraftScreen() {
   return (
     <>
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={[styles.container, { backgroundColor: 'transparent' }]}
         contentContainerStyle={[styles.content, { paddingTop: 20, paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
       >

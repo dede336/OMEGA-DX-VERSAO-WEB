@@ -209,7 +209,7 @@ export default function PvpScreen() {
   }
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingTop: topPad + 12, paddingBottom: 110 }}>
+    <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingTop: topPad + 12, paddingBottom: 110 }}>
       <View style={styles.titleRow}>
         <Image source={PVP_ICON} style={styles.titleIcon} resizeMode="contain" />
         <View>
