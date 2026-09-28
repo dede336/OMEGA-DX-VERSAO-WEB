@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   langFlagImg: { width: 28, height: 20 },
 
   // Stats strip
-  statsStrip: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, borderRadius: 14, borderWidth: 1, padding: 12 },
+  statsStrip: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, borderRadius: 8, borderWidth: 1, padding: 12, elevation: 2, shadowColor: '#3cdbff', shadowOpacity: 0.14, shadowRadius: 10 },
   statItem: { flex: 1, alignItems: 'center', gap: 3 },
   statDivider: { width: 1, marginVertical: 4 },
   statIcon: { width: 22, height: 22 },

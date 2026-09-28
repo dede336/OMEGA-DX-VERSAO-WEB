@@ -3,7 +3,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
-import { ImageBackground, Platform, StyleSheet, View } from "react-native";
+import { ImageBackground, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
@@ -12,12 +12,14 @@ import { useLanguage } from "@/context/LanguageContext";
 import NavigationFAB from "@/components/NavigationFAB";
 
 const DIGITAL_BACKGROUND = require('../../assets/images/imagem de fundo.png');
+const DIGITAL_BACKGROUND_MOBILE = require('../../assets/images/tela de fundo celular.png');
 
 function DigitalBackdrop() {
+  const { width, height } = useWindowDimensions();
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <ImageBackground
-        source={DIGITAL_BACKGROUND}
+        source={width < height * 0.8 ? DIGITAL_BACKGROUND_MOBILE : DIGITAL_BACKGROUND}
         resizeMode="cover"
         style={StyleSheet.absoluteFill}
         imageStyle={{ opacity: 0.7 }}

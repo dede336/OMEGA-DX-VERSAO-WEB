@@ -99,9 +99,9 @@ export default function AdminScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1 },
+  header: { paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, backgroundColor: '#0b2841', borderBottomColor: '#246187' },
   title: { fontSize: 15, fontWeight: '800' },
   sectionRow: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  sectionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1.5 },
+  sectionBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 6, borderWidth: 1.5 },
   content: { padding: 16 },
 });

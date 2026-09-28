@@ -457,6 +457,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingHorizontal: 16, paddingBottom: 10,
+    backgroundColor: '#0b2841', borderBottomWidth: 1, borderBottomColor: '#246187',
   },
   title: { fontSize: 16, fontWeight: '800' },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
@@ -469,6 +470,7 @@ const styles = StyleSheet.create({
   tabRow: {
     flexDirection: 'row', borderBottomWidth: 1,
     marginHorizontal: 0, marginBottom: 0,
+    backgroundColor: '#0b2841', borderBottomColor: '#246187',
   },
   tabBtn: {
     flex: 1, alignItems: 'center', paddingVertical: 10,
@@ -477,7 +479,7 @@ const styles = StyleSheet.create({
   convRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
     marginHorizontal: 12, marginBottom: 8, marginTop: 8,
-    padding: 14, borderRadius: 14, borderWidth: 1,
+    padding: 14, borderRadius: 8, borderWidth: 1,
   },
   avatarWrap: { position: 'relative' },
   avatar: {

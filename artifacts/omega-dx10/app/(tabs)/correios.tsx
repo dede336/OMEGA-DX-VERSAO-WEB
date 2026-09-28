@@ -273,7 +273,13 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 13 },
 
   msgCard: {
-    borderRadius: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#246187',
+    elevation: 2,
+    shadowColor: '#3cdbff',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
     padding: 16,
     marginBottom: 14,
     gap: 10,

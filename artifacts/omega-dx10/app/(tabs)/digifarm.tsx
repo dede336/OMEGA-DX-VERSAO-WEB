@@ -1896,7 +1896,7 @@ export default function DigifarmScreen() {
 
             {/* Painel de ação do Digimon selecionado */}
             {selectedFarmDigi && selectedDigi && selectedChar && (
-              <View style={[styles.actionPanel, { backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }, pixelStyle]}>
+              <View style={[styles.actionPanel, { backgroundColor: '#0b2841', borderColor: '#246187' }, pixelStyle]}>
                 <View style={styles.actionPanelHeader}>
                   <CharacterAvatar characterId={selectedDigi.characterId} size={44} />
                   <View style={{ flex: 1 }}>
@@ -1912,7 +1912,7 @@ export default function DigifarmScreen() {
                 </View>
                 <View style={styles.actionBtns}>
                   <TouchableOpacity
-                    style={[styles.feedBtn, { backgroundColor: totalFood > 0 ? '#f59e0b' : '#2a2a2a' }, pixelStyle]}
+                    style={[styles.feedBtn, { backgroundColor: totalFood > 0 ? '#f59e0b' : '#123450' }, pixelStyle]}
                     onPress={() => setFeedModalOpen(true)}
                     
                     activeOpacity={0.8}
@@ -1931,7 +1931,7 @@ export default function DigifarmScreen() {
                     </TouchableOpacity>
                   )}
                   <TouchableOpacity
-                    style={[styles.removeBtn, { backgroundColor: '#2a2a2a' }, pixelStyle]}
+                    style={[styles.removeBtn, { backgroundColor: '#123450' }, pixelStyle]}
                     onPress={() => removeFromSlot(selectedFarmDigi)}
                     activeOpacity={0.8}
                   >
@@ -2257,7 +2257,7 @@ const styles = StyleSheet.create({
   rewardTitle: { fontSize: 18, fontWeight: '900' as const },
 
   tabRow: { flexDirection: 'row', gap: 6, marginBottom: 2 },
-  tabBtn: { flex: 1, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 10, backgroundColor: '#1c1c1c', alignItems: 'center' },
+  tabBtn: { flex: 1, paddingVertical: 7, paddingHorizontal: 10, borderRadius: 6, backgroundColor: '#123450', borderWidth: 1, borderColor: '#246187', alignItems: 'center' },
   tabBtnActive: { backgroundColor: '#2d1b69', borderWidth: 1.5, borderColor: '#7c3aed' },
   tabBtnText: { fontSize: 12, fontWeight: '700' as const, color: 'rgba(255,255,255,0.4)' },
   tabBtnTextActive: { color: '#fff' },

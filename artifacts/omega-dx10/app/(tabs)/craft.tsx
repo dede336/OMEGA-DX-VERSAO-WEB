@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
   catRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
   catBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, borderRadius: 12, borderWidth: 1.5,
+    gap: 6, borderRadius: 6, borderWidth: 1.5,
     paddingVertical: isWeb ? 8 : 11,
   },
   catLabel: { fontSize: 11, fontWeight: '700' as const },
@@ -457,6 +457,6 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 14, fontWeight: '800' as const, marginBottom: 4 },
   sectionSub:   { fontSize: 11, marginBottom: 16 },
 
-  emptyBox:  { borderRadius: 14, borderWidth: 1, padding: 24, alignItems: 'center' as const },
+  emptyBox:  { borderRadius: 8, borderWidth: 1, padding: 24, alignItems: 'center' as const },
   emptyText: { fontSize: 13 },
 });

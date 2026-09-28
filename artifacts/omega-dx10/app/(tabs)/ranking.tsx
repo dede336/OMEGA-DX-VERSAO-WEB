@@ -263,11 +263,11 @@ export default function RankingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  header: { paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#0b2841', borderBottomColor: '#246187' },
   title: { fontSize: 15, fontWeight: '900' as const },
   loginBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
   loginBtnText: { fontSize: 13, fontWeight: '700' as const },
-  tabBar: { flexDirection: 'row', borderBottomWidth: 1 },
+  tabBar: { flexDirection: 'row', borderBottomWidth: 1, backgroundColor: '#0b2841', borderBottomColor: '#246187' },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 12 },
   tabText: { fontSize: 13, fontWeight: '700' as const },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 80 },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   retryBtn: { borderWidth: 1, borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
   emptyText: { fontSize: 13, textAlign: 'center', lineHeight: 24 },
   list: { padding: 16, gap: 10 },
-  entry: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, padding: 14, gap: 10, overflow: 'hidden' as const },
+  entry: { flexDirection: 'row', alignItems: 'center', borderRadius: 8, padding: 14, gap: 10, overflow: 'hidden' as const },
   cardBg: { position: 'absolute' as const, top: 0, left: 0, right: 0, height: 180, opacity: 0.60 },
   rankCol: { width: 32, alignItems: 'center' },
   avatarWrap: { width: 44, height: 64, alignItems: 'center', justifyContent: 'center' },
