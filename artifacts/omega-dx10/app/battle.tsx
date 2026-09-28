@@ -1728,7 +1728,7 @@ export default function BattleScreen() {
         {/* Arena: all enemies at once */}
         <View style={styles.arena}>
           {/* Background */}
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: '#0a0a0a' }]} />
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: '#07182c' }]} />
           {map.backgroundImage && (
             <View style={[StyleSheet.absoluteFillObject, styles.arenaBackgroundClip]}>
               <Animated.Image
@@ -2202,17 +2202,17 @@ const styles = StyleSheet.create({
   backBtn: { padding: 4 },
 
   // ── Header ──
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14, borderBottomWidth: 1, backgroundColor: '#0b2841', borderBottomColor: '#246187' },
   headerTitle: { fontSize: 14, fontWeight: '700' as const, flex: 1, textAlign: 'center' as const },
   speedBtn: { width: 52, height: 32, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   speedBtnImage: { width: 52, height: 32 },
-  battleHeader: { paddingHorizontal: 20, paddingBottom: 8, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  battleHeader: { paddingHorizontal: 20, paddingBottom: 8, borderBottomWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#0b2841', borderBottomColor: '#246187' },
   battleTitle: { fontSize: 14, fontWeight: '700' as const },
   enemyCountBadge: { borderRadius: 10, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 3 },
   enemyCountText: { fontSize: 12, fontWeight: '800' as const, color: '#ef4444' },
 
   // ── Select ──
-  enemyPreviewCard: { margin: 20, borderRadius: 16, borderWidth: 1.5, overflow: 'hidden' },
+  enemyPreviewCard: { margin: 20, borderRadius: 8, borderWidth: 1.5, overflow: 'hidden', elevation: 2, shadowColor: '#3cdbff', shadowOpacity: 0.12, shadowRadius: 12 },
   previewBg: { width: '100%', height: 150 },
   previewBgOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.25)', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 6 },
   enemyPreviewCompact: { flexDirection: 'row', marginHorizontal: 16, marginTop: 12, marginBottom: 4, borderRadius: 14, borderWidth: 1.5, overflow: 'hidden', height: 90 },
@@ -2231,7 +2231,7 @@ const styles = StyleSheet.create({
   chooseLabel: { fontSize: 11, fontWeight: '700' as const, letterSpacing: 1, paddingHorizontal: 20, marginBottom: 12, marginTop: 8 },
 
   slotsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginBottom: 16 },
-  slotCard: { flex: 1, borderRadius: 14, borderWidth: 1.5, paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center', gap: 6, position: 'relative' as const, minHeight: 130 },
+  slotCard: { flex: 1, borderRadius: 8, borderWidth: 1.5, paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center', gap: 6, position: 'relative' as const, minHeight: 130 },
   slotNumBadge: { position: 'absolute' as const, top: 6, left: 6, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   slotNumText: { fontSize: 11, fontWeight: '800' as const },
   slotName: { fontSize: 11, fontWeight: '700' as const, textAlign: 'center' as const },
