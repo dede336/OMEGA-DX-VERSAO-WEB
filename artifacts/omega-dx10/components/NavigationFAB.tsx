@@ -16,6 +16,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 import { getCharacter } from '@/constants/digimon';
 import { CHARACTERS } from '@/constants/gameData';
+import { getTemaImages } from '@/constants/temaImages';
 
 const FAB_IMG = require('../assets/images/menu-fab.webp');
 const ICON_HOME = require('../assets/images/home-icon.webp');
@@ -252,6 +253,7 @@ export default function NavigationFAB() {
     farmEggEntryTimes,
     pvpBattleCharges,
     refreshPvpBattles,
+    tamerId,
   } = useGame();
 
   const { logout, user } = useAuth();
@@ -574,12 +576,13 @@ export default function NavigationFAB() {
                 ? styles.menuWeb
                 : null,
               {
-                backgroundColor: colors.card,
-                borderColor: colors.border,
+                backgroundColor: 'transparent',
+                borderColor: 'transparent',
               },
               pixelStyle,
             ]}
           >
+            <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="stretch" />
             {confirmLogout ? (
               <View style={styles.confirmBox}>
                 <Feather
@@ -933,7 +936,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 20,
+    overflow: 'hidden',
   },
+  menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
 
   /*
    * Limite equivalente à largura mobile do jogo.
