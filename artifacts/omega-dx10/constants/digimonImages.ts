@@ -1,5 +1,8 @@
 // Nome do Digimon -> imagem local exibida no jogo. Edite a entrada aqui ao trocar um sprite.
 // As chaves seguem o nome do arquivo; digimon.ts normaliza maiúsculas e pontuação na busca.
+// Imagem padrão de qualquer Digimon do catálogo sem arte associada.
+export const NO_DIGIMON_IMAGE = require('../assets/images/digimons/no_image.png');
+
 const DIGIMON_IMAGE_CATALOG: Record<string, any> = {
   "Aegiochusmon": require("../assets/images/digimons/Aegiochusmon.png"),
   "Aegiomon": require("../assets/images/digimons/Aegiomon.png"),

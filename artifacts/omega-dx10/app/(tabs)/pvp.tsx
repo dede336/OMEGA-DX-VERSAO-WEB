@@ -15,12 +15,10 @@ import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 const PVP_ICON = require('../../assets/images/icone_pvp.gif');
 const PVP_COIN_ICON = require('../../assets/images/moeda_pvp.gif');
 const MAX_BATTLES = 5;
-const RANDOM_CARD_PREVIEW_IDS = ['card_aero_wing', 'card_asas_brancas', 'card_battle_tomahawk', 'card_blue'] as const;
 const RECHARGE_MS = 30 * 60 * 1000;
 const PVP_SHOP_IMAGES: Record<string, any> = {
   miracle_piece: getEquipItemImage('piece_brasao_milagre'),
-  // Cartas não possuem um asset genérico de verso no projeto; usa o mesmo ícone de cartas da Mochila.
-  random_card: getEquipItemImage('card_aero_wing'),
+  random_card: require('../../assets/images/imagem_carta_loja_pvp.png'),
   gold_battery_10: require('../../assets/images/battery_gold.webp'),
   energy_pill: ENERGY_PILL_IMAGE,
   pink_flower: require('../../assets/images/deco_flower.webp'),
@@ -65,7 +63,6 @@ export default function PvpScreen() {
   const [opponent, setOpponent] = useState<any | null>(null);
   const [pvpResult, setPvpResult] = useState<'win' | 'loss' | null>(null);
   const [pvpBusy, setPvpBusy] = useState(false);
-  const [cardPreviewIndex, setCardPreviewIndex] = useState(0);
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
   const [digimonSearch, setDigimonSearch] = useState('');
 
@@ -284,7 +281,7 @@ export default function PvpScreen() {
         ].map(([id,name,detail,price]) => (
           <View key={String(id)} style={[styles.shopRow,{borderColor:colors.border}]}>
             <Image
-              source={String(id) === 'random_card' ? getEquipItemImage(RANDOM_CARD_PREVIEW_IDS[cardPreviewIndex]) : PVP_SHOP_IMAGES[String(id)]}
+              source={PVP_SHOP_IMAGES[String(id)]}
               style={[styles.shopImage, String(id) === 'energy_pill' && styles.energyPillShopImage, String(id) === 'random_card' && styles.randomCardImage]}
               resizeMode="contain"
             />

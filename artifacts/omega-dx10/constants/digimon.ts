@@ -4,6 +4,7 @@ import { Character, CHARACTERS } from './gameData';
 import { applyVariantEvolutionRules, LUCEMON_CANONICAL_RARITIES, KUDAMON_LINE_CANONICAL_RARITIES, CHRONOMON_LINE_CANONICAL_RARITIES, FIRE_LINE_CANONICAL_RARITIES, registerEvolutionLines } from './evolution';
 export { getFarmEvolutionTarget, hasDivineGiftPassive } from './evolution';
 import CHARACTER_IMAGES from './characterImages';
+import { NO_DIGIMON_IMAGE } from './digimonImages';
 
 interface CatalogCharacterEntry extends Character {
   dbId: number;
@@ -321,7 +322,7 @@ export function getKnownCharacterName(id: string): string | null {
 
 export function getCharacterImageSourceByName(name: string): any {
   if (!name) return null;
-  return _IMAGE_BY_NORM[_normKey(name)] ?? null;
+  return _IMAGE_BY_NORM[_normKey(name)] ?? NO_DIGIMON_IMAGE;
 }
 
 export function getCharacterImageSource(id: string): any {
@@ -351,7 +352,8 @@ export function getCharacterImageSource(id: string): any {
   }
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
   if (catalogCharacter?.imageApiUrl) return { uri: catalogCharacter.imageApiUrl };
-  return null;
+  // A imagem padrão cobre Digimon do catálogo sem arte local ou imagem na API.
+  return catalogCharacter || CHARACTERS[id] || id.startsWith('name:') ? NO_DIGIMON_IMAGE : null;
 }
 
 export function getCharacterImageScale(id: string): number {
