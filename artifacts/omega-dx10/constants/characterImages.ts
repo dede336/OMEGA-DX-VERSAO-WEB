@@ -412,6 +412,9 @@ const CHARACTER_IMAGES: Record<string, any> = {
   blackGhoulmon: require('../assets/images/digimons/blackGhoulmon_29_vg.webp'),
   skullmamon: require('../assets/images/digimons/digimon-skullmamon.webp'),
   ...DIGIMON_IMAGE_CATALOG,
+  // The catalogue uses stage IDs while the bundled Arkadimon filenames use labels.
+  ArkadimonTraining: require('../assets/images/digimons/Arkadimon(TREINAMENTO).gif'),
+  ArkadimonChild: require('../assets/images/digimons/Arkadimon(rookie).gif'),
 };
 
 export const EGG_IMAGES: Record<string, any> = {
