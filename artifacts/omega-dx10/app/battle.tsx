@@ -21,15 +21,8 @@ import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useLanguage } from '@/context/LanguageContext';
-import {
-  CHARACTERS,
-  ATTRIBUTES,
-  GAME_MAPS,
-  EQUIPMENT_ITEMS,
-  EQUIP_SLOTS_ORDER,
-  getScaledStats,
-  ElementId,
-} from '@/constants/gameData';
+import { CHARACTERS, ATTRIBUTES, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER, getScaledStats, ElementId } from '@/constants/gameData';
+import { GAME_MAPS } from '@/constants/fases';
 import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName, hasDivineGiftPassive } from '@/constants/digimon';
 const CHARACTER_IMAGES = new Proxy({} as Record<string, any>, { get: (_t, p) => _getCharImg(String(p)) });
 import ELEMENT_IMAGES from '@/constants/elementImages';

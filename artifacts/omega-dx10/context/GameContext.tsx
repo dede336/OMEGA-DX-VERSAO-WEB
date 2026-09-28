@@ -1,14 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, useMemo } from 'react';
-import {
-  CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL, FUSIONS, GAME_MAPS, expToNextLevel, tamerExpToNextLevel, CODEX_ORDER,
-  EquipSlot, TamerGender, EQUIP_SLOTS_ORDER, DEFAULT_INVENTORY,
-  CRAFT_RECIPES, CraftRecipe,
-  SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT,
-  PRE_ROOKIE_STAGE_RARITIES,
-  EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
-} from '@/constants/gameData';
+import { CHARACTERS, EVOLUTIONS, ALTERNATE_EVOLUTIONS, EXTRA_ALTERNATE_EVOLUTIONS, FORM_CHANGES, FORM_CHANGE_MIN_LEVEL, FUSIONS, expToNextLevel, tamerExpToNextLevel, CODEX_ORDER, EquipSlot, TamerGender, EQUIP_SLOTS_ORDER, DEFAULT_INVENTORY, CRAFT_RECIPES, CraftRecipe, SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, PRE_ROOKIE_STAGE_RARITIES, EquipItem, CARD_DEFINITIONS, CARD_IDS } from '@/constants/gameData';
+import { GAME_MAPS, GameMap } from '@/constants/fases';
 import { loadCharacterCatalog, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/digimon';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';

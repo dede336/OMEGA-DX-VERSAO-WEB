@@ -1,4 +1,4 @@
-import { GameMap, MapStage } from './gameData';
+import { GameMap, MapStage } from './fases';
 
 interface CustomStageRaw {
   index: number; name?: string;

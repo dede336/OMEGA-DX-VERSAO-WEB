@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useGame } from '@/context/GameContext';
-import { GAME_MAPS } from '@/constants/gameData';
+import { GAME_MAPS } from '@/constants/fases';
 import { getCharacter } from '@/constants/digimon';
 
 const IMG_WATER = require('@/assets/images/tiles/water_tile.webp');

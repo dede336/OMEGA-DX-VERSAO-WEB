@@ -7,7 +7,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
-import { GAME_MAPS, MapStage, StageDrop } from '@/constants/gameData';
+import { GAME_MAPS, MapStage, StageDrop } from '@/constants/fases';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatLongCountdown, getStarryNightAvailability } from '@/utils/ascension';
 
