@@ -1,4 +1,4 @@
-import DIGIMON_IMAGE_CATALOG from './digimonImageCatalog';
+import DIGIMON_IMAGE_CATALOG from './digimonImages';
 
 export interface SpriteSheetConfig {
   source: any;

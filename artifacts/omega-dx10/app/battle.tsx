@@ -30,7 +30,7 @@ import {
   getScaledStats,
   ElementId,
 } from '@/constants/gameData';
-import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName, hasDivineGiftPassive } from '@/constants/extendedCharacters';
+import { getCharacterImageSource as _getCharImg, getCharacter, findCharacterIdByName, hasDivineGiftPassive } from '@/constants/digimon';
 const CHARACTER_IMAGES = new Proxy({} as Record<string, any>, { get: (_t, p) => _getCharImg(String(p)) });
 import ELEMENT_IMAGES from '@/constants/elementImages';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';

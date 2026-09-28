@@ -6,7 +6,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, EQUIPMENT_ITEMS, CRAFT_RECIPES, ITEM_NAMES, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
-import { getCharacterImageSource } from '@/constants/extendedCharacters';
+import { getCharacterImageSource } from '@/constants/digimon';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { DigimonPickerModal, FieldInput, ss } from './AdminShared';
 

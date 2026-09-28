@@ -6,7 +6,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, RARITY_COLORS, RARITY_LABELS, EQUIPMENT_ITEMS, CRAFT_RECIPES } from '@/constants/gameData';
-import { getCharacterImageSource, getCharacter, getCharacterImageSourceByName, getKnownCharacterName } from '@/constants/extendedCharacters';
+import { getCharacterImageSource, getCharacter, getCharacterImageSourceByName, getKnownCharacterName } from '@/constants/digimon';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { EGG_IMAGES } from '@/constants/characterImages';
 import type { GachaPoolEntry } from '@/context/GameContext';

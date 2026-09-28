@@ -9,7 +9,7 @@ import {
   CHARACTERS, expToNextLevel, getScaledStats,
 } from '@/constants/gameData';
 import { CHARACTER_SPRITE_SHEETS, EGG_IMAGES } from '@/constants/characterImages';
-import { getCharacterImageSource, getCharacterImageScale, getCharacter } from '@/constants/extendedCharacters';
+import { getCharacterImageSource, getCharacterImageScale, getCharacter } from '@/constants/digimon';
 import { SpriteSheet } from '@/components/SpriteSheet';
 import { OwnedCharacter } from '@/context/GameContext';
 import ELEMENT_IMAGES from '@/constants/elementImages';

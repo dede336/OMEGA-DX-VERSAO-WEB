@@ -6,7 +6,7 @@ import {
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS } from '@/constants/gameData';
-import { getCatalogCharacters, CatalogDigimonRaw } from '@/constants/extendedCharacters';
+import { getCatalogCharacters, CatalogDigimonRaw } from '@/constants/digimon';
 import {
   AttrKey, RarityKey, ElemKey, ATTRS, RARITIES, ELEMENTS, ELEM_ATTACK, PRE_ROOKIE_RARITIES,
   PickerRow, ToggleRow, FieldInput, ImagePickerBlock, ImageData,

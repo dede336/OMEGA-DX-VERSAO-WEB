@@ -12,7 +12,7 @@ import {
   FUSIONS, RARITY_COLORS, RARITY_LABELS, RarityId, TAMERS, ITEM_NAMES,
   HARDCODED_ALTERNATE_EVOLUTIONS,
 } from '@/constants/gameData';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 import { CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useGame } from '@/context/GameContext';

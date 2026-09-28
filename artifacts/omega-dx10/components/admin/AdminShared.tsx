@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useColors } from '@/hooks/useColors';
 import { CHARACTERS } from '@/constants/gameData';
-import { getCatalogCharacters } from '@/constants/extendedCharacters';
+import { getCatalogCharacters } from '@/constants/digimon';
 import ImageCropEditor from './ImageCropEditor';
 import { pixelStyle } from '@/constants/pixelStyle';
 

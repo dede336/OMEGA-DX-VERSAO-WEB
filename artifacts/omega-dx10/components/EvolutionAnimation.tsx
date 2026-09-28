@@ -13,7 +13,7 @@ import { Image as ExpoImage } from 'expo-image';
 import {
   getCharacter,
   getCharacterImageSource,
-} from '@/constants/extendedCharacters';
+} from '@/constants/digimon';
 import { EGG_IMAGES } from '@/constants/characterImages';
 
 type Props = {

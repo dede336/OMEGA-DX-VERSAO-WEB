@@ -15,7 +15,7 @@ import {
   SACRIFICE_DROPS, ROOKIE_OF, SACRIFICE_SCAN_OVERRIDES, SACRIFICE_SCAN_PCT, ITEM_NAMES, TAMERS,
   Character,
 } from '@/constants/gameData';
-import { getCharacter, getCharacterImageSource, getHatchTargets } from '@/constants/extendedCharacters';
+import { getCharacter, getCharacterImageSource, getHatchTargets } from '@/constants/digimon';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadge } from '@/components/GameComponents';
 import { useLanguage } from '@/context/LanguageContext';

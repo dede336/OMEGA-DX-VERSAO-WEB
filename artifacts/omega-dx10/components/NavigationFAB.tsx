@@ -14,7 +14,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useSocket } from '@/context/SocketContext';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 import { CHARACTERS } from '@/constants/gameData';
 
 const FAB_IMG = require('../assets/images/menu-fab.webp');

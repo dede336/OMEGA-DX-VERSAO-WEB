@@ -16,7 +16,7 @@ import {
 import EQUIP_ITEM_IMAGES, { getEquipItemImage } from '@/constants/equipImages';
 import { useLanguage } from '@/context/LanguageContext';
 import SaveManagerSection from '@/components/SaveManagerSection';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 import { CharacterAvatar } from '@/components/GameComponents';
 import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';
 

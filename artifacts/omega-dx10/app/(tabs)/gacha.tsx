@@ -15,7 +15,7 @@ import {
   getKnownCharacterName,
   getCharacter,
   findCharacterIdByName,
-} from '@/constants/extendedCharacters';
+} from '@/constants/digimon';
 import { AnimatedEgg } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';

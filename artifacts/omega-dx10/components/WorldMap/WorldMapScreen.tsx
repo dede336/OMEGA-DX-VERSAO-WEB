@@ -6,7 +6,7 @@ import {
 import { router } from 'expo-router';
 import { useGame } from '@/context/GameContext';
 import { GAME_MAPS } from '@/constants/gameData';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 
 const IMG_WATER = require('@/assets/images/tiles/water_tile.webp');
 const IMG_GRASS = require('@/assets/images/tiles/grass_texture.webp');

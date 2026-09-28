@@ -9,7 +9,7 @@ import { CharacterAvatar } from '@/components/GameComponents';
 import { EQUIPMENT_ITEMS } from '@/constants/gameData';
 import { getEquipItemImage } from '@/constants/equipImages';
 import { pixelStyle } from '@/constants/pixelStyle';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 
 const PVP_ICON = require('../../assets/images/icone_pvp.gif');

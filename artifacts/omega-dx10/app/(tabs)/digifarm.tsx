@@ -12,7 +12,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, PRE_ROOKIE_STAGE_RARITIES, RARITY_LABELS, GAME_MAPS } from '@/constants/gameData';
-import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharacters';
+import { getCharacter, getFarmEvolutionTarget } from '@/constants/digimon';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, AnimatedEgg } from '@/components/GameComponents';
 import EvolutionAnimation from '@/components/EvolutionAnimation';

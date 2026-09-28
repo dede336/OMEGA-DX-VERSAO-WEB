@@ -15,7 +15,7 @@ import {
 } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
-import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters, getCharacter } from '@/constants/extendedCharacters';
+import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters, getCharacter } from '@/constants/digimon';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import { applyAscensionBonus, getAscensionStars } from '@/utils/ascension';

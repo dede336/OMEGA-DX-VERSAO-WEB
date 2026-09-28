@@ -12,7 +12,7 @@ import { Image as ExpoImage } from 'expo-image';
 import {
   getCharacter,
   getCharacterImageSource,
-} from '@/constants/extendedCharacters';
+} from '@/constants/digimon';
 
 const FUSION_GIF = require('../assets/images/fusion_crimson.webp');
 

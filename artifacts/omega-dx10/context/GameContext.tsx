@@ -9,7 +9,7 @@ import {
   PRE_ROOKIE_STAGE_RARITIES,
   EquipItem, GameMap, CARD_DEFINITIONS, CARD_IDS,
 } from '@/constants/gameData';
-import { loadCharacterCatalog, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/extendedCharacters';
+import { loadCharacterCatalog, getCharacter, loadCharacterOverrides, getFarmEvolutionTarget, getRandomHatchTarget, findCharacterIdByName, getKnownCharacterName, migrateLegacyCharacterId } from '@/constants/digimon';
 import { isAsfalto, isNeighborPos, resolveAsfaltoMeta, snapAsfalto, ASFALTO_GRID } from '@/utils/asfaltoAutoConnect';
 import { loadCustomItems, getCustomEquipmentItems } from '@/constants/extendedItems';
 import { loadCustomMaps, getCustomGameMaps } from '@/constants/extendedMaps';

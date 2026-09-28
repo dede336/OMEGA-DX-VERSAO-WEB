@@ -16,7 +16,7 @@ import {
 } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, ITEM_NAMES } from '@/constants/gameData';
-import { getCharacterImageSource as _getCharImg } from '@/constants/extendedCharacters';
+import { getCharacterImageSource as _getCharImg } from '@/constants/digimon';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';
 

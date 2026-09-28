@@ -28,7 +28,7 @@ import {
   getScaledStats, expToNextLevel,
   FUSIONS, ITEM_NAMES,
 } from '@/constants/gameData';
-import { getCharacter, getCharacterImageSource, hasDivineGiftPassive } from '@/constants/extendedCharacters';
+import { getCharacter, getCharacterImageSource, hasDivineGiftPassive } from '@/constants/digimon';
 import { AttributeBadge, ElementBadge, StatBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import BatteryQuantityPicker from '@/components/BatteryQuantityPicker';

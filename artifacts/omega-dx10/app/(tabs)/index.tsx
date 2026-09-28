@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, ATTRIBUTES, GAME_MAPS, getScaledStats, TAMERS, EQUIPMENT_ITEMS } from '@/constants/gameData';
 import { getEquipItemImage } from '@/constants/equipImages';
 import { getItemImageSource } from '@/constants/extendedItems';
-import { getCharacter } from '@/constants/extendedCharacters';
+import { getCharacter } from '@/constants/digimon';
 import { AttributeBadge, ElementBadge, HPBar, CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useLanguage } from '@/context/LanguageContext';

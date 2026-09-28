@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { expToNextLevel } from '@/constants/gameData';
-import { getCharacter, getCharacterImageSource } from '@/constants/extendedCharacters';
+import { getCharacter, getCharacterImageSource } from '@/constants/digimon';
 
 type Props = {
   visible: boolean;
