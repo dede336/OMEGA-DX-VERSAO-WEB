@@ -518,6 +518,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
+    backgroundColor: '#0b2841',
+    borderBottomColor: '#246187',
   },
   title: { fontSize: 18, fontWeight: '800' as const },
   warnBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 },
@@ -526,6 +528,8 @@ const styles = StyleSheet.create({
   tabBar: {
     flexDirection: 'row',
     borderBottomWidth: 1,
+    backgroundColor: '#0b2841',
+    borderBottomColor: '#246187',
   },
   tab: {
     flex: 1,
@@ -540,7 +544,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 12 },
 
   content: { padding: 16, gap: 14 },
-  mapCard: { borderRadius: 16, borderWidth: 1, overflow: 'hidden' },
+  mapCard: { borderRadius: 8, borderWidth: 1, overflow: 'hidden', backgroundColor: '#0b2841', elevation: 3, shadowColor: '#3cdbff', shadowOpacity: 0.12, shadowRadius: 12 },
 
   mapBanner: { width: '100%', height: 120 },
   mapBannerImage: { resizeMode: 'cover' },
@@ -550,7 +554,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 14,
     gap: 12,
-    backgroundColor: 'rgba(0,0,0,0.42)',
+    backgroundColor: 'rgba(2,18,38,0.54)',
   },
   mapBannerInfo: { flex: 1 },
   mapBannerName: { fontSize: 14, fontWeight: '800' as const, color: '#ffffff', marginBottom: 3 },

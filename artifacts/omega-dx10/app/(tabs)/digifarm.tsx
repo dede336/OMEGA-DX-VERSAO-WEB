@@ -2207,7 +2207,7 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 10, color: '#1e293b', fontWeight: '600', textAlign: 'center' },
 
   hudTop: { position: 'absolute' as const, left: 12, right: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  hudPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(0,0,0,0.65)', borderRadius: 16, paddingHorizontal: 10, paddingVertical: 6 },
+  hudPill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(7,24,44,0.88)', borderRadius: 8, borderWidth: 1, borderColor: '#246187', paddingHorizontal: 10, paddingVertical: 6 },
   hudTitle: { fontSize: 12, fontWeight: '900' as const, color: '#fff', letterSpacing: 0.5 },
   hudSub: { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: '700' },
 
@@ -2215,15 +2215,15 @@ const styles = StyleSheet.create({
   xpBadgeMain: { fontSize: 14, fontWeight: '900' as const, color: '#fff' },
   xpBadgeSub: { fontSize: 8, color: 'rgba(255,255,255,0.8)', fontWeight: '700', letterSpacing: 0.5 },
   zoomControls: { position: 'absolute' as const, bottom: 10, right: 10, flexDirection: 'column', alignItems: 'center', gap: 2, zIndex: 20 },
-  zoomBtn: { width: 30, height: 30, borderRadius: 8, backgroundColor: 'rgba(0,0,0,0.55)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
+  zoomBtn: { width: 30, height: 30, borderRadius: 6, backgroundColor: 'rgba(7,24,44,0.88)', borderWidth: 1, borderColor: '#3cdbff88', alignItems: 'center', justifyContent: 'center' },
   zoomBtnText: { color: '#fff', fontSize: 20, fontWeight: '700' as const, lineHeight: 24 },
   zoomLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '700' as const, letterSpacing: 0.4 },
 
-  bottomPanel: { backgroundColor: '#0d0d0d', paddingTop: 12, paddingHorizontal: 10, paddingBottom: 4, gap: 10 },
+  bottomPanel: { backgroundColor: '#09233b', borderTopWidth: 1, borderTopColor: '#246187', paddingTop: 12, paddingHorizontal: 10, paddingBottom: 4, gap: 10 },
   slotsRow: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center' },
-  slotFilled: { width: 62, height: 62, borderRadius: 14, backgroundColor: '#1c1c1c', alignItems: 'center', justifyContent: 'center', position: 'relative' as const },
+  slotFilled: { width: 62, height: 62, borderRadius: 10, backgroundColor: '#123450', borderWidth: 1, borderColor: '#246187', alignItems: 'center', justifyContent: 'center', position: 'relative' as const },
   slotFilledSelected: { backgroundColor: '#2d1b69', borderWidth: 2, borderColor: '#7c3aed' },
-  slotEmpty: { width: 62, height: 62, borderRadius: 14, backgroundColor: '#1c1c1c', alignItems: 'center', justifyContent: 'center' },
+  slotEmpty: { width: 62, height: 62, borderRadius: 10, backgroundColor: '#123450', borderWidth: 1, borderColor: '#246187', alignItems: 'center', justifyContent: 'center' },
   slotRemove: { position: 'absolute' as const, top: -4, right: -4, width: 17, height: 17, borderRadius: 9, backgroundColor: '#444', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
 
   notifBtn: { position: 'absolute' as const, right: 14, zIndex: 30 },

@@ -751,7 +751,8 @@ const styles = StyleSheet.create({
 
   tamerCard: {
     flexDirection: 'row', alignItems: 'center', gap: 16,
-    borderRadius: 16, borderWidth: 1, padding: 18, marginBottom: 24,
+    borderRadius: 12, borderWidth: 1, padding: 18, marginBottom: 24,
+    elevation: 3, shadowColor: '#3cdbff', shadowOpacity: 0.12, shadowRadius: 12,
   },
   tamerAvatarWrap: { position: 'relative' },
   tamerAvatar: {
@@ -800,7 +801,7 @@ const styles = StyleSheet.create({
   },
 
   batteryGrid: { gap: 10, marginBottom: 24 },
-  batteryCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 14, borderWidth: 1.5, padding: 10, gap: 12 },
+  batteryCard: { flexDirection: 'row', alignItems: 'center', borderRadius: 8, borderWidth: 1.5, padding: 10, gap: 12 },
   batteryImage: { width: 50, height: 50 },
   batteryCardInfo: { flex: 1 },
   batteryName: { fontSize: 13, fontWeight: '800' as const },
@@ -809,9 +810,10 @@ const styles = StyleSheet.create({
   batteryQuantityText: { color: '#fff', fontSize: 12, fontWeight: '900' as const },
   inventoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 24 },
   inventoryCard: {
-    width: '47%', minHeight: 118, borderRadius: 14, borderWidth: 1.5,
+    width: '47%', minHeight: 118, borderRadius: 10, borderWidth: 1.5,
     padding: 12, alignItems: 'center', justifyContent: 'center', gap: 7,
     position: 'relative',
+    elevation: 2, shadowColor: '#3cdbff', shadowOpacity: 0.1, shadowRadius: 10,
   },
   cardActivationOverlay: {
     flex: 1,
