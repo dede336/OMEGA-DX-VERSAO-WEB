@@ -322,7 +322,7 @@ export function getKnownCharacterName(id: string): string | null {
 
 export function getCharacterImageSourceByName(name: string): any {
   if (!name) return null;
-  return _IMAGE_BY_NORM[_normKey(name)] ?? NO_DIGIMON_IMAGE;
+  return _IMAGE_BY_NORM[_normKey(name)] ?? null;
 }
 
 export function getCharacterImageSource(id: string): any {
@@ -348,12 +348,13 @@ export function getCharacterImageSource(id: string): any {
   const catalogCharacter = _catalogChars[id];
   if (catalogCharacter) {
     const localByName = catalogCharacter.name ? _IMAGE_BY_NORM[_normKey(catalogCharacter.name)] : undefined;
-    if (localByName) return localByName;
+    if (localByName && localByName !== NO_DIGIMON_IMAGE) return localByName;
   }
   if (_baseCharImageUrls[id]) return { uri: _baseCharImageUrls[id] };
   if (catalogCharacter?.imageApiUrl) return { uri: catalogCharacter.imageApiUrl };
-  // A imagem padrão cobre Digimon do catálogo sem arte local ou imagem na API.
-  return catalogCharacter || CHARACTERS[id] || id.startsWith('name:') ? NO_DIGIMON_IMAGE : null;
+  // A imagem provisória só é usada para nomes vinculados em digimonImages.ts.
+  const knownName = catalogCharacter?.name ?? CHARACTERS[id]?.name;
+  return knownName ? _IMAGE_BY_NORM[_normKey(knownName)] ?? null : null;
 }
 
 export function getCharacterImageScale(id: string): number {
