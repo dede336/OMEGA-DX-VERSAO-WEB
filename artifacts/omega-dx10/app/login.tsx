@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, useWindowDimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -15,8 +15,11 @@ import PixelBox from '@/components/PixelBox';
 type Mode = 'login' | 'register';
 
 const logoSource = require('../assets/images/logo.webp');
+const digitalBackground = require('../assets/images/imagem de fundo.png');
+const mobileBackground = require('../assets/images/tela de fundo celular.png');
 
 export default function LoginScreen() {
+  const { width, height } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { login, register } = useAuth();
   const { t } = useLanguage();
@@ -56,7 +59,7 @@ export default function LoginScreen() {
   const botPad = Platform.OS === 'web' ? 16 : insets.bottom + 16;
 
   return (
-    <View style={styles.root}>
+    <ImageBackground source={width < height * 0.8 ? mobileBackground : digitalBackground} resizeMode="cover" imageStyle={styles.backgroundImage} style={styles.root}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -74,7 +77,7 @@ export default function LoginScreen() {
             </View>
 
             {/* Toggle */}
-            <PixelBox style={styles.toggle} bgColor="#0a0a0f">
+            <PixelBox style={styles.toggle} bgColor="#07182c">
               {(['login', 'register'] as Mode[]).map((m) => (
                 <PixelBox
                   key={m}
@@ -186,23 +189,24 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root:             { flex: 1, backgroundColor: '#0a0a0f' },
+  root:             { flex: 1, backgroundColor: '#07182c' },
+  backgroundImage:  { opacity: 0.5 },
   flex:             { flex: 1 },
   scrollContent:    { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 20 },
-  inner:            { width: '100%', gap: 16 },
+  inner:            { width: '100%', maxWidth: 440, alignSelf: 'center', gap: 16, padding: 18, backgroundColor: 'rgba(7,24,44,0.9)', borderWidth: 1, borderColor: '#246187', borderRadius: 8 },
 
   logoArea:         { alignItems: 'center', gap: 6, paddingTop: 4 },
   logo:             { width: 160, height: 80 },
-  tagline:          { fontSize: 12, color: '#6b7280', letterSpacing: 0.5 },
+  tagline:          { fontSize: 12, color: '#a5c4d7', letterSpacing: 0.5 },
 
-  toggle:           { flexDirection: 'row', backgroundColor: '#1a1a2e', padding: 4, gap: 4 },
+  toggle:           { flexDirection: 'row', backgroundColor: '#102940', padding: 4, gap: 4, borderWidth: 1, borderColor: '#246187' },
   toggleBtn:        { flex: 1 },
-  toggleBtnActive:  { backgroundColor: '#3b82f6' },
+  toggleBtnActive:  { backgroundColor: '#176893' },
   toggleBtnInner:   { paddingVertical: 8, alignItems: 'center' as const },
   toggleText:       { fontSize: 12, fontWeight: '700' as const, color: '#6b7280' },
   toggleTextActive: { color: '#ffffff' },
@@ -212,9 +216,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#111827',
+    backgroundColor: '#102940',
     borderWidth: 1,
-    borderColor: '#1f2937',
+    borderColor: '#246187',
     paddingLeft: 12,
     paddingRight: 10,
     paddingVertical: 10,
@@ -232,8 +236,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   errorText:        { flex: 1, fontSize: 12, color: '#ef4444' },
-  submitBtn:        { backgroundColor: '#3b82f6' },
-  submitBtnLoading: { backgroundColor: '#3b82f688' },
+  submitBtn:        { backgroundColor: '#176893', borderWidth: 1, borderColor: '#3cdbff' },
+  submitBtnLoading: { backgroundColor: '#17689388' },
   submitBtnInner:   { paddingVertical: 12, alignItems: 'center' as const },
   submitText:       { fontSize: 13, fontWeight: '900' as const, color: '#ffffff', letterSpacing: 1 },
   hint:             { fontSize: 11, textAlign: 'center', color: '#6b7280' },
