@@ -12,7 +12,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, PRE_ROOKIE_STAGE_RARITIES, RARITY_LABELS, GAME_MAPS } from '@/constants/gameData';
-import { getCharacter, getFarmEvolutionTarget, getRandomHatchTarget } from '@/constants/extendedCharacters';
+import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, AnimatedEgg } from '@/components/GameComponents';
 import EvolutionAnimation from '@/components/EvolutionAnimation';
@@ -1068,33 +1068,23 @@ export default function DigifarmScreen() {
       // Só então abre a animação, evitando o ovo desaparecer sem mostrar a chocagem.
       if (hatchingEggId) return;
       setHatchingEggId(ownedId);
-      const ok = completeFarmProcess(ownedId);
-      if (!ok) {
+      const target = completeFarmProcess(ownedId);
+      if (!target) {
         setHatchingEggId(null);
         Alert.alert('Digifarm', 'É necessário ter um slot Baby/Training livre para chocar.');
         return;
       }
-      setTimeout(() => {
-        const updated = collection.find((entry) => entry.ownedId === ownedId);
-        // O estado React pode ainda estar no frame anterior; o alvo oficial é obtido
-        // pela mesma função de chocagem para alimentar a animação visual.
-        const target = updated && updated.characterId !== from
-          ? updated.characterId
-          : getRandomHatchTarget(char.element, from === 'specialDigitama');
-        if (target) setHatchAnim({ fromCharacterId: from, toCharacterId: target });
-        setHatchingEggId(null);
-        setFarmTick(Date.now());
-      }, 120);
+      setHatchAnim({ fromCharacterId: from, toCharacterId: target });
+      setFarmTick(Date.now());
       return;
     }
 
-    const target = getFarmEvolutionTarget(from);
-    const ok = completeFarmProcess(ownedId);
-    if (!ok) {
+    const target = completeFarmProcess(ownedId);
+    if (!target) {
       Alert.alert('Digifarm', 'Este Digimon ainda não está pronto.');
       return;
     }
-    if (target) setEvoAnim({ fromCharacterId: from, toCharacterId: target });
+    setEvoAnim({ fromCharacterId: from, toCharacterId: target });
     setFarmTick(Date.now());
   }
 
@@ -2176,7 +2166,7 @@ export default function DigifarmScreen() {
         visible={!!hatchAnim}
         fromCharacterId={hatchAnim?.fromCharacterId ?? ''}
         toCharacterId={hatchAnim?.toCharacterId ?? ''}
-        onClose={() => setHatchAnim(null)}
+        onClose={() => { setHatchAnim(null); setHatchingEggId(null); }}
       />
 
       {/* ── Reward modal ─────────────────────────────────────────────────────── */}

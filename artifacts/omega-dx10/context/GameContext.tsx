@@ -267,7 +267,7 @@ interface GameContextValue extends GameState {
   setFarmEggSlots: (slots: string[]) => void;
   sendToFarmProcess: (ownedId: string) => boolean;
   accelerateFarmProcess: (ownedId: string) => boolean;
-  completeFarmProcess: (ownedId: string) => boolean;
+  completeFarmProcess: (ownedId: string) => string | null;
   claimFarmProduction: () => { green: number; purple: number; gold: number; pills: number; gems: number } | null;
   processFarmEvolutions: () => void;
   addFarmFood: (foodId: string, qty: number) => void;
@@ -1930,21 +1930,21 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return false;
   }, []);
 
-  const completeFarmProcess = useCallback((ownedId: string): boolean => {
+  const completeFarmProcess = useCallback((ownedId: string): string | null => {
     const prev = stateRef.current;
     const owned = prev.collection.find((entry) => entry.ownedId === ownedId);
     const char = owned ? getCharacter(owned.characterId) : undefined;
-    if (!owned || !char) return false;
+    if (!owned || !char) return null;
     const rarity = String(char.rarity);
     const now = Date.now();
 
     if (rarity === 'EGG' && prev.farmEggSlots.includes(ownedId)) {
       const started = prev.farmEggEntryTimes[ownedId] ?? now;
-      if (now - started < FARM_EGG_MS) return false;
+      if (now - started < FARM_EGG_MS) return null;
       const max = farmProcessMaxSlots(prev.tamerLevel);
-      if (prev.farmNurserySlots.length >= max) return false;
+      if (prev.farmNurserySlots.length >= max) return null;
       const target = getRandomHatchTarget(char.element, owned.characterId === 'specialDigitama');
-      if (!target) return false;
+      if (!target) return null;
       setState((s) => {
         const eggTimes = { ...s.farmEggEntryTimes }; delete eggTimes[ownedId];
         return {
@@ -1956,15 +1956,15 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           farmNurseryEntryTimes: { ...s.farmNurseryEntryTimes, [ownedId]: now },
         };
       });
-      return true;
+      return target;
     }
 
     if ((rarity === 'BABY' || rarity === 'TRAINING') && prev.farmNurserySlots.includes(ownedId)) {
       const duration = rarity === 'BABY' ? FARM_BABY_MS : FARM_TRAINING_MS;
       const started = prev.farmNurseryEntryTimes[ownedId] ?? now;
-      if (now - started < duration) return false;
+      if (now - started < duration) return null;
       const target = getFarmEvolutionTarget(owned.characterId);
-      if (!target) return false;
+      if (!target) return null;
       setState((s) => {
         const nextChar = getCharacter(target);
         const becomesRookie = String(nextChar?.rarity) === 'ROOKIE';
@@ -1977,9 +1977,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           farmNurseryEntryTimes: times,
         };
       });
-      return true;
+      return target;
     }
-    return false;
+    return null;
   }, []);
 
   const claimFarmProduction = useCallback(() => {
