@@ -174,7 +174,7 @@ function ElementAttackEffect({ element, large = false }: { element: ElementId; l
 type Phase = 'select' | 'battle' | 'result';
 type BattleLog = { text: string; color: string };
 type TeamFighter = BattleFighter & { ownedId: string };
-type DroppedItem = { id: string; name: string; amount: number; color: string; kind?: 'deco' };
+type DroppedItem = { id: string; name: string; amount: number; color: string; kind?: 'deco' | 'item' };
 
 const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_tecido:           { name: 'Tecido Colorido',         color: '#ec4899' },

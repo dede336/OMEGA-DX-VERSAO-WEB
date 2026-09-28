@@ -61,7 +61,7 @@ export default function EvolutionAnimation({
   // before opening the Modal, which is why hatch evolution was invisible.
   const fromImage = fromIsEgg
     ? (
-        fromCharacterId === 'specialDigitama' || fromCharacter?.element === 'SPECIAL'
+        fromCharacterId === 'specialDigitama'
           ? EGG_IMAGES.SPECIAL
           : (EGG_IMAGES[fromCharacter?.element ?? 'NULL'] ?? EGG_IMAGES.NULL)
       )

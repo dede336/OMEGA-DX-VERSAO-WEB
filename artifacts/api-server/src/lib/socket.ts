@@ -6,12 +6,14 @@ import { eq, or, and, desc } from "drizzle-orm";
 import { logger } from "./logger.js";
 import { randomUUID } from "crypto";
 import { getActiveAccountBan, isRateLimited, validateChatContent } from "./chatPolicy.js";
+import { isAllowedOrigin } from "./allowedOrigins.js";
 
 export interface AuthPayload {
   userId: number;
   username: string;
   isAdmin: boolean;
   role: string;
+  sessionId?: string;
 }
 
 // In-memory presence map: username → socketId
@@ -102,7 +104,8 @@ let io: IOServer;
 export function initSocket(httpServer: HTTPServer): IOServer {
   io = new IOServer(httpServer, {
     path: "/api/socket.io",
-    cors: { origin: "*", methods: ["GET", "POST"] },
+    cors: { origin: (origin, callback) => callback(null, isAllowedOrigin(origin)), methods: ["GET", "POST"] },
+    allowRequest: (req, callback) => callback(null, isAllowedOrigin(req.headers.origin)),
     transports: ["polling", "websocket"],
   });
 
@@ -113,6 +116,11 @@ export function initSocket(httpServer: HTTPServer): IOServer {
       if (!token) return next(new Error("Missing token"));
       const secret = process.env["SESSION_SECRET"]!;
       const payload = jwt.verify(token, secret) as AuthPayload;
+      const [user] = await db.select({ activeSessionId: usersTable.activeSessionId })
+        .from(usersTable).where(eq(usersTable.id, payload.userId)).limit(1);
+      if (!user?.activeSessionId || !payload.sessionId || user.activeSessionId !== payload.sessionId) {
+        return next(new Error("Sessão encerrada. Entre novamente."));
+      }
       if (await getActiveAccountBan(payload.userId)) return next(new Error("ACCOUNT_BANNED"));
       (socket as any).auth = payload;
       next();
@@ -422,9 +430,10 @@ export function initSocket(httpServer: HTTPServer): IOServer {
 
     // ── Disconnect ────────────────────────────────────────────────────────────
     socket.on("disconnect", () => {
-      onlineUsers.delete(username);
+      const wasCurrentSocket = onlineUsers.get(username) === socket.id;
+      if (wasCurrentSocket) onlineUsers.delete(username);
       logger.info({ username }, "[socket] disconnected");
-      socket.broadcast.emit("presence:update", { username, online: false });
+      if (wasCurrentSocket) socket.broadcast.emit("presence:update", { username, online: false });
 
       // Forfeit active battles
       for (const [battleId, room] of battleRooms.entries()) {

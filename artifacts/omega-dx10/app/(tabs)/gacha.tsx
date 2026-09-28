@@ -73,8 +73,8 @@ function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
   // Special Digitama deliberately keeps its original rainbow effect.
   if (isSpecialDigitama) {
     return (
+      <View pointerEvents="none" style={{ position: 'absolute', width: size * 1.65, height: size * 1.65 }}>
       <Animated.Image
-        pointerEvents="none"
         source={FUSION_RAINBOW_CORE}
         style={{
           position: 'absolute',
@@ -84,6 +84,7 @@ function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
         }}
         resizeMode="contain"
       />
+      </View>
     );
   }
 
@@ -94,8 +95,8 @@ function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
       : GACHA_GLOW_BLUE;
 
   return (
+    <View pointerEvents="none" style={{ position: 'absolute', width: size * 1.9, height: size * 1.9 }}>
     <Animated.Image
-      pointerEvents="none"
       source={glowSource}
       style={{
         position: 'absolute',
@@ -105,6 +106,7 @@ function RewardEffect({ reward, size }: { reward: GachaReward; size: number }) {
       }}
       resizeMode="contain"
     />
+    </View>
   );
 }
 

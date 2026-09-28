@@ -106,7 +106,7 @@ router.get("/catalog", optionalAuth, async (req, res) => {
 
 // GET /digimons/catalog/:id/image
 router.get("/catalog/:id/image", async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   const [row] = await db.select({ imageBase64: customDigimonsTable.imageBase64, imageMimeType: customDigimonsTable.imageMimeType }).from(customDigimonsTable).where(eq(customDigimonsTable.id, id)).limit(1);
   if (!row || !row.imageBase64) { res.status(404).json({ error: "Imagem não encontrada" }); return; }
@@ -128,7 +128,7 @@ router.patch("/:id/toggle", requireAuth, async (req, res) => {
   if (!req.auth!.isAdmin) {
     res.status(403).json({ error: "Apenas admins podem ativar/desativar Digimons" }); return;
   }
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
 
   const [current] = await db.select({ isActive: customDigimonsTable.isActive, name: customDigimonsTable.name })
@@ -205,7 +205,7 @@ router.put("/:id", requireAuth, async (req, res) => {
   if (!canEditDigimon(req.auth!)) {
     res.status(403).json({ error: "Apenas o administrador principal pode editar Digimons" }); return;
   }
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
 
   const {
@@ -260,7 +260,7 @@ router.delete("/:id", requireAuth, async (req, res) => {
   if (!canEditDigimon(req.auth!)) {
     res.status(403).json({ error: "Apenas o administrador principal pode deletar Digimons" }); return;
   }
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   await db.delete(customDigimonsTable).where(eq(customDigimonsTable.id, id));
   res.json({ success: true });

@@ -27,6 +27,7 @@ router.put("/:key", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
   const { key } = req.params;
   const { value } = req.body as { value: string };
+  if (typeof key !== "string") { res.status(400).json({ error: "Chave inválida" }); return; }
   if (!value) { res.status(400).json({ error: "Valor obrigatório" }); return; }
   await db.insert(gameConfigTable).values({ key, value, updatedAt: new Date() })
     .onConflictDoUpdate({ target: gameConfigTable.key, set: { value, updatedAt: new Date() } });

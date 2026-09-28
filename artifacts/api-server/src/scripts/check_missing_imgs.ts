@@ -15,3 +15,5 @@ async function main() {
   missing.forEach((r: any) => console.log(`  id=${r.id} name="${r.name}"`));
 }
 main().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
+
+export {};

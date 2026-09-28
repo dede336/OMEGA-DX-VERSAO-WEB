@@ -25,13 +25,13 @@ function loadMapping(): Record<string, string> {
 router.get("/image/:filename", (req, res) => {
   const filename = path.basename(req.params.filename);
   const filepath = path.join(UNNAMED_DIR, filename);
-  if (!fs.existsSync(filepath)) return res.status(404).send("Not found");
+  if (!fs.existsSync(filepath)) { res.status(404).send("Not found"); return; }
   res.sendFile(filepath);
 });
 
 router.post("/save", (req, res) => {
   const { names } = req.body as { names: Record<string, string> };
-  if (!names || typeof names !== "object") return res.status(400).json({ error: "Invalid body" });
+  if (!names || typeof names !== "object") { res.status(400).json({ error: "Invalid body" }); return; }
   const existing = loadMapping();
   const merged = { ...existing, ...names };
   fs.writeFileSync(MAPPING_FILE, JSON.stringify(merged, null, 2));

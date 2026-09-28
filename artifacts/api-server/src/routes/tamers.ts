@@ -72,7 +72,7 @@ router.post("/", requireAuth, async (req, res) => {
 // PUT /tamers/:id - admin update
 router.put("/:id", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   const body = req.body as Partial<{
     name: string;
@@ -105,7 +105,7 @@ router.put("/:id", requireAuth, async (req, res) => {
 // DELETE /tamers/:id - admin
 router.delete("/:id", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   await db.delete(customTamersTable).where(eq(customTamersTable.id, id));
   res.json({ success: true });
@@ -115,6 +115,7 @@ router.delete("/:id", requireAuth, async (req, res) => {
 router.put("/overrides/:tamerId", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
   const { tamerId } = req.params;
+  if (typeof tamerId !== "string") { res.status(400).json({ error: "Tamer inválido" }); return; }
   const body = req.body as Partial<{
     avatarOffsetY: number;
     avatarOffsetX: number;

@@ -53,6 +53,7 @@ router.get("/:characterId/image", async (req, res) => {
 router.put("/:characterId", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
   const characterId = req.params.characterId;
+  if (typeof characterId !== "string") { res.status(400).json({ error: "Digimon inválido" }); return; }
   const body = req.body as Record<string, unknown>;
 
   const values: Partial<typeof characterOverridesTable.$inferInsert> & { characterId: string } = {

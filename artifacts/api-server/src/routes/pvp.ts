@@ -84,7 +84,7 @@ router.get("/state", requireAuth, async (req, res) => {
   const data = (save.saveData ?? {}) as SaveData;
   const now = Date.now();
   const { charges, anchor } = refreshCharges(data, now);
-  const next = { ...data, pvpBattleCharges: charges, pvpLastChargeAt: anchor, pvpWeekKey: data.pvpWeekKey ?? weekKey() };
+  const next: SaveData = { ...data, pvpBattleCharges: charges, pvpLastChargeAt: anchor, pvpWeekKey: data.pvpWeekKey ?? weekKey() };
   if (charges !== data.pvpBattleCharges || anchor !== data.pvpLastChargeAt || !data.pvpWeekKey) {
     await db.update(gameSavesTable).set({ saveData: next, updatedAt: new Date() }).where(eq(gameSavesTable.userId, req.auth!.userId));
   }

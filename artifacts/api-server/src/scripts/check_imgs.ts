@@ -18,3 +18,5 @@ async function main() {
   sample.forEach((r: any) => console.log(`  ${r.name}: hasImageFlag=${r.hasImageFlag} (type=${typeof r.hasImageFlag})`));
 }
 main().then(() => process.exit(0)).catch(e => { console.error(e); process.exit(1); });
+
+export {};

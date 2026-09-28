@@ -554,7 +554,7 @@ export default function SendSection() {
       <DigimonPickerModal
         visible={pickerOpen}
         onClose={() => setPickerOpen(false)}
-        customDigimons={customDigimons.map((d) => ({ id: d.id, name: d.name }))}
+        catalogDigimons={customDigimons.map((d) => ({ id: d.id, name: d.name }))}
         onSelect={(id, name) => { setDigimonId(id); setDigimonName(name); setPickerOpen(false); }}
       />
     </View>

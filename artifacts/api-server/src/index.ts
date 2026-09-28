@@ -7,6 +7,11 @@ import { logger } from "./lib/logger";
 import { seedAccounts, seedCustomDigimons, seedCharacterOverrides, activateAllSeededDigimons, deactivateLegacyEntries, syncImagesFromFolder, applyManualImageDecisions, fixDigimonRarities, deactivateDuplicateEntries, removeCanonicalDuplicates, seedSpiritItems, fixBrokenEvolvesFromIds } from "./seed.js";
 import { inicializadorSistema } from "./lib/systemAccounts.js";
 import { initSocket } from "./lib/socket.js";
+import { markSeedReady } from "./lib/startupState.js";
+
+if (!process.env["SESSION_SECRET"]?.trim()) {
+  throw new Error("SESSION_SECRET must be configured before starting the API");
+}
 
 const port = Number(process.env["PORT"] || "3000");
 if (Number.isNaN(port) || port <= 0) throw new Error(`Invalid PORT: ${process.env["PORT"]}`);
@@ -34,6 +39,7 @@ async function runSeed() {
     try { await inicializadorSistema.garantirContasEspeciais(); }
     catch (err) { logger.warn({ err }, "Special accounts initialization skipped"); }
     logger.info("Seed completed.");
+    markSeedReady();
   } catch (err) { logger.error({ err }, "Seed error; server remains online"); }
 }
 

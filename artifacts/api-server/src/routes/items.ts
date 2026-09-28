@@ -32,7 +32,7 @@ router.get("/", async (_req, res) => {
 
 // GET /items/:id/image
 router.get("/:id/image", async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   const [row] = await db.select({ imageBase64: customItemsTable.imageBase64, imageMimeType: customItemsTable.imageMimeType })
     .from(customItemsTable).where(eq(customItemsTable.id, id)).limit(1);
@@ -70,7 +70,7 @@ router.post("/", requireAuth, async (req, res) => {
 // PUT /items/:id
 router.put("/:id", requireAuth, async (req, res) => {
   if (!await assertAdmin(req.auth!.userId, res)) return;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
   const body = req.body as Record<string, unknown>;
   const update: Partial<typeof customItemsTable.$inferInsert> = { updatedAt: new Date() };

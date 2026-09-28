@@ -140,7 +140,7 @@ router.post("/request", requireAuth, async (req, res) => {
 
 router.put("/:id/accept", requireAuth, async (req, res) => {
   const userId = req.auth!.userId;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(typeof req.params.id === "string" ? req.params.id : "", 10);
   if (isNaN(id)) { res.status(400).json({ error: "ID inválido" }); return; }
 
   const [row] = await db

@@ -12,7 +12,7 @@ import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, PRE_ROOKIE_STAGE_RARITIES, RARITY_LABELS, GAME_MAPS } from '@/constants/gameData';
-import { getCharacter, getFarmEvolutionTarget } from '@/constants/extendedCharacters';
+import { getCharacter, getFarmEvolutionTarget, getRandomHatchTarget } from '@/constants/extendedCharacters';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, AnimatedEgg } from '@/components/GameComponents';
 import EvolutionAnimation from '@/components/EvolutionAnimation';
@@ -574,29 +574,37 @@ export default function DigifarmScreen() {
   }, []);
 
   useEffect(() => {
+    const loops: Animated.CompositeAnimation[] = [];
     rainAnims.forEach(a => { a.stopAnimation(); a.setValue(0); });
     snowAnims.forEach(a => { a.stopAnimation(); a.setValue(0); });
     if (weather === 'rain') {
       rainAnims.forEach((anim, i) => {
         const c = rainCfg[i];
-        Animated.loop(
+        const loop = Animated.loop(
           Animated.sequence([
             Animated.delay(c.del),
             Animated.timing(anim, { toValue: 1, duration: c.dur, useNativeDriver: false }),
+            Animated.timing(anim, { toValue: 0, duration: 1, useNativeDriver: false }),
           ])
-        ).start();
+        );
+        loop.start();
+        loops.push(loop);
       });
     } else if (weather === 'snow') {
       snowAnims.forEach((anim, i) => {
         const c = snowCfg[i];
-        Animated.loop(
+        const loop = Animated.loop(
           Animated.sequence([
             Animated.delay(c.del),
             Animated.timing(anim, { toValue: 1, duration: c.dur, useNativeDriver: false }),
+            Animated.timing(anim, { toValue: 0, duration: 1, useNativeDriver: false }),
           ])
-        ).start();
+        );
+        loop.start();
+        loops.push(loop);
       });
     }
+    return () => loops.forEach((loop) => loop.stop());
   }, [weather]);
 
   // ── Initial hunger bubbles on mount ──────────────────────────────────────────
