@@ -244,7 +244,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
   const isSpecialDigitama = reward.characterId === 'specialDigitama'
     || reward.nome?.replace(/^✨\\s*/, '').toLowerCase() === 'digitama especial';
   const img = isSpecialDigitama ? null : getGachaImageSource(reward.characterId, reward.nome, reward.tipo);
-  const cardSize = big ? 150 : 110;
+  const cardSize = big ? 150 : 136;
   const imgSize = big ? 90 : 64;
   const isEgg = char?.rarity === 'EGG' || isSpecialDigitama;
   const displayName = getGachaDisplayName(reward.characterId, reward.nome, char?.name);
@@ -268,7 +268,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
           </View>
         )}
       </View>
-      <Text style={[styles.rewardName, { color: colors.foreground, fontSize: big ? 13 : 11 }]} numberOfLines={2}>
+      <Text style={[styles.rewardName, { color: colors.foreground, fontSize: big ? 13 : 10 }]} numberOfLines={2}>
         {displayName}
       </Text>
     </View>
@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 14, fontWeight: '800' },
   headerSub: { fontSize: 12, marginTop: 2 },
 
-  destaqueCard: { borderRadius: 16, borderWidth: 1.5, padding: 14 },
+  destaqueCard: { borderRadius: 8, borderWidth: 1.5, padding: 14, elevation: 3, shadowColor: '#3cdbff', shadowOpacity: 0.14, shadowRadius: 12 },
   destaqueInner: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   destaqueImg: { width: 72, height: 72 },
   destaqueBadge: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
@@ -791,7 +791,7 @@ const styles = StyleSheet.create({
   machineImg: { width: 200, height: 200 },
   animeImg: { position: 'absolute' },
 
-  balanceCard: { borderRadius: 16, borderWidth: 1, padding: 16, gap: 12 },
+  balanceCard: { borderRadius: 8, borderWidth: 1, padding: 16, gap: 12, elevation: 2, shadowColor: '#3cdbff', shadowOpacity: 0.12, shadowRadius: 10 },
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   gemImg: { width: 40, height: 40 },
   balanceLabel: { fontSize: 12 },
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   pityFill: { height: '100%', borderRadius: 3 },
   pityHint: { fontSize: 11 },
 
-  guaranteesCard: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 10 },
+  guaranteesCard: { borderRadius: 8, borderWidth: 1, padding: 14, gap: 10 },
   guaranteesTitle: { fontSize: 12, fontWeight: '700' },
   guaranteesRow: { flexDirection: 'row', gap: 8 },
   guaranteeChip: {
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
     borderRadius: 16, borderWidth: 1, padding: 16,
   },
   btnSolo: {},
-  btn10: { backgroundColor: '#7c3aed', borderColor: '#6d28d9' },
+  btn10: { backgroundColor: '#4934a8', borderColor: '#9b83ff' },
   btnIcon: { width: 36, height: 36 },
   btnCostRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   btnGemIcon: { width: 14, height: 14 },
@@ -840,14 +840,14 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', padding: 16,
   },
   resultPanel: {
-    borderRadius: 24, width: '100%', maxHeight: '90%',
+    borderRadius: 8, width: '100%', maxWidth: 960, maxHeight: '90%', alignSelf: 'center',
     overflow: 'hidden', borderWidth: 1.5,
     ...Platform.select({
       ios:     { shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 30, shadowOffset: { width: 0, height: 8 } },
       android: { elevation: 20 },
     }),
   },
-  resultHeader: { padding: 20, borderBottomWidth: 1, gap: 6, alignItems: 'center' },
+  resultHeader: { padding: 20, borderBottomWidth: 1, gap: 6, alignItems: 'center', backgroundColor: '#0b2841' },
   resultTitle: { fontSize: 15, fontWeight: '800', textAlign: 'center' },
   resultMsg:   { fontSize: 13, textAlign: 'center', lineHeight: 18 },
   resultCards: { flexDirection: 'row', gap: 10, padding: 16 },
@@ -863,12 +863,12 @@ const styles = StyleSheet.create({
 
   // Legacy (kept for RewardCard)
   rewardCard: {
-    borderRadius: 14, borderWidth: 1.5,
+    borderRadius: 6, borderWidth: 1.5,
     alignItems: 'center', padding: 10, gap: 6, overflow: 'hidden',
   },
   rewardGlow: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, borderRadius: 14 },
   rewardImgPlaceholder: { borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   rarBadge: { borderRadius: 6, borderWidth: 1, paddingHorizontal: 6, paddingVertical: 2 },
   rarBadgeText: { fontSize: 9, fontWeight: '700' },
-  rewardName: { fontWeight: '700', textAlign: 'center' },
+  rewardName: { fontWeight: '700', textAlign: 'center', width: '100%', paddingHorizontal: 3, minHeight: 28 },
 });
