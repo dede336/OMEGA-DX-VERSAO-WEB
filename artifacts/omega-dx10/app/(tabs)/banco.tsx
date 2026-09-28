@@ -15,6 +15,7 @@ import {
 } from '@/constants/gameData';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterAvatar, ScanCard, AttributeBadge, ElementBadge } from '@/components/GameComponents';
+import { getTemaImages } from '@/constants/temaImages';
 import { CatalogDigimonRaw, getRawCatalogDigimons, getAllCharacters, getCharacter } from '@/constants/digimon';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
@@ -219,7 +220,7 @@ const ELEM_FILTERS = [
 export default function BancoScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshRosterData } = useGame();
+  const { collection, isAdmin, scanProgress, createFromScan, rosterReady, rosterRevision, refreshRosterData, tamerId } = useGame();
   const { getApiUrl, token } = useAuth();
   const { t } = useLanguage();
 
@@ -692,6 +693,7 @@ export default function BancoScreen() {
                 onPress={() => { setPreviewStars(0); setShowStatusPreview(false); setSelected(item); }}
                 activeOpacity={0.8}
               >
+                <Image source={getTemaImages(tamerId).banco} style={st.gridThemeImage} resizeMode="stretch" />
                 {/* LV badge — top right */}
                 <View style={st.lvBadge}>
                   {ownedDigimon ? (
@@ -854,12 +856,13 @@ function styles(colors: ReturnType<typeof useColors>) {
       minWidth: 0,
       flexGrow: 0,
       flexShrink: 0,
-      backgroundColor: '#0c2942',
+      backgroundColor: 'transparent',
       borderRadius: 6,
       overflow: 'hidden',
       alignItems: 'center',
       paddingBottom: 0,
     },
+    gridThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
     topAccent: {
       height: 3,
       width: '100%',

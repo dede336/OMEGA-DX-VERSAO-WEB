@@ -3,7 +3,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
-import { ImageBackground, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Image, ImageBackground, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
@@ -100,9 +100,21 @@ function NativeTabLayout() {
 function ClassicTabLayout() {
   const colors = useColors();
   const isIOS = Platform.OS === "ios";
+  const { width, height } = useWindowDimensions();
   const { user } = useAuth();
   const { t } = useLanguage();
   const canShowAdmin = (user?.isAdmin ?? false) || user?.role === 'digimon_creator';
+  const background = width < height * 0.8 ? DIGITAL_BACKGROUND_MOBILE : DIGITAL_BACKGROUND;
+  // On web, inactive tab scenes remain mounted. An opaque scene background
+  // prevents the previous tab from showing through the current screen.
+  const sceneStyle = Platform.OS === 'web'
+    ? {
+        backgroundColor: '#07182c',
+        backgroundImage: `linear-gradient(rgba(7, 24, 44, 0.3), rgba(7, 24, 44, 0.3)), url("${Image.resolveAssetSource(background).uri}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      } as any
+    : { backgroundColor: '#07182c' };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#07182c' }}>
@@ -110,7 +122,7 @@ function ClassicTabLayout() {
       <Tabs
         screenOptions={{
           headerShown: false,
-          sceneStyle: { backgroundColor: 'transparent' },
+          sceneStyle,
           tabBarStyle: { display: 'none' },
           tabBarBackground: () =>
             isIOS ? (

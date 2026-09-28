@@ -34,6 +34,15 @@ const MIMI_BG          = require('../../assets/images/mimi.png');
 const KARI_BG          = require('../../assets/images/kari.png');
 const MATT_BG          = require('../../assets/images/mat.png');
 
+const HOME_THEME: Record<string, { header: any; active: any; base: any; currency: any; accent: string }> = {
+  tamer_kari: { header: require('../../assets/images/tema/tela de inicio kari.png'), active: require('../../assets/images/tema/tela digimon ativo kari.png'), base: require('../../assets/images/tema/base digimon ativo kari.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha kari.png'), accent: '#fa60ba' },
+  tamer_matt: { header: require('../../assets/images/tema/tela de inicio matt.png'), active: require('../../assets/images/tema/tela digimon ativo matt.png'), base: require('../../assets/images/tema/base digimon ativo matt.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha matt.png'), accent: '#54dbe6' },
+  tamer_mimi: { header: require('../../assets/images/tema/tela de inicio mimi.png'), active: require('../../assets/images/tema/tela digimon ativo mimi.png'), base: require('../../assets/images/tema/base digimon ativo mimi.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha mimi.png'), accent: '#a6e8bb' },
+  tamer_sora: { header: require('../../assets/images/tema/tela de inicio sora.png'), active: require('../../assets/images/tema/tela digimon ativo sora.png'), base: require('../../assets/images/tema/base digimon ativo sora.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha sora.png'), accent: '#fc605c' },
+  tamer_tai: { header: require('../../assets/images/tema/tela de inicio tai.png'), active: require('../../assets/images/tema/tela digimon ativo tai.png'), base: require('../../assets/images/tema/base digimon ativo tai.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha tai.png'), accent: '#fe751d' },
+  tamer_tk: { header: require('../../assets/images/tema/tela de inicio tk.png'), active: require('../../assets/images/tema/tela digimon ativo tk.png'), base: require('../../assets/images/tema/base digimon ativo tk.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha tk.png'), accent: '#f4d65d' },
+};
+
 const ELEMENT_GIFS: Record<string, any> = {
   FIRE:      require('../../assets/images/fire_status.webp'),
   WATER:     require('../../assets/images/water_status.webp'),
@@ -85,6 +94,7 @@ export default function HomeScreen() {
   const isMimi = tamerId === 'tamer_mimi';
   const isKari = tamerId === 'tamer_kari';
   const isMatt = tamerId === 'tamer_matt';
+  const homeTheme = HOME_THEME[tamerId ?? ''] ?? HOME_THEME.tamer_tai;
   // Home shows the player's current Crest and Digivice.
   // Normal equipment is authoritative; PvP registration is a compatibility fallback
   // for saves where these two selections were already persisted there.
@@ -118,7 +128,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── tamer top wrapper (hero + stats + actions) ── */}
-      <View style={{ overflow: 'hidden', paddingTop: insets.top }}>
+      <View style={[styles.topPanel, { marginTop: insets.top }]}>
         {isTK && (
           <View style={StyleSheet.absoluteFillObject}>
             <Image
@@ -175,7 +185,8 @@ export default function HomeScreen() {
         )}
 
         {/* ── Hero banner ── */}
-        <View style={[styles.heroBanner, { backgroundColor: colors.primary + '18' }]}>
+        <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="stretch" />
+        <View style={styles.heroBanner}>
         {/* Tamer portrait */}
         <TouchableOpacity
           style={styles.tamerPortrait}
@@ -250,7 +261,8 @@ export default function HomeScreen() {
       </View>
 
       {/* ── Stats strip ── */}
-      <View style={[styles.statsStrip, { backgroundColor: 'rgba(28, 28, 28, 0.70)', borderColor: colors.border }, pixelStyle]}>
+      <View style={styles.statsStrip}>
+        <Image source={homeTheme.currency} style={styles.themeFrame} resizeMode="stretch" />
         <View style={styles.statItem}>
           <Image source={require('../../assets/images/digimon-icon.webp')} style={styles.statIcon} resizeMode="contain" />
           <Text style={[styles.statNum, { color: colors.foreground }]}>{collection.length}</Text>
@@ -271,6 +283,8 @@ export default function HomeScreen() {
       </View>
 
 
+
+      </View>
 
       <View style={styles.body}>
         {/* ── Quick Actions ── */}
@@ -305,7 +319,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      </View>
 
       <View style={styles.body}>
         {/* ── Active Digimon ── */}
@@ -314,10 +327,11 @@ export default function HomeScreen() {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => setSwapModalVisible(true)}
-            style={[styles.activeCard, { backgroundColor: colors.card, borderColor: attrData.color + '55' }, pixelStyle]}
+            style={styles.activeCard}
           >
+            <Image source={homeTheme.active} style={styles.themeFrame} resizeMode="stretch" />
             {/* top colored strip */}
-            <View style={[styles.activeStrip, { backgroundColor: attrData.color + '22' }]}>
+            <View style={styles.activeStrip}>
               {(() => {
                 const bgSrc = SPECIAL_GIFS[char.id] ?? ELEMENT_GIFS[char.element] ?? null;
                 return (
@@ -330,6 +344,7 @@ export default function HomeScreen() {
                         autoplay
                       />
                     )}
+                    <Image source={homeTheme.base} style={styles.activeBase} resizeMode="contain" />
                     <CharacterAvatar characterId={char.id} size={72} />
                   </>
                 );
@@ -347,7 +362,7 @@ export default function HomeScreen() {
 
             {/* HP */}
             <View style={styles.hpRow}>
-              <HPBar current={scaled.hp} max={scaled.hp} color={colors.primary} />
+              <HPBar current={scaled.hp} max={scaled.hp} color={homeTheme.accent} />
             </View>
 
             {/* Stat grid */}
@@ -488,9 +503,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  topPanel: { marginHorizontal: 14, minHeight: 190, overflow: 'hidden', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 8, paddingBottom: 12 },
+  themeFrame: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
 
   // Hero
-  heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 14, gap: 12 },
+  heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4, gap: 12 },
   tamerPortrait: { width: 50, height: 100 },
   tamerPortraitImg: { width: '100%' as unknown as number, height: '100%' as unknown as number },
   heroText: { flex: 1 },
@@ -525,7 +542,7 @@ const styles = StyleSheet.create({
   langFlagImg: { width: 28, height: 20 },
 
   // Stats strip
-  statsStrip: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, borderRadius: 8, borderWidth: 1, padding: 12, elevation: 2, shadowColor: '#3cdbff', shadowOpacity: 0.14, shadowRadius: 10 },
+  statsStrip: { flexDirection: 'row', marginHorizontal: 20, marginBottom: 5, borderRadius: 8, padding: 5, backgroundColor: '#140d2c66' },
   statItem: { flex: 1, alignItems: 'center', gap: 3 },
   statDivider: { width: 1, marginVertical: 4 },
   statIcon: { width: 22, height: 22 },
@@ -535,7 +552,7 @@ const styles = StyleSheet.create({
   body: { paddingHorizontal: 16 },
 
   // Quick actions
-  actionsRow: { flexDirection: 'row', gap: 10, marginBottom: 20 },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-around', gap: 10, marginTop: 16, marginBottom: 22 },
   actionBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', gap: 6 },
   actionIcon: { width: 44, height: 44 },
   actionLabel: { fontSize: 12, fontWeight: '700' as const },
@@ -543,9 +560,10 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700' as const, letterSpacing: 1, marginBottom: 10, textTransform: 'uppercase' as const },
 
   // Active card
-  activeCard: { borderRadius: 16, borderWidth: 1.5, overflow: 'hidden' as const, marginBottom: 20 },
-  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 14, minHeight: 110, overflow: 'hidden' },
-  activeStripGif: { opacity: 0.55 },
+  activeCard: { overflow: 'hidden' as const, marginBottom: 20, minHeight: 225, paddingHorizontal: 12, paddingTop: 8, paddingBottom: 10 },
+  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 10, gap: 12, minHeight: 110, overflow: 'hidden' },
+  activeBase: { position: 'absolute', left: 2, top: 30, width: 100, height: 70, opacity: 0.8 },
+  activeStripGif: { opacity: 0.35 },
   activeStripGifNative: { opacity: 0.55 },
   activeAvatarRing: { borderRadius: 40, borderWidth: 2, padding: 2 },
   activeInfo: { flex: 1 },
@@ -553,8 +571,8 @@ const styles = StyleSheet.create({
   activeBadges: { flexDirection: 'row', marginBottom: 5 },
   activeLevel: { fontSize: 13, fontWeight: '700' as const },
   hpRow: { paddingHorizontal: 0, paddingBottom: 8 },
-  statGrid: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 8, padding: 14, paddingTop: 0 },
-  miniStat: { flex: 1, minWidth: '30%' as any, borderRadius: 10, borderWidth: 1, padding: 10, alignItems: 'center' },
+  statGrid: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 5, paddingHorizontal: 9, paddingTop: 0 },
+  miniStat: { flex: 1, minWidth: '30%' as any, borderRadius: 4, borderWidth: 1, padding: 5, alignItems: 'center' },
   miniStatLabel: { fontSize: 10, fontWeight: '600' as const },
   miniStatValue: { fontSize: Platform.select({ web: 12, default: 13 }), fontWeight: '800' as const },
 

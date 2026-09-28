@@ -18,6 +18,7 @@ import {
 import { getCharacter, getCharacterImageSource, getHatchTargets } from '@/constants/digimon';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { CharacterCard, LockedCard, CharacterAvatar, AttributeBadge, ElementBadge } from '@/components/GameComponents';
+import { getTemaImages } from '@/constants/temaImages';
 import { useLanguage } from '@/context/LanguageContext';
 import { AscensionStars } from '@/components/AscensionStars';
 import AscensionAnimation from '@/components/AscensionAnimation';
@@ -135,6 +136,7 @@ interface DigiGridCardProps {
 
 function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress }: DigiGridCardProps) {
   const colors = useColors();
+  const { tamerId } = useGame();
   const rarityColor = RARITY_COLORS[char.rarity as keyof typeof RARITY_COLORS] ?? '#888';
   return (
     <TouchableOpacity
@@ -145,6 +147,7 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
       onPress={onPress}
       activeOpacity={0.8}
     >
+      <Image source={getTemaImages(tamerId).digibank} style={gridCardStyles.themeImage} resizeMode="stretch" />
       <View style={gridCardStyles.lvBadge}>
         <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
       </View>
@@ -162,10 +165,11 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
 }
 
 const gridCardStyles = StyleSheet.create({
+  themeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   card: {
     width: '100%',
     minWidth: 0,
-    backgroundColor: '#0c2942',
+    backgroundColor: 'transparent',
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#246187',
