@@ -442,7 +442,7 @@ export default function CollectionScreen() {
 
 
   return (
-    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
+    <View style={[styles.container, { backgroundColor: '#07182c' }]}>
       {/* ── Header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 6, borderBottomColor: colors.border }]}>
         <Text style={[styles.title, { color: colors.foreground }]}>{t('collection.title')}</Text>
@@ -504,6 +504,7 @@ export default function CollectionScreen() {
       </View>
 
       <FlatList
+        style={{ backgroundColor: '#07182c' }}
         data={activeRows}
         keyExtractor={(_, index) => `digibank-row-${index}`}
         contentContainerStyle={[styles.grid, { paddingBottom: bottomPad + 40 }]}

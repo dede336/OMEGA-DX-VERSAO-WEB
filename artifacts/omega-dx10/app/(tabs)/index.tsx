@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   langFlagImg: { width: 28, height: 20 },
 
   // Stats strip
-  statsStrip: { flexDirection: 'row', marginHorizontal: 20, marginBottom: 5, padding: 5 },
+  statsStrip: { flexDirection: 'row', marginHorizontal: 20, marginTop: 18, marginBottom: 20, padding: 5 },
   statItem: { flex: 1, alignItems: 'center', gap: 3 },
   statDivider: { width: 1, marginVertical: 4 },
   statIcon: { width: 22, height: 22 },

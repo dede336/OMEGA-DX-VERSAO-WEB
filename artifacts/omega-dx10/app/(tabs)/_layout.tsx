@@ -3,7 +3,7 @@ import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
-import { Image, ImageBackground, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import { ImageBackground, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 import { useAuth } from "@/context/AuthContext";
@@ -110,7 +110,7 @@ function ClassicTabLayout() {
   const sceneStyle = Platform.OS === 'web'
     ? {
         backgroundColor: '#07182c',
-        backgroundImage: `linear-gradient(rgba(7, 24, 44, 0.3), rgba(7, 24, 44, 0.3)), url("${Image.resolveAssetSource(background).uri}")`,
+        backgroundImage: `linear-gradient(rgba(7, 24, 44, 0.3), rgba(7, 24, 44, 0.3)), url("${(background as { uri: string }).uri}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       } as any
@@ -134,7 +134,7 @@ function ClassicTabLayout() {
       >
         <Tabs.Screen name="index" options={{ title: t('tab.home') }} />
         <Tabs.Screen name="banco" options={{ title: t('tab.banco') }} />
-        <Tabs.Screen name="collection" options={{ title: t('tab.collection') }} />
+        <Tabs.Screen name="collection" options={{ title: t('tab.collection'), sceneStyle: { backgroundColor: '#07182c' } }} />
         <Tabs.Screen name="mochila" options={{ href: null }} />
         <Tabs.Screen name="craft" options={{ title: t('tab.craft') }} />
         <Tabs.Screen name="map" options={{ title: t('tab.map') }} />
