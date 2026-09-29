@@ -113,13 +113,8 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingBottom: botPad }}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── Tamer frame and currencies ── */}
-      <View style={[styles.topPanel, { marginTop: insets.top + 24 }]}>
-        <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="contain" />
-      </View>
-
-      <View style={styles.body}>
-        {/* Tamer information sits below the artwork. */}
+      <View style={[styles.body, { marginTop: insets.top + 24 }]}>
+        {/* Tamer information at the top of the home screen. */}
         <View style={styles.heroBanner}>
         {/* Tamer portrait */}
         <TouchableOpacity
@@ -194,6 +189,10 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      </View>
+
+      <View style={styles.topPanel}>
+        <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="contain" />
       </View>
 
       {/* ── Stats strip ── */}
@@ -469,9 +468,9 @@ const styles = StyleSheet.create({
   activeCard: { overflow: 'hidden' as const, marginBottom: 20, minHeight: 225, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 17 },
   activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 8, gap: 10, minHeight: 110, overflow: 'hidden', backgroundColor: '#080d19' },
   activeStripShade: { ...StyleSheet.absoluteFillObject, backgroundColor: '#05091755' },
-  activeDigimonStage: { width: 86, height: 90, alignItems: 'center', justifyContent: 'flex-start' },
-  activeBase: { position: 'absolute', bottom: 0, width: 86, height: 51 },
-  activeDigimonPosition: { zIndex: 1 },
+  activeDigimonStage: { width: 112, height: 110, alignItems: 'center', justifyContent: 'flex-end' },
+  activeBase: { position: 'absolute', bottom: 6, width: 108, height: 46 },
+  activeDigimonPosition: { position: 'absolute', bottom: 21, alignSelf: 'center', zIndex: 1 },
   activeStripGif: { opacity: 0.95 },
   activeStripGifNative: { opacity: 0.55 },
   activeAvatarRing: { borderRadius: 40, borderWidth: 2, padding: 2 },
