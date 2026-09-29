@@ -190,10 +190,11 @@ const gridCardStyles = StyleSheet.create({
     position: 'relative',
   },
   avatar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: '25%',
     alignItems: 'center',
-    justifyContent: 'center',
-    // The Digimon stands above the ring in the lower half of the 300x300 artwork.
-    transform: [{ translateY: 0 }],
     zIndex: 1,
   },
   details: {
