@@ -28,6 +28,7 @@ const ICON_MUNDO = require('../assets/images/map-icon.webp');
 const ICON_MAIL = require('../assets/images/mailbox-icon.webp');
 const ICON_RANKING = require('../assets/images/trophy-icon.webp');
 const ICON_DIGIFARM = require('../assets/images/digifarm-icon.webp');
+const ICON_GACHA = require('../assets/images/gacha-anime.webp');
 const ICON_PVP = require('../assets/images/icone_pvp.gif');
 const ICON_AMIGOS = require('../assets/images/amigos-icon.webp');
 const ICON_ADMIN = require('../assets/images/admin_icon.webp');
@@ -228,6 +229,7 @@ const NAV_ITEMS: NavItem[] = [
   { labelKey: 'nav.mail', route: '/(tabs)/correios', image: ICON_MAIL, color: '#ec4899', isMail: true },
   { labelKey: 'nav.ranking', route: '/(tabs)/ranking', image: ICON_RANKING, color: '#f97316' },
   { labelKey: 'nav.digifarm', route: '/(tabs)/digifarm', image: ICON_DIGIFARM, color: '#84cc16', isFarm: true },
+  { labelKey: 'nav.gacha', route: '/(tabs)/gacha', image: ICON_GACHA, color: '#ec4899' },
   { labelKey: 'nav.pvp', label: 'PvP', route: '/(tabs)/pvp', image: ICON_PVP, color: '#dc2626', isPvp: true },
   { labelKey: 'nav.friends', route: '/(tabs)/amigos', image: ICON_AMIGOS, color: '#14b8a6', bigIcon: true },
   { labelKey: 'nav.chat', route: '/(tabs)/chat', image: ICON_CHAT, color: '#3b82f6', isChat: true },
