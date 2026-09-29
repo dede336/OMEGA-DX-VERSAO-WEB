@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
-  Image, Pressable, Platform, FlatList, Alert, TextInput,
+  Image, Pressable, Platform, Alert, TextInput,
   ActivityIndicator, KeyboardAvoidingView,
   Animated, PanResponder, ScrollView, useWindowDimensions,
 } from 'react-native';
@@ -569,19 +569,19 @@ export default function NavigationFAB() {
           setOpen(false)
         }
       >
-        <Pressable
+        <View
           style={[
             styles.overlay,
             Platform.OS === 'web'
               ? styles.overlayWeb
               : null,
           ]}
-          onPress={() => {
+        >
+          <Pressable style={StyleSheet.absoluteFillObject} onPress={() => {
             setOpen(false);
             setConfirmLogout(false);
-          }}
-        >
-          <Pressable
+          }} />
+          <View
             style={[
               styles.menu,
               Platform.OS === 'web'
@@ -597,7 +597,7 @@ export default function NavigationFAB() {
             ]}
           >
             <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
-            <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuScrollContent} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+            <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuScrollContent} showsVerticalScrollIndicator={false} nestedScrollEnabled bounces>
             {confirmLogout ? (
               <View style={styles.confirmBox}>
                 <Feather
@@ -698,21 +698,8 @@ export default function NavigationFAB() {
                   </TouchableOpacity>
                 </View>
 
-                <FlatList
-                  data={visible}
-                  numColumns={3}
-                  keyExtractor={(item) =>
-                    item.route
-                  }
-                  scrollEnabled={false}
-                  columnWrapperStyle={{
-                    gap: 10,
-                  }}
-                  contentContainerStyle={{
-                    gap: 10,
-                    paddingTop: 8,
-                  }}
-                  renderItem={({ item }) => {
+                <View style={styles.navGrid}>
+                  {visible.map((item) => {
                     const badgeCount =
                       item.isChat
                         ? unreadChat
@@ -729,6 +716,7 @@ export default function NavigationFAB() {
 
                     return (
                       <TouchableOpacity
+                        key={item.route}
                         style={
                           styles.navItem
                         }
@@ -800,8 +788,8 @@ export default function NavigationFAB() {
                         )}
                       </TouchableOpacity>
                     );
-                  }}
-                />
+                  })}
+                </View>
 
                 <TouchableOpacity
                   style={[
@@ -860,8 +848,8 @@ export default function NavigationFAB() {
               </>
             )}
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <ChangePasswordModal
@@ -955,8 +943,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
-  menuScroll: { flex: 1, width: '100%' },
-  menuScrollContent: { flexGrow: 1, paddingBottom: 12 },
+  menuScroll: { flex: 1, width: '100%', ...Platform.select({ web: { overflowY: 'auto', touchAction: 'pan-y' } as any, default: {} }) },
+  menuScrollContent: { paddingBottom: 28 },
+  navGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, paddingTop: 8 },
 
   /*
    * Limite equivalente à largura mobile do jogo.
@@ -984,7 +973,7 @@ const styles = StyleSheet.create({
   },
 
   navItem: {
-    flex: 1,
+    width: '30%',
     alignItems: 'center',
     paddingVertical: 10,
     gap: 6,
