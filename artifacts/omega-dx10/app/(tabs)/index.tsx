@@ -133,7 +133,7 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={TK_BG_GIF}
-              style={{ width: '100%', height: '100%', opacity: 0.35 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
@@ -142,7 +142,7 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={TAI_BG}
-              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
@@ -151,7 +151,7 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={SORA_BG}
-              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
@@ -160,7 +160,7 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={MIMI_BG}
-              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
@@ -169,7 +169,7 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={KARI_BG}
-              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
@@ -178,14 +178,13 @@ export default function HomeScreen() {
           <View style={styles.heroArtwork}>
             <Image
               source={MATT_BG}
-              style={{ width: '100%', height: '100%', opacity: 0.30 }}
+              style={styles.heroArtworkImage}
               resizeMode="stretch"
             />
           </View>
         )}
 
         {/* ── Hero banner ── */}
-        <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="stretch" />
         <View style={styles.heroBanner}>
         {/* Tamer portrait */}
         <TouchableOpacity
@@ -281,9 +280,9 @@ export default function HomeScreen() {
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.gems')}</Text>
         </View>
       </View>
-
-
-
+        <View style={styles.themeFrame} pointerEvents="none">
+          <Image source={homeTheme.header} style={styles.fullFrameImage} resizeMode="stretch" />
+        </View>
       </View>
 
       <View style={styles.body}>
@@ -343,9 +342,12 @@ export default function HomeScreen() {
                         autoplay
                       />
                     )}
-                    <Image source={homeTheme.base} style={styles.activeBase} resizeMode="contain" />
-                    <View style={styles.activeDigimonPosition}>
-                      <CharacterAvatar characterId={char.id} size={72} />
+                    <View style={styles.activeStripShade} pointerEvents="none" />
+                    <View style={styles.activeDigimonStage}>
+                      <Image source={homeTheme.base} style={styles.activeBase} resizeMode="contain" />
+                      <View style={styles.activeDigimonPosition}>
+                        <CharacterAvatar characterId={char.id} size={72} />
+                      </View>
                     </View>
                   </>
                 );
@@ -508,7 +510,8 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topPanel: { marginHorizontal: 14, minHeight: 190, overflow: 'hidden', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 8, paddingBottom: 12 },
-  heroArtwork: { position: 'absolute', top: 10, left: 12, right: 12, bottom: 68, overflow: 'hidden' },
+  heroArtwork: { position: 'absolute', top: 10, left: 12, right: 12, bottom: 68, overflow: 'hidden', backgroundColor: '#091424' },
+  heroArtworkImage: { width: '100%', height: '100%' },
   themeFrame: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   fullFrameImage: { width: '100%', height: '100%' },
 
@@ -566,11 +569,13 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700' as const, letterSpacing: 1, marginBottom: 10, textTransform: 'uppercase' as const },
 
   // Active card
-  activeCard: { overflow: 'hidden' as const, marginBottom: 20, minHeight: 225, paddingHorizontal: 12, paddingTop: 8, paddingBottom: 10 },
-  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 10, gap: 12, minHeight: 110, overflow: 'hidden' },
-  activeBase: { position: 'absolute', left: 17, top: 50, width: 70, height: 49, opacity: 0.8 },
-  activeDigimonPosition: { transform: [{ translateY: -14 }] },
-  activeStripGif: { opacity: 0.35 },
+  activeCard: { overflow: 'hidden' as const, marginBottom: 20, minHeight: 225, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 17 },
+  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 8, gap: 10, minHeight: 110, overflow: 'hidden', backgroundColor: '#080d19' },
+  activeStripShade: { ...StyleSheet.absoluteFillObject, backgroundColor: '#05091755' },
+  activeDigimonStage: { width: 86, height: 90, alignItems: 'center', justifyContent: 'flex-start' },
+  activeBase: { position: 'absolute', bottom: 0, width: 86, height: 51 },
+  activeDigimonPosition: { zIndex: 1 },
+  activeStripGif: { opacity: 0.95 },
   activeStripGifNative: { opacity: 0.55 },
   activeAvatarRing: { borderRadius: 40, borderWidth: 2, padding: 2 },
   activeInfo: { flex: 1 },

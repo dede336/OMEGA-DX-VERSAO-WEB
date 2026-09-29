@@ -147,19 +147,25 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Image source={getTemaImages(tamerId).digibank} style={gridCardStyles.themeImage} resizeMode="stretch" />
-      <View style={gridCardStyles.lvBadge}>
-        <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
-      </View>
-      {canEvolve && <DigiviceEvoIndicator tintColor={tamerAccent} />}
-      <CharacterAvatar characterId={owned.characterId} size={60} ascensionStars={owned.ascensionStars} />
-      <AscensionStars stars={owned.ascensionStars} size="small" />
-      {char.rarity !== 'EGG' && (
-        <View style={gridCardStyles.badgeRow}>
-          <AttributeBadge attr={char.attribute} />
-          <ElementBadge elem={char.element} />
+      <View style={gridCardStyles.artwork}>
+        <Image source={getTemaImages(tamerId).digibank} style={gridCardStyles.themeImage} resizeMode="contain" />
+        {canEvolve && <DigiviceEvoIndicator tintColor={tamerAccent} />}
+        <View style={gridCardStyles.lvBadge}>
+          <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
         </View>
-      )}
+        <View style={gridCardStyles.avatar}>
+          <CharacterAvatar characterId={owned.characterId} size={60} ascensionStars={owned.ascensionStars} />
+          <AscensionStars stars={owned.ascensionStars} size="small" />
+        </View>
+      </View>
+      <View style={gridCardStyles.details}>
+        {char.rarity !== 'EGG' && (
+          <View style={gridCardStyles.badgeRow}>
+            <AttributeBadge attr={char.attribute} />
+            <ElementBadge elem={char.element} />
+          </View>
+        )}
+      </View>
     </TouchableOpacity>
   );
 }
@@ -173,13 +179,33 @@ const gridCardStyles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#246187',
-    overflow: 'hidden',
     alignItems: 'center',
+    paddingBottom: 4,
+  },
+  artwork: {
+    width: '100%',
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  avatar: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  details: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 18,
+    gap: 3,
   },
   lvBadge: {
-    alignSelf: 'flex-end',
+    position: 'absolute',
+    top: 3,
+    right: 3,
     paddingHorizontal: 5,
-    paddingTop: 3,
+    zIndex: 2,
   },
   lvText: {
     fontSize: 9,
@@ -201,18 +227,15 @@ const gridCardStyles = StyleSheet.create({
   },
   badgeRow: {
     flexDirection: 'row' as const,
-    gap: 3,
-    marginTop: 2,
-    marginBottom: 4,
-    flexWrap: 'wrap' as const,
+    gap: 1,
     justifyContent: 'center' as const,
-    paddingHorizontal: 4,
   },
   name: {
     fontSize: 9,
     fontWeight: '700' as const,
     textAlign: 'center' as const,
     paddingHorizontal: 4,
+    width: '100%',
   },
   bottomAccent: {
     height: 3,
