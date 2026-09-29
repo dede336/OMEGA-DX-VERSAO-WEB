@@ -134,7 +134,7 @@ function ClassicTabLayout() {
       >
         <Tabs.Screen name="index" options={{ title: t('tab.home') }} />
         <Tabs.Screen name="banco" options={{ title: t('tab.banco') }} />
-        <Tabs.Screen name="collection" options={{ title: t('tab.collection'), sceneStyle: { backgroundColor: '#07182c' } }} />
+        <Tabs.Screen name="collection" options={{ title: t('tab.collection'), sceneStyle: { backgroundColor: '#07182c', backgroundImage: 'none' } as any }} />
         <Tabs.Screen name="mochila" options={{ href: null }} />
         <Tabs.Screen name="craft" options={{ title: t('tab.craft') }} />
         <Tabs.Screen name="map" options={{ title: t('tab.map') }} />
