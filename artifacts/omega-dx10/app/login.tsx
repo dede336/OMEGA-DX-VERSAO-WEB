@@ -15,8 +15,8 @@ import PixelBox from '@/components/PixelBox';
 type Mode = 'login' | 'register';
 
 const logoSource = require('../assets/images/logo.webp');
-const digitalBackground = require('../assets/images/imagem de fundo.png');
-const mobileBackground = require('../assets/images/tela de fundo celular.png');
+const digitalBackground = require('../assets/images/imagem de fundo.gif');
+const mobileBackground = require('../assets/images/tela de fundo celular.gif');
 
 export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
