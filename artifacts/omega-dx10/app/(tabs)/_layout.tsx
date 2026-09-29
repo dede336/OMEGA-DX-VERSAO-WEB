@@ -11,8 +11,8 @@ import { useSocket } from "@/context/SocketContext";
 import { useLanguage } from "@/context/LanguageContext";
 import NavigationFAB from "@/components/NavigationFAB";
 
-const DIGITAL_BACKGROUND = require('../../assets/images/imagem de fundo.png');
-const DIGITAL_BACKGROUND_MOBILE = require('../../assets/images/tela de fundo celular.png');
+const DIGITAL_BACKGROUND = require('../../assets/images/imagem de fundo.gif');
+const DIGITAL_BACKGROUND_MOBILE = require('../../assets/images/tela de fundo celular.gif');
 
 function DigitalBackdrop() {
   const { width, height } = useWindowDimensions();
