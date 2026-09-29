@@ -115,7 +115,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* ── tamer top wrapper (hero + stats + actions) ── */}
-      <View style={[styles.topPanel, { marginTop: insets.top }]}>
+      <View style={[styles.topPanel, { marginTop: insets.top + 24 }]}>
         <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="contain" />
         {/* ── Hero banner ── */}
         <View style={styles.heroBanner}>
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
   fullFrameImage: { width: '100%', height: '100%' },
 
   // Hero
-  heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4, gap: 12 },
+  heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4, gap: 12, transform: [{ translateY: 18 }] },
   tamerPortrait: { width: 50, height: 100 },
   tamerPortraitImg: { width: '100%' as unknown as number, height: '100%' as unknown as number },
   heroText: { flex: 1 },
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
   heroName: { fontSize: Platform.select({ web: 13, default: 15 }), fontWeight: '900' as const, marginTop: 1 },
   heroTamer: { fontSize: 10, fontWeight: '500' as const, marginTop: 1 },
   heroEquipmentCompact:{flexDirection:'row',alignItems:'center',gap:7,marginTop:3},
-  heroEquipmentCompactItem:{alignItems:'center',justifyContent:'center',width:32,height:32,borderWidth:0,backgroundColor:'transparent'},
+  heroEquipmentCompactItem:{alignItems:'center',justifyContent:'center',width:34,height:34,borderRadius:4,backgroundColor:'#081625aa'},
   heroEquipmentCompactImage:{width:28,height:28,borderWidth:0,backgroundColor:'transparent'},
   heroEquipmentCompactLabel:{color:'#fff',fontSize:4,fontWeight:'900',marginTop:1},
   homeEquipmentBar:{marginHorizontal:16,marginTop:10,borderWidth:1,borderRadius:10,paddingHorizontal:10,paddingVertical:8,flexDirection:'row',alignItems:'center'},
