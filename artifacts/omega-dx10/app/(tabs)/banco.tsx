@@ -694,33 +694,31 @@ export default function BancoScreen() {
               >
                 <View style={st.gridArtwork}>
                   <Image source={getTemaImages(tamerId).banco} style={st.gridThemeImage} resizeMode="contain" />
-                  <View style={st.lvBadge}>
-                    <Text style={[st.lvText, { color: ownedDigimon ? rarityColor : colors.mutedForeground }]}>
-                      {ownedDigimon ? `Lv${ownedDigimon.level}` : '—'}
-                    </Text>
-                  </View>
-
-                  {/* O Digimon ocupa apenas o círculo central da moldura. */}
                   <View style={[st.gridAvatarWrap, !item.isOwned && st.avatarGray]}>
                     <CharacterAvatar characterId={item.id} size={48} ascensionStars={ownedMaxStars} />
-                    <AscensionStars stars={ownedMaxStars} size="small" />
                   </View>
-
-                  {/* Os três campos inferiores fazem parte da própria imagem. */}
+                </View>
+                <View style={st.gridDetails}>
                   <Text
-                    style={[st.gridName, { color: item.isOwned ? '#fff' : '#cbd5e1' }]}
+                    style={[st.gridName, { color: item.isOwned ? colors.foreground : colors.mutedForeground }]}
                     numberOfLines={1}
                     adjustsFontSizeToFit
-                    minimumFontScale={0.65}
+                    minimumFontScale={0.7}
                   >
                     {item.char.name}
                   </Text>
-                  {item.char.rarity !== 'EGG' && (
-                    <>
-                      <View style={st.gridAttribute}><AttributeBadge attr={item.char.attribute as any} /></View>
-                      <View style={st.gridElement}><ElementBadge elem={item.char.element as any} /></View>
-                    </>
-                  )}
+                  <View style={st.gridMetaRow}>
+                    <Text style={[st.lvText, { color: ownedDigimon ? rarityColor : colors.mutedForeground }]}>
+                      {ownedDigimon ? `Lv${ownedDigimon.level}` : '—'}
+                    </Text>
+                    {item.char.rarity !== 'EGG' && (
+                      <>
+                        <AttributeBadge attr={item.char.attribute as any} />
+                        <ElementBadge elem={item.char.element as any} />
+                      </>
+                    )}
+                  </View>
+                  <AscensionStars stars={ownedMaxStars} size="small" />
                 </View>
               </TouchableOpacity>
             );
@@ -856,7 +854,7 @@ function styles(colors: ReturnType<typeof useColors>) {
       backgroundColor: 'transparent',
       borderRadius: 6,
       alignItems: 'center',
-      paddingBottom: 0,
+      paddingBottom: 4,
     },
     gridArtwork: {
       width: '100%',
@@ -866,6 +864,19 @@ function styles(colors: ReturnType<typeof useColors>) {
       position: 'relative',
     },
     gridThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+    gridDetails: {
+      width: '100%',
+      alignItems: 'center',
+      paddingHorizontal: 2,
+      gap: 2,
+    },
+    gridMetaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 3,
+      minHeight: 18,
+    },
     topAccent: {
       height: 3,
       width: '100%',
@@ -875,21 +886,16 @@ function styles(colors: ReturnType<typeof useColors>) {
       width: '100%',
       marginTop: 6,
     },
-    lvBadge: {
-      position: 'absolute',
-      top: '5%',
-      right: '6%',
-    },
     lvText: {
       fontSize: 9,
       fontWeight: '800',
     },
     gridAvatarWrap: {
       position: 'absolute',
-      top: '11%',
+      top: '9%',
       left: '20%',
       width: '60%',
-      height: '62%',
+      height: '64%',
       alignItems: 'center',
       justifyContent: 'center',
       borderRadius: 6,
@@ -899,36 +905,11 @@ function styles(colors: ReturnType<typeof useColors>) {
       filter: 'grayscale(1)' as any,
       opacity: 0.6,
     },
-    gridAttribute: {
-      position: 'absolute',
-      left: '59%',
-      bottom: '7%',
-      width: '10%',
-      height: '10%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transform: [{ scale: 0.55 }],
-    },
-    gridElement: {
-      position: 'absolute',
-      left: '74%',
-      bottom: '7%',
-      width: '10%',
-      height: '10%',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transform: [{ scale: 0.55 }],
-    },
     gridName: {
-      position: 'absolute',
-      left: '10%',
-      bottom: '7%',
-      width: '46%',
-      height: '10%',
-      fontSize: 8,
+      width: '100%',
+      fontSize: 9,
       fontWeight: '700',
       textAlign: 'center',
-      textAlignVertical: 'center',
     },
 
     detailSheet: {
