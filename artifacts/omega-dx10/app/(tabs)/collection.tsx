@@ -154,7 +154,7 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
           <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
         </View>
         <View style={gridCardStyles.avatar}>
-          <CharacterAvatar characterId={owned.characterId} size={60} ascensionStars={owned.ascensionStars} />
+          <CharacterAvatar characterId={owned.characterId} size={90} ascensionStars={owned.ascensionStars} />
           <AscensionStars stars={owned.ascensionStars} size="small" />
         </View>
       </View>
@@ -192,8 +192,8 @@ const gridCardStyles = StyleSheet.create({
   avatar: {
     alignItems: 'center',
     justifyContent: 'center',
-    // The Digimon stands on the ring in the lower half of the 300x300 artwork.
-    transform: [{ translateY: -7 }],
+    // The Digimon stands above the ring in the lower half of the 300x300 artwork.
+    transform: [{ translateY: 0 }],
     zIndex: 1,
   },
   details: {
