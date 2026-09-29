@@ -193,7 +193,7 @@ const gridCardStyles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: '25%',
+    bottom: '5%',
     alignItems: 'center',
     zIndex: 1,
   },
