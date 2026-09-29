@@ -24,7 +24,6 @@ const FLAG_IMAGES: Record<Language, any> = {
 };
 const LANG_CYCLE: Language[] = ['pt', 'en', 'es'];
 
-const GACHA_ANIME_IMG  = require('../../assets/images/gacha-anime.webp');
 const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
 
 const HOME_THEME: Record<string, { header: any; active: any; base: any; currency: any; accent: string }> = {
@@ -114,10 +113,13 @@ export default function HomeScreen() {
       contentContainerStyle={{ paddingBottom: botPad }}
       showsVerticalScrollIndicator={false}
     >
-      {/* ── tamer top wrapper (hero + stats + actions) ── */}
+      {/* ── Tamer frame and currencies ── */}
       <View style={[styles.topPanel, { marginTop: insets.top + 24 }]}>
         <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="contain" />
-        {/* ── Hero banner ── */}
+      </View>
+
+      <View style={styles.body}>
+        {/* Tamer information sits below the artwork. */}
         <View style={styles.heroBanner}>
         {/* Tamer portrait */}
         <TouchableOpacity
@@ -192,6 +194,8 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      </View>
+
       {/* ── Stats strip ── */}
       <View style={styles.statsStrip}>
         <Image source={homeTheme.currency} style={styles.themeFrame} resizeMode="stretch" />
@@ -211,41 +215,6 @@ export default function HomeScreen() {
           <Image source={GEM_ICON_IMG} style={styles.statIcon} resizeMode="contain" />
           <Text style={[styles.statNum, { color: '#22d3ee' }]}>{gemas >= 1000 ? `${(gemas / 1000).toFixed(1)}k` : gemas}</Text>
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.gems')}</Text>
-        </View>
-      </View>
-      </View>
-
-      <View style={styles.body}>
-        {/* ── Quick Actions ── */}
-        <View style={styles.actionsRow}>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => router.push('/(tabs)/digifarm')}
-            activeOpacity={0.8}
-          >
-            <Image source={require('../../assets/images/digifarm-icon.webp')} style={styles.actionIcon} resizeMode="contain" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => router.push('/(tabs)/collection')}
-            activeOpacity={0.8}
-          >
-            <Image source={require('../../assets/images/digibank-icon.webp')} style={styles.actionIcon} resizeMode="contain" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => router.push('/(tabs)/mochila')}
-            activeOpacity={0.8}
-          >
-            <Image source={require('../../assets/images/mochila-icon.webp')} style={styles.actionIcon} resizeMode="contain" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => router.push('/(tabs)/gacha')}
-            activeOpacity={0.8}
-          >
-            <Image source={GACHA_ANIME_IMG} style={styles.actionIcon} resizeMode="contain" />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -439,12 +408,12 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  topPanel: { marginHorizontal: 14, aspectRatio: 1080 / 660, minHeight: 190, overflow: 'hidden', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 8, paddingBottom: 12 },
+  topPanel: { marginHorizontal: 14, aspectRatio: 1080 / 660, minHeight: 190, overflow: 'hidden' },
   themeFrame: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   fullFrameImage: { width: '100%', height: '100%' },
 
   // Hero
-  heroBanner: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 12, paddingBottom: 4, gap: 12, transform: [{ translateY: 18 }] },
+  heroBanner: { flexDirection: 'row', alignItems: 'center', marginTop: 12, marginBottom: 12, paddingHorizontal: 14, paddingVertical: 12, gap: 12, borderRadius: 10, backgroundColor: '#081625bb' },
   tamerPortrait: { width: 50, height: 100 },
   tamerPortraitImg: { width: '100%' as unknown as number, height: '100%' as unknown as number },
   heroText: { flex: 1 },
