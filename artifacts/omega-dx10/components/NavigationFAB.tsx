@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, Modal, StyleSheet,
   Image, Pressable, Platform, FlatList, Alert, TextInput,
   ActivityIndicator, KeyboardAvoidingView,
-  Animated, PanResponder, useWindowDimensions,
+  Animated, PanResponder, ScrollView, useWindowDimensions,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -38,6 +38,14 @@ const FAB_SIZE = 47;
 const IMG_SIZE = 38;
 const EDGE_GAP = 14;
 const TAP_SLOP = 6;
+const MENU_ASPECT_RATIO: Record<string, number> = {
+  tamer_kari: 1080 / 1526,
+  tamer_matt: 1080 / 1508,
+  tamer_mimi: 1080 / 1532,
+  tamer_sora: 1080 / 1507,
+  tamer_tai: 1080 / 1520,
+  tamer_tk: 1080 / 1533,
+};
 
 function ChangePasswordModal({
   visible,
@@ -255,6 +263,8 @@ export default function NavigationFAB() {
     refreshPvpBattles,
     tamerId,
   } = useGame();
+  const menuRatio = MENU_ASPECT_RATIO[tamerId ?? ''] ?? MENU_ASPECT_RATIO.tamer_tai;
+  const menuWidth = Math.min(stageWidth - 32, (H - insets.top - insets.bottom - 48) * menuRatio);
 
   const { logout, user } = useAuth();
   const { totalUnread: unreadChat } = useSocket();
@@ -578,11 +588,14 @@ export default function NavigationFAB() {
               {
                 backgroundColor: 'transparent',
                 borderColor: 'transparent',
+                width: menuWidth,
+                height: menuWidth / menuRatio,
               },
               pixelStyle,
             ]}
           >
-            <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="stretch" />
+            <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
+            <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuScrollContent} showsVerticalScrollIndicator={false} nestedScrollEnabled>
             {confirmLogout ? (
               <View style={styles.confirmBox}>
                 <Feather
@@ -844,6 +857,7 @@ export default function NavigationFAB() {
                 </TouchableOpacity>
               </>
             )}
+            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -939,6 +953,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
+  menuScroll: { flex: 1, width: '100%' },
+  menuScrollContent: { flexGrow: 1, paddingBottom: 12 },
 
   /*
    * Limite equivalente à largura mobile do jogo.
