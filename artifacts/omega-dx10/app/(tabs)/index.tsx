@@ -27,13 +27,6 @@ const LANG_CYCLE: Language[] = ['pt', 'en', 'es'];
 const GACHA_ANIME_IMG  = require('../../assets/images/gacha-anime.webp');
 const GEM_ICON_IMG = require('../../assets/images/diamante.gif');
 
-const TK_BG_GIF        = require('../../assets/images/tk.png');
-const TAI_BG           = require('../../assets/images/tai.png');
-const SORA_BG          = require('../../assets/images/sora.png');
-const MIMI_BG          = require('../../assets/images/mimi.png');
-const KARI_BG          = require('../../assets/images/kari.png');
-const MATT_BG          = require('../../assets/images/mat.png');
-
 const HOME_THEME: Record<string, { header: any; active: any; base: any; currency: any; accent: string }> = {
   tamer_kari: { header: require('../../assets/images/tema/tela de inicio kari.png'), active: require('../../assets/images/tema/tela digimon ativo kari.png'), base: require('../../assets/images/tema/base digimon ativo kari.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha kari.png'), accent: '#fa60ba' },
   tamer_matt: { header: require('../../assets/images/tema/tela de inicio matt.png'), active: require('../../assets/images/tema/tela digimon ativo matt.png'), base: require('../../assets/images/tema/base digimon ativo matt.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha matt.png'), accent: '#54dbe6' },
@@ -88,12 +81,6 @@ export default function HomeScreen() {
   const attrData = char ? ATTRIBUTES[char.attribute] : null;
 
   const tamer = tamerId ? TAMERS.find((t) => t.id === tamerId) : null;
-  const isTK   = tamerId === 'tamer_tk';
-  const isTai  = tamerId === 'tamer_tai';
-  const isSora = tamerId === 'tamer_sora';
-  const isMimi = tamerId === 'tamer_mimi';
-  const isKari = tamerId === 'tamer_kari';
-  const isMatt = tamerId === 'tamer_matt';
   const homeTheme = HOME_THEME[tamerId ?? ''] ?? HOME_THEME.tamer_tai;
   // Home shows the player's current Crest and Digivice.
   // Normal equipment is authoritative; PvP registration is a compatibility fallback
@@ -129,61 +116,7 @@ export default function HomeScreen() {
     >
       {/* ── tamer top wrapper (hero + stats + actions) ── */}
       <View style={[styles.topPanel, { marginTop: insets.top }]}>
-        {isTK && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={TK_BG_GIF}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-        {isTai && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={TAI_BG}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-        {isSora && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={SORA_BG}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-        {isMimi && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={MIMI_BG}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-        {isKari && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={KARI_BG}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-        {isMatt && (
-          <View style={styles.heroArtwork}>
-            <Image
-              source={MATT_BG}
-              style={styles.heroArtworkImage}
-              resizeMode="stretch"
-            />
-          </View>
-        )}
-
+        <Image source={homeTheme.header} style={styles.themeFrame} resizeMode="contain" />
         {/* ── Hero banner ── */}
         <View style={styles.heroBanner}>
         {/* Tamer portrait */}
@@ -280,9 +213,6 @@ export default function HomeScreen() {
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.gems')}</Text>
         </View>
       </View>
-        <View style={styles.themeFrame} pointerEvents="none">
-          <Image source={homeTheme.header} style={styles.fullFrameImage} resizeMode="stretch" />
-        </View>
       </View>
 
       <View style={styles.body}>
@@ -509,9 +439,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  topPanel: { marginHorizontal: 14, minHeight: 190, overflow: 'hidden', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 8, paddingBottom: 12 },
-  heroArtwork: { position: 'absolute', top: 10, left: 12, right: 12, bottom: 68, overflow: 'hidden', backgroundColor: '#091424' },
-  heroArtworkImage: { width: '100%', height: '100%' },
+  topPanel: { marginHorizontal: 14, aspectRatio: 1080 / 660, minHeight: 190, overflow: 'hidden', justifyContent: 'space-between', paddingHorizontal: 8, paddingTop: 8, paddingBottom: 12 },
   themeFrame: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   fullFrameImage: { width: '100%', height: '100%' },
 
