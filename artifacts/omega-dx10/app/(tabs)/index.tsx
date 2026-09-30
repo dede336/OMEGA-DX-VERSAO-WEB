@@ -141,7 +141,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
           {tamer ? (
             <ExpoImage
               source={getActiveTamerImage(tamer)}
-              style={styles.tamerPortraitImg}
+              style={[styles.tamerPortraitImg, tamer.id === 'tamer_tai' && { transform: [{ scale: 1.8 }] }]}
               contentFit="contain"
               autoplay
             />
