@@ -39,6 +39,28 @@ const FAB_SIZE = 47;
 const IMG_SIZE = 38;
 const EDGE_GAP = 14;
 const TAP_SLOP = 6;
+
+function MenuScroller({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === 'web') {
+    return React.createElement('div', {
+      style: {
+        flex: '1 1 0%',
+        minHeight: 0,
+        width: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        touchAction: 'pan-y',
+        overscrollBehaviorY: 'contain',
+        WebkitOverflowScrolling: 'touch',
+      },
+    }, <View style={styles.menuScrollContent}>{children}</View>);
+  }
+  return (
+    <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuScrollContent} nestedScrollEnabled>
+      {children}
+    </ScrollView>
+  );
+}
 const MENU_ASPECT_RATIO: Record<string, number> = {
   tamer_kari: 1080 / 1526,
   tamer_matt: 1080 / 1508,
@@ -596,8 +618,10 @@ export default function NavigationFAB() {
               pixelStyle,
             ]}
           >
-            <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
-            <ScrollView style={styles.menuScroll} contentContainerStyle={styles.menuScrollContent} showsVerticalScrollIndicator={false} nestedScrollEnabled bounces>
+            <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
+              <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
+            </View>
+            <MenuScroller>
             {confirmLogout ? (
               <View style={styles.confirmBox}>
                 <Feather
@@ -847,7 +871,7 @@ export default function NavigationFAB() {
                 </TouchableOpacity>
               </>
             )}
-            </ScrollView>
+            </MenuScroller>
           </View>
         </View>
       </Modal>
@@ -929,6 +953,8 @@ const styles = StyleSheet.create({
   },
 
   menu: {
+    flexShrink: 0,
+    minHeight: 0,
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
