@@ -35,6 +35,15 @@ const HOME_THEME: Record<string, { header: any; active: any; base: any; currency
   tamer_tk: { header: require('../../assets/images/tema/tela de inicio tk.png'), active: require('../../assets/images/tema/tela digimon ativo tk.png'), base: require('../../assets/images/tema/base digimon ativo tk.png'), currency: require('../../assets/images/tema/imagem fundo botão sari-trocar senha tk.png'), accent: '#f4d65d' },
 };
 
+const STATUS_THEME: Record<string, { small: any; wide: any }> = {
+  tamer_kari: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT KARI.png'), wide: require('../../assets/images/tema/BARRA SPD-MP.png') },
+  tamer_matt: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT MATT.png'), wide: require('../../assets/images/tema/BARRA SPD-MP MATT.png') },
+  tamer_mimi: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT MIMI.png'), wide: require('../../assets/images/tema/BARRA SPD-MP MIMI.png') },
+  tamer_sora: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT SORA.png'), wide: require('../../assets/images/tema/BARRA SPD-MP SORA.png') },
+  tamer_tai: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT TAI.png'), wide: require('../../assets/images/tema/BARRA SPD-MP TAI.png') },
+  tamer_tk: { small: require('../../assets/images/tema/BARRA ATK-DEF-SPT TK.png'), wide: require('../../assets/images/tema/BARRA SPD-MP TK.png') },
+};
+
 const ELEMENT_GIFS: Record<string, any> = {
   FIRE:      require('../../assets/images/fire_status.webp'),
   WATER:     require('../../assets/images/water_status.webp'),
@@ -81,6 +90,7 @@ export default function HomeScreen() {
 
   const tamer = tamerId ? TAMERS.find((t) => t.id === tamerId) : null;
   const homeTheme = HOME_THEME[tamerId ?? ''] ?? HOME_THEME.tamer_tai;
+  const statusTheme = STATUS_THEME[tamerId ?? ''] ?? STATUS_THEME.tamer_tai;
   // Home shows the player's current Crest and Digivice.
   // Normal equipment is authoritative; PvP registration is a compatibility fallback
   // for saves where these two selections were already persisted there.
@@ -275,7 +285,8 @@ export default function HomeScreen() {
                 { k: 'SPD', v: scaled.spd, c: '#facc15' },
                 { k: 'MP',  v: scaled.mp,  c: '#00d4ff' },
               ].map((s) => (
-                <View key={s.k} style={[styles.miniStat, { backgroundColor: s.c + '11', borderColor: s.c + '44' }, pixelStyle]}>
+                <View key={s.k} style={[styles.miniStat, { aspectRatio: s.k === 'SPD' || s.k === 'MP' ? 270 / 76 : 176 / 76 }]}>
+                  <Image source={s.k === 'SPD' || s.k === 'MP' ? statusTheme.wide : statusTheme.small} style={styles.statFrameImage} resizeMode="contain" />
                   <Text style={[styles.miniStatLabel, { color: colors.mutedForeground }]}>{s.k}</Text>
                   <Text style={[styles.miniStatValue, { color: s.c }]}>{s.v}</Text>
                 </View>
@@ -482,7 +493,8 @@ const styles = StyleSheet.create({
   activeLevel: { fontSize: 13, fontWeight: '700' as const },
   hpRow: { paddingHorizontal: 0, paddingBottom: 8 },
   statGrid: { flexDirection: 'row', flexWrap: 'wrap' as const, gap: 5, paddingHorizontal: 9, paddingTop: 0 },
-  miniStat: { flex: 1, minWidth: '30%' as any, borderRadius: 4, borderWidth: 1, padding: 5, alignItems: 'center' },
+  miniStat: { flex: 1, minWidth: '30%' as any, padding: 5, alignItems: 'center', justifyContent: 'center' },
+  statFrameImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   miniStatLabel: { fontSize: 10, fontWeight: '600' as const },
   miniStatValue: { fontSize: Platform.select({ web: 12, default: 13 }), fontWeight: '800' as const },
 
