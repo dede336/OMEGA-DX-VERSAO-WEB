@@ -45,7 +45,10 @@ import {
   SPIRIT_MP_COST,
 } from '@/utils/battleEngine';
 import { HPBar, AttributeBadge, CharacterAvatar, ELEMENT_EMOJI } from '@/components/GameComponents';
-import { pixelStyle } from '@/constants/pixelStyle';
+// Keep battle borders closed: clipping a bordered box removes its corners.
+const battleBorderStyle = Platform.OS === 'web'
+  ? { borderRadius: 0 }
+  : { borderRadius: 10, overflow: 'hidden' as const };
 
 const AUTO_BATTLE_IMG = require('../assets/images/auto_battle.webp');
 const TARGET_RETICLE_IMG = require('../assets/images/target-reticle.png');
@@ -1562,7 +1565,7 @@ export default function BattleScreen() {
           <Text style={[styles.headerTitle, { color: colors.foreground }]}>{stage.name}</Text>
           <TouchableOpacity
             onPress={toggleBattleSpeed}
-            style={[styles.speedBtn, pixelStyle]}
+            style={[styles.speedBtn, battleBorderStyle]}
           >
             <Image
               source={(battleSpeed ?? battleSpeedRef.current) === 2
@@ -1611,7 +1614,7 @@ export default function BattleScreen() {
                     borderColor: owned ? colors.primary : colors.border,
                     borderStyle: owned ? 'solid' : 'dashed',
                   },
-                  pixelStyle,
+                  battleBorderStyle,
                 ]}
                 onPress={() => { setPickerSource('mine'); setSlotPickerOpen(slotIdx); }}
                 activeOpacity={0.8}
@@ -1653,7 +1656,7 @@ export default function BattleScreen() {
           onRequestClose={() => setSlotPickerOpen(null)}
         >
           <Pressable style={styles.slotModalOverlay} onPress={() => setSlotPickerOpen(null)}>
-            <Pressable style={[styles.slotModalSheet, { backgroundColor: colors.card }, pixelStyle]} onPress={(e) => e.stopPropagation()}>
+            <Pressable style={[styles.slotModalSheet, { backgroundColor: colors.card }, battleBorderStyle]} onPress={(e) => e.stopPropagation()}>
               <View style={[styles.slotModalHandle, { backgroundColor: colors.border }]} />
               <Text style={[styles.slotModalTitle, { color: colors.foreground }]}>
                 {t('battle.chooseSlot')} {(slotPickerOpen ?? 0) + 1}
@@ -1769,7 +1772,7 @@ export default function BattleScreen() {
           )}
           <TouchableOpacity
             onPress={toggleBattleSpeed}
-            style={[styles.speedBtn, pixelStyle]}
+            style={[styles.speedBtn, battleBorderStyle]}
             accessibilityLabel={(battleSpeed ?? battleSpeedRef.current) === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X'}
           >
             <Image
@@ -1867,7 +1870,7 @@ export default function BattleScreen() {
         {/* Battle log */}
         <ScrollView
           ref={logRef}
-          style={[styles.logBox, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}
+          style={[styles.logBox, { backgroundColor: colors.card, borderColor: colors.border }, battleBorderStyle]}
           contentContainerStyle={styles.logContent}
           showsVerticalScrollIndicator={false}
         >
@@ -1933,7 +1936,7 @@ export default function BattleScreen() {
                       styles.teamChip,
                       { borderColor: isActive ? colors.primary : colors.border, opacity: dead ? 0.35 : 1 },
                       isActive && { backgroundColor: colors.primary + '18' },
-                      pixelStyle,
+                      battleBorderStyle,
                     ]}
                   >
                     {isActive && (
@@ -1975,11 +1978,11 @@ export default function BattleScreen() {
         <View style={[styles.actionsWrap, { paddingBottom: botPad + 6, borderTopColor: colors.border }]}>
           {/* Attack submenu */}
           {attackMenuOpen && !autoMode && (
-            <View style={[styles.attackMenu, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}>
+            <View style={[styles.attackMenu, { backgroundColor: colors.card, borderColor: colors.border }, battleBorderStyle]}>
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => handlePlayerAction('ATTACK')}
-                style={[styles.attackOption, { borderColor: '#ef4444', backgroundColor: '#ef444418' }, pixelStyle]}
+                style={[styles.attackOption, { borderColor: '#ef4444', backgroundColor: '#ef444418' }, battleBorderStyle]}
               >
                 <Text style={{ fontSize: 15 }}>{ELEMENT_EMOJI[playerFighter.attackElement ?? playerFighter.element] ?? '⚔️'}</Text>
                 <Text style={[styles.attackOptionLabel, { color: '#ef4444' }]}>{playerFighter.attackName ?? 'Ataque'}</Text>
@@ -1991,7 +1994,7 @@ export default function BattleScreen() {
                   borderColor: canSpirit ? '#a855f7' : colors.border,
                   backgroundColor: canSpirit ? '#a855f718' : colors.card,
                   opacity: canSpirit ? 1 : 0.45,
-                }, pixelStyle]}
+                }, battleBorderStyle]}
               >
                 <Text style={{ fontSize: 15 }}>{ELEMENT_EMOJI[playerFighter.spiritElement ?? playerFighter.element] ?? '✨'}</Text>
                 <Text style={[styles.attackOptionLabel, { color: canSpirit ? '#a855f7' : colors.mutedForeground }]}>
@@ -2034,7 +2037,7 @@ export default function BattleScreen() {
                       borderColor: targetSelected ? '#ef4444' : colors.border,
                       opacity: targetSelected ? 1 : 0.55,
                     },
-                    pixelStyle,
+                    battleBorderStyle,
                   ]}
                 >
                   <Text style={{ fontSize: 14 }}>⚔️</Text>
@@ -2044,7 +2047,7 @@ export default function BattleScreen() {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handlePlayerAction('FLEE')}
-                  style={[styles.actionBtn, { backgroundColor: '#f59e0b18', borderColor: '#f59e0b' }, pixelStyle]}
+                  style={[styles.actionBtn, { backgroundColor: '#f59e0b18', borderColor: '#f59e0b' }, battleBorderStyle]}
                 >
                   <Text style={{ fontSize: 14 }}>🏃</Text>
                   <Text style={[styles.actionBtnLabel, { color: '#f59e0b' }]}>{t('battle.flee')}</Text>
@@ -2053,7 +2056,7 @@ export default function BattleScreen() {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handlePlayerAction('DEFEND')}
-                  style={[styles.actionBtn, { backgroundColor: '#3b82f622', borderColor: '#3b82f6' }, pixelStyle]}
+                  style={[styles.actionBtn, { backgroundColor: '#3b82f622', borderColor: '#3b82f6' }, battleBorderStyle]}
                 >
                   <Text style={{ fontSize: 14 }}>🛡️</Text>
                   <Text style={[styles.actionBtnLabel, { color: '#60a5fa' }]}>Defender</Text>
@@ -2078,7 +2081,7 @@ export default function BattleScreen() {
                     setAutoMode(true);
                   }
                 }}
-                style={[styles.autoBtn, { backgroundColor: autoMode ? '#22c55e22' : colors.card, borderColor: autoMode ? '#22c55e' : colors.border }, pixelStyle]}
+                style={[styles.autoBtn, { backgroundColor: autoMode ? '#22c55e22' : colors.card, borderColor: autoMode ? '#22c55e' : colors.border }, battleBorderStyle]}
               >
                 <Image source={AUTO_BATTLE_IMG} style={{ width: 18, height: 18, opacity: autoMode ? 1 : 0.5 }} resizeMode="contain" />
                 <Text style={[styles.autoBtnLabel, { color: autoMode ? '#22c55e' : colors.mutedForeground }]}>
@@ -2108,7 +2111,7 @@ export default function BattleScreen() {
 
     return (
       <View style={[styles.container, styles.resultCenter, { backgroundColor: colors.background }]}>
-        <View style={[styles.resultCard, { backgroundColor: colors.card, borderColor: won ? '#22c55e' : '#ef4444' }, pixelStyle]}>
+        <View style={[styles.resultCard, { backgroundColor: colors.card, borderColor: won ? '#22c55e' : '#ef4444' }, battleBorderStyle]}>
           {won ? (
             <Image source={require('../assets/images/victory-gabumon.webp')} style={{ width: 100, height: 100 }} resizeMode="contain" />
           ) : (
@@ -2132,7 +2135,7 @@ export default function BattleScreen() {
               {droppedItems.map((drop) => {
                 const img = EQUIP_ITEM_IMAGES[drop.id];
                 return (
-                  <View key={drop.id} style={[styles.dropChip, { borderColor: drop.color + '99', backgroundColor: drop.color + '18' }, pixelStyle]}>
+                  <View key={drop.id} style={[styles.dropChip, { borderColor: drop.color + '99', backgroundColor: drop.color + '18' }, battleBorderStyle]}>
                     {drop.kind === 'deco' ? (
                       <Text style={{ fontSize: 20 }}>🛣️</Text>
                     ) : img ? (
