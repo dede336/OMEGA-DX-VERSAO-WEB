@@ -91,7 +91,9 @@ export function CharacterAvatar({ characterId, size = 72, borderColor, bgColor, 
   const char = getCharacter(characterId) ?? CHARACTERS[characterId];
   const elemData = char ? ELEMENTS[char.element] : null;
   const bc = borderColor ?? elemData?.color ?? '#00d4ff';
-  const imgScale = AVATAR_SCALE[characterId] ?? getCharacterImageScale(characterId);
+  const baseImageScale = AVATAR_SCALE[characterId] ?? getCharacterImageScale(characterId);
+  const imageName = (char?.name ?? characterId).toLowerCase().replace(/[^a-z]/g, '');
+  const imgScale = baseImageScale * (imageName === 'exveemon' || imageName === 'gargomon' || imageName === 'ginryumon' || imageName === 'examon' || imageName === 'examonx' ? 1.2 : imageName === 'hyokomon' || imageName === 'guardromon' || imageName === 'guardomon' || imageName === 'kabuterimon' || imageName === 'huanglongmon' || imageName === 'huanglongmonruinmode' || imageName === 'sakuyamon' || imageName === 'sakuyamonmaidmode' || imageName === 'kuzuhamon' || imageName === 'kuzuhamonmikomode' || imageName === 'venusmon' || imageName === 'betelgammamon' ? 1.15 : imageName === 'hopmon' || imageName === 'tokomon' || imageName === 'flamon' ? 1.3 : imageName === 'blacksalamon' || imageName === 'salamonblack' || characterId === 'blackSalamon' ? 1.1 : 1);
   const isEgg = char?.rarity === 'EGG';
   const auraPulse = useRef(new Animated.Value(0.55)).current;
 

@@ -735,13 +735,11 @@ export default function NavigationFAB() {
                             }
                             style={{
                               width:
-                                item.bigIcon
-                                  ? 72
-                                  : 48,
+                                (item.bigIcon ? 72 : 48) *
+                                (item.image === ICON_GACHA || item.image === ICON_AMIGOS ? 1 : 0.85),
                               height:
-                                item.bigIcon
-                                  ? 72
-                                  : 48,
+                                (item.bigIcon ? 72 : 48) *
+                                (item.image === ICON_GACHA || item.image === ICON_AMIGOS ? 1 : 0.85),
                             }}
                             resizeMode="contain"
                           />
