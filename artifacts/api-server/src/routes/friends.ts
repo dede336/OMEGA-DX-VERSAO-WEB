@@ -3,6 +3,8 @@ import { db, usersTable, gameSavesTable, friendshipsTable } from "@workspace/db"
 import { eq, or, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth.js";
 
+import { publicPartner } from "../lib/public-player.js";
+
 const router = Router();
 
 router.get("/", requireAuth, async (req, res) => {
@@ -60,6 +62,7 @@ router.get("/", requireAuth, async (req, res) => {
 
       return {
         username: user.username,
+        activePartner: publicPartner(data),
         playerName: data.playerName ?? user.username,
         tamerLevel: data.tamerLevel ?? 1,
         tamerId: data.tamerId ?? null,
@@ -70,6 +73,24 @@ router.get("/", requireAuth, async (req, res) => {
   );
 
   res.json({ friends: friendUsers.filter(Boolean) });
+});
+
+// Resolve the current active partner only for an accepted friendship.
+router.get("/:username/partner", requireAuth, async (req, res) => {
+  const username = String(req.params.username);
+  const [friend] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.username, username)).limit(1);
+  if (!friend) { res.status(404).json({ error: "Amigo não encontrado" }); return; }
+  const me = req.auth!.userId;
+  const [link] = await db.select({ id: friendshipsTable.id }).from(friendshipsTable).where(and(
+    eq(friendshipsTable.status, "accepted"),
+    or(and(eq(friendshipsTable.requesterId, me), eq(friendshipsTable.addresseeId, friend.id)),
+       and(eq(friendshipsTable.requesterId, friend.id), eq(friendshipsTable.addresseeId, me)))
+  )).limit(1);
+  if (!link) { res.status(403).json({ error: "Este jogador não está na sua lista de amigos" }); return; }
+  const [save] = await db.select({ saveData: gameSavesTable.saveData }).from(gameSavesTable).where(eq(gameSavesTable.userId, friend.id)).limit(1);
+  const partner = publicPartner(save?.saveData);
+  if (!partner) { res.status(404).json({ error: "O amigo não tem um Digimon ativo" }); return; }
+  res.json({ username, partner });
 });
 
 router.get("/requests", requireAuth, async (req, res) => {

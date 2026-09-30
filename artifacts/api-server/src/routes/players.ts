@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db, usersTable, gameSavesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
+import { publicHome } from "../lib/public-player.js";
+
 const router = Router();
 
 // GET /players/:username
@@ -29,6 +31,7 @@ router.get("/:username", async (req, res) => {
 
   res.json({
     username: user.username,
+    home: publicHome(data),
     tamerLevel: data.tamerLevel ?? 1,
     tamerName: data.playerName ?? user.username,
     tamerId: data.tamerId ?? null,
