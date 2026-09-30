@@ -295,7 +295,7 @@ export default function NavigationFAB() {
     tamerId,
   } = useGame();
   const menuRatio = MENU_ASPECT_RATIO[tamerId ?? ''] ?? MENU_ASPECT_RATIO.tamer_tai;
-  const menuWidth = Math.min(stageWidth - 32, (H - insets.top - insets.bottom - 48) * menuRatio);
+  const menuWidth = Math.min(stageWidth - 32, (H - insets.top - insets.bottom - 80) / (1 / menuRatio + 238 / 2160));
 
   const { logout, user } = useAuth();
   const { totalUnread: unreadChat } = useSocket();
@@ -610,6 +610,7 @@ export default function NavigationFAB() {
             setOpen(false);
             setConfirmLogout(false);
           }} />
+          <View style={{ width: menuWidth }}>
           <View
             style={[
               styles.menu,
@@ -773,6 +774,11 @@ export default function NavigationFAB() {
                   })}
                 </View>
 
+              </>
+            )}
+            </MenuScroller>
+          </View>
+          {!confirmLogout && <View style={styles.menuFooter}>
                 <TouchableOpacity
                   style={styles.themeActionBtn}
                   onPress={() => {
@@ -790,9 +796,7 @@ export default function NavigationFAB() {
                   <Image source={MENU_ACTION_IMAGES[tamerId ?? ''] ?? MENU_ACTION_IMAGES.tamer_tai} style={styles.menuThemeImage} resizeMode="contain" />
                   <Text style={[styles.themeActionText, { color: '#ff7373' }]}>{t('nav.logout')}</Text>
                 </TouchableOpacity>
-              </>
-            )}
-            </MenuScroller>
+          </View>}
           </View>
         </View>
       </Modal>
@@ -877,7 +881,9 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     minHeight: 0,
     borderRadius: 20,
-    padding: 16,
+    paddingHorizontal: 28,
+    paddingTop: 48,
+    paddingBottom: 36,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: {
@@ -891,10 +897,11 @@ const styles = StyleSheet.create({
   },
   menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   menuScroll: { flex: 1, width: '100%', ...Platform.select({ web: { overflowY: 'auto', touchAction: 'pan-y' } as any, default: {} }) },
-  menuScrollContent: { paddingTop: 32, paddingBottom: 28 },
+  menuScrollContent: { paddingTop: 4, paddingBottom: 12 },
   menuClose: { position: 'absolute', top: 10, right: 16, zIndex: 3, padding: 6 },
-  themeActionBtn: { width: '100%', aspectRatio: 1080 / 238, marginTop: 12, alignItems: 'center', justifyContent: 'center' },
-  themeActionText: { color: '#ffffff', fontSize: 12, fontWeight: '800' },
+  menuFooter: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  themeActionBtn: { flex: 1, aspectRatio: 1080 / 238, alignItems: 'center', justifyContent: 'center' },
+  themeActionText: { color: '#ffffff', fontSize: 10, fontWeight: '800' },
   navGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, paddingTop: 8 },
 
   /*
