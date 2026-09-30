@@ -19,7 +19,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
-import { useGame } from '@/context/GameContext';
+import { useGame, OwnedCharacter } from '@/context/GameContext';
+import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { CHARACTERS, ATTRIBUTES, EQUIPMENT_ITEMS, EQUIP_SLOTS_ORDER, getScaledStats, ElementId } from '@/constants/gameData';
 import { GAME_MAPS } from '@/constants/fases';
@@ -29,6 +30,7 @@ import ELEMENT_IMAGES from '@/constants/elementImages';
 import EQUIP_ITEM_IMAGES from '@/constants/equipImages';
 import { applyAscensionBonus, getStarryNightAvailability } from '@/utils/ascension';
 import { AscensionStars } from '@/components/AscensionStars';
+import { supportId, createBattleTeam, chooseBattleSlot, ownBattleTeam } from '@/utils/friendSupport';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -195,10 +197,36 @@ const PIECE_META: Record<string, { name: string; color: string }> = {
   piece_golden_ascension_star: { name: 'Fragmento de Estrela Dourada', color: '#facc15' },
 };
 
+type FriendSupport = { username: string; playerName: string; activePartner: OwnedCharacter | null };
+
 export default function BattleScreen() {
+  const { token, getApiUrl } = useAuth();
+  const [friendSupports, setFriendSupports] = useState<FriendSupport[]>([]);
+  const [supportsLoading, setSupportsLoading] = useState(false);
+  const [supportError, setSupportError] = useState('');
+  const [pickerSource, setPickerSource] = useState<'mine' | 'friends'>('mine');
+  const [supportRetry, setSupportRetry] = useState(0);
+  const mountedRef = useRef(true);
+  const startAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; startAbortRef.current?.abort(); }; }, []);
+  const guestSnapshotRef = useRef<Record<string, OwnedCharacter>>({});
+  const startingRef = useRef(false);
+  const [starting, setStarting] = useState(false);
+  useEffect(() => {
+    if (!token) { setFriendSupports([]); return; }
+    if (pickerSource !== 'friends') return;
+    const abort = new AbortController();
+    setSupportsLoading(true); setSupportError('');
+    fetch(`${getApiUrl()}/friends`, { headers: { Authorization: `Bearer ${token}` }, signal: abort.signal })
+      .then(async (res) => { if (!res.ok) throw new Error('Não foi possível carregar os parceiros dos amigos.'); return res.json(); })
+      .then((data) => setFriendSupports(data.friends ?? []))
+      .catch((e) => { if (!abort.signal.aborted) setSupportError(e.message); })
+      .finally(() => { if (!abort.signal.aborted) setSupportsLoading(false); });
+    return () => abort.abort();
+  }, [token, getApiUrl, pickerSource, supportRetry]);
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams<{ mapId: string; stageIndex: string; auto?: string }>();
+  const params = useLocalSearchParams<{ mapId: string; stageIndex: string; auto?: string; support?: string; supportSlot?: string }>();
   const {
     collection,
     selectedCharacter,
@@ -283,7 +311,12 @@ export default function BattleScreen() {
   const logRef = useRef<ScrollView>(null);
 
   // ── Team selection ─────────────────────────────────────────────────────────
-  const initialTeam = team.length > 0 ? team : (selectedCharacter ? [selectedCharacter.ownedId] : []);
+  const initialTeam = createBattleTeam(team.length > 0 ? team : (selectedCharacter ? [selectedCharacter.ownedId] : []), params.support, Number(params.supportSlot) || 0);
+  function resolveTeamOwned(ownedId: string): OwnedCharacter | undefined {
+    if (!ownedId.startsWith('friend:')) return collection.find((c) => c.ownedId === ownedId);
+    const partner = guestSnapshotRef.current[ownedId] ?? friendSupports.find((f) => supportId(f.username) === ownedId)?.activePartner;
+    return partner ? { ...partner, ownedId } : undefined;
+  }
   const [selectedTeam, setSelectedTeam] = useState<string[]>(initialTeam);
   const selectedTeamRef = useRef<string[]>(initialTeam);
   useEffect(() => { selectedTeamRef.current = selectedTeam; }, [selectedTeam]);
@@ -507,7 +540,7 @@ export default function BattleScreen() {
   // ── Auto-start battle when coming from auto-restart ────────────────────────
   useEffect(() => {
     if (!autoQuotaReady || !autoMode || !autoBattleAllowed || collection.length === 0) return;
-    const autoTeam = team.length > 0 ? team : (selectedCharacter ? [selectedCharacter.ownedId] : []);
+    const autoTeam = selectedTeamRef.current;
     if (autoTeam.length === 0) return;
     startBattle(autoTeam);
   // Run only once on mount
@@ -519,7 +552,10 @@ export default function BattleScreen() {
     if (!autoMode || winner !== 'player') return;
     const timer = setTimeout(() => {
       if (!autoModeRef.current) return;
-      router.replace(`/battle?mapId=${mapId}&stageIndex=${stageIndex}&auto=1`);
+      const ids = selectedTeamRef.current;
+      const guestSlot = ids.findIndex((id) => id.startsWith('friend:'));
+      const support = guestSlot >= 0 ? ids[guestSlot].slice(7) : undefined;
+      router.replace({ pathname: '/battle', params: { mapId, stageIndex: String(stageIndex), auto: '1', ...(support ? { support, supportSlot: String(guestSlot) } : {}) } } as any);
     }, 3000);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -783,7 +819,8 @@ export default function BattleScreen() {
   }
 
   // ── Start battle ───────────────────────────────────────────────────────────
-  function startBattle(teamIds: string[]) {
+  async function startBattle(teamIds: string[]) {
+    if (startingRef.current) return;
     if (!stage || teamIds.length === 0) return;
     if (!isAdmin && (stage as any)?.isBoss && isBossOnCooldown(mapId, stageIndex)) {
       Alert.alert('Boss em recarga', 'Este Boss só pode ser enfrentado uma vez a cada 30 minutos.');
@@ -797,11 +834,32 @@ export default function BattleScreen() {
       const minutes = now.getHours() * 60 + now.getMinutes();
       if (!availableHours.some(({ start, end }) => minutes >= start * 60 && minutes < end * 60)) return;
     }
+    const guestIds = teamIds.filter((id) => id.startsWith('friend:'));
+    if (guestIds.length > 1) { setSupportError('Escolha apenas um parceiro de amigo por equipe.'); return; }
+    startingRef.current = true; setStarting(true); setSupportError('');
+    const abort = new AbortController();
+    startAbortRef.current = abort;
+    const requestTimeout = setTimeout(() => abort.abort(), 15000);
+    try {
+      for (const id of guestIds) {
+        const username = id.slice(7);
+        const response = await fetch(`${getApiUrl()}/friends/${encodeURIComponent(username)}/partner`, { headers: { Authorization: `Bearer ${token}` }, signal: abort.signal });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error ?? 'Parceiro indisponível.');
+        const ch = getCharacter(data.partner?.characterId);
+        if (!ch || ch.rarity === 'EGG') throw new Error('O parceiro do amigo precisa ser um Digimon.');
+        guestSnapshotRef.current[id] = { ...data.partner, ownedId: id };
+      }
+    } catch (e) {
+      if (mountedRef.current) setSupportError(abort.signal.aborted ? 'Não foi possível carregar o parceiro. Tente novamente.' : e instanceof Error ? e.message : 'Erro ao carregar parceiro.');
+      return;
+    } finally { clearTimeout(requestTimeout); startingRef.current = false; if (mountedRef.current) setStarting(false); }
+    if (!mountedRef.current) return;
     const eqBonuses = buildEquipBonuses();
 
     const fighters: TeamFighter[] = [];
     for (const ownedId of teamIds) {
-      const owned = collection.find((c) => c.ownedId === ownedId);
+      const owned = resolveTeamOwned(ownedId);
       if (!owned) continue;
       const ch = getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId];
       if (!ch) continue;
@@ -842,7 +900,7 @@ export default function BattleScreen() {
       fighters.map((f) => f.name),
       fighters.map((f) => f.element),
       teamIds.map((ownedId) => {
-        const owned = collection.find((c) => c.ownedId === ownedId);
+        const owned = resolveTeamOwned(ownedId);
         return !!owned && hasDivineGiftPassive(owned.characterId);
       }),
     );
@@ -887,8 +945,9 @@ export default function BattleScreen() {
     setTargetIdx(-1);
     targetIdxRef.current = -1;
     setTargetSelected(false);
-    setSelectedCharacter(fighters[0].ownedId);
-    setTeam(teamIds);
+    const ownIds = ownBattleTeam(teamIds);
+    if (ownIds[0]) setSelectedCharacter(ownIds[0]);
+    setTeam(ownIds);
     setLog([]);
     setWinner(null);
     setBusy(false);
@@ -1481,24 +1540,12 @@ export default function BattleScreen() {
   const canSpirit = !!playerFighter && playerFighter.currentMP >= SPIRIT_MP_COST;
   const livingEnemies = enemies.filter((e) => e.currentHP > 0);
   const pOwned = teamFighters[activeTeamIdx]
-    ? collection.find((c) => c.ownedId === teamFighters[activeTeamIdx].ownedId)
+    ? resolveTeamOwned(teamFighters[activeTeamIdx].ownedId)
     : null;
-  const pChar = pOwned ? CHARACTERS[pOwned.characterId] : null;
+  const pChar = pOwned ? getCharacter(pOwned.characterId) : null;
 
   function setSlot(slotIdx: number, ownedId: string | null) {
-    setSelectedTeam((prev) => {
-      const next = [...prev];
-      if (ownedId === null) {
-        next.splice(slotIdx, 1);
-        return next.filter(Boolean);
-      }
-      const existingIdx = next.indexOf(ownedId);
-      if (existingIdx !== -1 && existingIdx !== slotIdx) {
-        next.splice(existingIdx, 1);
-      }
-      next[slotIdx] = ownedId;
-      return next.filter(Boolean);
-    });
+    setSelectedTeam((prev) => chooseBattleSlot(prev, slotIdx, ownedId));
   }
 
   // ─── SELECT ────────────────────────────────────────────────────────────────
@@ -1552,7 +1599,7 @@ export default function BattleScreen() {
         <View style={styles.slotsRow}>
           {[0, 1, 2].map((slotIdx) => {
             const ownedId = selectedTeam[slotIdx];
-            const owned = ownedId ? collection.find((c) => c.ownedId === ownedId) : null;
+            const owned = ownedId ? resolveTeamOwned(ownedId) : null;
             const char = owned ? (getCharacter(owned.characterId) ?? CHARACTERS[owned.characterId]) : null;
             return (
               <TouchableOpacity
@@ -1566,7 +1613,7 @@ export default function BattleScreen() {
                   },
                   pixelStyle,
                 ]}
-                onPress={() => setSlotPickerOpen(slotIdx)}
+                onPress={() => { setPickerSource('mine'); setSlotPickerOpen(slotIdx); }}
                 activeOpacity={0.8}
               >
                 <View style={[styles.slotNumBadge, { backgroundColor: colors.primary }]}>
@@ -1576,7 +1623,7 @@ export default function BattleScreen() {
                   <>
                     <CharacterAvatar characterId={char.id} size={54} />
                     <Text style={[styles.slotName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
-                    <Text style={[styles.slotLevel, { color: colors.primary }]}>Lv {owned.level}</Text>
+                    <Text style={[styles.slotLevel, { color: colors.primary }]}>Lv {owned.level}{ownedId?.startsWith('friend:') ? ` · @${ownedId.slice(7)}` : ''}</Text>
                     <TouchableOpacity
                       style={[styles.slotRemoveBtn, { backgroundColor: '#ef444422', borderColor: '#ef444488' }]}
                       onPress={(e) => { e.stopPropagation(); setSlot(slotIdx, null); }}
@@ -1611,8 +1658,15 @@ export default function BattleScreen() {
               <Text style={[styles.slotModalTitle, { color: colors.foreground }]}>
                 {t('battle.chooseSlot')} {(slotPickerOpen ?? 0) + 1}
               </Text>
+              <View style={{ flexDirection: 'row', gap: 16, padding: 12 }}>
+                <TouchableOpacity onPress={() => setPickerSource('mine')}><Text style={{ color: pickerSource === 'mine' ? colors.primary : colors.mutedForeground }}>Meus Digimons</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => setPickerSource('friends')}><Text style={{ color: pickerSource === 'friends' ? colors.primary : colors.mutedForeground }}>Parceiro de amigo</Text></TouchableOpacity>
+              </View>
+              {pickerSource === 'friends' && <TouchableOpacity accessibilityLabel="Atualizar parceiros" onPress={() => setSupportRetry((v) => v + 1)}><Text style={{ color: colors.primary, paddingHorizontal: 16, paddingBottom: 8 }}>Atualizar parceiros</Text></TouchableOpacity>}
+              {pickerSource === 'friends' && <Text style={{ color: colors.mutedForeground, paddingHorizontal: 16, paddingBottom: 8 }}>Um parceiro ocupa um dos três espaços da equipe.</Text>}
               <FlatList
-                data={collection}
+                ListEmptyComponent={<Text style={{ color: colors.mutedForeground, padding: 16 }}>{supportsLoading ? 'Carregando amigos…' : supportError || (token ? 'Nenhum parceiro disponível.' : 'Entre na sua conta para usar parceiros de amigos.')}</Text>}
+                data={pickerSource === 'mine' ? collection : friendSupports.filter((f) => f.activePartner && getCharacter(f.activePartner.characterId) && getCharacter(f.activePartner.characterId)?.rarity !== 'EGG').map((f) => ({ ...f.activePartner!, ownedId: supportId(f.username) }))}
                 keyExtractor={(item) => item.ownedId}
                 contentContainerStyle={{ paddingBottom: botPad + 16 }}
                 renderItem={({ item }) => {
@@ -1640,7 +1694,7 @@ export default function BattleScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={[styles.slotPickerName, { color: colors.foreground }]}>{c.name}</Text>
-                        <Text style={[styles.slotPickerLevel, { color: colors.mutedForeground }]}>{t('common.level')} {item.level}</Text>
+                        <Text style={[styles.slotPickerLevel, { color: colors.mutedForeground }]}>{t('common.level')} {item.level}{item.ownedId.startsWith('friend:') ? ` · @${item.ownedId.slice(7)}` : ''}</Text>
                       </View>
                       {isSelected && !isThisSlot && (
                         <View style={[styles.inOtherSlot, { backgroundColor: colors.mutedForeground + '22' }]}>
@@ -1660,8 +1714,11 @@ export default function BattleScreen() {
           </Pressable>
         </Modal>
 
+        {supportError ? <Text style={{ color: '#f87171', paddingHorizontal: 20, paddingBottom: 12 }}>{supportError}</Text> : null}
+        {starting && <Text style={{ color: colors.primary, textAlign: 'center' }}>Carregando parceiro…</Text>}
         <TouchableOpacity
-          onPress={() => { if (selectedTeam.length > 0) startBattle(selectedTeam); }}
+          disabled={starting}
+          onPress={() => { if (selectedTeam.length > 0) void startBattle(selectedTeam); }}
           activeOpacity={selectedTeam.length > 0 ? 0.8 : 1}
           style={[
             styles.startBattleBtn,
@@ -1823,7 +1880,7 @@ export default function BattleScreen() {
         <View style={[styles.playerSection, { borderTopColor: colors.border }]}>
           <HPBar
             current={playerFighter.currentHP}
-            max={getScaledStats(pChar?.baseStats ?? playerFighter.stats, pOwned?.level ?? 1).hp}
+            max={playerFighter.stats.hp}
             color={colors.primary}
           />
           <View style={styles.playerInfoRow}>
@@ -1857,9 +1914,9 @@ export default function BattleScreen() {
           {teamFighters.length > 1 && (
             <View style={styles.teamStrip}>
               {teamFighters.map((tf, i) => {
-                const tfOwned = collection.find((c) => c.ownedId === tf.ownedId);
-                const tfChar = tfOwned ? CHARACTERS[tfOwned.characterId] : null;
-                const maxHP = tfChar ? getScaledStats(tfChar.baseStats, tfOwned?.level ?? 1).hp : tf.stats.hp;
+                const tfOwned = resolveTeamOwned(tf.ownedId);
+                const tfChar = tfOwned ? getCharacter(tfOwned.characterId) : null;
+                const maxHP = tf.stats.hp;
                 const isActive = i === activeTeamIdx;
                 const dead = tf.currentHP <= 0;
                 return (
