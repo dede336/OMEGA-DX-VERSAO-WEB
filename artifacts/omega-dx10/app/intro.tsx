@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, Animated, Platform, TouchableOpacity, Text } from 'react-native';
-import { useVideoPlayer, VideoView } from 'expo-video';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useGame } from '@/context/GameContext';
@@ -8,7 +7,7 @@ import { pixelStyle } from '@/constants/pixelStyle';
 
 const useND = Platform.OS !== 'web';
 
-const videoSource = require('../assets/videos/intro.mp4');
+const introSource = require('../assets/images/intro.gif');
 const logoSource = require('../assets/images/logo.webp');
 
 export default function IntroScreen() {
@@ -27,21 +26,6 @@ export default function IntroScreen() {
     });
   }, [isLoaded, isOnboarded, logoOpacity]);
 
-  const player = useVideoPlayer(videoSource, (p) => {
-    p.loop = false;
-    p.muted = false;
-    p.play();
-  });
-
-  useEffect(() => {
-    const sub = player.addListener('playingChange', (event) => {
-      if (!event.isPlaying && player.currentTime > 0) {
-        navigateAway();
-      }
-    });
-    return () => sub.remove();
-  }, [player, navigateAway]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       Animated.parallel([
@@ -59,11 +43,11 @@ export default function IntroScreen() {
 
   return (
     <View style={styles.container}>
-      <VideoView
-        player={player}
-        style={styles.video}
-        contentFit="cover"
-        nativeControls={false}
+      <Image
+        source={introSource}
+        style={styles.animation}
+        contentFit="contain"
+        autoplay
       />
 
       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -87,7 +71,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  video: {
+  animation: {
     position: 'absolute' as const,
     top: 0,
     left: 0,
