@@ -736,12 +736,12 @@ export default function NavigationFAB() {
                             style={{
                               width:
                                 item.bigIcon
-                                  ? 64
-                                  : 32,
+                                  ? 72
+                                  : 48,
                               height:
                                 item.bigIcon
-                                  ? 64
-                                  : 32,
+                                  ? 72
+                                  : 48,
                             }}
                             resizeMode="contain"
                           />
@@ -897,12 +897,12 @@ const styles = StyleSheet.create({
   },
   menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   menuScroll: { flex: 1, width: '100%', ...Platform.select({ web: { overflowY: 'auto', touchAction: 'pan-y' } as any, default: {} }) },
-  menuScrollContent: { paddingTop: 4, paddingBottom: 12 },
+  menuScrollContent: { flexGrow: 1, minHeight: '100%', paddingTop: 4, paddingBottom: 12 },
   menuClose: { position: 'absolute', top: 10, right: 16, zIndex: 3, padding: 6 },
   menuFooter: { flexDirection: 'row', gap: 10, marginTop: 12 },
   themeActionBtn: { flex: 1, aspectRatio: 1080 / 238, alignItems: 'center', justifyContent: 'center' },
   themeActionText: { color: '#ffffff', fontSize: 10, fontWeight: '800' },
-  navGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, paddingTop: 8 },
+  navGrid: { flexGrow: 1, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignContent: 'space-around', columnGap: 10, rowGap: 12, paddingVertical: 12 },
 
   /*
    * Limite equivalente à largura mobile do jogo.
@@ -938,8 +938,8 @@ const styles = StyleSheet.create({
   },
 
   navIcon: {
-    width: 44,
-    height: 44,
+    width: 64,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
   },
