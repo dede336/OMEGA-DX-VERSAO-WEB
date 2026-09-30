@@ -281,7 +281,7 @@ export default function HomeScreen() {
                 </View>
               ))}
             </View>
-            <View style={styles.themeFrame} pointerEvents="none">
+            <View style={[styles.themeFrame, styles.activeFrameFront]} pointerEvents="none">
               <Image source={homeTheme.active} style={styles.fullFrameImage} resizeMode="stretch" />
             </View>
           </TouchableOpacity>
@@ -466,12 +466,13 @@ const styles = StyleSheet.create({
 
   // Active card
   activeCard: { overflow: 'hidden' as const, marginBottom: 20, minHeight: 225, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 17 },
-  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 8, gap: 10, minHeight: 110, overflow: 'hidden', backgroundColor: '#080d19' },
+  activeStrip: { flexDirection: 'row', alignItems: 'center', padding: 8, gap: 10, minHeight: 110, overflow: 'visible', backgroundColor: '#080d19', zIndex: 0 },
   activeStripShade: { ...StyleSheet.absoluteFillObject, backgroundColor: '#05091755' },
   activeDigimonStage: { width: 112, height: 110, alignItems: 'center', justifyContent: 'flex-end' },
   activeBase: { position: 'absolute', bottom: 6, width: 108, height: 46 },
   activeDigimonPosition: { position: 'absolute', bottom: 21, alignSelf: 'center', zIndex: 1 },
-  activeStripGif: { opacity: 0.95 },
+  activeStripGif: { opacity: 0.95, transform: [{ scale: 1.1 }], zIndex: 0 },
+  activeFrameFront: { zIndex: 10 },
   activeStripGifNative: { opacity: 0.55 },
   activeAvatarRing: { borderRadius: 40, borderWidth: 2, padding: 2 },
   activeInfo: { flex: 1 },
