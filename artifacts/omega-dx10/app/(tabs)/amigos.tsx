@@ -6,7 +6,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Image as ExpoImage } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
+import { getActiveTamerImage } from '@/constants/activeTamerImages';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
@@ -135,7 +137,7 @@ export default function AmigosScreen() {
           <View style={[styles.friendAvatar, { borderColor: tamer?.accentColor ?? colors.border, backgroundColor: '#0f1629' }]}>
             {tamer ? (
               <View style={{ overflow: 'hidden', borderRadius: 22 }}>
-                <Text style={{ fontSize: 16 }}>{tamer.fullName.charAt(0)}</Text>
+                {tamer.id === 'tamer_tai' ? <ExpoImage source={getActiveTamerImage(tamer)} style={{ width: 40, height: 40 }} contentFit="contain" autoplay /> : <Text style={{ fontSize: 16 }}>{tamer.fullName.charAt(0)}</Text>}
               </View>
             ) : (
               <Feather name="user" size={22} color={colors.mutedForeground} />

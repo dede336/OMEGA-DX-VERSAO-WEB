@@ -4,6 +4,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { getActiveTamerImage } from '@/constants/activeTamerImages';
 import { useColors } from '@/hooks/useColors';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
@@ -138,10 +139,11 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
           activeOpacity={isAdmin ? 0.7 : 1}
         >
           {tamer ? (
-            <Image
-              source={tamer.image}
+            <ExpoImage
+              source={getActiveTamerImage(tamer)}
               style={styles.tamerPortraitImg}
-              resizeMode="contain"
+              contentFit="contain"
+              autoplay
             />
           ) : (
             <Feather name="user" size={36} color={colors.primary} />

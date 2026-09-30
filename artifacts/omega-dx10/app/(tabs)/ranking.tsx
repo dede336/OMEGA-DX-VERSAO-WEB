@@ -5,7 +5,9 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { Image as ExpoImage } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
+import { getActiveTamerImage } from '@/constants/activeTamerImages';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { TAMERS, CHARACTERS } from '@/constants/gameData';
@@ -122,22 +124,22 @@ export default function RankingScreen() {
 
         <View style={styles.rankCol}>
           {topRank ? (
-            <Image source={RANK_IMAGES[item.rank - 1]} style={{ width: 38, height: 44 }} resizeMode="contain" accessibilityLabel={`${item.rank}º lugar`} />
+            <Image source={RANK_IMAGES[item.rank - 1]} style={{ width: 26, height: 30 }} resizeMode="contain" accessibilityLabel={`${item.rank}º lugar`} />
           ) : (
-            <View style={{ alignItems: 'center' }}><Image source={HONOR_MEDAL} style={{ width: 28, height: 32 }} resizeMode="contain" /><Text style={[styles.rankNum, { color: colors.mutedForeground, fontSize: 9 }]}>#{item.rank}</Text></View>
+            <View style={{ alignItems: 'center' }}><Image source={HONOR_MEDAL} style={{ width: 20, height: 23 }} resizeMode="contain" /><Text style={[styles.rankNum, { color: colors.mutedForeground, fontSize: 9 }]}>#{item.rank}</Text></View>
           )}
         </View>
 
         <View style={styles.avatarWrap}>
           {tamer ? (
-            <Image
-              source={tamer.image}
+            <ExpoImage
+              source={getActiveTamerImage(tamer)}
               style={[
                 styles.avatarImg,
                 isMatt && { transform: [{ scale: 1.8 }] },
                 isTK   && { transform: [{ scale: 1.2 }] },
               ]}
-              resizeMode="contain"
+              contentFit="contain" autoplay
             />
           ) : (
             <Feather name="user" size={20} color={colors.mutedForeground} />
