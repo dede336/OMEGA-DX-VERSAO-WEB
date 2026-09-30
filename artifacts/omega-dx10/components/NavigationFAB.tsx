@@ -33,7 +33,14 @@ const ICON_PVP = require('../assets/images/icone_pvp.gif');
 const ICON_AMIGOS = require('../assets/images/amigos-icon.webp');
 const ICON_ADMIN = require('../assets/images/admin_icon.webp');
 const ICON_CHAT = require('../assets/images/chat-icon.webp');
-const ICON_LOGOUT = require('../assets/images/logout-icon.webp');
+const MENU_ACTION_IMAGES: Record<string, any> = {
+  tamer_kari: require('../assets/images/tema/imagem fundo botão sari-trocar senha kari.png'),
+  tamer_matt: require('../assets/images/tema/imagem fundo botão sari-trocar senha matt.png'),
+  tamer_mimi: require('../assets/images/tema/imagem fundo botão sari-trocar senha mimi.png'),
+  tamer_sora: require('../assets/images/tema/imagem fundo botão sari-trocar senha sora.png'),
+  tamer_tai: require('../assets/images/tema/imagem fundo botão sari-trocar senha tai.png'),
+  tamer_tk: require('../assets/images/tema/imagem fundo botão sari-trocar senha tk.png'),
+};
 
 const FAB_SIZE = 47;
 const IMG_SIZE = 38;
@@ -621,6 +628,9 @@ export default function NavigationFAB() {
             <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
               <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
             </View>
+            <TouchableOpacity style={styles.menuClose} accessibilityLabel="Fechar menu" onPress={() => setOpen(false)}>
+              <Feather name="x" size={22} color={colors.foreground} />
+            </TouchableOpacity>
             <MenuScroller>
             {confirmLogout ? (
               <View style={styles.confirmBox}>
@@ -683,45 +693,6 @@ export default function NavigationFAB() {
               </View>
             ) : (
               <>
-                <View
-                  style={styles.menuHeader}
-                >
-                  <Image
-                    source={FAB_IMG}
-                    style={{
-                      width: 38,
-                      height: 38,
-                    }}
-                    resizeMode="contain"
-                  />
-
-                  <Text
-                    style={[
-                      styles.menuTitle,
-                      {
-                        color:
-                          colors.foreground,
-                      },
-                    ]}
-                  >
-                    {t('nav.menuTitle')}
-                  </Text>
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      setOpen(false)
-                    }
-                  >
-                    <Feather
-                      name="x"
-                      size={22}
-                      color={
-                        colors.mutedForeground
-                      }
-                    />
-                  </TouchableOpacity>
-                </View>
-
                 <View style={styles.navGrid}>
                   {visible.map((item) => {
                     const badgeCount =
@@ -741,6 +712,7 @@ export default function NavigationFAB() {
                     return (
                       <TouchableOpacity
                         key={item.route}
+                        accessibilityLabel={item.label ?? t(item.labelKey)}
                         style={
                           styles.navItem
                         }
@@ -774,20 +746,6 @@ export default function NavigationFAB() {
                           />
                         </View>
 
-                        <Text
-                          style={[
-                            styles.navLabel,
-                            {
-                              color:
-                                colors.foreground,
-                            },
-                          ]}
-                        >
-                          {item.label ?? t(
-                            item.labelKey
-                          )}
-                        </Text>
-
                         {hasUnread && (
                           <View
                             style={[
@@ -816,58 +774,21 @@ export default function NavigationFAB() {
                 </View>
 
                 <TouchableOpacity
-                  style={[
-                    styles.changePasswordBtn,
-                    {
-                      backgroundColor: '#3b82f622',
-                      borderColor: '#3b82f6',
-                    },
-                    pixelStyle,
-                  ]}
+                  style={styles.themeActionBtn}
                   onPress={() => {
                     setOpen(false);
                     setConfirmLogout(false);
                     setChangePasswordOpen(true);
                   }}
+                  accessibilityLabel="Trocar senha"
                   activeOpacity={0.75}
                 >
-                  <Feather name="key" size={24} color="#60a5fa" />
-                  <Text style={styles.changePasswordText}>Alterar senha</Text>
+                  <Image source={MENU_ACTION_IMAGES[tamerId ?? ''] ?? MENU_ACTION_IMAGES.tamer_tai} style={styles.menuThemeImage} resizeMode="contain" />
+                  <Text style={styles.themeActionText}>Trocar senha</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.logoutBtn,
-                    {
-                      backgroundColor:
-                        '#ef444422',
-                      borderColor:
-                        '#ef4444',
-                    },
-                    pixelStyle,
-                  ]}
-                  onPress={handleLogout}
-                  activeOpacity={0.75}
-                >
-                  <Image
-                    source={ICON_LOGOUT}
-                    style={{
-                      width: 26,
-                      height: 26,
-                    }}
-                    resizeMode="contain"
-                  />
-
-                  <Text
-                    style={[
-                      styles.logoutText,
-                      {
-                        color: '#ef4444',
-                      },
-                    ]}
-                  >
-                    {t('nav.logout')}
-                  </Text>
+                <TouchableOpacity style={styles.themeActionBtn} onPress={handleLogout} accessibilityLabel={t('nav.logout')} activeOpacity={0.75}>
+                  <Image source={MENU_ACTION_IMAGES[tamerId ?? ''] ?? MENU_ACTION_IMAGES.tamer_tai} style={styles.menuThemeImage} resizeMode="contain" />
+                  <Text style={[styles.themeActionText, { color: '#ff7373' }]}>{t('nav.logout')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -970,7 +891,10 @@ const styles = StyleSheet.create({
   },
   menuThemeImage: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%' },
   menuScroll: { flex: 1, width: '100%', ...Platform.select({ web: { overflowY: 'auto', touchAction: 'pan-y' } as any, default: {} }) },
-  menuScrollContent: { paddingBottom: 28 },
+  menuScrollContent: { paddingTop: 32, paddingBottom: 28 },
+  menuClose: { position: 'absolute', top: 10, right: 16, zIndex: 3, padding: 6 },
+  themeActionBtn: { width: '100%', aspectRatio: 1080 / 238, marginTop: 12, alignItems: 'center', justifyContent: 'center' },
+  themeActionText: { color: '#ffffff', fontSize: 12, fontWeight: '800' },
   navGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, paddingTop: 8 },
 
   /*
