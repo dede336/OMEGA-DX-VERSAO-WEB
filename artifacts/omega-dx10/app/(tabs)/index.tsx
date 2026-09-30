@@ -235,12 +235,12 @@ export default function HomeScreen() {
                     {bgSrc && (
                       <ExpoImage
                         source={bgSrc}
-                        style={[StyleSheet.absoluteFillObject, styles.activeStripGif]}
+                        style={[StyleSheet.absoluteFillObject, styles.activeBackgroundGeometry, styles.activeStripGif]}
                         contentFit="cover"
                         autoplay
                       />
                     )}
-                    <View style={styles.activeStripShade} pointerEvents="none" />
+                    <View style={[styles.activeStripShade, styles.activeBackgroundGeometry]} pointerEvents="none" />
                     <View style={styles.activeDigimonStage}>
                       <Image source={homeTheme.base} style={styles.activeBase} resizeMode="contain" />
                       <View style={styles.activeDigimonPosition}>
@@ -471,7 +471,8 @@ const styles = StyleSheet.create({
   activeDigimonStage: { width: 112, height: 110, alignItems: 'center', justifyContent: 'flex-end' },
   activeBase: { position: 'absolute', bottom: 6, width: 108, height: 46 },
   activeDigimonPosition: { position: 'absolute', bottom: 21, alignSelf: 'center', zIndex: 1 },
-  activeStripGif: { opacity: 0.95, transform: [{ scale: 1.1 }], zIndex: 0 },
+  activeBackgroundGeometry: { transform: [{ translateY: -5 }, { scale: 1.1 }] },
+  activeStripGif: { opacity: 0.95, zIndex: 0 },
   activeFrameFront: { zIndex: 10 },
   activeStripGifNative: { opacity: 0.55 },
   activeAvatarRing: { borderRadius: 40, borderWidth: 2, padding: 2 },
