@@ -154,7 +154,11 @@ function DigiGridCard({ owned, char, isSelected, canEvolve, tamerAccent, onPress
           <Text style={[gridCardStyles.lvText, { color: rarityColor }]}>Lv{owned.level}</Text>
         </View>
         <View style={gridCardStyles.avatar}>
-          <CharacterAvatar characterId={owned.characterId} size={90} ascensionStars={owned.ascensionStars} />
+          <CharacterAvatar
+            characterId={owned.characterId}
+            size={char.rarity === 'EGG' || owned.characterId === 'mushroomon' ? 90 * 0.8 : owned.characterId === 'salamon' ? 90 * 0.85 : owned.characterId === 'blackSalamon' ? 90 * 1.15 : 90}
+            ascensionStars={owned.ascensionStars}
+          />
           <AscensionStars stars={owned.ascensionStars} size="small" />
         </View>
       </View>
@@ -193,7 +197,7 @@ const gridCardStyles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: '5%',
+    bottom: '9%',
     alignItems: 'center',
     zIndex: 1,
   },
