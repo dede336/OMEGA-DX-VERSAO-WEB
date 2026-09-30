@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Alert, Modal, TextInput } from 'react-native';
+import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useGame } from '@/context/GameContext';
@@ -14,6 +15,13 @@ import ENERGY_PILL_IMAGE from '@/constants/energyPillImage';
 
 const PVP_ICON = require('../../assets/images/icone_pvp.gif');
 const PVP_COIN_ICON = require('../../assets/images/moeda_pvp.gif');
+// Filenames 1 and 2 are swapped: use the placement printed on each trophy.
+const PVP_RANK_IMAGES = [
+  require('../../assets/images/rankin 2 pvp.png'),
+  require('../../assets/images/rankin 1 pvp.png'),
+  require('../../assets/images/rankin 3 pvp.png'),
+];
+const HONOR_TROPHY = require('../../assets/images/trofel de honra.png');
 const MAX_BATTLES = 5;
 const RECHARGE_MS = 30 * 60 * 1000;
 const PVP_SHOP_IMAGES: Record<string, any> = {
@@ -335,11 +343,11 @@ export default function PvpScreen() {
       </TouchableOpacity>
 
       <Text style={[styles.heading,{color:colors.foreground}]}>Ranking PvP</Text>
-      {ranking.map((entry) => <View key={entry.username} style={[styles.rankRow,{backgroundColor:colors.card,borderColor:colors.border}]}>
-        <Text style={[styles.rankPos,{color:colors.foreground}]}>#{entry.rank}</Text>
+      {ranking.map((entry) => <TouchableOpacity accessibilityLabel={`Ver perfil de ${entry.tamerName}`} onPress={() => router.push({ pathname: "/player-profile", params: { username: entry.username } } as any)} key={entry.username} style={[styles.rankRow,{backgroundColor:colors.card,borderColor:colors.border}]}>
+        <View style={{ width: 38, alignItems: 'center' }}>{entry.rank <= 3 ? <Image source={PVP_RANK_IMAGES[entry.rank - 1]} style={{ width: 38, height: 44 }} resizeMode="contain" accessibilityLabel={`${entry.rank}º lugar`} /> : <View style={{ alignItems: 'center' }}><Image source={HONOR_TROPHY} style={{ width: 28, height: 32 }} resizeMode="contain" /><Text style={[styles.rankPos,{color:colors.foreground,textAlign:'center',fontSize:9}]}>#{entry.rank}</Text></View>}</View>
         <View style={{flex:1}}><Text style={[styles.rankName,{color:colors.foreground}]}>{entry.tamerName}</Text><Text style={[styles.rankUser,{color:colors.mutedForeground}]}>@{entry.username}</Text></View>
         <Text style={styles.rankPts}>{entry.pvpPoints} pts</Text>
-      </View>)}
+      </TouchableOpacity>)}
     </ScrollView>
   );
 }

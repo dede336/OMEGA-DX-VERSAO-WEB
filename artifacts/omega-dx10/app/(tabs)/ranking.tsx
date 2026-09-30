@@ -34,8 +34,13 @@ interface LeaderboardEntry {
 
 type RankType = 'level' | 'count' | 'stats';
 
+const HONOR_MEDAL = require('../../assets/images/medalha de honra.png');
 const RANK_COLORS = ['#facc15', '#94a3b8', '#b87333'];
-const RANK_ICONS = ['🥇', '🥈', '🥉'];
+const RANK_IMAGES = [
+  require('../../assets/images/rankin 1.png'),
+  require('../../assets/images/rankin 2.png'),
+  require('../../assets/images/rankin 3.png'),
+];
 
 const TAB_CONFIG: { key: RankType; label: string; icon: string }[] = [
   { key: 'level', label: 'Tamer', icon: '⭐' },
@@ -99,7 +104,7 @@ export default function RankingScreen() {
     const bestChar = (rankType === 'stats' && item.bestDigimonCharId) ? CHARACTERS[item.bestDigimonCharId] : null;
 
     return (
-      <View style={[
+      <TouchableOpacity accessibilityLabel={`Ver perfil de ${item.tamerName}`} onPress={() => router.push({ pathname: "/player-profile", params: { username: item.username } } as any)} style={[
         styles.entry,
         {
           backgroundColor: isMe ? colors.primary + '18' : colors.card,
@@ -117,9 +122,9 @@ export default function RankingScreen() {
 
         <View style={styles.rankCol}>
           {topRank ? (
-            <Text style={styles.rankEmoji}>{RANK_ICONS[item.rank - 1]}</Text>
+            <Image source={RANK_IMAGES[item.rank - 1]} style={{ width: 38, height: 44 }} resizeMode="contain" accessibilityLabel={`${item.rank}º lugar`} />
           ) : (
-            <Text style={[styles.rankNum, { color: colors.mutedForeground }]}>#{item.rank}</Text>
+            <View style={{ alignItems: 'center' }}><Image source={HONOR_MEDAL} style={{ width: 28, height: 32 }} resizeMode="contain" /><Text style={[styles.rankNum, { color: colors.mutedForeground, fontSize: 9 }]}>#{item.rank}</Text></View>
           )}
         </View>
 
@@ -179,7 +184,7 @@ export default function RankingScreen() {
             </View>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 

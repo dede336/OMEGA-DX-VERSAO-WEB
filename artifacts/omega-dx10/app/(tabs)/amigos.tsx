@@ -318,6 +318,14 @@ export default function AmigosScreen() {
                     })}
                   </View>
 
+                  <TouchableOpacity style={[styles.challengeBtn, pixelStyle]} onPress={() => {
+                    setSelectedFriend(null);
+                    router.push({ pathname: '/player-profile', params: { username: f.username } } as any);
+                  }}>
+                    <Feather name="user" size={18} color="#fff" />
+                    <Text style={styles.challengeBtnText}>Ver tela de início</Text>
+                  </TouchableOpacity>
+
                   {tamerLevel >= 5 ? (
                     <TouchableOpacity
                       style={[styles.challengeBtn, pixelStyle]}

@@ -63,8 +63,13 @@ const SPECIAL_GIFS: Record<string, any> = {
   imperialDramonPM:      require('../../assets/images/characters/imperialDramonPM_status.webp'),
 };
 
-export default function HomeScreen() {
-  const colors = useColors();
+export type PublicHomeProfile = Pick<ReturnType<typeof useGame>, 'playerName' | 'totalPlayerLevel' | 'tamerId' | 'bits' | 'gemas' | 'selectedCharacter' | 'pvpCrest' | 'pvpDigivice'> & {
+  username: string; collectionSize: number; equippedItems: { brasao: string | null; digivice: string | null };
+};
+
+export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHomeProfile } = {}) {
+  const themeColors = useColors();
+  const colors = publicProfile ? { ...themeColors, primary: (HOME_THEME[publicProfile.tamerId ?? ''] ?? HOME_THEME.tamer_tai).accent } : themeColors;
   const insets = useSafeAreaInsets();
   const game = useGame();
   const { user } = useAuth();
@@ -75,11 +80,11 @@ export default function HomeScreen() {
     const next = LANG_CYCLE[(idx + 1) % LANG_CYCLE.length];
     setLanguage(next);
   }
-  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId, equippedItems, pvpCrest, pvpDigivice } = game;
+  const { selectedCharacter, collection, clearedStages, playerName, totalPlayerLevel, bits, gemas, tamerId, setSelectedCharacter, setTamerId, equippedItems, pvpCrest, pvpDigivice } = publicProfile ? { ...game, ...publicProfile } : game;
 
   const [swapModalVisible, setSwapModalVisible] = useState(false);
   const [tamerPickerVisible, setTamerPickerVisible] = useState(false);
-  const isAdmin = user?.isAdmin ?? false;
+  const isAdmin = !publicProfile && (user?.isAdmin ?? false);
 
   const totalStages = GAME_MAPS.reduce((s, m) => s + m.stages.length, 0);
   const clearedCount = Object.keys(clearedStages).length;
@@ -150,7 +155,7 @@ export default function HomeScreen() {
 
         {/* Welcome text */}
         <View style={styles.heroText}>
-          <Text style={[styles.heroGreeting, { color: colors.primary }]}>{t('home.welcome')}</Text>
+          <Text style={[styles.heroGreeting, { color: colors.primary }]}>{publicProfile ? 'PERFIL DO JOGADOR' : t('home.welcome')}</Text>
           <Text style={[styles.heroName, { color: colors.foreground }]} numberOfLines={1}>{playerName}</Text>
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
@@ -178,10 +183,10 @@ export default function HomeScreen() {
             <Text style={[styles.rankBadgeLabel, { color: colors.primaryForeground }]}>RANK</Text>
             <Text style={[styles.rankBadgeNum, { color: colors.primaryForeground }]}>{totalPlayerLevel}</Text>
           </View>
-          {user ? (
+          {user || publicProfile ? (
             <View style={[styles.userBadge, { backgroundColor: '#22c55e22', borderColor: '#22c55e55' }, pixelStyle]}>
               <Feather name="user-check" size={11} color="#22c55e" />
-              <Text style={[styles.userBadgeText, { color: '#22c55e' }]} numberOfLines={1}>{user.username}</Text>
+              <Text style={[styles.userBadgeText, { color: '#22c55e' }]} numberOfLines={1}>{publicProfile?.username ?? user?.username}</Text>
             </View>
           ) : (
             <TouchableOpacity
@@ -193,7 +198,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
           {/* Language toggle flag */}
-          <TouchableOpacity onPress={cycleLanguage} style={styles.langFlag} activeOpacity={0.75}>
+          <TouchableOpacity disabled={!!publicProfile} onPress={cycleLanguage} style={styles.langFlag} activeOpacity={0.75}>
             <Image source={FLAG_IMAGES[language]} style={styles.langFlagImg} resizeMode="cover" />
           </TouchableOpacity>
         </View>
@@ -210,7 +215,7 @@ export default function HomeScreen() {
         <Image source={homeTheme.currency} style={styles.themeFrame} resizeMode="stretch" />
         <View style={styles.statItem}>
           <Image source={require('../../assets/images/digimon-icon.webp')} style={styles.statIcon} resizeMode="contain" />
-          <Text style={[styles.statNum, { color: colors.foreground }]}>{collection.length}</Text>
+          <Text style={[styles.statNum, { color: colors.foreground }]}>{publicProfile?.collectionSize ?? collection.length}</Text>
           <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{t('home.stat.digimons')}</Text>
         </View>
         <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
@@ -233,6 +238,7 @@ export default function HomeScreen() {
         {char && scaled && selectedCharacter && attrData ? (
           <TouchableOpacity
             activeOpacity={0.85}
+            disabled={!!publicProfile}
             onPress={() => setSwapModalVisible(true)}
             style={styles.activeCard}
           >
@@ -299,6 +305,7 @@ export default function HomeScreen() {
         ) : (
           <TouchableOpacity
             activeOpacity={0.85}
+            disabled={!!publicProfile}
             onPress={() => router.push('/(tabs)/collection')}
             style={[styles.emptyCard, { backgroundColor: colors.card, borderColor: colors.border }, pixelStyle]}
           >
