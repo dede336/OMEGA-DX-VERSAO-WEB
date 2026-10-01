@@ -81,9 +81,11 @@ const styles = StyleSheet.create({
     height: '100%' as any,
   },
   logoWrapper: {
-    flex: 1,
+    position: 'absolute',
+    top: '12%',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   logo: {
     width: 260,
