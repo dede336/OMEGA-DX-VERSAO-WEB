@@ -137,7 +137,7 @@ export default function AmigosScreen() {
           <View style={[styles.friendAvatar, { borderColor: tamer?.accentColor ?? colors.border, backgroundColor: '#0f1629' }]}>
             {tamer ? (
               <View style={{ overflow: 'hidden', borderRadius: 22 }}>
-                {(tamer.id === 'tamer_tai' || tamer.id === 'tamer_kari') ? <ExpoImage source={getActiveTamerImage(tamer)} style={{ width: 40, height: 40 }} contentFit="contain" autoplay /> : <Text style={{ fontSize: 16 }}>{tamer.fullName.charAt(0)}</Text>}
+                {(tamer.id === 'tamer_tai' || tamer.id === 'tamer_kari' || tamer.id === 'tamer_matt') ? <ExpoImage source={getActiveTamerImage(tamer)} style={{ width: 40, height: 40 }} contentFit="contain" autoplay /> : <Text style={{ fontSize: 16 }}>{tamer.fullName.charAt(0)}</Text>}
               </View>
             ) : (
               <Feather name="user" size={22} color={colors.mutedForeground} />
