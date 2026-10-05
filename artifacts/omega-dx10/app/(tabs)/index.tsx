@@ -141,7 +141,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
           {tamer ? (
             <ExpoImage
               source={getActiveTamerImage(tamer)}
-              style={[styles.tamerPortraitImg, (tamer.id === 'tamer_tai' || tamer.id === 'tamer_kari' || tamer.id === 'tamer_matt' || tamer.id === 'tamer_tk') && { transform: [{ scale: 1.8 }] }]}
+              style={[styles.tamerPortraitImg, (tamer.id === 'tamer_tai' || tamer.id === 'tamer_kari' || tamer.id === 'tamer_matt' || tamer.id === 'tamer_tk' || tamer.id === 'tamer_mimi') && { transform: [{ scale: 1.8 }] }]}
               contentFit="contain"
               autoplay
             />
