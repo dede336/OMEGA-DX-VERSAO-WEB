@@ -5,6 +5,7 @@ const ACTIVE_TAMER_IMAGES: Record<string, any> = {
   tamer_matt: require('../assets/tamers/matt ativo.gif'),
   tamer_tk: require('../assets/tamers/tk ativo.gif'),
   tamer_mimi: require('../assets/tamers/mimi ativo.gif'),
+  tamer_sora: require('../assets/tamers/sora ativo.gif'),
 };
 
 export function getActiveTamerImage(tamer: { id: string; image: any }) {
