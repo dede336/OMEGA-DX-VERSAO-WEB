@@ -12,6 +12,7 @@ import {
   FUSIONS, RARITY_COLORS, RARITY_LABELS, RarityId, TAMERS, ITEM_NAMES,
   HARDCODED_ALTERNATE_EVOLUTIONS,
 } from '@/constants/gameData';
+import { getEquipItemImage } from '@/constants/equipImages';
 import { getCharacter } from '@/constants/digimon';
 import { CharacterAvatar } from '@/components/GameComponents';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -384,6 +385,7 @@ function EvoConditionsModal({
     return c?.name ?? id;
   });
 
+  const requiredItemImage = cond?.requiredItem ? getEquipItemImage(cond.requiredItem) : null;
   const itemName = cond?.requiredItem ? (ITEM_NAMES[cond.requiredItem] ?? cond.requiredItem) : null;
   const isRoot = !cond;
 
@@ -430,7 +432,11 @@ function EvoConditionsModal({
 
             {itemName && (
               <View style={modalStyles.row}>
-                <Feather name="package" size={14} color="#facc15" />
+                {requiredItemImage ? (
+                  <Image source={requiredItemImage} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                ) : (
+                  <Feather name="package" size={14} color="#facc15" />
+                )}
                 <Text style={[modalStyles.rowLabel, { color: colors.mutedForeground }]}>Item necessário</Text>
                 <Text style={[modalStyles.rowValue, { color: '#facc15' }]}>{itemName}</Text>
               </View>
@@ -888,3 +894,4 @@ const styles = StyleSheet.create({
   pathWrap: { width: '100%', alignItems: 'center', gap: 0 },
   stepWrap: { width: '100%', alignItems: 'center', gap: 8 },
 });
+
