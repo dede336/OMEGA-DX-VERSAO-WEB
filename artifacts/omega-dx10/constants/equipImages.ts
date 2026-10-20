@@ -1,5 +1,7 @@
 import ENERGY_PILL_IMAGE from './energyPillImage';
 const EQUIP_ITEM_IMAGES: Record<string, any> = {
+  fragmento_corrompido: require('../assets/images/items/fragmento_corrompido.png'),
+  piece_fragmento_corrompido: require('../assets/images/items/piece_fragmento_corrompido.png'),
   pilula_energetica: ENERGY_PILL_IMAGE,
   brasao_coragem:   require('../assets/images/brasao-coragem.gif'),
   brasao_esperanca: require('../assets/images/brasao-esperanca.gif'),
@@ -133,3 +135,4 @@ export function getEquipItemImage(itemId: string, tamerId?: string | null): any 
 }
 
 export default EQUIP_ITEM_IMAGES;
+
