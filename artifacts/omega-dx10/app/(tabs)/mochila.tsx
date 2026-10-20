@@ -542,6 +542,7 @@ export default function MochilaScreen() {
             {/* Requirements chips */}
             <View style={styles.craftReqRow}>
               {reqs.map((r) => {
+                const materialImage = getEquipItemImage(r.pieceId);
                 const have = pieces[r.pieceId] ?? 0;
                 const met = have >= r.count;
                 return (
@@ -552,7 +553,11 @@ export default function MochilaScreen() {
                       borderColor: met ? r.pieceColor : colors.border,
                     }]}
                   >
-                    <Feather name={r.pieceIcon as any} size={13} color={met ? r.pieceColor : colors.mutedForeground} />
+                    {materialImage ? (
+                      <Image source={materialImage} style={{ width: 18, height: 18 }} resizeMode="contain" />
+                    ) : (
+                      <Feather name={r.pieceIcon as any} size={13} color={met ? r.pieceColor : colors.mutedForeground} />
+                    )}
                     <Text style={[styles.craftReqText, { color: met ? r.pieceColor : colors.mutedForeground }]}>
                       {have}/{r.count} {r.pieceName}
                     </Text>
@@ -943,3 +948,4 @@ const styles = StyleSheet.create({
   bonusVal: { fontSize: 14, fontWeight: '800' as const },
   bonusNote: { fontSize: 11, textAlign: 'center' },
 });
+

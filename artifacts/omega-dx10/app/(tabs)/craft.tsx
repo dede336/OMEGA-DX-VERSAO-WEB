@@ -16,6 +16,7 @@ const isWeb = Platform.OS === 'web';
 
 // ─── Fragment display metadata ──────────────────────────────────────────────
 const PIECE_META: Record<string, { label: string; icon: string; color: string; image?: any }> = {
+  piece_fragmento_corrompido: { label: 'Fragmento Corrompido', icon: 'cpu', color: '#a855f7', image: getEquipItemImage('piece_fragmento_corrompido') },
   piece_brasao_coragem:      { label: 'Fragmento da Coragem',      icon: 'sun',     color: '#f97316', image: getEquipItemImage('piece_brasao_coragem') },
   piece_brasao_esperanca:    { label: 'Fragmento da Esperança',    icon: 'sun',     color: '#eab308', image: getEquipItemImage('piece_brasao_esperanca') },
   piece_brasao_amizade:      { label: 'Fragmento da Amizade',      icon: 'users',   color: '#3b82f6', image: getEquipItemImage('piece_brasao_amizade') },
@@ -361,7 +362,7 @@ export default function CraftScreen() {
   const [selectedRecipe, setSelectedRecipe] = useState<CraftRecipe | null>(null);
 
   const filteredRecipes = CRAFT_RECIPES.filter(
-    r => r.resultItemId !== 'fragmento_corrompido' && getCategoryForRecipe(r) === activeCategory,
+    r => getCategoryForRecipe(r) === activeCategory,
   );
   const activeCat = CATEGORIES.find(c => c.id === activeCategory)!;
 
@@ -460,3 +461,4 @@ const styles = StyleSheet.create({
   emptyBox:  { borderRadius: 8, borderWidth: 1, padding: 24, alignItems: 'center' as const },
   emptyText: { fontSize: 13 },
 });
+
