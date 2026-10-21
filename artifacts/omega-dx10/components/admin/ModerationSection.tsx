@@ -1,5 +1,8 @@
+import { localizeText } from '@/utils/displayLocalization';
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Alert, Text, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
 import { pixelStyle } from '@/constants/pixelStyle';
@@ -73,14 +76,14 @@ export default function ModerationSection() {
       </View>
       {reports.length === 0 ? <Text style={{ color: colors.mutedForeground, textAlign: 'center', marginTop: 30 }}>Nenhuma denúncia pendente.</Text> : reports.map((report) => (
         <View key={report.id} style={[{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12, gap: 8 }, pixelStyle]}>
-          <Text style={{ color: colors.foreground, fontWeight: '800' }}>{report.messageKind === 'global' ? '🌍 Pública' : '🔒 Privada'} · {report.reportedUsername}</Text>
-          <Text style={{ color: colors.mutedForeground }}>Motivo da denúncia: {report.reason}</Text>
-          <Text style={{ color: colors.foreground }}>“{report.message?.content ?? 'Mensagem indisponível'}”</Text>
+          <Text style={{ color: colors.foreground, fontWeight: '800' }}>{report.messageKind === 'global' ? '🌍 Pública' : '🔒 Privada'} · <Text localize={false}>{report.reportedUsername}</Text></Text>
+          <Text style={{ color: colors.mutedForeground }}>Motivo da denúncia: <Text localize={false}>{report.reason}</Text></Text>
+          <Text style={{ color: colors.foreground }}>“<Text localize={false}>{report.message?.content ?? localizeText('Mensagem indisponível')}</Text>”</Text>
           <TouchableOpacity onPress={() => toggleContext(report.id)} style={{ paddingVertical: 8 }}>
             <Text style={{ color: colors.primary, fontWeight: '700' }}>{contexts[report.id] ? 'Ocultar conversa' : 'Ver contexto da conversa'}</Text>
           </TouchableOpacity>
           {contexts[report.id]?.map((message) => (
-            <Text key={message.id} style={{ color: colors.mutedForeground, fontSize: 11 }}><Text style={{ fontWeight: '700' }}>{message.from ?? 'Jogador'}:</Text> {message.content}</Text>
+            <Text key={message.id} style={{ color: colors.mutedForeground, fontSize: 11 }}><Text style={{ fontWeight: '700' }}><Text localize={false}>{message.from ?? localizeText('Jogador')}</Text>:</Text> <Text localize={false}>{message.content}</Text></Text>
           ))}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             <TouchableOpacity onPress={() => confirmBan(report)} style={{ backgroundColor: '#dc2626', padding: 10, borderRadius: 9 }}><Text style={{ color: '#fff', fontWeight: '700' }}>Banir conta</Text></TouchableOpacity>
@@ -92,9 +95,9 @@ export default function ModerationSection() {
       <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '800', marginTop: 12 }}>Contas suspensas</Text>
       {bans.length === 0 ? <Text style={{ color: colors.mutedForeground }}>Nenhum banimento ativo.</Text> : bans.map((ban) => (
         <View key={ban.id} style={{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12, gap: 6 }}>
-          <Text style={{ color: colors.foreground, fontWeight: '800' }}>{ban.username}</Text>
-          <Text style={{ color: colors.mutedForeground }}>{ban.reason}</Text>
-          <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>Até {new Date(ban.expiresAt).toLocaleString('pt-BR')} · aplicado por Admin</Text>
+          <Text localize={false} style={{ color: colors.foreground, fontWeight: '800' }}>{ban.username}</Text>
+          <Text localize={false} style={{ color: colors.mutedForeground }}>{ban.reason}</Text>
+          <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>Até {new Date(ban.expiresAt).toLocaleString(getDisplayLocale())} · aplicado por Admin</Text>
           {(user?.isAdmin || ban.createdByRole !== 'admin') && (
             <TouchableOpacity onPress={() => action(`/moderation/bans/${ban.id}/revoke`)} style={{ alignSelf: 'flex-start', backgroundColor: '#2563eb', padding: 9, borderRadius: 9 }}>
               <Text style={{ color: '#fff', fontWeight: '700' }}>Desfazer banimento</Text>

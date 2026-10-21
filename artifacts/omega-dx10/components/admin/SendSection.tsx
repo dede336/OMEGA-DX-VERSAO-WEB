@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Image,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Image } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, EQUIPMENT_ITEMS, CRAFT_RECIPES, ITEM_NAMES, RARITY_COLORS, RARITY_LABELS } from '@/constants/gameData';
@@ -432,7 +431,7 @@ export default function SendSection() {
             {gemasAmt && Number(gemasAmt) > 0 && (
               <View style={[styles.gemPreview, { backgroundColor: '#06b6d411', borderColor: '#06b6d444' }, pixelStyle]}>
                 <Text style={{ color: '#06b6d4', fontSize: 18 }}>💎</Text>
-                <Text style={{ color: '#06b6d4', fontWeight: '800', fontSize: 14 }}>+{Number(gemasAmt).toLocaleString()}</Text>
+                <Text style={{ color: '#06b6d4', fontWeight: '800', fontSize: 14 }}>+{Number(gemasAmt).toLocaleString(getDisplayLocale())}</Text>
                 <Text style={{ color: '#06b6d499', fontSize: 12 }}>gemas serão adicionadas</Text>
               </View>
             )}

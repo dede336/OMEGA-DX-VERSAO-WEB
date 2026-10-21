@@ -1,5 +1,6 @@
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { pixelStyle } from '@/constants/pixelStyle';

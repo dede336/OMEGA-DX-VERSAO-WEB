@@ -1,8 +1,6 @@
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, ScrollView, TextInput, TouchableOpacity,
-  Alert, ActivityIndicator, Image, StyleSheet,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS } from '@/constants/gameData';
@@ -372,7 +370,7 @@ export default function DigimonSection() {
                 allChars.map((c) => (
                   <View key={c.id} style={[ds.charRow, { backgroundColor: colors.card, borderColor: c.isActive === false ? '#ef444444' : colors.border }, pixelStyle]}>
                     <TouchableOpacity style={{ flex: 1 }} onPress={() => c.isBase ? loadBaseForEdit(c.id) : loadCustomForEdit(c.rawData!)}>
-                      <Text style={{ color: colors.foreground, fontWeight: '600' }}>{c.name}</Text>
+                      <Text localize={false} style={{ color: colors.foreground, fontWeight: '600' }}>{c.name}</Text>
                       {c.isBase && <Text style={{ color: colors.mutedForeground, fontSize: 11 }}>{c.id}</Text>}
                     </TouchableOpacity>
                     <View style={[ds.badge, { backgroundColor: c.isBase ? '#3b82f622' : '#a855f722', borderColor: c.isBase ? '#3b82f6' : '#a855f7' }]}>

@@ -1,8 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useRef, useState, useEffect } from 'react';
-import {
-  View, Text, Image, Modal, TouchableOpacity,
-  PanResponder, StyleSheet, ActivityIndicator,
-} from 'react-native';
+import { View, Image, Modal, TouchableOpacity, PanResponder, StyleSheet, ActivityIndicator } from 'react-native';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useColors } from '@/hooks/useColors';
 import { pixelStyle } from '@/constants/pixelStyle';

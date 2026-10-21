@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, Alert, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, TouchableOpacity, ScrollView,
-  Alert, ActivityIndicator, StyleSheet, Modal, FlatList, TextInput,
-} from 'react-native';
+import { View, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Modal, FlatList } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS } from '@/constants/gameData';
@@ -518,7 +517,7 @@ export default function MapsSection() {
                         <Text style={{ color: m.isPermanent ? '#22c55e' : '#f59e0b', fontSize: 10, fontWeight: '700' }}>{m.isPermanent ? 'PERMANENTE' : 'PROVISÓRIA'}</Text>
                       </View>
                       {!m.isPermanent && m.expiresAt && (
-                        <Text style={{ color: colors.mutedForeground, fontSize: 9 }}>Expira: {new Date(m.expiresAt).toLocaleDateString('pt-BR')}</Text>
+                        <Text style={{ color: colors.mutedForeground, fontSize: 9 }}>Expira: {new Date(m.expiresAt).toLocaleDateString(getDisplayLocale())}</Text>
                       )}
                     </View>
                   </TouchableOpacity>

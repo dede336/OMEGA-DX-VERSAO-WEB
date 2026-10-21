@@ -1,8 +1,6 @@
+import { Text, Alert } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useState } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  Alert, ActivityIndicator, Image, StyleSheet,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { TAMERS } from '@/constants/gameData';

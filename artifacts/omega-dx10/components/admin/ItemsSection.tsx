@@ -1,8 +1,6 @@
+import { Text, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  Alert, ActivityIndicator, StyleSheet,
-} from 'react-native';
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { EQUIPMENT_ITEMS, CRAFT_RECIPES, ITEM_NAMES } from '@/constants/gameData';

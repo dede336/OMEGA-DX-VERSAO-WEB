@@ -1,8 +1,6 @@
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, ScrollView,
-  Modal, FlatList, Alert, StyleSheet,
-} from 'react-native';
+import { View, TouchableOpacity, ScrollView, Modal, FlatList, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';

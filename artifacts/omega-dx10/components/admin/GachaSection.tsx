@@ -1,8 +1,6 @@
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, ScrollView, Image, Modal,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ActivityIndicator, ScrollView, Image, Modal } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
 import { CHARACTERS, RARITY_COLORS, RARITY_LABELS, EQUIPMENT_ITEMS, CRAFT_RECIPES } from '@/constants/gameData';
@@ -308,7 +306,7 @@ function AddItemModal({
                               </View>
                             )}
                             <View style={{ flex: 1 }}>
-                              <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>{c.name}</Text>
+                              <Text localize={false} style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>{c.name}</Text>
                               <Text style={{ color: getDigimonRarityColor(c.rarity), fontSize: 11 }}>
                                 {getDigimonRarityLabel(c.rarity)}
                                 {''}

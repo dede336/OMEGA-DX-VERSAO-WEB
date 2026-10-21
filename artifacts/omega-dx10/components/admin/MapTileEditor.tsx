@@ -1,8 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, PanResponder,
-  ScrollView, Modal,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, PanResponder, ScrollView, Modal } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 
 const MAP_W = 20;
