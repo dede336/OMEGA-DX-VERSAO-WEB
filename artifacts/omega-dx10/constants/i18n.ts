@@ -1582,8 +1582,8 @@ const es: TranslationMap = {
   'dadiva.heal_team':         '💫 Regenera 10% del HP máximo de todo el equipo al final de cada ronda',
 };
 
-const translations: Record<Language, TranslationMap> = { pt, en, es };
+export const translations: Record<Language, TranslationMap> = { pt, en, es };
 
-export function translate(lang: Language, key: string): string {
-  return translations[lang]?.[key] ?? translations['pt'][key] ?? key;
+export function translate(lang: Language, key: string, fallback: string = key): string {
+  return translations[lang]?.[key] ?? translations['pt'][key] ?? fallback;
 }
