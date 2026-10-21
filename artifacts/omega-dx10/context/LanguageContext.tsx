@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Language, translate } from '@/constants/i18n';
+import { setDisplayLanguage } from '@/utils/displayLocalization';
 
 const STORAGE_KEY = '@omega_language';
 
@@ -9,7 +10,7 @@ interface LanguageContextValue {
   isLanguageLoaded: boolean;
   isLanguageSelected: boolean;
   setLanguage: (lang: Language) => Promise<void>;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextValue>({
@@ -17,7 +18,7 @@ const LanguageContext = createContext<LanguageContextValue>({
   isLanguageLoaded: false,
   isLanguageSelected: false,
   setLanguage: async () => {},
-  t: (key) => key,
+  t: (key, fallback) => fallback ?? key,
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
@@ -30,6 +31,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       try {
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored === 'pt' || stored === 'en' || stored === 'es') {
+          setDisplayLanguage(stored);
           setLang(stored);
           setIsLanguageSelected(true);
         }
@@ -39,6 +41,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setLanguage = useCallback(async (lang: Language) => {
+    setDisplayLanguage(lang);
     setLang(lang);
     setIsLanguageSelected(true);
     try {
@@ -46,7 +49,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
 
-  const t = useCallback((key: string) => translate(language, key), [language]);
+  useEffect(() => {
+    if (typeof document !== 'undefined') document.documentElement.lang = language === 'pt' ? 'pt-BR' : language;
+  }, [language]);
+
+  const t = useCallback((key: string, fallback?: string) => translate(language, key, fallback), [language]);
 
   return (
     <LanguageContext.Provider value={{ language, isLanguageLoaded, isLanguageSelected, setLanguage, t }}>

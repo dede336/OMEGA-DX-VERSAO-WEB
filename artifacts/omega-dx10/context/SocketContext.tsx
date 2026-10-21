@@ -1,5 +1,6 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert } from '@/components/localization/LocalizedNative';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -326,7 +327,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     });
     socket.on('chat:error', ({ message }: { message: string }) => setChatError(message));
     socket.on('account:banned', async ({ title, message, expiresAt }: { title: string; message: string; expiresAt: string }) => {
-      const notice = `${message}\n\nAcesso liberado em: ${new Date(expiresAt).toLocaleString('pt-BR')}`;
+      const notice = `${message}\n\nAcesso liberado em: ${new Date(expiresAt).toLocaleString(getDisplayLocale())}`;
       setChatError(`${title}\n${notice}`);
       Alert.alert(title, notice);
       await logout();
