@@ -1,8 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions,
-  Image, Animated, Easing, Modal, Pressable, PanResponder,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Dimensions, Image, Animated, Easing, Modal, Pressable, PanResponder } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -418,7 +416,7 @@ function EvoConditionsModal({
               <View style={modalStyles.row}>
                 <Feather name="arrow-up-circle" size={14} color={colors.mutedForeground} />
                 <Text style={[modalStyles.rowLabel, { color: colors.mutedForeground }]}>Evolui de</Text>
-                <Text style={[modalStyles.rowValue, { color: colors.foreground }]}>{fromChar.name}</Text>
+                <Text localize={false} style={[modalStyles.rowValue, { color: colors.foreground }]}>{fromChar.name}</Text>
               </View>
             )}
 
