@@ -1,3 +1,4 @@
+import { localizeNamingToolPage } from "../lib/namingLocalization.js";
 import { Router } from "express";
 import fs from "node:fs";
 import path from "node:path";
@@ -377,7 +378,7 @@ function applyFilter() {
 </body>
 </html>`;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(html);
+  res.send(localizeNamingToolPage(html));
 });
 
 export default router;
