@@ -1,5 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, ImageBackground } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -218,7 +220,7 @@ export default function MapScreen() {
           <View style={[styles.dungeonBanner, { backgroundColor: '#7c3aed33', borderBottomColor: '#7c3aed55' }]}>
             <Feather name="clock" size={12} color="#c4b5fd" />
             <Text style={[styles.dungeonBannerText, { color: '#c4b5fd' }]}>
-              Evento até {expiresAt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+              Evento até {expiresAt.toLocaleDateString(getDisplayLocale(), { day: '2-digit', month: '2-digit' })}
             </Text>
           </View>
         )}
@@ -410,7 +412,7 @@ export default function MapScreen() {
                             <View key={`bits-${di}`} style={styles.rewardRow}>
                               <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 14, height: 14 }} resizeMode="contain" />
                               <Text style={[styles.rewardText, { color: '#facc15' }]}>
-                                {drop.amount.toLocaleString()} Bits ({Math.round(drop.chance * 100)}%)
+                                {drop.amount.toLocaleString(getDisplayLocale())} Bits ({Math.round(drop.chance * 100)}%)
                               </Text>
                             </View>
                           ))}

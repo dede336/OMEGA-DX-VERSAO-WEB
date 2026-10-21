@@ -1,9 +1,6 @@
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, ActivityIndicator, RefreshControl, Platform,
-  Modal, Pressable, Alert, Image,
-} from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, Platform, Modal, Pressable, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Image as ExpoImage } from 'expo-image';
@@ -152,12 +149,12 @@ export default function AmigosScreen() {
         </View>
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Text style={[styles.friendName, { color: colors.foreground }]}>{friend.playerName}</Text>
+            <Text style={[styles.friendName, { color: colors.foreground }]}><Text localize={false}>{friend.playerName}</Text></Text>
             <Text style={{ color: isOnline ? '#22c55e' : colors.mutedForeground, fontSize: 10, fontWeight: '600' }}>
               {isOnline ? t('amigos.online') : t('amigos.offline')}
             </Text>
           </View>
-          <Text style={[styles.friendUser, { color: colors.mutedForeground }]}>@{friend.username} · Lv {friend.tamerLevel}</Text>
+          <Text style={[styles.friendUser, { color: colors.mutedForeground }]}>@<Text localize={false}>{friend.username}</Text> · Lv {friend.tamerLevel}</Text>
         </View>
         <View style={styles.teamRow}>
           {friend.teamDetails.slice(0, 3).map((td) => (
@@ -244,7 +241,7 @@ export default function AmigosScreen() {
                 {requests.map((r) => (
                   <View key={r.id} style={[styles.reqRow, { borderTopColor: colors.border }]}>
                     <Feather name="user" size={18} color={colors.mutedForeground} />
-                    <Text style={[styles.reqName, { color: colors.foreground }]}>@{r.username}</Text>
+                    <Text style={[styles.reqName, { color: colors.foreground }]}>@<Text localize={false}>{r.username}</Text></Text>
                     <TouchableOpacity
                       style={[styles.acceptBtn, { backgroundColor: '#22c55e' }, pixelStyle]}
                       onPress={() => acceptRequest(r.id)}
@@ -293,8 +290,8 @@ export default function AmigosScreen() {
               return (
                 <>
                   <View style={[styles.sheetHandle, { backgroundColor: colors.border }]} />
-                  <Text style={[styles.sheetTitle, { color: colors.foreground }]}>{f.playerName}</Text>
-                  <Text style={[styles.sheetUser, { color: colors.mutedForeground }]}>@{f.username} · Nível {f.tamerLevel}</Text>
+                  <Text style={[styles.sheetTitle, { color: colors.foreground }]}><Text localize={false}>{f.playerName}</Text></Text>
+                  <Text style={[styles.sheetUser, { color: colors.mutedForeground }]}>@<Text localize={false}>{f.username}</Text> · Nível {f.tamerLevel}</Text>
 
                   <Text style={[styles.teamTitle, { color: colors.foreground }]}>{t('amigos.battleTeam')}</Text>
                   <View style={styles.teamFull}>
@@ -306,7 +303,7 @@ export default function AmigosScreen() {
                           {td && char ? (
                             <>
                               <CharacterAvatar characterId={td.characterId} size={60} />
-                              <Text style={[styles.teamCharName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
+                              <Text localize={false} style={[styles.teamCharName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
                               <Text style={[styles.teamCharLevel, { color: colors.primary }]}>Lv {td.level}</Text>
                             </>
                           ) : (

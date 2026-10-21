@@ -1,7 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Image,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -185,7 +185,7 @@ export default function CorreiosScreen() {
                     {msg.reward.bits && (
                       <View style={[styles.rewardChip, { backgroundColor: '#eab30822', borderColor: '#eab30855' }, pixelStyle]}>
                         <Text style={[styles.rewardChipText, { color: '#eab308' }]}>
-                          🪙 {msg.reward.bits.toLocaleString()} Bits
+                          🪙 {msg.reward.bits.toLocaleString(getDisplayLocale())} Bits
                         </Text>
                       </View>
                     )}

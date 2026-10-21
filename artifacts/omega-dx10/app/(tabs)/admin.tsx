@@ -1,5 +1,7 @@
+import { useLanguage } from '@/context/LanguageContext';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { pixelStyle } from '@/constants/pixelStyle';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -29,6 +31,7 @@ const ALL_SECTIONS: { key: Section; label: string; emoji: string; color: string;
 ];
 
 export default function AdminScreen() {
+  useLanguage();
   const { user } = useAuth();
   const colors = useColors();
   const insets = useSafeAreaInsets();

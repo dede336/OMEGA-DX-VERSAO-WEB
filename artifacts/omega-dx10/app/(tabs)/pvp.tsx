@@ -1,5 +1,8 @@
+import { useLanguage } from '@/context/LanguageContext';
+import { localizeText } from '@/utils/displayLocalization';
+import { Text, Alert, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Alert, Modal, TextInput } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, Modal } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -57,6 +60,7 @@ function rewardForRank(rank: number, points: number) {
 }
 
 export default function PvpScreen() {
+  useLanguage();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { user, token, getApiUrl } = useAuth();
@@ -245,7 +249,7 @@ export default function PvpScreen() {
           </TouchableOpacity>
         ) : (
           <View style={{gap:8}}>
-            <Text style={[styles.shopName,{color:colors.foreground}]}>{opponent.tamerName} • @{opponent.username}</Text>
+            <Text style={[styles.shopName,{color:colors.foreground}]}><Text localize={false}>{opponent.tamerName}</Text> • @<Text localize={false}>{opponent.username}</Text></Text>
             <View style={styles.grid}>{(opponent.team ?? []).map((d:any)=><View key={d.ownedId} style={[styles.digimon,{borderColor:colors.border,backgroundColor:colors.background}]}><CharacterAvatar characterId={d.characterId} size={52}/><Text style={[styles.lv,{color:colors.foreground}]}>Lv {d.level}</Text></View>)}</View>
             <Text style={[styles.help,{color:colors.mutedForeground}]}>Equipe defensiva registrada • Brasão e Digivice preservados.</Text>
             <Text style={[styles.help,{color:'#f59e0b'}]}>A arena competitiva usará esta defesa. Enquanto a integração visual da batalha é finalizada, o resultado só pode ser registrado pelo fluxo de batalha.</Text>
@@ -343,9 +347,9 @@ export default function PvpScreen() {
       </TouchableOpacity>
 
       <Text style={[styles.heading,{color:colors.foreground}]}>Ranking PvP</Text>
-      {ranking.map((entry) => <TouchableOpacity accessibilityLabel={`Ver perfil de ${entry.tamerName}`} onPress={() => router.push({ pathname: "/player-profile", params: { username: entry.username } } as any)} key={entry.username} style={[styles.rankRow,{backgroundColor:colors.card,borderColor:colors.border}]}>
-        <View style={{ width: 38, alignItems: 'center' }}>{entry.rank <= 3 ? <Image source={PVP_RANK_IMAGES[entry.rank - 1]} style={{ width: 38, height: 44 }} resizeMode="contain" accessibilityLabel={`${entry.rank}º lugar`} /> : <View style={{ alignItems: 'center' }}><Image source={HONOR_TROPHY} style={{ width: 28, height: 32 }} resizeMode="contain" /><Text style={[styles.rankPos,{color:colors.foreground,textAlign:'center',fontSize:9}]}>#{entry.rank}</Text></View>}</View>
-        <View style={{flex:1}}><Text style={[styles.rankName,{color:colors.foreground}]}>{entry.tamerName}</Text><Text style={[styles.rankUser,{color:colors.mutedForeground}]}>@{entry.username}</Text></View>
+      {ranking.map((entry) => <TouchableOpacity accessibilityLabel={localizeText(`Ver perfil de ${entry.tamerName}`)} onPress={() => router.push({ pathname: "/player-profile", params: { username: entry.username } } as any)} key={entry.username} style={[styles.rankRow,{backgroundColor:colors.card,borderColor:colors.border}]}>
+        <View style={{ width: 38, alignItems: 'center' }}>{entry.rank <= 3 ? <Image source={PVP_RANK_IMAGES[entry.rank - 1]} style={{ width: 38, height: 44 }} resizeMode="contain" accessibilityLabel={localizeText(`${entry.rank}º lugar`)} /> : <View style={{ alignItems: 'center' }}><Image source={HONOR_TROPHY} style={{ width: 28, height: 32 }} resizeMode="contain" /><Text style={[styles.rankPos,{color:colors.foreground,textAlign:'center',fontSize:9}]}>#{entry.rank}</Text></View>}</View>
+        <View style={{flex:1}}><Text localize={false} style={[styles.rankName,{color:colors.foreground}]}>{entry.tamerName}</Text><Text style={[styles.rankUser,{color:colors.mutedForeground}]}>@<Text localize={false}>{entry.username}</Text></Text></View>
         <Text style={styles.rankPts}>{entry.pvpPoints} pts</Text>
       </TouchableOpacity>)}
     </ScrollView>

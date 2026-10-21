@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Image, Modal, Pressable,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -212,7 +211,7 @@ function DetailModal({
                 <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 16, height: 16, opacity: hasEnoughBits ? 1 : 0.4 }} resizeMode="contain" />
                 <Text style={[chipStyles.name, { color: hasEnoughBits ? '#facc15' : colors.mutedForeground, flex: 1 }]}>Bits</Text>
                 <Text style={[chipStyles.count, { color: hasEnoughBits ? '#facc15' : colors.mutedForeground }]}>
-                  {bits.toLocaleString()}/{(recipe.bitsCost ?? 0).toLocaleString()}
+                  {bits.toLocaleString(getDisplayLocale())}/{(recipe.bitsCost ?? 0).toLocaleString(getDisplayLocale())}
                 </Text>
               </View>
             )}
@@ -237,7 +236,7 @@ function DetailModal({
             >
               <Feather name="tool" size={16} color={canCraft ? recipe.pieceColor : colors.mutedForeground} />
               <Text style={[modal.craftBtnText, { color: canCraft ? recipe.pieceColor : colors.mutedForeground }]}>
-                {canCraft ? `Forjar ${recipe.resultItemName}` : !hasEnoughPieces ? 'Materiais insuficientes' : `Faltam ${((recipe.bitsCost ?? 0) - bits).toLocaleString()} bits`}
+                {canCraft ? `Forjar ${recipe.resultItemName}` : !hasEnoughPieces ? 'Materiais insuficientes' : `Faltam ${((recipe.bitsCost ?? 0) - bits).toLocaleString(getDisplayLocale())} bits`}
               </Text>
             </TouchableOpacity>
           )}

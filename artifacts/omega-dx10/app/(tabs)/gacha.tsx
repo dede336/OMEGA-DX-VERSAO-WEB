@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Animated, Image, Modal, Platform, Easing, ActivityIndicator,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Animated, Image, Modal, Platform, Easing, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -268,7 +267,7 @@ function RewardCard({ reward, big = false }: { reward: GachaReward; big?: boolea
           </View>
         )}
       </View>
-      <Text style={[styles.rewardName, { color: colors.foreground, fontSize: big ? 13 : 10 }]} numberOfLines={2}>
+      <Text localize={false} style={[styles.rewardName, { color: colors.foreground, fontSize: big ? 13 : 10 }]} numberOfLines={2}>
         {displayName}
       </Text>
     </View>
@@ -607,7 +606,7 @@ export default function GachaScreen() {
           <Image source={GEM_ICON_IMG} style={styles.gemImg} resizeMode="contain" />
           <View>
             <Text style={[styles.balanceLabel, { color: colors.mutedForeground }]}>Suas Gemas</Text>
-            <Text style={[styles.balanceValue, { color: colors.foreground }]}>{gemas.toLocaleString()}</Text>
+            <Text style={[styles.balanceValue, { color: colors.foreground }]}>{gemas.toLocaleString(getDisplayLocale())}</Text>
           </View>
         </View>
         <View style={[styles.divider, { backgroundColor: colors.border }]} />

@@ -1,10 +1,7 @@
+import { Text, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Svg, { Line, Polygon } from 'react-native-svg';
-import {
-  View, Text, StyleSheet, Image, TouchableOpacity,
-  Modal, FlatList, Pressable, Platform, ScrollView,
-  Animated, useWindowDimensions, Alert,
-} from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, Modal, FlatList, Pressable, Platform, ScrollView, Animated, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -1900,7 +1897,7 @@ export default function DigifarmScreen() {
                 <View style={styles.actionPanelHeader}>
                   <CharacterAvatar characterId={selectedDigi.characterId} size={44} />
                   <View style={{ flex: 1 }}>
-                    <Text style={[styles.actionName, { color: '#fff' }]}>{selectedChar.name}</Text>
+                    <Text localize={false} style={[styles.actionName, { color: '#fff' }]}>{selectedChar.name}</Text>
                     <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>Lv {selectedDigi.level} · Satisfação {selectedSat}%</Text>
                     <View style={styles.satBarOuter}>
                       <View style={[styles.satBarInner, { width: `${selectedSat}%` as any, backgroundColor: satBarColor }]} />
@@ -2013,7 +2010,7 @@ export default function DigifarmScreen() {
                     >
                       <CharacterAvatar characterId={item.characterId} size={44} />
                       <View style={{ flex: 1 }}>
-                        <Text style={[{ fontSize: 14, fontWeight: '700', color: colors.foreground }]}>{char.name}</Text>
+                        <Text localize={false} style={[{ fontSize: 14, fontWeight: '700', color: colors.foreground }]}>{char.name}</Text>
                         {char.rarity !== 'EGG' && <Text style={[{ fontSize: 12, color: colors.mutedForeground }]}>{t('common.lv')} {item.level}</Text>}
                       </View>
                       <Feather name="plus-circle" size={22} color={colors.primary} />

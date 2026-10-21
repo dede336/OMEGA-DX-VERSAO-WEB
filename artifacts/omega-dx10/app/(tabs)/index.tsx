@@ -1,5 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Modal, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Modal, FlatList } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -158,7 +159,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
         {/* Welcome text */}
         <View style={styles.heroText}>
           <Text style={[styles.heroGreeting, { color: colors.primary }]}>{publicProfile ? 'PERFIL DO JOGADOR' : t('home.welcome')}</Text>
-          <Text style={[styles.heroName, { color: colors.foreground }]} numberOfLines={1}>{playerName}</Text>
+          <Text style={[styles.heroName, { color: colors.foreground }]} numberOfLines={1}><Text localize={false}>{playerName}</Text></Text>
           {tamer && (
             <Text style={[styles.heroTamer, { color: colors.primary + 'cc' }]}>{tamer.fullName}</Text>
           )}
@@ -188,7 +189,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
           {user || publicProfile ? (
             <View style={[styles.userBadge, { backgroundColor: '#22c55e22', borderColor: '#22c55e55' }, pixelStyle]}>
               <Feather name="user-check" size={11} color="#22c55e" />
-              <Text style={[styles.userBadgeText, { color: '#22c55e' }]} numberOfLines={1}>{publicProfile?.username ?? user?.username}</Text>
+              <Text localize={false} style={[styles.userBadgeText, { color: '#22c55e' }]} numberOfLines={1}>{publicProfile?.username ?? user?.username}</Text>
             </View>
           ) : (
             <TouchableOpacity
@@ -269,7 +270,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
                 );
               })()}
               <View style={styles.activeInfo}>
-                <Text style={[styles.activeName, { color: colors.foreground }]}>{char.name}</Text>
+                <Text localize={false} style={[styles.activeName, { color: colors.foreground }]}>{char.name}</Text>
                 <View style={styles.activeBadges}>
                   <AttributeBadge attr={char.attribute} />
                   <View style={{ width: 6 }} />
@@ -357,7 +358,7 @@ export default function HomeScreen({ publicProfile }: { publicProfile?: PublicHo
                       <CharacterAvatar characterId={c.id} size={44} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.swapName, { color: colors.foreground }]} numberOfLines={1}>{c.name}</Text>
+                      <Text localize={false} style={[styles.swapName, { color: colors.foreground }]} numberOfLines={1}>{c.name}</Text>
                       <Text style={[styles.swapLevel, { color: colors.mutedForeground }]}>{t('common.level')} {item.level}</Text>
                     </View>
                     <AttributeBadge attr={c.attribute} />

@@ -1,10 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import {
-  View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl, Platform, Modal, Pressable,
-  TextInput, KeyboardAvoidingView,
-  Alert, ScrollView,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Platform, Modal, Pressable, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -40,7 +37,7 @@ function timeAgo(iso: string): string {
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(getDisplayLocale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 type Tab = 'global' | 'private';
@@ -279,7 +276,7 @@ export default function ChatScreen() {
                           {item.from}
                         </Text>
                       )}
-                      <Text style={{ color: isMe ? '#fff' : colors.foreground, fontSize: 12 }}>
+                      <Text localize={false} style={{ color: isMe ? '#fff' : colors.foreground, fontSize: 12 }}>
                         {item.content}
                       </Text>
                       <Text style={{ color: isMe ? '#ffffffaa' : colors.mutedForeground, fontSize: 10, alignSelf: 'flex-end', marginTop: 2 }}>
@@ -374,7 +371,7 @@ export default function ChatScreen() {
                         {timeAgo(item.lastMessage.createdAt)}
                       </Text>
                     </View>
-                    <Text style={{ color: colors.mutedForeground, fontSize: 13 }} numberOfLines={1}>
+                    <Text localize={false} style={{ color: colors.mutedForeground, fontSize: 13 }} numberOfLines={1}>
                       {item.lastMessage.from === user?.username ? t('chat.you') : ''}
                       {item.lastMessage.content}
                     </Text>
@@ -433,11 +430,11 @@ export default function ChatScreen() {
                       <Text style={{ fontSize: 14 }}>🧑‍💻</Text>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 12 }}>
+                      <Text localize={false} style={{ color: colors.foreground, fontWeight: '700', fontSize: 12 }}>
                         {item.username}
                       </Text>
                       {item.playerName && item.playerName !== item.username && (
-                        <Text style={{ color: colors.mutedForeground, fontSize: 12 }}>{item.playerName}</Text>
+                        <Text style={{ color: colors.mutedForeground, fontSize: 12 }}><Text localize={false}>{item.playerName}</Text></Text>
                       )}
                     </View>
                     <Feather name="message-circle" size={20} color={colors.primary} />

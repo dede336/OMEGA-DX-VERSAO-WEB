@@ -1,8 +1,6 @@
+import { Text, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import {
-  Dimensions, FlatList, Image, Modal, Platform, ScrollView, StyleSheet, Text, TextInput,
-  TouchableOpacity, View, ActivityIndicator,
-} from 'react-native';
+import { Dimensions, FlatList, Image, Modal, Platform, ScrollView, StyleSheet, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
@@ -406,7 +404,7 @@ export default function BancoScreen() {
           <View style={[st.modalSheet, { backgroundColor: colors.card }, pixelStyle]}>
             <View style={[st.modalHandle, { backgroundColor: colors.border }]} />
             <Text style={[st.modalTitle, { color: colors.foreground }]}>
-              {filterModalOpen === 'elem' ? `⚡ ${t('banco.element')}` : filterModalOpen === 'rarity' ? `🎖 ${t('banco.phase')}` : `🛡 ${t('banco.attribute')}`}
+              {filterModalOpen === 'elem' ? `⚡ ${t('banco.filterElem')}` : filterModalOpen === 'rarity' ? `🎖 ${t('banco.filterPhase')}` : `🛡 ${t('banco.filterAttr')}`}
             </Text>
             <View style={st.modalOptions}>
               {filterModalOpen === 'elem' && ELEM_FILTERS.map(({ key, label, color }) => (
@@ -460,7 +458,7 @@ export default function BancoScreen() {
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, marginBottom: 4 }}>
         <Text style={[st.countText, { color: colors.mutedForeground, flex: 1 }]}>
           {ownedSet.size}/{totalCount} {t('banco.obtained')} · {filtered.length} {t('banco.shown')}
-          {!rosterReady && ` · ${t('banco.loading')}`}
+          {!rosterReady && ` · ${t('banco.loadingDots')}`}
         </Text>
         {activeFiltersCount > 0 && (
           <TouchableOpacity onPress={() => { setAttrFilter(''); setRarityFilter(''); setElemFilter(''); }}

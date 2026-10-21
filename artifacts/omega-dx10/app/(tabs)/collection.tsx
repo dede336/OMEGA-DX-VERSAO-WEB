@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, Alert, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image, Easing, FlatList, Alert, TextInput,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, Pressable, Animated, Image, Easing, FlatList } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -1047,7 +1046,7 @@ export default function CollectionScreen() {
                           </TouchableOpacity>
                         </View>
 
-                        <Text style={[styles.xpTotalText, { color: battery.color }]}>+{(battery.xp * batteryQty).toLocaleString()} EXP</Text>
+                        <Text style={[styles.xpTotalText, { color: battery.color }]}>+{(battery.xp * batteryQty).toLocaleString(getDisplayLocale())} EXP</Text>
                         <TouchableOpacity
                           style={[styles.xpConfirmButton, { backgroundColor: battery.color, opacity: available > 0 ? 1 : 0.45 }]}
                           disabled={available <= 0}

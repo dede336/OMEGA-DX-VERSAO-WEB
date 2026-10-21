@@ -1,8 +1,7 @@
+import { localizeText } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useCallback, useState } from 'react';
-import {
-  View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Platform, Image,
-} from 'react-native';
+import { View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl, Platform, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Image as ExpoImage } from 'expo-image';
@@ -106,7 +105,7 @@ export default function RankingScreen() {
     const bestChar = (rankType === 'stats' && item.bestDigimonCharId) ? CHARACTERS[item.bestDigimonCharId] : null;
 
     return (
-      <TouchableOpacity accessibilityLabel={`Ver perfil de ${item.tamerName}`} onPress={() => router.push({ pathname: "/player-profile", params: { username: item.username } } as any)} style={[
+      <TouchableOpacity accessibilityLabel={localizeText(`Ver perfil de ${item.tamerName}`)} onPress={() => router.push({ pathname: "/player-profile", params: { username: item.username } } as any)} style={[
         styles.entry,
         {
           backgroundColor: isMe ? colors.primary + '18' : colors.card,
@@ -124,7 +123,7 @@ export default function RankingScreen() {
 
         <View style={styles.rankCol}>
           {topRank ? (
-            <Image source={RANK_IMAGES[item.rank - 1]} style={{ width: 26, height: 30 }} resizeMode="contain" accessibilityLabel={`${item.rank}º lugar`} />
+            <Image source={RANK_IMAGES[item.rank - 1]} style={{ width: 26, height: 30 }} resizeMode="contain" accessibilityLabel={localizeText(`${item.rank}º lugar`)} />
           ) : (
             <View style={{ alignItems: 'center' }}><Image source={HONOR_MEDAL} style={{ width: 20, height: 23 }} resizeMode="contain" /><Text style={[styles.rankNum, { color: colors.mutedForeground, fontSize: 9 }]}>#{item.rank}</Text></View>
           )}
@@ -148,7 +147,7 @@ export default function RankingScreen() {
 
         <View style={styles.infoCol}>
           <View style={styles.nameRow}>
-            <Text style={[styles.tamerName, { color: colors.foreground }]} numberOfLines={1}>
+            <Text localize={false} style={[styles.tamerName, { color: colors.foreground }]} numberOfLines={1}>
               {item.tamerName}
             </Text>
             {isMe && (
@@ -157,7 +156,7 @@ export default function RankingScreen() {
               </View>
             )}
           </View>
-          <Text style={[styles.username, { color: colors.mutedForeground }]}>@{item.username}</Text>
+          <Text style={[styles.username, { color: colors.mutedForeground }]}>@<Text localize={false}>{item.username}</Text></Text>
         </View>
 
         <View style={styles.statsCol}>

@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Image, Modal, Pressable,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Image, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -152,7 +151,7 @@ export default function MochilaScreen() {
               {equippedItem ? (
                 <>
                   <Text style={[styles.slotItemName, { color: rarityCol ?? colors.foreground }]} numberOfLines={1}>
-                    {t(`item.${equippedItem.id}`) || equippedItem.name}
+                    {t(`item.${equippedItem.id}`, equippedItem.name)}
                   </Text>
                   <View style={[styles.rarityPill, { backgroundColor: rarityCol + '33' }]}>
                     <Text style={[styles.rarityPillText, { color: rarityCol ?? colors.foreground }]}>
@@ -227,7 +226,7 @@ export default function MochilaScreen() {
                     )}
                     <View style={{ flex: 1 }}>
                       <View style={styles.pickerItemNameRow}>
-                        <Text style={[styles.pickerItemName, { color: colors.foreground }]}>{t(`item.${item.id}`) || item.name}</Text>
+                        <Text style={[styles.pickerItemName, { color: colors.foreground }]}>{t(`item.${item.id}`, item.name)}</Text>
                         <View style={[styles.rarityPill, { backgroundColor: rc + '33', marginLeft: 6 }]}>
                           <Text style={[styles.rarityPillText, { color: rc }]}>{t(`rarity.${item.rarity}`)}</Text>
                         </View>
@@ -486,7 +485,7 @@ export default function MochilaScreen() {
                 <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 22, height: 22 }} resizeMode="contain" />
               </View>
               <Text style={[styles.fragmentSummaryCount, { color: '#facc15' }]}>
-                {bits >= 1000 ? `${(bits / 1000).toFixed(1)}k` : bits.toLocaleString()}
+                {bits >= 1000 ? `${(bits / 1000).toFixed(1)}k` : bits.toLocaleString(getDisplayLocale())}
               </Text>
               <Text style={[styles.fragmentSummaryLabel, { color: colors.mutedForeground }]}>Bits</Text>
             </View>
@@ -571,7 +570,7 @@ export default function MochilaScreen() {
                 }]}>
                   <Image source={require('../../assets/images/bits-icon.gif')} style={{ width: 14, height: 14, opacity: bitsMet ? 1 : 0.4 }} resizeMode="contain" />
                   <Text style={[styles.craftReqText, { color: bitsMet ? '#facc15' : colors.mutedForeground }]}>
-                    {recipe.bitsCost.toLocaleString()} Bits
+                    {recipe.bitsCost.toLocaleString(getDisplayLocale())} Bits
                   </Text>
                 </View>
               )}
@@ -648,8 +647,8 @@ export default function MochilaScreen() {
 
           <View style={{ alignItems: 'center', gap: 4 }}>
             <Text style={[styles.batteryModalTitle, { color: colors.foreground }]}>Tamer Lv {tamerLevel}</Text>
-            <Text style={[styles.batteryModalSubtitle, { color: colors.mutedForeground }]}>EXP atual: {tamerExp.toLocaleString()}</Text>
-            <Text style={[styles.batteryTotalXp, { color: colors.primary }]}>+{(500 * energyPillQty).toLocaleString()} EXP Tamer</Text>
+            <Text style={[styles.batteryModalSubtitle, { color: colors.mutedForeground }]}>EXP atual: {tamerExp.toLocaleString(getDisplayLocale())}</Text>
+            <Text style={[styles.batteryTotalXp, { color: colors.primary }]}>+{(500 * energyPillQty).toLocaleString(getDisplayLocale())} EXP Tamer</Text>
           </View>
 
           <TouchableOpacity
@@ -726,7 +725,7 @@ export default function MochilaScreen() {
             availableLabel={`Disponível: ${selectedBatteryStock}`}
           />
 
-          <Text style={[styles.batteryTotalXp, { color: selectedBattery.color }]}>+{(selectedBattery.xp * batteryQty).toLocaleString()} EXP</Text>
+          <Text style={[styles.batteryTotalXp, { color: selectedBattery.color }]}>+{(selectedBattery.xp * batteryQty).toLocaleString(getDisplayLocale())} EXP</Text>
 
           <TouchableOpacity
             style={[
