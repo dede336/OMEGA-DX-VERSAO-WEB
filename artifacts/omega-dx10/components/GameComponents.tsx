@@ -1,5 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform, Animated, Easing } from 'react-native';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
@@ -278,7 +279,7 @@ export function CharacterCard({ owned, onPress, isSelected, compact, canEvolve }
         ]}
       >
         <CharacterAvatar characterId={owned.characterId} size={52} />
-        <Text style={[cardStyles.compactName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
+        <Text localize={false} style={[cardStyles.compactName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
         <Text style={[cardStyles.compactLevel, { color: colors.primary }]}>Lv {owned.level}</Text>
         {isSelected && <View style={[cardStyles.selectedDot, { backgroundColor: colors.primary }]} />}
         {canEvolve && (
@@ -316,7 +317,7 @@ export function CharacterCard({ owned, onPress, isSelected, compact, canEvolve }
       <View style={cardStyles.header}>
         <CharacterAvatar characterId={owned.characterId} size={Platform.select({ web: 56, default: 80 })} />
         <View style={[cardStyles.headerInfo, { marginLeft: Platform.select({ web: 8, default: 14 }) }]}>
-          <Text numberOfLines={1} style={[cardStyles.name, { color: colors.foreground }]}>{char.name}</Text>
+          <Text localize={false} numberOfLines={1} style={[cardStyles.name, { color: colors.foreground }]}>{char.name}</Text>
           <Text style={[cardStyles.rarity, { color: rarityColor }]}>{RARITY_LABELS[char.rarity]}</Text>
           {char.rarity !== 'EGG' && (
             <View style={cardStyles.badges}>
@@ -416,7 +417,7 @@ export function ScanCard({ characterId, scanPct, onCreate }: ScanCardProps) {
       <View style={scanStyles.header}>
         <CharacterAvatar characterId={characterId} size={Platform.select({ web: 56, default: 80 })} dimmed={!complete} />
         <View style={[scanStyles.info, { marginLeft: Platform.select({ web: 8, default: 14 }) }]}>
-          <Text numberOfLines={1} style={[scanStyles.name, { color: complete ? colors.foreground : colors.mutedForeground }]}>{char.name}</Text>
+          <Text localize={false} numberOfLines={1} style={[scanStyles.name, { color: complete ? colors.foreground : colors.mutedForeground }]}>{char.name}</Text>
           <Text style={[scanStyles.rarity, { color: rarityColor }]}>{RARITY_LABELS[char.rarity]}</Text>
           {char.rarity !== 'EGG' && (
             <View style={scanStyles.badges}>

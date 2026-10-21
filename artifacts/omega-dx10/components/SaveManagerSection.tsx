@@ -1,8 +1,6 @@
+import { Text, Alert, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef } from 'react';
-import {
-  View, Text, TouchableOpacity, StyleSheet, Alert,
-  Modal, TextInput, ActivityIndicator, Platform,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, ActivityIndicator, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
 import { useColors } from '@/hooks/useColors';
@@ -226,7 +224,7 @@ export default function SaveManagerSection() {
             <View style={[styles.modalInfoBox, { backgroundColor: colors.border + '44', borderColor: colors.border }]}>
               <Text style={[styles.modalInfoText, { color: colors.mutedForeground }]}>
                 Save de:{' '}
-                <Text style={{ color: colors.foreground, fontWeight: '700' }}>
+                <Text localize={false} style={{ color: colors.foreground, fontWeight: '700' }}>
                   {String(pendingExportData?.username ?? '')}
                 </Text>
               </Text>

@@ -1,13 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Image,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Animated, Image, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import {
   getCharacter,

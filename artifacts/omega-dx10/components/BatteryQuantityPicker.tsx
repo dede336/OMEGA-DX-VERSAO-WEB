@@ -1,5 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useCallback, useEffect, useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 interface Props {

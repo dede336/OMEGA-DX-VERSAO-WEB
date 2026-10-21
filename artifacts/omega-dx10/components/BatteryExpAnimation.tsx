@@ -1,5 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Image, Modal, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { expToNextLevel } from '@/constants/gameData';
 import { getCharacter, getCharacterImageSource } from '@/constants/digimon';
 
@@ -73,7 +75,7 @@ export default function BatteryExpAnimation({ visible, characterId, initialLevel
         <Text style={styles.name}>{character?.name ?? characterId}</Text>
         <Text style={styles.level}>LV {displayedLevel}</Text>
         <View style={styles.bar}><Animated.View style={[styles.fill, { width, backgroundColor: color }]} /></View>
-        <Text style={styles.exp}>+{gainedExp.toLocaleString()} EXP</Text>
+        <Text style={styles.exp}>+{gainedExp.toLocaleString(getDisplayLocale())} EXP</Text>
         {finished && <>
           <Text style={[styles.result, { color }]}>{levelsGained > 0 ? `SUBIU ${levelsGained} NÍVEL${levelsGained > 1 ? 'IS' : ''}!` : 'EXP ADICIONADA!'}</Text>
           <Text style={styles.finalLevel}>LV {initialLevel} → LV {calculated.finalLevel}</Text>

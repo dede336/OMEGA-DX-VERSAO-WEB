@@ -1,10 +1,7 @@
+import { localizeText } from '@/utils/displayLocalization';
+import { Text, Alert, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View, Text, TouchableOpacity, Modal, StyleSheet,
-  Image, Pressable, Platform, Alert, TextInput,
-  ActivityIndicator, KeyboardAvoidingView,
-  Animated, PanResponder, ScrollView, useWindowDimensions,
-} from 'react-native';
+import { View, TouchableOpacity, Modal, StyleSheet, Image, Pressable, Platform, ActivityIndicator, KeyboardAvoidingView, Animated, PanResponder, ScrollView, useWindowDimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -629,7 +626,7 @@ export default function NavigationFAB() {
             <View pointerEvents="none" style={StyleSheet.absoluteFillObject}>
               <Image source={getTemaImages(tamerId).menu} style={styles.menuThemeImage} resizeMode="contain" />
             </View>
-            <TouchableOpacity style={styles.menuClose} accessibilityLabel="Fechar menu" onPress={() => setOpen(false)}>
+            <TouchableOpacity style={styles.menuClose} accessibilityLabel={localizeText("Fechar menu")} onPress={() => setOpen(false)}>
               <Feather name="x" size={22} color={colors.foreground} />
             </TouchableOpacity>
             <MenuScroller>
@@ -713,7 +710,7 @@ export default function NavigationFAB() {
                     return (
                       <TouchableOpacity
                         key={item.route}
-                        accessibilityLabel={item.label ?? t(item.labelKey)}
+                        accessibilityLabel={localizeText(item.label ?? t(item.labelKey))}
                         style={
                           styles.navItem
                         }
@@ -784,13 +781,13 @@ export default function NavigationFAB() {
                     setConfirmLogout(false);
                     setChangePasswordOpen(true);
                   }}
-                  accessibilityLabel="Trocar senha"
+                  accessibilityLabel={localizeText("Trocar senha")}
                   activeOpacity={0.75}
                 >
                   <Image source={MENU_ACTION_IMAGES[tamerId ?? ''] ?? MENU_ACTION_IMAGES.tamer_tai} style={styles.menuThemeImage} resizeMode="contain" />
                   <Text style={styles.themeActionText}>Trocar senha</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.themeActionBtn} onPress={handleLogout} accessibilityLabel={t('nav.logout')} activeOpacity={0.75}>
+                <TouchableOpacity style={styles.themeActionBtn} onPress={handleLogout} accessibilityLabel={localizeText(t('nav.logout'))} activeOpacity={0.75}>
                   <Image source={MENU_ACTION_IMAGES[tamerId ?? ''] ?? MENU_ACTION_IMAGES.tamer_tai} style={styles.menuThemeImage} resizeMode="contain" />
                   <Text style={[styles.themeActionText, { color: '#ff7373' }]}>{t('nav.logout')}</Text>
                 </TouchableOpacity>

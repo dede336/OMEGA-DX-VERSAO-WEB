@@ -1,15 +1,11 @@
+import { useLanguage } from '@/context/LanguageContext';
+import { localizeText } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import { Feather } from "@expo/vector-icons";
 import { reloadAppAsync } from "expo";
 import React, { useState } from "react";
 import {
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+  Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useColors } from "@/hooks/useColors";
@@ -21,6 +17,7 @@ export type ErrorFallbackProps = {
 };
 
 export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
+  useLanguage();
   const colors = useColors();
   const insets = useSafeAreaInsets();
 
@@ -54,7 +51,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       {__DEV__ ? (
         <Pressable
           onPress={() => setIsModalVisible(true)}
-          accessibilityLabel="View error details"
+          accessibilityLabel={localizeText("View error details")}
           accessibilityRole="button"
           style={({ pressed }) => [
             styles.topButton,
@@ -127,7 +124,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 </Text>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}
-                  accessibilityLabel="Close error details"
+                  accessibilityLabel={localizeText("Close error details")}
                   accessibilityRole="button"
                   style={({ pressed }) => [
                     styles.closeButton,

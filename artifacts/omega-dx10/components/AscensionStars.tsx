@@ -1,4 +1,6 @@
+import { localizeText } from '@/utils/displayLocalization';
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { Image, StyleSheet, View } from 'react-native';
 import { getAscensionStars } from '@/utils/ascension';
 
@@ -15,6 +17,7 @@ const STAR_IMAGES = {
 } as const;
 
 export function AscensionStars({ stars = 0, size = 'medium' }: Props) {
+  useLanguage();
   const count = getAscensionStars({ ascensionStars: stars });
 
   if (count === 0) return null;
@@ -35,7 +38,7 @@ export function AscensionStars({ stars = 0, size = 'medium' }: Props) {
   if (count === 4) {
     return (
       <View
-        accessibilityLabel="4 estrelas de ascensão"
+        accessibilityLabel={localizeText("4 estrelas de ascensão")}
         style={styles.row}
       >
         <Image
@@ -55,7 +58,7 @@ export function AscensionStars({ stars = 0, size = 'medium' }: Props) {
   // 3 estrelas = 3 imagens 3_star.gif
   return (
     <View
-      accessibilityLabel={`${count} estrela${count === 1 ? '' : 's'} de ascensão`}
+      accessibilityLabel={localizeText(`${count} estrela${count === 1 ? '' : 's'} de ascensão`)}
       style={styles.row}
     >
       {Array.from({ length: count }).map((_, index) => (
