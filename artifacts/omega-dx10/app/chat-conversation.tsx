@@ -1,9 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, TextInput, Alert } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  View, Text, FlatList, TextInput, TouchableOpacity,
-  StyleSheet, Platform, KeyboardAvoidingView, ActivityIndicator,
-  Alert, ScrollView,
-} from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet, Platform, KeyboardAvoidingView, ActivityIndicator, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -15,11 +13,11 @@ import { CHAT_EMOJIS, CHAT_UNIT_LIMIT, countChatUnits } from '@/utils/chat';
 
 function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(getDisplayLocale(), { hour: '2-digit', minute: '2-digit' });
 }
 function formatDate(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  return d.toLocaleDateString(getDisplayLocale(), { day: '2-digit', month: 'short' });
 }
 
 export default function ChatConversationScreen() {
@@ -120,7 +118,7 @@ export default function ChatConversationScreen() {
             <View style={[styles.presenceDot, { backgroundColor: isOnline ? '#22c55e' : '#6b7280' }]} />
           </View>
           <View>
-            <Text style={[styles.headerUsername, { color: colors.foreground }]}>{username}</Text>
+            <Text localize={false} style={[styles.headerUsername, { color: colors.foreground }]}>{username}</Text>
             <Text style={{ color: isOnline ? '#22c55e' : colors.mutedForeground, fontSize: 12 }}>
               {isOnline ? 'Online' : 'Offline'}
             </Text>
@@ -146,7 +144,7 @@ export default function ChatConversationScreen() {
             ListEmptyComponent={
               <View style={styles.empty}>
                 <Text style={{ fontSize: 20 }}>👋</Text>
-                <Text style={{ color: colors.mutedForeground, marginTop: 8, fontSize: 12 }}>
+                <Text localize={false} style={{ color: colors.mutedForeground, marginTop: 8, fontSize: 12 }}>
                   Diga olá para {username}!
                 </Text>
               </View>
@@ -173,7 +171,7 @@ export default function ChatConversationScreen() {
                       { backgroundColor: isMe ? '#3b82f6' : colors.card, borderColor: colors.border },
                       pixelStyle,
                     ]}>
-                      <Text style={{ color: isMe ? '#fff' : colors.foreground, fontSize: 12 }}>
+                      <Text localize={false} style={{ color: isMe ? '#fff' : colors.foreground, fontSize: 12 }}>
                         {item.content}
                       </Text>
                       <Text style={{ color: isMe ? '#ffffffaa' : colors.mutedForeground, fontSize: 10, alignSelf: 'flex-end', marginTop: 2 }}>

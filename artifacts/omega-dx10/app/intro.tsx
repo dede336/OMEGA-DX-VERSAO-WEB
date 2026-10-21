@@ -1,5 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, Animated, Platform, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, Animated, Platform, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import { useGame } from '@/context/GameContext';

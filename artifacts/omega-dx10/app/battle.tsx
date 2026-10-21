@@ -1,19 +1,8 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { localizeText } from '@/utils/displayLocalization';
+import { Text, Alert } from '@/components/localization/LocalizedNative';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  FlatList,
-  Animated,
-  Platform,
-  ImageBackground,
-  Image,
-  Modal,
-  Pressable,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, FlatList, Animated, Platform, ImageBackground, Image, Modal, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -660,7 +649,7 @@ export default function BattleScreen() {
 
     if (map?.bitsReward) {
       gainBits(map.bitsReward);
-      addLog(`💰 +${map.bitsReward.toLocaleString()} Bits!`, '#facc15');
+      addLog(`💰 +${map.bitsReward.toLocaleString(getDisplayLocale())} Bits!`, '#facc15');
     }
     if (map?.tamerExpReward) {
       const ei = equippedItemsRef.current;
@@ -682,7 +671,7 @@ export default function BattleScreen() {
     if (stage?.drops) {
       stage.drops.forEach((d) => {
         if (Math.random() < d.chance) {
-          if (d.type === 'bits') { gainBits(d.amount); addLog(`💰 +${d.amount.toLocaleString()} Bits!`, '#facc15'); }
+          if (d.type === 'bits') { gainBits(d.amount); addLog(`💰 +${d.amount.toLocaleString(getDisplayLocale())} Bits!`, '#facc15'); }
           else if (d.type === 'piece' && d.id) { gainPiece(d.id, d.amount); recordDrop(d.id, d.amount); addLog('✦ Fragmento obtido!', '#f59e0b'); }
         }
       });
@@ -1625,7 +1614,7 @@ export default function BattleScreen() {
                 {owned && char ? (
                   <>
                     <CharacterAvatar characterId={char.id} size={54} />
-                    <Text style={[styles.slotName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
+                    <Text localize={false} style={[styles.slotName, { color: colors.foreground }]} numberOfLines={1}>{char.name}</Text>
                     <Text style={[styles.slotLevel, { color: colors.primary }]}>Lv {owned.level}{ownedId?.startsWith('friend:') ? ` · @${ownedId.slice(7)}` : ''}</Text>
                     <TouchableOpacity
                       style={[styles.slotRemoveBtn, { backgroundColor: '#ef444422', borderColor: '#ef444488' }]}
@@ -1665,7 +1654,7 @@ export default function BattleScreen() {
                 <TouchableOpacity onPress={() => setPickerSource('mine')}><Text style={{ color: pickerSource === 'mine' ? colors.primary : colors.mutedForeground }}>Meus Digimons</Text></TouchableOpacity>
                 <TouchableOpacity onPress={() => setPickerSource('friends')}><Text style={{ color: pickerSource === 'friends' ? colors.primary : colors.mutedForeground }}>Parceiro de amigo</Text></TouchableOpacity>
               </View>
-              {pickerSource === 'friends' && <TouchableOpacity accessibilityLabel="Atualizar parceiros" onPress={() => setSupportRetry((v) => v + 1)}><Text style={{ color: colors.primary, paddingHorizontal: 16, paddingBottom: 8 }}>Atualizar parceiros</Text></TouchableOpacity>}
+              {pickerSource === 'friends' && <TouchableOpacity accessibilityLabel={localizeText("Atualizar parceiros")} onPress={() => setSupportRetry((v) => v + 1)}><Text style={{ color: colors.primary, paddingHorizontal: 16, paddingBottom: 8 }}>Atualizar parceiros</Text></TouchableOpacity>}
               {pickerSource === 'friends' && <Text style={{ color: colors.mutedForeground, paddingHorizontal: 16, paddingBottom: 8 }}>Um parceiro ocupa um dos três espaços da equipe.</Text>}
               <FlatList
                 ListEmptyComponent={<Text style={{ color: colors.mutedForeground, padding: 16 }}>{supportsLoading ? 'Carregando amigos…' : supportError || (token ? 'Nenhum parceiro disponível.' : 'Entre na sua conta para usar parceiros de amigos.')}</Text>}
@@ -1696,7 +1685,7 @@ export default function BattleScreen() {
                         <CharacterAvatar characterId={c.id} size={44} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={[styles.slotPickerName, { color: colors.foreground }]}>{c.name}</Text>
+                        <Text localize={false} style={[styles.slotPickerName, { color: colors.foreground }]}>{c.name}</Text>
                         <Text style={[styles.slotPickerLevel, { color: colors.mutedForeground }]}>{t('common.level')} {item.level}{item.ownedId.startsWith('friend:') ? ` · @${item.ownedId.slice(7)}` : ''}</Text>
                       </View>
                       {isSelected && !isThisSlot && (
@@ -1773,7 +1762,7 @@ export default function BattleScreen() {
           <TouchableOpacity
             onPress={toggleBattleSpeed}
             style={[styles.speedBtn, battleBorderStyle]}
-            accessibilityLabel={(battleSpeed ?? battleSpeedRef.current) === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X'}
+            accessibilityLabel={localizeText((battleSpeed ?? battleSpeedRef.current) === 2 ? 'Velocidade de batalha 2X' : 'Velocidade de batalha 1X')}
           >
             <Image
               source={(battleSpeed ?? battleSpeedRef.current) === 2

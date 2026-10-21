@@ -1,11 +1,15 @@
+import { useLanguage } from '@/context/LanguageContext';
+import { localizeText } from '@/utils/displayLocalization';
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
+import { View, TouchableOpacity, ActivityIndicator, ImageBackground } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/context/AuthContext';
 import HomeScreen, { PublicHomeProfile } from './(tabs)/index';
 
 export default function PlayerProfileScreen() {
+  useLanguage();
   const { username } = useLocalSearchParams<{ username: string }>();
   const { getApiUrl } = useAuth();
   const insets = useSafeAreaInsets();
@@ -23,7 +27,7 @@ export default function PlayerProfileScreen() {
   }, [username, getApiUrl, retry]);
   return <ImageBackground source={require('../assets/images/tela de fundo celular.gif')} resizeMode="cover" style={{ flex: 1, backgroundColor: '#07182c' }}>
     <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 12 }}>
-      <TouchableOpacity accessibilityLabel="Voltar" onPress={() => router.back()}><Text style={{ color: '#fff', fontSize: 16 }}>‹ Voltar · @{username}</Text></TouchableOpacity>
+      <TouchableOpacity accessibilityLabel={localizeText("Voltar")} onPress={() => router.back()}><Text style={{ color: '#fff', fontSize: 16 }}>‹ Voltar · @<Text localize={false}>{username}</Text></Text></TouchableOpacity>
     </View>
     {profile ? <HomeScreen publicProfile={profile} /> : error ? <View style={{ padding: 24, gap: 16 }}><Text style={{ color: '#fff' }}>{error}</Text><TouchableOpacity onPress={() => setRetry((v) => v + 1)}><Text style={{ color: '#60a5fa' }}>Tentar novamente</Text></TouchableOpacity></View> : <ActivityIndicator color="#fff" />}
   </ImageBackground>;

@@ -1,8 +1,6 @@
+import { Text } from '@/components/localization/LocalizedNative';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  View, Text, StyleSheet, TouchableOpacity,
-  ScrollView, Animated, Platform, Modal, ActivityIndicator,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, Animated, Platform, Modal, ActivityIndicator } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -203,7 +201,7 @@ export default function FriendBattleScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.headerTitle}>{t('friendbattle.title')}</Text>
             {params.username && (
-              <Text style={styles.headerSub}>{t('friendbattle.vs')}{params.username}</Text>
+              <Text style={styles.headerSub}>{t('friendbattle.vs')}<Text localize={false}>{params.username}</Text></Text>
             )}
           </View>
         </View>
@@ -222,7 +220,7 @@ export default function FriendBattleScreen() {
             <>
               <Text style={{ fontSize: 24 }}>😔</Text>
               <Text style={[styles.waitTitle, { color: '#ef4444' }]}>{t('friendbattle.inviteDeclined')}</Text>
-              <Text style={styles.waitSub}>@{params.username} {t('friendbattle.didNotAccept')}</Text>
+              <Text style={styles.waitSub}>@<Text localize={false}>{params.username}</Text> {t('friendbattle.didNotAccept')}</Text>
               <TouchableOpacity style={styles.retryBtn} onPress={() => { clearBattle(); router.back(); }}>
                 <Text style={styles.retryText}>{t('common.back')}</Text>
               </TouchableOpacity>

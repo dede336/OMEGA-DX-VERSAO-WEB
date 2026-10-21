@@ -1,8 +1,6 @@
+import { Text, TextInput } from '@/components/localization/LocalizedNative';
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, useWindowDimensions,
-} from 'react-native';
+import { View, TouchableOpacity, StyleSheet, ImageBackground, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
