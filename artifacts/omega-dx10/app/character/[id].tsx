@@ -1,8 +1,7 @@
+import { getDisplayLocale } from '@/utils/displayLocalization';
+import { Text, Alert } from '@/components/localization/LocalizedNative';
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Platform, Modal, Pressable, Animated, Image, Easing, Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform, Modal, Pressable, Animated, Image, Easing } from 'react-native';
 import { Image as ExpoImage } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -373,7 +372,7 @@ export default function CharacterDetailScreen() {
             <CharacterAvatar characterId={char.id} size={90} ascensionStars={owned.ascensionStars} />
           </View>
           <View style={styles.heroInfo}>
-            <Text style={[styles.heroName, { color: colors.foreground }]}>{char.name}</Text>
+            <Text localize={false} style={[styles.heroName, { color: colors.foreground }]}>{char.name}</Text>
             <AscensionStars stars={owned.ascensionStars} size="large" />
             {!!owned.ascensionStars && (
               <Text style={{ color: '#86efac', fontSize: 11, fontWeight: '800' }}>
@@ -527,13 +526,13 @@ export default function CharacterDetailScreen() {
             <View style={[styles.advTag, { backgroundColor: '#22c55e22', borderColor: '#22c55e' }]}>
               <Feather name="chevrons-up" size={14} color="#22c55e" />
               <Text style={[styles.advText, { color: '#22c55e' }]}>
-                {attrData.beats ? `${t('char.effectiveVs')} ${t(`attr.${attrData.beats}`) || ATTRIBUTES[attrData.beats].label} (${attrData.beats})` : t('char.noAdvantage')}
+                {attrData.beats ? `${t('char.effectiveVs')} ${t(`attr.${attrData.beats}`, ATTRIBUTES[attrData.beats].label)} (${attrData.beats})` : t('char.noAdvantage')}
               </Text>
             </View>
             <View style={[styles.advTag, { backgroundColor: '#ef444422', borderColor: '#ef4444' }]}>
               <Feather name="chevrons-down" size={14} color="#ef4444" />
               <Text style={[styles.advText, { color: '#ef4444' }]}>
-                {attrData.weakTo ? `${t('char.weakVs')} ${t(`attr.${attrData.weakTo}`) || ATTRIBUTES[attrData.weakTo].label} (${attrData.weakTo})` : t('char.noWeakness')}
+                {attrData.weakTo ? `${t('char.weakVs')} ${t(`attr.${attrData.weakTo}`, ATTRIBUTES[attrData.weakTo].label)} (${attrData.weakTo})` : t('char.noWeakness')}
               </Text>
             </View>
           </View>
@@ -543,13 +542,13 @@ export default function CharacterDetailScreen() {
             <View style={[styles.advTag, { backgroundColor: elemData.color + '22', borderColor: elemData.color }]}>
               <Feather name="chevrons-up" size={14} color={elemData.color} />
               <Text style={[styles.advText, { color: elemData.color }]}>
-                {elemData.beats ? `${t('char.effectiveVs')} ${t(`elem.${elemData.beats}`) || ELEMENTS[elemData.beats].label}` : t('char.noAdvantage')}
+                {elemData.beats ? `${t('char.effectiveVs')} ${t(`elem.${elemData.beats}`, ELEMENTS[elemData.beats].label)}` : t('char.noAdvantage')}
               </Text>
             </View>
             <View style={[styles.advTag, { backgroundColor: '#ef444422', borderColor: '#ef4444' }]}>
               <Feather name="chevrons-down" size={14} color="#ef4444" />
               <Text style={[styles.advText, { color: '#ef4444' }]}>
-                {elemData.weakTo ? `${t('char.weakVs')} ${t(`elem.${elemData.weakTo}`) || ELEMENTS[elemData.weakTo].label}` : t('char.noWeakness')}
+                {elemData.weakTo ? `${t('char.weakVs')} ${t(`elem.${elemData.weakTo}`, ELEMENTS[elemData.weakTo].label)}` : t('char.noWeakness')}
               </Text>
             </View>
           </View>
@@ -743,7 +742,7 @@ export default function CharacterDetailScreen() {
                     availableLabel={`${t('char.available')} ${maxQty}`}
                   />
                   <Text style={{ color: bat.color, fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
-                    +{totalXp.toLocaleString()} {t('char.xpTotal')}
+                    +{totalXp.toLocaleString(getDisplayLocale())} {t('char.xpTotal')}
                   </Text>
 
                   <View style={styles.confirmBtnRow}>
@@ -790,7 +789,7 @@ export default function CharacterDetailScreen() {
             <Text style={[styles.confirmBody, { color: colors.mutedForeground }]}>
               {requiredPartnerIds.map((partnerId) => (getCharacter(partnerId) ?? CHARACTERS[partnerId])?.name ?? partnerId).join(', ')}{' '}
               <Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{t('char.fuseConfirmPermanent')}</Text>
-              {' '}<Text style={{ color: '#ff3c6e', fontWeight: '700' }}>{resultChar?.name}</Text>.
+              {' '}<Text localize={false} style={{ color: '#ff3c6e', fontWeight: '700' }}>{resultChar?.name}</Text>.
               {'\n\n'}{t('char.fuseConfirmUndo')}
             </Text>
             <Text style={{ color: '#facc15', fontSize: 12, lineHeight: 17, textAlign: 'center', marginBottom: 12 }}>
